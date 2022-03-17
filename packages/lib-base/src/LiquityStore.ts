@@ -5,7 +5,6 @@ import { StabilityDeposit } from "./StabilityDeposit";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { Fees } from "./Fees";
 import { LQTYStake } from "./LQTYStake";
-import { FrontendStatus } from "./ReadableLiquity";
 
 /**
  * State variables read from the blockchain.
@@ -13,12 +12,6 @@ import { FrontendStatus } from "./ReadableLiquity";
  * @public
  */
 export interface LiquityStoreBaseState {
-  /** Status of currently used frontend. */
-  frontend: FrontendStatus;
-
-  /** Status of user's own frontend. */
-  ownFrontend: FrontendStatus;
-
   /** Number of Troves that are currently open. */
   numberOfTroves: number;
 
@@ -180,16 +173,6 @@ const strictEquals = <T>(a: T, b: T) => a === b;
 const eq = <T extends { eq(that: T): boolean }>(a: T, b: T) => a.eq(b);
 const equals = <T extends { equals(that: T): boolean }>(a: T, b: T) => a.equals(b);
 
-const frontendStatusEquals = (a: FrontendStatus, b: FrontendStatus) =>
-  a.status === "unregistered"
-    ? b.status === "unregistered"
-    : b.status === "registered" && a.kickbackRate.eq(b.kickbackRate);
-
-const showFrontendStatus = (x: FrontendStatus) =>
-  x.status === "unregistered"
-    ? '{ status: "unregistered" }'
-    : `{ status: "registered", kickbackRate: ${x.kickbackRate} }`;
-
 const wrap = <A extends unknown[], R>(f: (...args: A) => R) => (...args: A) => f(...args);
 
 const difference = <T>(a: T, b: T) =>
@@ -322,22 +305,6 @@ export abstract class LiquityStore<T = unknown> {
     baseStateUpdate: Partial<LiquityStoreBaseState>
   ): LiquityStoreBaseState {
     return {
-      frontend: this._updateIfChanged(
-        frontendStatusEquals,
-        "frontend",
-        baseState.frontend,
-        baseStateUpdate.frontend,
-        showFrontendStatus
-      ),
-
-      ownFrontend: this._updateIfChanged(
-        frontendStatusEquals,
-        "ownFrontend",
-        baseState.ownFrontend,
-        baseStateUpdate.ownFrontend,
-        showFrontendStatus
-      ),
-
       numberOfTroves: this._updateIfChanged(
         strictEquals,
         "numberOfTroves",

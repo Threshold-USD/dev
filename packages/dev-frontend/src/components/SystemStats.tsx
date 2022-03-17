@@ -1,6 +1,5 @@
 import React from "react";
 import { Card, Heading, Link, Box, Text } from "theme-ui";
-import { AddressZero } from "@ethersproject/constants";
 import { Decimal, Percent, LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
@@ -46,8 +45,7 @@ const select = ({
   lusdInStabilityPool,
   borrowingRate,
   redemptionRate,
-  totalStakedLQTY,
-  frontend
+  totalStakedLQTY
 }: LiquityStoreState) => ({
   numberOfTroves,
   price,
@@ -55,14 +53,13 @@ const select = ({
   lusdInStabilityPool,
   borrowingRate,
   redemptionRate,
-  totalStakedLQTY,
-  kickbackRate: frontend.status === "registered" ? frontend.kickbackRate : null
+  totalStakedLQTY
 });
 
 export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", showBalances }) => {
   const {
     liquity: {
-      connection: { version: contractsVersion, deploymentDate, frontendTag }
+      connection: { version: contractsVersion, deploymentDate }
     }
   } = useLiquity();
 
@@ -72,15 +69,13 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
     lusdInStabilityPool,
     total,
     borrowingRate,
-    totalStakedLQTY,
-    kickbackRate
+    totalStakedLQTY
   } = useLiquitySelector(select);
 
   const lusdInStabilityPoolPct =
     total.debt.nonZero && new Percent(lusdInStabilityPool.div(total.debt));
   const totalCollateralRatioPct = new Percent(total.collateralRatio(price));
   const borrowingFeePct = new Percent(borrowingRate);
-  const kickbackRatePct = frontendTag === AddressZero ? "100" : kickbackRate?.mul(100).prettify();
 
   return (
     <Card {...{ variant }}>
@@ -147,14 +142,6 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
       <Heading as="h2" sx={{ mt: 3, fontWeight: "body" }}>
         Frontend
       </Heading>
-      {kickbackRatePct && (
-        <Statistic
-          name="Kickback Rate"
-          tooltip="A rate between 0 and 100% set by the Frontend Operator that determines the fraction of LQTY that will be paid out as a kickback to the Stability Providers using the frontend."
-        >
-          {kickbackRatePct}%
-        </Statistic>
-      )}
 
       <Box sx={{ mt: 3, opacity: 0.66 }}>
         <Box sx={{ fontSize: 0 }}>

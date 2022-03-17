@@ -51,13 +51,11 @@ const getGasCost = (tx: EthersTransactionReceipt) => tx.gasUsed.mul(tx.effective
 
 const connectToDeployment = async (
   deployment: _LiquityDeploymentJSON,
-  signer: Signer,
-  frontendTag?: string
+  signer: Signer
 ) =>
   EthersLiquity._from(
     _connectToDeployment(deployment, signer, {
-      userAddress: await signer.getAddress(),
-      frontendTag
+      userAddress: await signer.getAddress()
     })
   );
 
@@ -414,42 +412,6 @@ describe("EthersLiquity", () => {
       const { status } = await tx.waitForReceipt();
 
       expect(status).to.equal("failed");
-    });
-  });
-
-  describe("Frontend", () => {
-    it("should have no frontend initially", async () => {
-      const frontend = await liquity.getFrontendStatus(await user.getAddress());
-
-      assertStrictEqual(frontend.status, "unregistered" as const);
-    });
-
-    it("should register a frontend", async () => {
-      await liquity.registerFrontend(0.75);
-    });
-
-    it("should have a frontend now", async () => {
-      const frontend = await liquity.getFrontendStatus(await user.getAddress());
-
-      assertStrictEqual(frontend.status, "registered" as const);
-      expect(`${frontend.kickbackRate}`).to.equal("0.75");
-    });
-
-    it("other user's deposit should be tagged with the frontend's address", async () => {
-      const frontendTag = await user.getAddress();
-
-      await funder.sendTransaction({
-        to: otherUsers[0].getAddress(),
-        value: Decimal.from(20.1).hex
-      });
-
-      const otherLiquity = await connectToDeployment(deployment, otherUsers[0], frontendTag);
-      await otherLiquity.openTrove({ depositCollateral: 20, borrowLUSD: LUSD_MINIMUM_DEBT });
-
-      await otherLiquity.depositLUSDInStabilityPool(LUSD_MINIMUM_DEBT);
-
-      const deposit = await otherLiquity.getStabilityDeposit();
-      expect(deposit.frontendTag).to.equal(frontendTag);
     });
   });
 

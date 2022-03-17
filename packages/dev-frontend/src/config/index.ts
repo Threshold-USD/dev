@@ -1,14 +1,9 @@
-import { AddressZero } from "@ethersproject/constants";
-import { isAddress, getAddress } from "@ethersproject/address";
-
 export type LiquityFrontendConfig = {
-  frontendTag: string;
   infuraApiKey?: string;
   testnetOnly?: boolean;
 };
 
 const defaultConfig: LiquityFrontendConfig = {
-  frontendTag: AddressZero
 };
 
 function hasKey<K extends string>(o: object, k: K): o is Record<K, unknown> {
@@ -19,17 +14,6 @@ const parseConfig = (json: unknown): LiquityFrontendConfig => {
   const config = { ...defaultConfig };
 
   if (typeof json === "object" && json !== null) {
-    if (hasKey(json, "frontendTag") && json.frontendTag !== "") {
-      const { frontendTag } = json;
-
-      if (typeof frontendTag === "string" && isAddress(frontendTag)) {
-        config.frontendTag = getAddress(frontendTag);
-      } else {
-        console.error("Malformed frontendTag:");
-        console.log(frontendTag);
-      }
-    }
-
     if (hasKey(json, "infuraApiKey") && json.infuraApiKey !== "") {
       const { infuraApiKey } = json;
 

@@ -167,10 +167,6 @@ export const _requireAddress = (
   overrides?.from ?? connection.userAddress ?? panic(new Error("A user address is required"));
 
 /** @internal */
-export const _requireFrontendAddress = (connection: EthersLiquityConnection): string =>
-  connection.frontendTag ?? panic(new Error("A frontend address is required"));
-
-/** @internal */
 export const _usingStore = (
   connection: EthersLiquityConnection
 ): connection is EthersLiquityConnection & { useStore: EthersLiquityStoreOption } =>
@@ -255,17 +251,6 @@ export interface EthersLiquityConnectionOptionalParams {
    * will be automatically determined from the `Signer`.
    */
   readonly userAddress?: string;
-
-  /**
-   * Address that will receive LQTY rewards from newly created Stability Deposits by default.
-   *
-   * @remarks
-   * For example
-   * {@link EthersLiquity.depositLUSDInStabilityPool | depositLUSDInStabilityPool(amount, frontendTag?)}
-   * will tag newly made Stability Deposits with this address when its `frontendTag` parameter is
-   * omitted.
-   */
-  readonly frontendTag?: string;
 
   /**
    * Create a {@link @liquity/lib-base#LiquityStore} and expose it as the `store` property.

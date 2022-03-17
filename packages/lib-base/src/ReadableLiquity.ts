@@ -4,20 +4,6 @@ import { StabilityDeposit } from "./StabilityDeposit";
 import { Fees } from "./Fees";
 import { LQTYStake } from "./LQTYStake";
 
-/**
- * Represents whether an address has been registered as a Liquity frontend.
- *
- * @remarks
- * Returned by the {@link ReadableLiquity.getFrontendStatus | getFrontendStatus()} function.
- *
- * When `status` is `"registered"`, `kickbackRate` gives the frontend's kickback rate as a
- * {@link Decimal} between 0 and 1.
- *
- * @public
- */
-export type FrontendStatus =
-  | { status: "unregistered" }
-  | { status: "registered"; kickbackRate: Decimal };
 
 /**
  * Parameters of the {@link ReadableLiquity.(getTroves:2) | getTroves()} function.
@@ -203,11 +189,4 @@ export interface ReadableLiquity {
    * Get the total amount of LQTY currently staked.
    */
   getTotalStakedLQTY(): Promise<Decimal>;
-
-  /**
-   * Check whether an address is registered as a Liquity frontend, and what its kickback rate is.
-   *
-   * @param address - Address to check.
-   */
-  getFrontendStatus(address?: string): Promise<FrontendStatus>;
 }

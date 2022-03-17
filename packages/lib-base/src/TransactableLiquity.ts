@@ -313,21 +313,16 @@ export interface TransactableLiquity {
    * Make a new Stability Deposit, or top up existing one.
    *
    * @param amount - Amount of LUSD to add to new or existing deposit.
-   * @param frontendTag - Address that should receive a share of this deposit's LQTY rewards.
    *
    * @throws
    * Throws {@link TransactionFailedError} in case of transaction failure.
-   *
-   * @remarks
-   * The `frontendTag` parameter is only effective when making a new deposit.
    *
    * As a side-effect, the transaction will also pay out an existing Stability Deposit's
    * {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain} and
    * {@link @liquity/lib-base#StabilityDeposit.lqtyReward | LQTY reward}.
    */
   depositLUSDInStabilityPool(
-    amount: Decimalish,
-    frontendTag?: string
+    amount: Decimalish
   ): Promise<StabilityDepositChangeDetails>;
 
   /**
@@ -509,15 +504,4 @@ export interface TransactableLiquity {
    * Throws {@link TransactionFailedError} in case of transaction failure.
    */
   exitLiquidityMining(): Promise<void>;
-
-  /**
-   * Register current wallet address as a Liquity frontend.
-   *
-   * @param kickbackRate - The portion of LQTY rewards to pass onto users of the frontend
-   *                       (between 0 and 1).
-   *
-   * @throws
-   * Throws {@link TransactionFailedError} in case of transaction failure.
-   */
-  registerFrontend(kickbackRate: Decimalish): Promise<void>;
 }

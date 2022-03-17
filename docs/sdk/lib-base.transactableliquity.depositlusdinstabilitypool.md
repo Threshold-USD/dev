@@ -9,7 +9,7 @@ Make a new Stability Deposit, or top up existing one.
 <b>Signature:</b>
 
 ```typescript
-depositLUSDInStabilityPool(amount: Decimalish, frontendTag?: string): Promise<StabilityDepositChangeDetails>;
+depositLUSDInStabilityPool(amount: Decimalish): Promise<StabilityDepositChangeDetails>;
 ```
 
 ## Parameters
@@ -17,7 +17,6 @@ depositLUSDInStabilityPool(amount: Decimalish, frontendTag?: string): Promise<St
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  amount | [Decimalish](./lib-base.decimalish.md) | Amount of LUSD to add to new or existing deposit. |
-|  frontendTag | string | Address that should receive a share of this deposit's LQTY rewards. |
 
 <b>Returns:</b>
 
@@ -26,10 +25,6 @@ Promise&lt;[StabilityDepositChangeDetails](./lib-base.stabilitydepositchangedeta
 ## Exceptions
 
 Throws [TransactionFailedError](./lib-base.transactionfailederror.md) in case of transaction failure.
-
-## Remarks
-
-The `frontendTag` parameter is only effective when making a new deposit.
 
 As a side-effect, the transaction will also pay out an existing Stability Deposit's [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) and [LQTY reward](./lib-base.stabilitydeposit.lqtyreward.md)<!-- -->.
 

@@ -86,7 +86,7 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
   private async _get(
     blockTag?: number
   ): Promise<[baseState: LiquityStoreBaseState, extraState: BlockPolledLiquityStoreExtraState]> {
-    const { userAddress, frontendTag } = this.connection;
+    const { userAddress } = this.connection;
 
     const {
       blockTimestamp,
@@ -112,10 +112,6 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
         blockTag
       }),
 
-      frontend: frontendTag
-        ? this._readable.getFrontendStatus(frontendTag, { blockTag })
-        : { status: "unregistered" as const },
-
       ...(userAddress
         ? {
             accountBalance: this._provider.getBalance(userAddress, blockTag).then(decimalify),
@@ -134,8 +130,7 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
               blockTag
             }),
             stabilityDeposit: this._readable.getStabilityDeposit(userAddress, { blockTag }),
-            lqtyStake: this._readable.getLQTYStake(userAddress, { blockTag }),
-            ownFrontend: this._readable.getFrontendStatus(userAddress, { blockTag })
+            lqtyStake: this._readable.getLQTYStake(userAddress, { blockTag })
           }
         : {
             accountBalance: Decimal.ZERO,
@@ -154,11 +149,9 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
               Decimal.ZERO,
               Decimal.ZERO,
               Decimal.ZERO,
-              Decimal.ZERO,
-              AddressZero
+              Decimal.ZERO
             ),
-            lqtyStake: new LQTYStake(),
-            ownFrontend: { status: "unregistered" as const }
+            lqtyStake: new LQTYStake()
           })
     });
 

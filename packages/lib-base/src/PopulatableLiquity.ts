@@ -200,8 +200,7 @@ export interface PopulatableLiquity<R = unknown, S = unknown, P = unknown>
 
   /** {@inheritDoc TransactableLiquity.depositLUSDInStabilityPool} */
   depositLUSDInStabilityPool(
-    amount: Decimalish,
-    frontendTag?: string
+    amount: Decimalish
   ): Promise<
     PopulatedLiquityTransaction<
       P,
@@ -298,8 +297,4 @@ export interface PopulatableLiquity<R = unknown, S = unknown, P = unknown>
     PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>
   >;
 
-  /** {@inheritDoc TransactableLiquity.registerFrontend} */
-  registerFrontend(
-    kickbackRate: Decimalish
-  ): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
 }

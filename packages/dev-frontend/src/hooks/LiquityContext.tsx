@@ -50,7 +50,6 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
       try {
         return _connectByChainId(provider, provider.getSigner(account), chainId, {
           userAddress: account,
-          frontendTag: config.frontendTag,
           useStore: "blockPolled"
         });
       } catch {}

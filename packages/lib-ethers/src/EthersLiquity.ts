@@ -6,7 +6,6 @@ import {
   Decimalish,
   FailedReceipt,
   Fees,
-  FrontendStatus,
   LiquidationDetails,
   LiquityStore,
   LQTYStake,
@@ -307,11 +306,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     return this._readable.getTotalStakedLQTY(overrides);
   }
 
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getFrontendStatus} */
-  getFrontendStatus(address?: string, overrides?: EthersCallOverrides): Promise<FrontendStatus> {
-    return this._readable.getFrontendStatus(address, overrides);
-  }
-
   /**
    * {@inheritDoc @liquity/lib-base#TransactableLiquity.openTrove}
    *
@@ -456,10 +450,9 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    */
   depositLUSDInStabilityPool(
     amount: Decimalish,
-    frontendTag?: string,
     overrides?: EthersTransactionOverrides
   ): Promise<StabilityDepositChangeDetails> {
-    return this.send.depositLUSDInStabilityPool(amount, frontendTag, overrides).then(waitForSuccess);
+    return this.send.depositLUSDInStabilityPool(amount, overrides).then(waitForSuccess);
   }
 
   /**
@@ -589,17 +582,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    */
   withdrawGainsFromStaking(overrides?: EthersTransactionOverrides): Promise<void> {
     return this.send.withdrawGainsFromStaking(overrides).then(waitForSuccess);
-  }
-
-  /**
-   * {@inheritDoc @liquity/lib-base#TransactableLiquity.registerFrontend}
-   *
-   * @throws
-   * Throws {@link EthersTransactionFailedError} in case of transaction failure.
-   * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
-   */
-  registerFrontend(kickbackRate: Decimalish, overrides?: EthersTransactionOverrides): Promise<void> {
-    return this.send.registerFrontend(kickbackRate, overrides).then(waitForSuccess);
   }
 
   /** @internal */

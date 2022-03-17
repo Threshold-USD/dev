@@ -3,7 +3,6 @@ import { BlockTag } from "@ethersproject/abstract-provider";
 import {
   Decimal,
   Fees,
-  FrontendStatus,
   LiquityStore,
   LQTYStake,
   ReadableLiquity,
@@ -27,8 +26,7 @@ import {
   _connect,
   _getBlockTimestamp,
   _getContracts,
-  _requireAddress,
-  _requireFrontendAddress
+  _requireAddress
 } from "./EthersLiquityConnection";
 
 import { BlockPolledLiquityStore } from "./BlockPolledLiquityStore";
@@ -256,7 +254,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     const { stabilityPool } = _getContracts(this.connection);
 
     const [
-      { frontEndTag, initialValue },
+      initialValue,
       currentLUSD,
       collateralGain,
       lqtyReward
@@ -271,8 +269,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
       decimalify(initialValue),
       decimalify(currentLUSD),
       decimalify(collateralGain),
-      decimalify(lqtyReward),
-      frontEndTag
+      decimalify(lqtyReward)
     );
   }
 
@@ -491,21 +488,6 @@ export class ReadableEthersLiquity implements ReadableLiquity {
 
     return lqtyStaking.totalLQTYStaked({ ...overrides }).then(decimalify);
   }
-
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getFrontendStatus} */
-  async getFrontendStatus(
-    address?: string,
-    overrides?: EthersCallOverrides
-  ): Promise<FrontendStatus> {
-    address ??= _requireFrontendAddress(this.connection);
-    const { stabilityPool } = _getContracts(this.connection);
-
-    const { registered, kickbackRate } = await stabilityPool.frontEnds(address, { ...overrides });
-
-    return registered
-      ? { status: "registered", kickbackRate: decimalify(kickbackRate) }
-      : { status: "unregistered" };
-  }
 }
 
 type Resolved<T> = T extends Promise<infer U> ? U : T;
@@ -562,13 +544,6 @@ class _BlockPolledReadableEthersLiquity
     return (
       this._blockHit(overrides) &&
       (address === undefined || address === this.store.connection.userAddress)
-    );
-  }
-
-  private _frontendHit(address?: string, overrides?: EthersCallOverrides): boolean {
-    return (
-      this._blockHit(overrides) &&
-      (address === undefined || address === this.store.connection.frontendTag)
     );
   }
 
@@ -723,15 +698,6 @@ class _BlockPolledReadableEthersLiquity
     return this._blockHit(overrides)
       ? this.store.state.totalStakedLQTY
       : this._readable.getTotalStakedLQTY(overrides);
-  }
-
-  async getFrontendStatus(
-    address?: string,
-    overrides?: EthersCallOverrides
-  ): Promise<FrontendStatus> {
-    return this._frontendHit(address, overrides)
-      ? this.store.state.frontend
-      : this._readable.getFrontendStatus(address, overrides);
   }
 
   getTroves(

@@ -132,11 +132,10 @@ export class SendableEthersLiquity
   /** {@inheritDoc @liquity/lib-base#SendableLiquity.depositLUSDInStabilityPool} */
   depositLUSDInStabilityPool(
     amount: Decimalish,
-    frontendTag?: string,
     overrides?: EthersTransactionOverrides
   ): Promise<SentEthersLiquityTransaction<StabilityDepositChangeDetails>> {
     return this._populate
-      .depositLUSDInStabilityPool(amount, frontendTag, overrides)
+      .depositLUSDInStabilityPool(amount, overrides)
       .then(sendTransaction);
   }
 
@@ -217,14 +216,6 @@ export class SendableEthersLiquity
     overrides?: EthersTransactionOverrides
   ): Promise<SentEthersLiquityTransaction<void>> {
     return this._populate.withdrawGainsFromStaking(overrides).then(sendTransaction);
-  }
-
-  /** {@inheritDoc @liquity/lib-base#SendableLiquity.registerFrontend} */
-  registerFrontend(
-    kickbackRate: Decimalish,
-    overrides?: EthersTransactionOverrides
-  ): Promise<SentEthersLiquityTransaction<void>> {
-    return this._populate.registerFrontend(kickbackRate, overrides).then(sendTransaction);
   }
 
   /** @internal */

@@ -1096,7 +1096,6 @@ export class PopulatableEthersLiquity
   /** {@inheritDoc @liquity/lib-base#PopulatableLiquity.depositLUSDInStabilityPool} */
   async depositLUSDInStabilityPool(
     amount: Decimalish,
-    frontendTag?: string,
     overrides?: EthersTransactionOverrides
   ): Promise<PopulatedEthersLiquityTransaction<StabilityDepositChangeDetails>> {
     const { stabilityPool } = _getContracts(this._readable.connection);
@@ -1107,8 +1106,7 @@ export class PopulatableEthersLiquity
       await stabilityPool.estimateAndPopulate.provideToSP(
         { ...overrides },
         addGasForLQTYIssuance,
-        depositLUSD.hex,
-        frontendTag ?? this._readable.connection.frontendTag ?? AddressZero
+        depositLUSD.hex
       )
     );
   }
@@ -1302,22 +1300,6 @@ export class PopulatableEthersLiquity
     overrides?: EthersTransactionOverrides
   ): Promise<PopulatedEthersLiquityTransaction<void>> {
     return this.unstakeLQTY(Decimal.ZERO, overrides);
-  }
-
-  /** {@inheritDoc @liquity/lib-base#PopulatableLiquity.registerFrontend} */
-  async registerFrontend(
-    kickbackRate: Decimalish,
-    overrides?: EthersTransactionOverrides
-  ): Promise<PopulatedEthersLiquityTransaction<void>> {
-    const { stabilityPool } = _getContracts(this._readable.connection);
-
-    return this._wrapSimpleTransaction(
-      await stabilityPool.estimateAndPopulate.registerFrontEnd(
-        { ...overrides },
-        id,
-        Decimal.from(kickbackRate).hex
-      )
-    );
   }
 
   /** @internal */
