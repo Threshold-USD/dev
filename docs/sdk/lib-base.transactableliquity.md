@@ -39,7 +39,7 @@ Implemented by [EthersLiquity](./lib-ethers.ethersliquity.md)<!-- -->.
 |  [transferCollateralGainToTrove()](./lib-base.transactableliquity.transfercollateralgaintotrove.md) | Transfer [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit to Trove. |
 |  [unstakeLQTY(amount)](./lib-base.transactableliquity.unstakelqty.md) | Withdraw LQTY from staking. |
 |  [withdrawCollateral(amount)](./lib-base.transactableliquity.withdrawcollateral.md) | Adjust existing Trove by withdrawing some of its collateral. |
-|  [withdrawGainsFromStabilityPool()](./lib-base.transactableliquity.withdrawgainsfromstabilitypool.md) | Withdraw [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) and [LQTY reward](./lib-base.stabilitydeposit.lqtyreward.md) from Stability Deposit. |
+|  [withdrawGainsFromStabilityPool()](./lib-base.transactableliquity.withdrawgainsfromstabilitypool.md) | Withdraw [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit. |
 |  [withdrawGainsFromStaking()](./lib-base.transactableliquity.withdrawgainsfromstaking.md) | Withdraw [collateral gain](./lib-base.lqtystake.collateralgain.md) and [LUSD gain](./lib-base.lqtystake.lusdgain.md) from LQTY stake. |
 |  [withdrawLUSDFromStabilityPool(amount)](./lib-base.transactableliquity.withdrawlusdfromstabilitypool.md) | Withdraw LUSD from Stability Deposit. |
 

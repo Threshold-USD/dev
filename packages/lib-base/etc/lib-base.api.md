@@ -538,7 +538,7 @@ export interface SentLiquityTransaction<S = unknown, T extends LiquityReceipt = 
 // @public
 export class StabilityDeposit {
     // @internal
-    constructor(initialLUSD: Decimal, currentLUSD: Decimal, collateralGain: Decimal, lqtyReward: Decimal);
+    constructor(initialLUSD: Decimal, currentLUSD: Decimal, collateralGain: Decimal);
     apply(change: StabilityDepositChange<Decimalish> | undefined): Decimal;
     readonly collateralGain: Decimal;
     readonly currentLUSD: Decimal;
@@ -546,7 +546,6 @@ export class StabilityDeposit {
     readonly initialLUSD: Decimal;
     // (undocumented)
     get isEmpty(): boolean;
-    readonly lqtyReward: Decimal;
     // @internal (undocumented)
     toString(): string;
     whatChanged(thatLUSD: Decimalish): StabilityDepositChange<Decimal> | undefined;
@@ -570,7 +569,6 @@ export interface StabilityDepositChangeDetails extends StabilityPoolGainsWithdra
 // @public
 export interface StabilityPoolGainsWithdrawalDetails {
     collateralGain: Decimal;
-    lqtyReward: Decimal;
     lusdLoss: Decimal;
     newLUSDDeposit: Decimal;
 }

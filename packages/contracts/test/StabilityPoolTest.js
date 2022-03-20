@@ -171,7 +171,6 @@ contract('StabilityPool', async accounts => {
       // --- TEST ---
       const P_Before = (await stabilityPool.P())
       const S_Before = (await stabilityPool.epochToScaleToSum(0, 0))
-      const G_Before = (await stabilityPool.epochToScaleToG(0, 0))
       assert.isTrue(P_Before.gt(toBN('0')))
       assert.isTrue(S_Before.gt(toBN('0')))
 
@@ -179,10 +178,8 @@ contract('StabilityPool', async accounts => {
       const alice_snapshot_Before = await stabilityPool.depositSnapshots(alice)
       const alice_snapshot_S_Before = alice_snapshot_Before[0].toString()
       const alice_snapshot_P_Before = alice_snapshot_Before[1].toString()
-      const alice_snapshot_G_Before = alice_snapshot_Before[2].toString()
       assert.equal(alice_snapshot_S_Before, '0')
       assert.equal(alice_snapshot_P_Before, '0')
-      assert.equal(alice_snapshot_G_Before, '0')
 
       // Make deposit
       await stabilityPool.provideToSP(dec(100, 18), { from: alice })
@@ -191,11 +188,9 @@ contract('StabilityPool', async accounts => {
       const alice_snapshot_After = await stabilityPool.depositSnapshots(alice)
       const alice_snapshot_S_After = alice_snapshot_After[0].toString()
       const alice_snapshot_P_After = alice_snapshot_After[1].toString()
-      const alice_snapshot_G_After = alice_snapshot_After[2].toString()
 
       assert.equal(alice_snapshot_S_After, S_Before)
       assert.equal(alice_snapshot_P_After, P_Before)
-      assert.equal(alice_snapshot_G_After, G_Before)
     })
 
     it("provideToSP(), multiple deposits: updates user's deposit and snapshots", async () => {
@@ -599,101 +594,6 @@ contract('StabilityPool', async accounts => {
     })
 
     // --- LQTY functionality ---
-    it("provideToSP(), new deposit: when SP > 0, triggers LQTY reward event - increases the sum G", async () => {
-      await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
-
-      // A, B, C open troves and make Stability Pool deposits
-      await openTrove({ extraLUSDAmount: toBN(dec(1000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
-      await openTrove({ extraLUSDAmount: toBN(dec(2000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
-      await openTrove({ extraLUSDAmount: toBN(dec(3000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
-
-      // A provides to SP
-      await stabilityPool.provideToSP(dec(1000, 18), { from: A })
-
-      let currentEpoch = await stabilityPool.currentEpoch()
-      let currentScale = await stabilityPool.currentScale()
-      const G_Before = await stabilityPool.epochToScaleToG(currentEpoch, currentScale)
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      // B provides to SP
-      await stabilityPool.provideToSP(dec(1000, 18), { from: B })
-
-      currentEpoch = await stabilityPool.currentEpoch()
-      currentScale = await stabilityPool.currentScale()
-      const G_After = await stabilityPool.epochToScaleToG(currentEpoch, currentScale)
-
-      // Expect G has increased from the LQTY reward event triggered
-      assert.isTrue(G_After.gt(G_Before))
-    })
-
-    it("provideToSP(), new deposit: when SP is empty, doesn't update G", async () => {
-      await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
-
-      // A, B, C open troves and make Stability Pool deposits
-      await openTrove({ extraLUSDAmount: toBN(dec(1000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
-      await openTrove({ extraLUSDAmount: toBN(dec(2000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
-      await openTrove({ extraLUSDAmount: toBN(dec(3000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
-
-      // A provides to SP
-      await stabilityPool.provideToSP(dec(1000, 18), { from: A })
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      // A withdraws
-      await stabilityPool.withdrawFromSP(dec(1000, 18), { from: A })
-
-      // Check SP is empty
-      assert.equal((await stabilityPool.getTotalLUSDDeposits()), '0')
-
-      // Check G is non-zero
-      let currentEpoch = await stabilityPool.currentEpoch()
-      let currentScale = await stabilityPool.currentScale()
-      const G_Before = await stabilityPool.epochToScaleToG(currentEpoch, currentScale)
-
-      assert.isTrue(G_Before.gt(toBN('0')))
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      // B provides to SP
-      await stabilityPool.provideToSP(dec(1000, 18), { from: B })
-
-      currentEpoch = await stabilityPool.currentEpoch()
-      currentScale = await stabilityPool.currentScale()
-      const G_After = await stabilityPool.epochToScaleToG(currentEpoch, currentScale)
-
-      // Expect G has not changed
-      assert.isTrue(G_After.eq(G_Before))
-    })
-
-    it("provideToSP(), new deposit: depositor does not receive any LQTY rewards", async () => {
-      await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
-
-      // A, B, open troves
-      await openTrove({ extraLUSDAmount: toBN(dec(1000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
-      await openTrove({ extraLUSDAmount: toBN(dec(2000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
-
-      // Get A, B, C LQTY balances before and confirm they're zero
-      const A_LQTYBalance_Before = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_Before = await lqtyToken.balanceOf(B)
-
-      assert.equal(A_LQTYBalance_Before, '0')
-      assert.equal(B_LQTYBalance_Before, '0')
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      // A, B provide to SP
-      await stabilityPool.provideToSP(dec(1000, 18), { from: A })
-      await stabilityPool.provideToSP(dec(2000, 18), { from: B })
-
-      // Get A, B, C LQTY balances after, and confirm they're still zero
-      const A_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_After = await lqtyToken.balanceOf(B)
-
-      assert.equal(A_LQTYBalance_After, '0')
-      assert.equal(B_LQTYBalance_After, '0')
-    })
-
     it("provideToSP(), new deposit: depositor does not receive ETH gains", async () => {
       await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
@@ -798,34 +698,6 @@ contract('StabilityPool', async accounts => {
       assert.equal(B_ETHBalance_After, B_ETHBalance_Before)
       assert.equal(C_ETHBalance_After, C_ETHBalance_Before)
       assert.equal(D_ETHBalance_After, D_ETHBalance_Before)
-    })
-
-    it("provideToSP(), topup: triggers LQTY reward event - increases the sum G", async () => {
-      await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
-
-      // A, B, C open troves
-      await openTrove({ extraLUSDAmount: toBN(dec(1000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
-      await openTrove({ extraLUSDAmount: toBN(dec(2000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
-      await openTrove({ extraLUSDAmount: toBN(dec(3000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
-
-      // A, B, C provide to SP
-      await stabilityPool.provideToSP(dec(100, 18), { from: A })
-      await stabilityPool.provideToSP(dec(50, 18), { from: B })
-      await stabilityPool.provideToSP(dec(50, 18), { from: C })
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      const G_Before = await stabilityPool.epochToScaleToG(0, 0)
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      // B tops up
-      await stabilityPool.provideToSP(dec(100, 18), { from: B })
-
-      const G_After = await stabilityPool.epochToScaleToG(0, 0)
-
-      // Expect G has increased from the LQTY reward event triggered by B's topup
-      assert.isTrue(G_After.gt(G_Before))
     })
 
     it("provideToSP(): reverts when amount is zero", async () => {
@@ -1838,41 +1710,6 @@ contract('StabilityPool', async accounts => {
     })
 
     // --- LQTY functionality ---
-    it("withdrawFromSP(): triggers LQTY reward event - increases the sum G", async () => {
-      await openTrove({ extraLUSDAmount: toBN(dec(1, 24)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
-
-      // A, B, C open troves
-      await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
-      await openTrove({ extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
-      await openTrove({ extraLUSDAmount: toBN(dec(30000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
-
-      // A and B provide to SP
-      await stabilityPool.provideToSP(dec(10000, 18), { from: A })
-      await stabilityPool.provideToSP(dec(10000, 18), { from: B })
-
-      const G_Before = await stabilityPool.epochToScaleToG(0, 0)
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      // A withdraws from SP
-      await stabilityPool.withdrawFromSP(dec(5000, 18), { from: A })
-
-      const G_1 = await stabilityPool.epochToScaleToG(0, 0)
-
-      // Expect G has increased from the LQTY reward event triggered
-      assert.isTrue(G_1.gt(G_Before))
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      // A withdraws from SP
-      await stabilityPool.withdrawFromSP(dec(5000, 18), { from: B })
-
-      const G_2 = await stabilityPool.epochToScaleToG(0, 0)
-
-      // Expect G has increased from the LQTY reward event triggered
-      assert.isTrue(G_2.gt(G_1))
-    })
-
     it("withdrawFromSP(), full withdrawal: zero's depositor's snapshots", async () => {
       await openTrove({ extraLUSDAmount: toBN(dec(1000000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
@@ -1899,13 +1736,11 @@ contract('StabilityPool', async accounts => {
 
       const S_Before = await stabilityPool.epochToScaleToSum(currentEpoch, currentScale)
       const P_Before = await stabilityPool.P()
-      const G_Before = await stabilityPool.epochToScaleToG(currentEpoch, currentScale)
 
       // Confirm 0 < P < 1
       assert.isTrue(P_Before.gt(toBN('0')) && P_Before.lt(toBN(dec(1, 18))))
       // Confirm S, G are both > 0
       assert.isTrue(S_Before.gt(toBN('0')))
-      assert.isTrue(G_Before.gt(toBN('0')))
 
       // --- TEST ---
 
@@ -1934,9 +1769,8 @@ contract('StabilityPool', async accounts => {
         // Check S,P, G snapshots are non-zero
         assert.isTrue(snapshot[0].eq(S_Before))  // S
         assert.isTrue(snapshot[1].eq(P_Before))  // P
-        assert.isTrue(snapshot[2].gt(ZERO))  // GL increases a bit between each depositor op, so just check it is non-zero
-        assert.equal(snapshot[3], '0')  // scale
-        assert.equal(snapshot[4], '0')  // epoch
+        assert.equal(snapshot[2], '0')  // scale
+        assert.equal(snapshot[3], '0')  // epoch
       }
 
       // All depositors make full withdrawal
@@ -1952,9 +1786,8 @@ contract('StabilityPool', async accounts => {
         // Check S, P, G snapshots are now zero
         assert.equal(snapshot[0], '0')  // S
         assert.equal(snapshot[1], '0')  // P
-        assert.equal(snapshot[2], '0')  // G
-        assert.equal(snapshot[3], '0')  // scale
-        assert.equal(snapshot[4], '0')  // epoch
+        assert.equal(snapshot[2], '0')  // scale
+        assert.equal(snapshot[3], '0')  // epoch
       }
     })
 
@@ -2399,53 +2232,6 @@ contract('StabilityPool', async accounts => {
 
       // D attempts to withdraw his ETH gain to Trove
       await th.assertRevert(stabilityPool.withdrawETHGainToTrove(dennis, dennis, { from: dennis }), "caller must have an active trove to withdraw ETHGain to")
-    })
-
-    it("withdrawETHGainToTrove(): triggers LQTY reward event - increases the sum G", async () => {
-      await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
-
-      // A, B, C open troves
-      await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
-      await openTrove({ extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
-      await openTrove({ extraLUSDAmount: toBN(dec(30000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
-
-      // A and B provide to SP
-      await stabilityPool.provideToSP(dec(10000, 18), { from: A })
-      await stabilityPool.provideToSP(dec(10000, 18), { from: B })
-
-      // Defaulter opens a trove, price drops, defaulter gets liquidated
-      await openTrove({ ICR: toBN(dec(2, 18)), extraParams: { from: defaulter_1 } })
-      await priceFeed.setPrice(dec(105, 18))
-      assert.isFalse(await th.checkRecoveryMode(contracts))
-      await troveManager.liquidate(defaulter_1)
-      assert.isFalse(await sortedTroves.contains(defaulter_1))
-
-      const G_Before = await stabilityPool.epochToScaleToG(0, 0)
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      await priceFeed.setPrice(dec(200, 18))
-
-      // A withdraws from SP
-      await stabilityPool.withdrawFromSP(dec(50, 18), { from: A })
-
-      const G_1 = await stabilityPool.epochToScaleToG(0, 0)
-
-      // Expect G has increased from the LQTY reward event triggered
-      assert.isTrue(G_1.gt(G_Before))
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      // Check B has non-zero ETH gain
-      assert.isTrue((await stabilityPool.getDepositorETHGain(B)).gt(ZERO))
-
-      // B withdraws to trove
-      await stabilityPool.withdrawETHGainToTrove(B, B, { from: B })
-
-      const G_2 = await stabilityPool.epochToScaleToG(0, 0)
-
-      // Expect G has increased from the LQTY reward event triggered
-      assert.isTrue(G_2.gt(G_1))
     })
 
     it("withdrawETHGainToTrove(): reverts when depositor has no ETH gain", async () => {

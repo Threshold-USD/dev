@@ -124,9 +124,6 @@ export interface StabilityPoolGainsWithdrawalDetails {
 
   /** Amount of native currency (e.g. Ether) paid out to the depositor in this transaction. */
   collateralGain: Decimal;
-
-  /** Amount of LQTY rewarded to the depositor in this transaction. */
-  lqtyReward: Decimal;
 }
 
 /**
@@ -318,8 +315,7 @@ export interface TransactableLiquity {
    * Throws {@link TransactionFailedError} in case of transaction failure.
    *
    * As a side-effect, the transaction will also pay out an existing Stability Deposit's
-   * {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain} and
-   * {@link @liquity/lib-base#StabilityDeposit.lqtyReward | LQTY reward}.
+   * {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain}
    */
   depositLUSDInStabilityPool(
     amount: Decimalish
@@ -335,14 +331,12 @@ export interface TransactableLiquity {
    *
    * @remarks
    * As a side-effect, the transaction will also pay out the Stability Deposit's
-   * {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain} and
-   * {@link @liquity/lib-base#StabilityDeposit.lqtyReward | LQTY reward}.
+   * {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain}.
    */
   withdrawLUSDFromStabilityPool(amount: Decimalish): Promise<StabilityDepositChangeDetails>;
 
   /**
-   * Withdraw {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain} and
-   * {@link @liquity/lib-base#StabilityDeposit.lqtyReward | LQTY reward} from Stability Deposit.
+   * Withdraw {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain} from Stability Deposit.
    *
    * @throws
    * Throws {@link TransactionFailedError} in case of transaction failure.
@@ -358,9 +352,6 @@ export interface TransactableLiquity {
    *
    * @remarks
    * The collateral gain is transfered to the Trove as additional collateral.
-   *
-   * As a side-effect, the transaction will also pay out the Stability Deposit's
-   * {@link @liquity/lib-base#StabilityDeposit.lqtyReward | LQTY reward}.
    */
   transferCollateralGainToTrove(): Promise<CollateralGainTransferDetails>;
 

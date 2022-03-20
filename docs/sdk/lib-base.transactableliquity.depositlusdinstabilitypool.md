@@ -26,5 +26,5 @@ Promise&lt;[StabilityDepositChangeDetails](./lib-base.stabilitydepositchangedeta
 
 Throws [TransactionFailedError](./lib-base.transactionfailederror.md) in case of transaction failure.
 
-As a side-effect, the transaction will also pay out an existing Stability Deposit's [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) and [LQTY reward](./lib-base.stabilitydeposit.lqtyreward.md)<!-- -->.
+As a side-effect, the transaction will also pay out an existing Stability Deposit's [collateral gain](./lib-base.stabilitydeposit.collateralgain.md)
 

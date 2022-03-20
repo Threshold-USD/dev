@@ -24,20 +24,15 @@ export class StabilityDeposit {
   /** Amount of native currency (e.g. Ether) received in exchange for the used-up LUSD. */
   readonly collateralGain: Decimal;
 
-  /** Amount of LQTY rewarded since the last modification of the Stability Deposit. */
-  readonly lqtyReward: Decimal;
-
   /** @internal */
   constructor(
     initialLUSD: Decimal,
     currentLUSD: Decimal,
-    collateralGain: Decimal,
-    lqtyReward: Decimal
+    collateralGain: Decimal
   ) {
     this.initialLUSD = initialLUSD;
     this.currentLUSD = currentLUSD;
     this.collateralGain = collateralGain;
-    this.lqtyReward = lqtyReward;
 
     if (this.currentLUSD.gt(this.initialLUSD)) {
       throw new Error("currentLUSD can't be greater than initialLUSD");
@@ -48,8 +43,7 @@ export class StabilityDeposit {
     return (
       this.initialLUSD.isZero &&
       this.currentLUSD.isZero &&
-      this.collateralGain.isZero &&
-      this.lqtyReward.isZero
+      this.collateralGain.isZero
     );
   }
 
@@ -58,8 +52,7 @@ export class StabilityDeposit {
     return (
       `{ initialLUSD: ${this.initialLUSD}` +
       `, currentLUSD: ${this.currentLUSD}` +
-      `, collateralGain: ${this.collateralGain}` +
-      `, lqtyReward: ${this.lqtyReward} }`
+      `, collateralGain: ${this.collateralGain} }`
     );
   }
 
@@ -70,8 +63,7 @@ export class StabilityDeposit {
     return (
       this.initialLUSD.eq(that.initialLUSD) &&
       this.currentLUSD.eq(that.currentLUSD) &&
-      this.collateralGain.eq(that.collateralGain) &&
-      this.lqtyReward.eq(that.lqtyReward)
+      this.collateralGain.eq(that.collateralGain)
     );
   }
 

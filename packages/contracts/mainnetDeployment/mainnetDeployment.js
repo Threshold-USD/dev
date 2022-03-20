@@ -506,12 +506,10 @@ async function mainnetDeploy(configParams) {
   const currentScale = await liquityCore.stabilityPool.currentScale()
   const currentEpoch = await liquityCore.stabilityPool.currentEpoch()
   const S = await liquityCore.stabilityPool.epochToScaleToSum(currentEpoch, currentScale)
-  const G = await liquityCore.stabilityPool.epochToScaleToG(currentEpoch, currentScale)
   th.logBN("Product P", P)
   th.logBN("Current epoch", currentEpoch)
   th.logBN("Current scale", currentScale)
   th.logBN("Sum S, at current epoch and scale", S)
-  th.logBN("Sum G, at current epoch and scale", G)
 
   // LQTYStaking
   console.log("LQTYStaking state variables:")

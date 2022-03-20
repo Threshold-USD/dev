@@ -74,8 +74,7 @@ const reduce = (
       const changeCommitted =
         !updatedDeposit.initialLUSD.eq(originalDeposit.initialLUSD) ||
         updatedDeposit.currentLUSD.gt(originalDeposit.currentLUSD) ||
-        updatedDeposit.collateralGain.lt(originalDeposit.collateralGain) ||
-        updatedDeposit.lqtyReward.lt(originalDeposit.lqtyReward);
+        updatedDeposit.collateralGain.lt(originalDeposit.collateralGain);
 
       if (changePending && changeCommitted) {
         return finishChange(revert(newState));

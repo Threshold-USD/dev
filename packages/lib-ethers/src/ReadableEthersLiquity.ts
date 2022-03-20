@@ -256,20 +256,17 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     const [
       initialValue,
       currentLUSD,
-      collateralGain,
-      lqtyReward
+      collateralGain
     ] = await Promise.all([
       stabilityPool.deposits(address, { ...overrides }),
       stabilityPool.getCompoundedLUSDDeposit(address, { ...overrides }),
-      stabilityPool.getDepositorETHGain(address, { ...overrides }),
-      stabilityPool.getDepositorLQTYGain(address, { ...overrides })
+      stabilityPool.getDepositorETHGain(address, { ...overrides })
     ]);
 
     return new StabilityDeposit(
       decimalify(initialValue),
       decimalify(currentLUSD),
-      decimalify(collateralGain),
-      decimalify(lqtyReward)
+      decimalify(collateralGain)
     );
   }
 

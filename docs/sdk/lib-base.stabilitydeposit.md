@@ -24,7 +24,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [currentLUSD](./lib-base.stabilitydeposit.currentlusd.md) |  | [Decimal](./lib-base.decimal.md) | Amount of LUSD left in the Stability Deposit. |
 |  [initialLUSD](./lib-base.stabilitydeposit.initiallusd.md) |  | [Decimal](./lib-base.decimal.md) | Amount of LUSD in the Stability Deposit at the time of the last direct modification. |
 |  [isEmpty](./lib-base.stabilitydeposit.isempty.md) |  | boolean |  |
-|  [lqtyReward](./lib-base.stabilitydeposit.lqtyreward.md) |  | [Decimal](./lib-base.decimal.md) | Amount of LQTY rewarded since the last modification of the Stability Deposit. |
 
 ## Methods
 

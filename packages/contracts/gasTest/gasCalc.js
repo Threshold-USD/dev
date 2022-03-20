@@ -1157,12 +1157,6 @@ contract('Gas cost tests', async accounts => {
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
     await stabilityPool.provideToSP(dec(1, 18), { from: _10_Accounts[0] })
 
-    // Check the other accounts have LQTY gain
-    for (account of _10_Accounts.slice(1)) {
-      const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-      assert.isTrue(LQTYGain.gt(toBN('0')))
-    }
-
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
     // top-up of StabilityPool Deposit
@@ -1183,12 +1177,6 @@ contract('Gas cost tests', async accounts => {
   //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
   //   await stabilityPool.provideToSP(dec(1, 18), { from: _10_Accounts[0] })
 
-  //   // Check the other accounts have LQTY gain
-  //   for (account of _10_Accounts.slice(1)) {
-  //     const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-  //     assert.isTrue(LQTYGain.gt(toBN('0')))
-  //   }
-
   //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
   //   // top-up of StabilityPool Deposit
@@ -1208,12 +1196,6 @@ contract('Gas cost tests', async accounts => {
     // >>FF time and one account tops up, triggers LQTY gains for all
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
     await stabilityPool.provideToSP(dec(1, 18), { from: _10_Accounts[0] })
-
-    // Check the other accounts have LQTY gain
-    for (account of _10_Accounts.slice(1)) {
-      const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-      assert.isTrue(LQTYGain.gt(toBN('0')))
-    }
 
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
@@ -1247,12 +1229,6 @@ contract('Gas cost tests', async accounts => {
   //   await troveManager.liquidate(accounts[1], { from: accounts[0] })
   //   assert.isFalse(await sortedTroves.contains(accounts[1]))
 
-  //   // Check accounts have LQTY gains from liquidations
-  //   for (account of accounts.slice(2, 12)) {
-  //     const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-  //     assert.isTrue(LQTYGain.gt(toBN('0')))
-  //   }
-
   //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
   //   // 9 active Troves top up their Stability Pool deposits with 50 LUSD
@@ -1281,12 +1257,6 @@ contract('Gas cost tests', async accounts => {
   //   await troveManager.liquidate(accounts[1], { from: accounts[0] })
   //   assert.isFalse(await sortedTroves.contains(accounts[1]))
 
-  //   // Check accounts have LQTY gains from liquidations
-  //   for (account of accounts.slice(2, 12)) {
-  //     const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-  //     assert.isTrue(LQTYGain.gt(toBN('0')))
-  //   }
-
   //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
   //   // 5 active Troves top up their Stability Pool deposits with 90 LUSD, using up all their issued LUSD
@@ -1314,12 +1284,6 @@ contract('Gas cost tests', async accounts => {
     await troveManager.liquidate(accounts[1], { from: accounts[0] })
     assert.isFalse(await sortedTroves.contains(accounts[1]))
 
-    // Check accounts have LQTY gains from liquidations
-    for (account of accounts.slice(2, 12)) {
-      const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-      assert.isTrue(LQTYGain.gt(toBN('0')))
-    }
-
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
     // 5 active Troves top up their Stability Pool deposits with a random LUSD amount
@@ -1344,11 +1308,6 @@ contract('Gas cost tests', async accounts => {
   //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
   //   await stabilityPool.provideToSP(dec(1, 18), { from: _10_Accounts[0] })
 
-  //   // Check the other accounts have LQTY gain
-  //   for (account of _10_Accounts.slice(1)) {
-  //     const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-  //     assert.isTrue(LQTYGain.gt(toBN('0')))
-  //   }
   //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
   //   const gasResults = await th.withdrawFromSP_allAccounts(_10_Accounts, stabilityPool, dec(90, 18))
@@ -1368,11 +1327,6 @@ contract('Gas cost tests', async accounts => {
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
     await stabilityPool.provideToSP(dec(1, 18), { from: _10_Accounts[0] })
 
-    // Check the other accounts have LQTY gain
-    for (account of _10_Accounts.slice(1)) {
-      const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-      assert.isTrue(LQTYGain.gt(toBN('0')))
-    }
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
     const gasResults = await th.withdrawFromSP_allAccounts(_10_Accounts, stabilityPool, dec(130, 18))
@@ -1417,12 +1371,6 @@ contract('Gas cost tests', async accounts => {
   //   await troveManager.liquidate(accounts[1], { from: accounts[0] })
   //   assert.isFalse(await sortedTroves.contains(accounts[1]))
 
-  //   // Check accounts have LQTY gains from liquidations
-  //   for (account of accounts.slice(2, 12)) {
-  //     const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-  //     assert.isTrue(LQTYGain.gt(toBN('0')))
-  //   }
-
   //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
   //   // 5 active Troves reduce their Stability Pool deposit by 90 LUSD
@@ -1451,12 +1399,6 @@ contract('Gas cost tests', async accounts => {
     await troveManager.liquidate(accounts[1], { from: accounts[0] })
     assert.isFalse(await sortedTroves.contains(accounts[1]))
 
-    // Check accounts have LQTY gains from liquidations
-    for (account of accounts.slice(2, 12)) {
-      const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-      assert.isTrue(LQTYGain.gt(toBN('0')))
-    }
-
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
     // 5 active Troves reduce their Stability Pool deposit by 130 LUSD
@@ -1483,12 +1425,6 @@ contract('Gas cost tests', async accounts => {
     await priceFeed.setPrice(dec(100, 18))
     await troveManager.liquidate(accounts[1], { from: accounts[0] })
     assert.isFalse(await sortedTroves.contains(accounts[1]))
-
-    // Check accounts have LQTY gains from liquidations
-    for (account of accounts.slice(2, 12)) {
-      const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-      assert.isTrue(LQTYGain.gt(toBN('0')))
-    }
 
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
@@ -1520,12 +1456,6 @@ contract('Gas cost tests', async accounts => {
   //   await troveManager.liquidate(accounts[1], { from: accounts[0] })
   //   assert.isFalse(await sortedTroves.contains(accounts[1]))
 
-  //    // Check accounts have LQTY gains from liquidations
-  //    for (account of accounts.slice(2, 12)) {
-  //     const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-  //     assert.isTrue(LQTYGain.gt(toBN('0')))
-  //   }
-
   //   await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
   //   // 5 active Troves withdraw their ETH gain to their trove
@@ -1553,13 +1483,7 @@ contract('Gas cost tests', async accounts => {
     await troveManager.liquidate(accounts[1], { from: accounts[0] })
     assert.isFalse(await sortedTroves.contains(accounts[1]))
 
-       // Check accounts have LQTY gains from liquidations
-       for (account of accounts.slice(2, 22)) {
-        const LQTYGain = await stabilityPool.getDepositorLQTYGain(account)
-        assert.isTrue(LQTYGain.gt(toBN('0')))
-      }
-
-      await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
+    await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
     // 5 active Troves withdraw their ETH gain to their trove
     const gasResults = await th.withdrawETHGainToTrove_allAccounts(accounts.slice(2, 22), contracts)

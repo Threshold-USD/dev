@@ -64,7 +64,7 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [transferCollateralGainToTrove(overrides)](./lib-ethers.ethersliquity.transfercollateralgaintotrove.md) |  | Transfer [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit to Trove. |
 |  [unstakeLQTY(amount, overrides)](./lib-ethers.ethersliquity.unstakelqty.md) |  | Withdraw LQTY from staking. |
 |  [withdrawCollateral(amount, overrides)](./lib-ethers.ethersliquity.withdrawcollateral.md) |  | Adjust existing Trove by withdrawing some of its collateral. |
-|  [withdrawGainsFromStabilityPool(overrides)](./lib-ethers.ethersliquity.withdrawgainsfromstabilitypool.md) |  | Withdraw [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) and [LQTY reward](./lib-base.stabilitydeposit.lqtyreward.md) from Stability Deposit. |
+|  [withdrawGainsFromStabilityPool(overrides)](./lib-ethers.ethersliquity.withdrawgainsfromstabilitypool.md) |  | Withdraw [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit. |
 |  [withdrawGainsFromStaking(overrides)](./lib-ethers.ethersliquity.withdrawgainsfromstaking.md) |  | Withdraw [collateral gain](./lib-base.lqtystake.collateralgain.md) and [LUSD gain](./lib-base.lqtystake.lusdgain.md) from LQTY stake. |
 |  [withdrawLUSDFromStabilityPool(amount, overrides)](./lib-ethers.ethersliquity.withdrawlusdfromstabilitypool.md) |  | Withdraw LUSD from Stability Deposit. |
 

@@ -109,8 +109,8 @@ export const StabilityDepositEditor: React.FC<StabilityDepositEditorProps> = ({
             <StaticRow
               label="Reward"
               inputId="deposit-reward"
-              amount={originalDeposit.lqtyReward.prettify()}
-              color={originalDeposit.lqtyReward.nonZero && "success"}
+              amount="0"
+              color={originalDeposit.collateralGain.nonZero && "success"}
               unit={GT}
               infoIcon={
                 <InfoIcon

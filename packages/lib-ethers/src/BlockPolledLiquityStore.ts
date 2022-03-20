@@ -129,7 +129,6 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
             stabilityDeposit: new StabilityDeposit(
               Decimal.ZERO,
               Decimal.ZERO,
-              Decimal.ZERO,
               Decimal.ZERO
             ),
             lqtyStake: new LQTYStake()
