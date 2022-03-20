@@ -51,7 +51,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
       const totalLiquidatedDebt = A_totalDebt.add(B_totalDebt).add(C_totalDebt)
 
       await openTrove({ ICR: toBN(dec(340, 16)), extraLUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
-      await stabilityPool.provideToSP(totalLiquidatedDebt, ZERO_ADDRESS, { from: whale })
+      await stabilityPool.provideToSP(totalLiquidatedDebt, { from: whale })
 
       // Price drops
       await priceFeed.setPrice(dec(100, 18))
@@ -149,7 +149,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
       const totalLiquidatedDebt = A_totalDebt.add(B_totalDebt).add(C_totalDebt)
 
       await openTrove({ ICR: toBN(dec(310, 16)), extraLUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
-      await stabilityPool.provideToSP(totalLiquidatedDebt, ZERO_ADDRESS, { from: whale })
+      await stabilityPool.provideToSP(totalLiquidatedDebt, { from: whale })
 
       // Price drops
       await priceFeed.setPrice(dec(100, 18))
@@ -194,7 +194,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
       const totalLiquidatedDebt = A_totalDebt.add(B_totalDebt)
 
       await openTrove({ ICR: toBN(dec(300, 16)), extraLUSDAmount: totalLiquidatedDebt, extraParams: { from: whale } })
-      await stabilityPool.provideToSP(totalLiquidatedDebt, ZERO_ADDRESS, { from: whale })
+      await stabilityPool.provideToSP(totalLiquidatedDebt, { from: whale })
 
       // Price drops
       await priceFeed.setPrice(dec(100, 18))

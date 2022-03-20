@@ -67,11 +67,11 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
   // Accuracy tests
   it("getCumulativeIssuanceFraction(): fraction doesn't increase if less than a minute has passed", async () => {
-   // progress time 1 week 
+   // progress time 1 week
     await th.fastForwardTime(timeValues.MINUTES_IN_ONE_WEEK, web3.currentProvider)
 
     await communityIssuanceTester.unprotectedIssueLQTY()
-   
+
     const issuanceFractionBefore = await communityIssuanceTester.getCumulativeIssuanceFraction()
     assert.isTrue(issuanceFractionBefore.gt(th.toBN('0')))
     console.log(`issuance fraction before: ${issuanceFractionBefore}`)
@@ -93,10 +93,10 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
   /*--- Issuance tests for "Yearly halving" schedule.
 
-  Total issuance year 1: 50%, year 2: 75%, year 3:   0.875, etc   
-  
+  Total issuance year 1: 50%, year 2: 75%, year 3:   0.875, etc
+
   Error tolerance: 1e-9
-  
+
   ---*/
 
   // using the result of this to advance time by the desired amount from the deployment time, whether or not some extra time has passed in the meanwhile
@@ -124,8 +124,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -146,8 +146,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -168,8 +168,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -190,8 +190,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -212,8 +212,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -234,8 +234,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -256,8 +256,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -278,8 +278,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -300,8 +300,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -322,8 +322,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -344,8 +344,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -366,8 +366,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -388,8 +388,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -410,8 +410,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedIssuanceFraction).sub(issuanceFraction)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    issuanceFraction: ${issuanceFraction},  
+    //   `time since deployment: ${duration},
+    //    issuanceFraction: ${issuanceFraction},
     //    expectedIssuanceFraction: ${expectedIssuanceFraction},
     //    abs. error: ${absError}`
     // )
@@ -438,8 +438,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -463,8 +463,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -488,8 +488,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -513,8 +513,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -538,8 +538,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -562,8 +562,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -586,8 +586,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -610,8 +610,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -634,8 +634,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -658,8 +658,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -682,8 +682,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -706,8 +706,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -730,8 +730,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -754,8 +754,8 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
 
     const absError = th.toBN(expectedTotalLQTYIssued).sub(totalLQTYIssued)
     // console.log(
-    //   `time since deployment: ${duration}, 
-    //    totalLQTYIssued: ${totalLQTYIssued},  
+    //   `time since deployment: ${duration},
+    //    totalLQTYIssued: ${totalLQTYIssued},
     //    expectedTotalLQTYIssued: ${expectedTotalLQTYIssued},
     //    abs. error: ${absError}`
     // )
@@ -763,142 +763,5 @@ contract('LQTY community issuance arithmetic tests', async accounts => {
     assert.isAtMost(th.getDifference(totalLQTYIssued, expectedTotalLQTYIssued), 1000000000000000)
   })
 
-  /* ---  
-  Accumulated issuance error: how many tokens are lost over a given period, for a given issuance frequency? 
-  
-  Slow tests are skipped.
-  --- */
 
-  // TODO: Convert to 25mil issuance schedule
-  it.skip("Frequent token issuance: issuance event every year, for 30 years", async () => {
-    // Register front end with kickback rate = 100%
-    await stabilityPool.registerFrontEnd(dec(1, 18), { from: frontEnd_1 })
-
-    // Alice opens trove and deposits to SP
-    await borrowerOperations.openTrove(th._100pct, dec(1, 18), alice, alice, { from: alice, value: dec(1, 'ether') })
-    await stabilityPool.provideToSP(dec(1, 18), frontEnd_1, { from: alice })
-
-    assert.isTrue(await stabilityPool.isEligibleForLQTY(alice))
-
-    const timeBetweenIssuances = timeValues.SECONDS_IN_ONE_YEAR
-    const duration = await getDuration(timeValues.SECONDS_IN_ONE_YEAR * 30)
-
-    await repeatedlyIssueLQTY(stabilityPool, timeBetweenIssuances, duration)
-
-    // Depositor withdraws their deposit and accumulated LQTY
-    await stabilityPool.withdrawFromSP(dec(1, 18), { from: alice })
-
-    const LQTYBalance_A = await lqtyToken.balanceOf(alice)
-    const expectedLQTYBalance_A = th.toBN('33333333302289200000000000')
-    const diff = expectedLQTYBalance_A.sub(LQTYBalance_A)
-
-    // logLQTYBalanceAndError(LQTYBalance_A, expectedLQTYBalance_A)
-
-    // Check the actual balance differs by no more than 1e18 (i.e. 1 token) from the expected balance
-    assert.isTrue(diff.lte(th.toBN(dec(1, 18))))
-  })
-  /*  Results:
-  
-  Expected final balance: 33333333302289200000000000,
-  Actual final balance: 33333333302289247499999999,
-  Abs. error: -47499999999 */
-
-
-    // TODO: Convert to 25mil issuance schedule
-  it.skip("Frequent token issuance: issuance event every day, for 30 years", async () => {
-    // Register front end with kickback rate = 100%
-    await stabilityPool.registerFrontEnd(dec(1, 18), { from: frontEnd_1 })
-
-    // Alice opens trove and deposits to SP
-    await borrowerOperations.openTrove(th._100pct, dec(1, 18), alice, alice, { from: alice, value: dec(1, 'ether') })
-    await stabilityPool.provideToSP(dec(1, 18), frontEnd_1, { from: alice })
-
-    assert.isTrue(await stabilityPool.isEligibleForLQTY(alice))
-
-    const timeBetweenIssuances = timeValues.SECONDS_IN_ONE_DAY
-    const duration = await getDuration(timeValues.SECONDS_IN_ONE_YEAR * 30)
-
-    await repeatedlyIssueLQTY(stabilityPool, timeBetweenIssuances, duration)
-
-    // Depositor withdraws their deposit and accumulated LQTY
-    await stabilityPool.withdrawFromSP(dec(1, 18), { from: alice })
-
-    const LQTYBalance_A = await lqtyToken.balanceOf(alice)
-    const expectedLQTYBalance_A = th.toBN('33333333302289200000000000')
-    const diff = expectedLQTYBalance_A.sub(LQTYBalance_A)
-
-    // logLQTYBalanceAndError(LQTYBalance_A, expectedLQTYBalance_A)
-
-    // Check the actual balance differs by no more than 1e18 (i.e. 1 token) from the expected balance
-    assert.isTrue(diff.lte(th.toBN(dec(1, 18))))
-  })
-  /* Results:
-
-  Expected final balance: 33333333302289200000000000,
-  Actual final balance: 33333333302297188866666666,
-  Abs. error: -7988866666666  */
-
-  // TODO: Convert to 25mil issuance schedule
-  it.skip("Frequent token issuance: issuance event every minute, for 1 month", async () => {
-    // Register front end with kickback rate = 100%
-    await stabilityPool.registerFrontEnd(dec(1, 18), { from: frontEnd_1 })
-
-    // Alice opens trove and deposits to SP
-    await borrowerOperations.openTrove(th._100pct, dec(1, 18), alice, alice, { from: alice, value: dec(1, 'ether') })
-    await stabilityPool.provideToSP(dec(1, 18), frontEnd_1, { from: alice })
-
-    assert.isTrue(await stabilityPool.isEligibleForLQTY(alice))
-
-    const timeBetweenIssuances = timeValues.SECONDS_IN_ONE_MINUTE
-    const duration = await getDuration(timeValues.SECONDS_IN_ONE_MONTH)
-
-    await repeatedlyIssueLQTY(stabilityPool, timeBetweenIssuances, duration)
-
-    // Depositor withdraws their deposit and accumulated LQTY
-    await stabilityPool.withdrawFromSP(dec(1, 18), { from: alice })
-
-    const LQTYBalance_A = await lqtyToken.balanceOf(alice)
-    const expectedLQTYBalance_A = th.toBN('1845951269598880000000000')
-    const diff = expectedLQTYBalance_A.sub(LQTYBalance_A)
-
-    // logLQTYBalanceAndError(LQTYBalance_A, expectedLQTYBalance_A)
-
-    // Check the actual balance differs by no more than 1e18 (i.e. 1 token) from the expected balance
-    assert.isTrue(diff.lte(th.toBN(dec(1, 18))))
-  })
-  /* Results:
-
-  Expected final balance: 1845951269598880000000000,
-  Actual final balance: 1845951269564420199999999,
-  Abs. error: 34459800000001
-  */
-
-  // TODO: Convert to 25mil issuance schedule
-  it.skip("Frequent token issuance: issuance event every minute, for 1 year", async () => {
-    // Register front end with kickback rate = 100%
-    await stabilityPool.registerFrontEnd(dec(1, 18), { from: frontEnd_1 })
-
-    // Alice opens trove and deposits to SP
-    await borrowerOperations.openTrove(th._100pct, dec(1, 18), alice, alice, { from: alice, value: dec(1, 'ether') })
-    await stabilityPool.provideToSP(dec(1, 18), frontEnd_1, { from: alice })
-
-    assert.isTrue(await stabilityPool.isEligibleForLQTY(alice))
-
-    const timeBetweenIssuances = timeValues.SECONDS_IN_ONE_MINUTE
-    const duration = await getDuration(timeValues.SECONDS_IN_ONE_YEAR)
-
-    await repeatedlyIssueLQTY(stabilityPool, timeBetweenIssuances, duration)
-
-    // Depositor withdraws their deposit and accumulated LQTY
-    await stabilityPool.withdrawFromSP(dec(1, 18), { from: alice })
-
-    const LQTYBalance_A = await lqtyToken.balanceOf(alice)
-    const expectedLQTYBalance_A = th.toBN('1845951269598880000000000')
-    const diff = expectedLQTYBalance_A.sub(LQTYBalance_A)
-
-    // logLQTYBalanceAndError(LQTYBalance_A, expectedLQTYBalance_A)
-
-    // Check the actual balance differs by no more than 1e18 (i.e. 1 token) from the expected balance
-    assert.isTrue(diff.lte(th.toBN(dec(1, 18))))
-  })
 })

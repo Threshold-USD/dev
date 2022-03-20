@@ -448,7 +448,7 @@ describe("EthersLiquity", () => {
         lusdLoss: Decimal.from(0),
         newLUSDDeposit: smallStabilityDeposit,
         collateralGain: Decimal.from(0),
-        lqtyReward: Decimal.from(0),
+        lqtyReward: undefined,
 
         change: {
           depositLUSD: smallStabilityDeposit
@@ -509,8 +509,7 @@ describe("EthersLiquity", () => {
             .mul(0.995) // -0.5% gas compensation
             .mulDiv(smallStabilityDeposit, troveWithVeryLowICR.debt)
             .sub("0.000000000000000005"), // tiny imprecision
-          Decimal.ZERO,
-          AddressZero
+          Decimal.ZERO
         )
       );
     });
@@ -551,7 +550,7 @@ describe("EthersLiquity", () => {
       expect(details).to.deep.equal({
         lusdLoss: smallStabilityDeposit,
         newLUSDDeposit: Decimal.ZERO,
-        lqtyReward: Decimal.ZERO,
+        lqtyReward: undefined,
 
         collateralGain: troveWithVeryLowICR.collateral
           .mul(0.995) // -0.5% gas compensation

@@ -68,14 +68,14 @@ contract('Gas compensation tests', async accounts => {
     borrowerOperations = contracts.borrowerOperations
 
     await deploymentHelper.connectLQTYContracts(LQTYContracts)
-    await deploymentHelper.connectCoreContracts(contracts, LQTYContracts) 
+    await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
   })
 
   // --- Raw gas compensation calculations ---
 
   it('_getCollGasCompensation(): returns the 0.5% of collaterall if it is < $10 in value', async () => {
-    /* 
+    /*
     ETH:USD price = 1
     coll = 1 ETH: $1 in value
     -> Expect 0.5% of collaterall as gas compensation */
@@ -84,7 +84,7 @@ contract('Gas compensation tests', async accounts => {
     const gasCompensation_1 = (await troveManagerTester.getCollGasCompensation(dec(1, 'ether'))).toString()
     assert.equal(gasCompensation_1, dec(5, 15))
 
-    /* 
+    /*
     ETH:USD price = 28.4
     coll = 0.1 ETH: $2.84 in value
     -> Expect 0.5% of collaterall as gas compensation */
@@ -93,9 +93,9 @@ contract('Gas compensation tests', async accounts => {
     const gasCompensation_2 = (await troveManagerTester.getCollGasCompensation(dec(100, 'finney'))).toString()
     assert.equal(gasCompensation_2, dec(5, 14))
 
-    /* 
+    /*
     ETH:USD price = 1000000000 (1 billion)
-    coll = 0.000000005 ETH (5e9 wei): $5 in value 
+    coll = 0.000000005 ETH (5e9 wei): $5 in value
     -> Expect 0.5% of collaterall as gas compensation */
     await priceFeed.setPrice(dec(1, 27))
     // const price_3 = await priceFeed.getPrice()
@@ -107,23 +107,23 @@ contract('Gas compensation tests', async accounts => {
     const price = await priceFeed.getPrice()
     assert.equal(price, dec(200, 18))
 
-    /* 
+    /*
     ETH:USD price = 200
-    coll = 9.999 ETH  
+    coll = 9.999 ETH
     0.5% of coll = 0.04995 ETH. USD value: $9.99
     -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation_1 = (await troveManagerTester.getCollGasCompensation('9999000000000000000')).toString()
     assert.equal(gasCompensation_1, '49995000000000000')
 
     /* ETH:USD price = 200
-     coll = 0.055 ETH  
+     coll = 0.055 ETH
      0.5% of coll = 0.000275 ETH. USD value: $0.055
      -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation_2 = (await troveManagerTester.getCollGasCompensation('55000000000000000')).toString()
     assert.equal(gasCompensation_2, dec(275, 12))
 
     /* ETH:USD price = 200
-    coll = 6.09232408808723580 ETH  
+    coll = 6.09232408808723580 ETH
     0.5% of coll = 0.004995 ETH. USD value: $6.09
     -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation_3 = (await troveManagerTester.getCollGasCompensation('6092324088087235800')).toString()
@@ -134,9 +134,9 @@ contract('Gas compensation tests', async accounts => {
     const price = await priceFeed.getPrice()
     assert.equal(price, dec(200, 18))
 
-    /* 
+    /*
     ETH:USD price = 200
-    coll = 10 ETH  
+    coll = 10 ETH
     0.5% of coll = 0.5 ETH. USD value: $10
     -> Expect 0.5% of collaterall as gas compensation */
     const gasCompensation = (await troveManagerTester.getCollGasCompensation(dec(10, 'ether'))).toString()
@@ -147,40 +147,40 @@ contract('Gas compensation tests', async accounts => {
     const price = await priceFeed.getPrice()
     assert.equal(price, dec(200, 18))
 
-    /* 
+    /*
     ETH:USD price = 200 $/E
-    coll = 100 ETH  
+    coll = 100 ETH
     0.5% of coll = 0.5 ETH. USD value: $100
     -> Expect $100 gas compensation, i.e. 0.5 ETH */
     const gasCompensation_1 = (await troveManagerTester.getCollGasCompensation(dec(100, 'ether'))).toString()
     assert.equal(gasCompensation_1, dec(500, 'finney'))
 
-    /* 
+    /*
     ETH:USD price = 200 $/E
-    coll = 10.001 ETH  
+    coll = 10.001 ETH
     0.5% of coll = 0.050005 ETH. USD value: $10.001
     -> Expect $100 gas compensation, i.e.  0.050005  ETH */
     const gasCompensation_2 = (await troveManagerTester.getCollGasCompensation('10001000000000000000')).toString()
     assert.equal(gasCompensation_2, '50005000000000000')
 
-    /* 
+    /*
     ETH:USD price = 200 $/E
-    coll = 37.5 ETH  
+    coll = 37.5 ETH
     0.5% of coll = 0.1875 ETH. USD value: $37.5
     -> Expect $37.5 gas compensation i.e.  0.1875  ETH */
     const gasCompensation_3 = (await troveManagerTester.getCollGasCompensation('37500000000000000000')).toString()
     assert.equal(gasCompensation_3, '187500000000000000')
 
-    /* 
+    /*
     ETH:USD price = 45323.54542 $/E
-    coll = 94758.230582309850 ETH  
+    coll = 94758.230582309850 ETH
     0.5% of coll = 473.7911529 ETH. USD value: $21473894.84
     -> Expect $21473894.8385808 gas compensation, i.e.  473.7911529115490  ETH */
     await priceFeed.setPrice('45323545420000000000000')
     const gasCompensation_4 = await troveManagerTester.getCollGasCompensation('94758230582309850000000')
     assert.isAtMost(th.getDifference(gasCompensation_4, '473791152911549000000'), 1000000)
 
-    /* 
+    /*
     ETH:USD price = 1000000 $/E (1 million)
     coll = 300000000 ETH   (300 million)
     0.5% of coll = 1500000 ETH. USD value: $150000000000
@@ -198,9 +198,9 @@ contract('Gas compensation tests', async accounts => {
     const price = await priceFeed.getPrice()
     assert.equal(price, dec(200, 18))
 
-    /* 
+    /*
     ETH:USD price = 200
-    coll = 9.999 ETH 
+    coll = 9.999 ETH
     debt = 10 LUSD
     0.5% of coll = 0.04995 ETH. USD value: $9.99
     -> Expect composite debt = 10 + 200  = 2100 LUSD*/
@@ -208,7 +208,7 @@ contract('Gas compensation tests', async accounts => {
     assert.equal(compositeDebt_1, dec(210, 18))
 
     /* ETH:USD price = 200
-     coll = 0.055 ETH  
+     coll = 0.055 ETH
      debt = 0 LUSD
      0.5% of coll = 0.000275 ETH. USD value: $0.055
      -> Expect composite debt = 0 + 200 = 200 LUSD*/
@@ -216,8 +216,8 @@ contract('Gas compensation tests', async accounts => {
     assert.equal(compositeDebt_2, dec(200, 18))
 
     // /* ETH:USD price = 200
-    // coll = 6.09232408808723580 ETH 
-    // debt = 200 LUSD 
+    // coll = 6.09232408808723580 ETH
+    // debt = 200 LUSD
     // 0.5% of coll = 0.004995 ETH. USD value: $6.09
     // -> Expect  composite debt =  200 + 200 = 400  LUSD */
     const compositeDebt_3 = await troveManagerTester.getCompositeDebt(dec(200, 18))
@@ -229,9 +229,9 @@ contract('Gas compensation tests', async accounts => {
     const price = await priceFeed.getPrice()
     assert.equal(price, dec(200, 18))
 
-    /* 
+    /*
     ETH:USD price = 200
-    coll = 10 ETH  
+    coll = 10 ETH
     debt = 123.45 LUSD
     0.5% of coll = 0.5 ETH. USD value: $10
     -> Expect composite debt = (123.45 + 200) = 323.45 LUSD  */
@@ -239,40 +239,40 @@ contract('Gas compensation tests', async accounts => {
     assert.equal(compositeDebt, '323450000000000000000')
   })
 
-  /// *** 
+  /// ***
 
   // gets debt + 50 when 0.5% of coll > 10
   it('getCompositeDebt(): returns (debt + 50) when 0.5% of collateral > $10 in value', async () => {
     const price = await priceFeed.getPrice()
     assert.equal(price, dec(200, 18))
 
-    /* 
+    /*
     ETH:USD price = 200 $/E
-    coll = 100 ETH  
+    coll = 100 ETH
     debt = 2000 LUSD
     -> Expect composite debt = (2000 + 200) = 2200 LUSD  */
     const compositeDebt_1 = (await troveManagerTester.getCompositeDebt(dec(2000, 18))).toString()
     assert.equal(compositeDebt_1, '2200000000000000000000')
 
-    /* 
+    /*
     ETH:USD price = 200 $/E
-    coll = 10.001 ETH  
+    coll = 10.001 ETH
     debt = 200 LUSD
     -> Expect composite debt = (200 + 200) = 400 LUSD  */
     const compositeDebt_2 = (await troveManagerTester.getCompositeDebt(dec(200, 18))).toString()
     assert.equal(compositeDebt_2, '400000000000000000000')
 
-    /* 
+    /*
     ETH:USD price = 200 $/E
-    coll = 37.5 ETH  
+    coll = 37.5 ETH
     debt = 500 LUSD
     -> Expect composite debt = (500 + 200) = 700 LUSD  */
     const compositeDebt_3 = (await troveManagerTester.getCompositeDebt(dec(500, 18))).toString()
     assert.equal(compositeDebt_3, '700000000000000000000')
 
-    /* 
+    /*
     ETH:USD price = 45323.54542 $/E
-    coll = 94758.230582309850 ETH  
+    coll = 94758.230582309850 ETH
     debt = 1 billion LUSD
     -> Expect composite debt = (1000000000 + 200) = 1000000200 LUSD  */
     await priceFeed.setPrice('45323545420000000000000')
@@ -280,7 +280,7 @@ contract('Gas compensation tests', async accounts => {
     const compositeDebt_4 = (await troveManagerTester.getCompositeDebt(dec(1, 27))).toString()
     assert.isAtMost(th.getDifference(compositeDebt_4, '1000000200000000000000000000'), 100000000000)
 
-    /* 
+    /*
     ETH:USD price = 1000000 $/E (1 million)
     coll = 300000000 ETH   (300 million)
     debt = 54321.123456789 LUSD
@@ -352,8 +352,8 @@ contract('Gas compensation tests', async accounts => {
     await openTrove({ ICR: toBN(dec(2, 18)), extraLUSDAmount: B_totalDebt.add(C_totalDebt), extraParams: { from: erin } })
 
     // D, E each provide LUSD to SP
-    await stabilityPool.provideToSP(A_totalDebt, ZERO_ADDRESS, { from: dennis })
-    await stabilityPool.provideToSP(B_totalDebt.add(C_totalDebt), ZERO_ADDRESS, { from: erin })
+    await stabilityPool.provideToSP(A_totalDebt, { from: dennis })
+    await stabilityPool.provideToSP(B_totalDebt.add(C_totalDebt), { from: erin })
 
     const LUSDinSP_0 = await stabilityPool.getTotalLUSDDeposits()
 
@@ -361,7 +361,7 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice('9990000000000000000')
     const price_1 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 9.99
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
@@ -380,7 +380,7 @@ contract('Gas compensation tests', async accounts => {
     const _0pt5percent_aliceColl = aliceColl.div(web3.utils.toBN('200'))
     assert.equal(compensationReceived_A, _0pt5percent_aliceColl)
 
-    // Check SP LUSD has decreased due to the liquidation 
+    // Check SP LUSD has decreased due to the liquidation
     const LUSDinSP_A = await stabilityPool.getTotalLUSDDeposits()
     assert.isTrue(LUSDinSP_A.lte(LUSDinSP_0))
 
@@ -392,7 +392,7 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice(dec(3, 18))
     const price_2 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 3
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
@@ -423,7 +423,7 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice('3141592653589793238')
     const price_3 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 3.141592653589793238
     Carol coll = 3 ETH. Value = (3 * 3.141592653589793238) = $6
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
@@ -463,8 +463,8 @@ contract('Gas compensation tests', async accounts => {
     await openTrove({ ICR: toBN(dec(80, 18)), extraLUSDAmount: dec(1, 23), extraParams: { from: erin } })
 
     // D, E each provide 10000 LUSD to SP
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: dennis })
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: erin })
+    await stabilityPool.provideToSP(dec(1, 23), { from: dennis })
+    await stabilityPool.provideToSP(dec(1, 23), { from: erin })
 
     const LUSDinSP_0 = await stabilityPool.getTotalLUSDDeposits()
     const ETHinSP_0 = await stabilityPool.getETH()
@@ -473,12 +473,12 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice('199999000000000000000')
     const price_1 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 199.999
     Alice coll = 1 ETH. Value: $199.999
     0.5% of coll  = 0.05 ETH. Value: (0.05 * 199.999) = $9.99995
     Minimum comp = $10 = 0.05000025000125001 ETH.
-    -> Expect 0.05000025000125001 ETH sent to liquidator, 
+    -> Expect 0.05000025000125001 ETH sent to liquidator,
     and (1 - 0.05000025000125001) = 0.94999974999875 ETH remainder liquidated */
 
     // Check collateral value in USD is > $10
@@ -515,12 +515,12 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice(dec(15, 18))
     const price_2 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 15
     Bob coll = 15 ETH. Value: $165
     0.5% of coll  = 0.75 ETH. Value: (0.75 * 11) = $8.25
     Minimum comp = $10 =  0.66666...ETH.
-    -> Expect 0.666666666666666666 ETH sent to liquidator, 
+    -> Expect 0.666666666666666666 ETH sent to liquidator,
     and (15 - 0.666666666666666666) ETH remainder liquidated */
 
     // Check collateral value in USD is > $10
@@ -567,8 +567,8 @@ contract('Gas compensation tests', async accounts => {
     await openTrove({ ICR: toBN(dec(4, 18)), extraLUSDAmount: dec(1, 23), extraParams: { from: erin } })
 
     // D, E each provide 10000 LUSD to SP
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: dennis })
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: erin })
+    await stabilityPool.provideToSP(dec(1, 23), { from: dennis })
+    await stabilityPool.provideToSP(dec(1, 23), { from: erin })
 
     const LUSDinSP_0 = await stabilityPool.getTotalLUSDDeposits()
     const ETHinSP_0 = await stabilityPool.getETH()
@@ -576,12 +576,12 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice(dec(200, 18))
     const price_1 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 200
     Alice coll = 10.001 ETH. Value: $2000.2
     0.5% of coll  = 0.050005 ETH. Value: (0.050005 * 200) = $10.01
     Minimum comp = $10 = 0.05 ETH.
-    -> Expect  0.050005 ETH sent to liquidator, 
+    -> Expect  0.050005 ETH sent to liquidator,
     and (10.001 - 0.050005) ETH remainder liquidated */
 
     // Check value of 0.5% of collateral in USD is > $10
@@ -602,7 +602,7 @@ contract('Gas compensation tests', async accounts => {
     const compensationReceived_A = (liquidatorBalance_after_A.sub(liquidatorBalance_before_A)).toString()
     assert.equal(compensationReceived_A, _0pt5percent_aliceColl)
 
-    // Check SP LUSD has decreased due to the liquidation of A 
+    // Check SP LUSD has decreased due to the liquidation of A
     const LUSDinSP_A = await stabilityPool.getTotalLUSDDeposits()
     assert.isTrue(LUSDinSP_A.lt(LUSDinSP_0))
 
@@ -615,12 +615,12 @@ contract('Gas compensation tests', async accounts => {
     assert.isAtMost(th.getDifference(SPETHIncrease_A, collRemainder_A), 1000)
 
 
-    /* 
+    /*
    ETH:USD price = 200
    Bob coll = 37.5 ETH. Value: $7500
    0.5% of coll  = 0.1875 ETH. Value: (0.1875 * 200) = $37.5
    Minimum comp = $10 = 0.05 ETH.
-   -> Expect 0.1875 ETH sent to liquidator, 
+   -> Expect 0.1875 ETH sent to liquidator,
    and (37.5 - 0.1875 ETH) ETH remainder liquidated */
 
     // Check value of 0.5% of collateral in USD is > $10
@@ -668,8 +668,8 @@ contract('Gas compensation tests', async accounts => {
     await openTrove({ ICR: toBN(dec(2, 18)), extraLUSDAmount: B_totalDebt, extraParams: { from: erin } })
 
     // D, E each provide LUSD to SP
-    await stabilityPool.provideToSP(A_totalDebt, ZERO_ADDRESS, { from: dennis })
-    await stabilityPool.provideToSP(B_totalDebt, ZERO_ADDRESS, { from: erin })
+    await stabilityPool.provideToSP(A_totalDebt, { from: dennis })
+    await stabilityPool.provideToSP(B_totalDebt, { from: erin })
 
     const LUSDinSP_0 = await stabilityPool.getTotalLUSDDeposits()
 
@@ -678,7 +678,7 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice('9990000000000000000')
     const price_1 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 9.99
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
@@ -706,7 +706,7 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice(dec(3, 18))
     const price_2 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 3
     -> Expect 0.5% of collaterall to be sent to liquidator, as gas compensation */
 
@@ -742,8 +742,8 @@ contract('Gas compensation tests', async accounts => {
     await openTrove({ ICR: toBN(dec(80, 18)), extraLUSDAmount: dec(1, 23), extraParams: { from: erin } })
 
     // D, E each provide 10000 LUSD to SP
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: dennis })
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: erin })
+    await stabilityPool.provideToSP(dec(1, 23), { from: dennis })
+    await stabilityPool.provideToSP(dec(1, 23), { from: erin })
 
     const LUSDinSP_0 = await stabilityPool.getTotalLUSDDeposits()
     const ETHinSP_0 = await stabilityPool.getETH()
@@ -752,12 +752,12 @@ contract('Gas compensation tests', async accounts => {
     await priceFeed.setPrice('199999000000000000000')
     const price_1 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 199.999
     Alice coll = 1 ETH. Value: $199.999
     0.5% of coll  = 0.05 ETH. Value: (0.05 * 199.999) = $9.99995
     Minimum comp = $10 = 0.05000025000125001 ETH.
-    -> Expect 0.05000025000125001 ETH sent to liquidator, 
+    -> Expect 0.05000025000125001 ETH sent to liquidator,
     and (1 - 0.05000025000125001) = 0.94999974999875 ETH remainder liquidated */
 
     // Check collateral value in USD is > $10
@@ -791,12 +791,12 @@ contract('Gas compensation tests', async accounts => {
       await priceFeed.setPrice(dec(15, 18))
       const price_2 = await priceFeed.getPrice()
 
-    /* 
+    /*
     ETH:USD price = 15
     Bob coll = 15 ETH. Value: $165
     0.5% of coll  = 0.75 ETH. Value: (0.75 * 11) = $8.25
     Minimum comp = $10 =  0.66666...ETH.
-    -> Expect 0.666666666666666666 ETH sent to liquidator, 
+    -> Expect 0.666666666666666666 ETH sent to liquidator,
     and (15 - 0.666666666666666666) ETH remainder liquidated */
 
     // Check collateral value in USD is > $10
@@ -838,8 +838,8 @@ contract('Gas compensation tests', async accounts => {
     await openTrove({ ICR: toBN(dec(4, 18)), extraLUSDAmount: dec(1, 23), extraParams: { from: erin } })
 
     // D, E each provide 10000 LUSD to SP
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: dennis })
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: erin })
+    await stabilityPool.provideToSP(dec(1, 23), { from: dennis })
+    await stabilityPool.provideToSP(dec(1, 23), { from: erin })
 
     const LUSDinSP_0 = await stabilityPool.getTotalLUSDDeposits()
     const ETHinSP_0 = await stabilityPool.getETH()
@@ -859,7 +859,7 @@ contract('Gas compensation tests', async accounts => {
 
     // Liquidate A (use 0 gas price to easily check the amount the compensation amount the liquidator receives)
     const liquidationTxA = await troveManager.liquidate(alice, { from: liquidator, gasPrice: 0 })
-    
+
     const expectedGasComp_A = _0pt5percent_aliceColl
     const expectedLiquidatedColl_A = aliceColl.sub(_0pt5percent_aliceColl)
     const expectedLiquidatedDebt_A =  aliceDebt
@@ -871,12 +871,12 @@ contract('Gas compensation tests', async accounts => {
     assert.isAtMost(th.getDifference(expectedGasComp_A, loggedGasComp_A), 1000)
 
 
-    /* 
+    /*
    ETH:USD price = 200
    Bob coll = 37.5 ETH. Value: $7500
    0.5% of coll  = 0.1875 ETH. Value: (0.1875 * 200) = $37.5
    Minimum comp = $10 = 0.05 ETH.
-   -> Expect 0.1875 ETH sent to liquidator, 
+   -> Expect 0.1875 ETH sent to liquidator,
    and (37.5 - 0.1875 ETH) ETH remainder liquidated */
 
     // Check value of 0.5% of collateral in USD is > $10
@@ -891,7 +891,7 @@ contract('Gas compensation tests', async accounts => {
 
     // Liquidate B (use 0 gas price to easily check the amount the compensation amount the liquidator receives)
     const liquidationTxB = await troveManager.liquidate(bob, { from: liquidator, gasPrice: 0 })
-    
+
     const expectedGasComp_B = _0pt5percent_bobColl
     const expectedLiquidatedColl_B = bobColl.sub(_0pt5percent_bobColl)
     const expectedLiquidatedDebt_B =  bobDebt
@@ -919,16 +919,16 @@ contract('Gas compensation tests', async accounts => {
     await openTrove({ ICR: toBN(dec(10, 18)), extraLUSDAmount: dec(1, 23), extraParams: { from: flyn } })
 
     // D, E each provide 10000 LUSD to SP
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: erin })
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: flyn })
+    await stabilityPool.provideToSP(dec(1, 23), { from: erin })
+    await stabilityPool.provideToSP(dec(1, 23), { from: flyn })
 
     const LUSDinSP_0 = await stabilityPool.getTotalLUSDDeposits()
 
-    // price drops to 200 
+    // price drops to 200
     await priceFeed.setPrice(dec(200, 18))
     const price = await priceFeed.getPrice()
 
-    // Check not in Recovery Mode 
+    // Check not in Recovery Mode
     assert.isFalse(await th.checkRecoveryMode(contracts))
 
     // Check A, B, C, D have ICR < MCR
@@ -957,7 +957,7 @@ contract('Gas compensation tests', async accounts => {
     const collGasCompensation = await troveManagerTester.getCollGasCompensation(price)
     assert.equal(collGasCompensation, dec(1, 18))
 
-    /* Expect total gas compensation = 
+    /* Expect total gas compensation =
     0.5% of [A_coll + B_coll + C_coll + D_coll]
     */
     const expectedGasComp = _0pt5percent_aliceColl
@@ -965,7 +965,7 @@ contract('Gas compensation tests', async accounts => {
       .add(_0pt5percent_carolColl)
       .add(_0pt5percent_dennisColl)
 
-    /* Expect liquidated coll = 
+    /* Expect liquidated coll =
     0.95% of [A_coll + B_coll + C_coll + D_coll]
     */
     const expectedLiquidatedColl = aliceColl.sub(_0pt5percent_aliceColl)
@@ -1006,11 +1006,11 @@ contract('Gas compensation tests', async accounts => {
 
     const LUSDinDefaultPool_0 = await defaultPool.getLUSDDebt()
 
-    // price drops to 200 
+    // price drops to 200
     await priceFeed.setPrice(dec(200, 18))
     const price = await priceFeed.getPrice()
 
-    // Check not in Recovery Mode 
+    // Check not in Recovery Mode
     assert.isFalse(await th.checkRecoveryMode(contracts))
 
     // Check A, B, C, D have ICR < MCR
@@ -1034,7 +1034,7 @@ contract('Gas compensation tests', async accounts => {
     const collGasCompensation = await troveManagerTester.getCollGasCompensation(price)
     assert.equal(collGasCompensation, dec(1 , 18))
 
-    /* Expect total gas compensation = 
+    /* Expect total gas compensation =
        0.5% of [A_coll + B_coll + C_coll + D_coll]
     */
     const expectedGasComp = _0pt5percent_aliceColl
@@ -1042,7 +1042,7 @@ contract('Gas compensation tests', async accounts => {
           .add(_0pt5percent_carolColl)
           .add(_0pt5percent_dennisColl)
 
-    /* Expect liquidated coll = 
+    /* Expect liquidated coll =
     0.95% of [A_coll + B_coll + C_coll + D_coll]
     */
     const expectedLiquidatedColl = aliceColl.sub(_0pt5percent_aliceColl)
@@ -1084,16 +1084,16 @@ contract('Gas compensation tests', async accounts => {
     await openTrove({ ICR: toBN(dec(10, 18)), extraLUSDAmount: dec(1, 23), extraParams: { from: flyn } })
 
     // D, E each provide 10000 LUSD to SP
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: erin })
-    await stabilityPool.provideToSP(dec(1, 23), ZERO_ADDRESS, { from: flyn })
+    await stabilityPool.provideToSP(dec(1, 23), { from: erin })
+    await stabilityPool.provideToSP(dec(1, 23), { from: flyn })
 
     const LUSDinSP_0 = await stabilityPool.getTotalLUSDDeposits()
 
-    // price drops to 200 
+    // price drops to 200
     await priceFeed.setPrice(dec(200, 18))
     const price = await priceFeed.getPrice()
 
-    // Check not in Recovery Mode 
+    // Check not in Recovery Mode
     assert.isFalse(await th.checkRecoveryMode(contracts))
 
     // Check A, B, C, D have ICR < MCR
@@ -1122,7 +1122,7 @@ contract('Gas compensation tests', async accounts => {
     const collGasCompensation = await troveManagerTester.getCollGasCompensation(price)
     assert.equal(collGasCompensation, dec(1, 18))
 
-    /* Expect total gas compensation = 
+    /* Expect total gas compensation =
     0.5% of [A_coll + B_coll + C_coll + D_coll]
     */
     const expectedGasComp = _0pt5percent_aliceColl
@@ -1130,7 +1130,7 @@ contract('Gas compensation tests', async accounts => {
       .add(_0pt5percent_carolColl)
       .add(_0pt5percent_dennisColl)
 
-    /* Expect liquidated coll = 
+    /* Expect liquidated coll =
        0.95% of [A_coll + B_coll + C_coll + D_coll]
     */
     const expectedLiquidatedColl = aliceColl.sub(_0pt5percent_aliceColl)
@@ -1146,7 +1146,7 @@ contract('Gas compensation tests', async accounts => {
 
     // Get data from the liquidation event logs
     const [loggedDebt, loggedColl, loggedGasComp, ] = th.getEmittedLiquidationValues(liquidationTxData)
-    
+
     assert.isAtMost(th.getDifference(expectedLiquidatedDebt, loggedDebt), 1000)
     assert.isAtMost(th.getDifference(expectedLiquidatedColl, loggedColl), 1000)
     assert.isAtMost(th.getDifference(expectedGasComp, loggedGasComp), 1000)
@@ -1167,11 +1167,11 @@ contract('Gas compensation tests', async accounts => {
 
     const LUSDinDefaultPool_0 = await defaultPool.getLUSDDebt()
 
-    // price drops to 200 
+    // price drops to 200
     await priceFeed.setPrice(dec(200, 18))
     const price = await priceFeed.getPrice()
 
-    // Check not in Recovery Mode 
+    // Check not in Recovery Mode
     assert.isFalse(await th.checkRecoveryMode(contracts))
 
     // Check A, B, C, D have ICR < MCR
@@ -1191,7 +1191,7 @@ contract('Gas compensation tests', async accounts => {
     const _0pt5percent_carolColl = carolColl.div(web3.utils.toBN('200'))
     const _0pt5percent_dennisColl = dennisColl.div(web3.utils.toBN('200'))
 
-    /* Expect total gas compensation = 
+    /* Expect total gas compensation =
     0.5% of [A_coll + B_coll + C_coll + D_coll]
     */
     const expectedGasComp = _0pt5percent_aliceColl
@@ -1199,7 +1199,7 @@ contract('Gas compensation tests', async accounts => {
       .add(_0pt5percent_carolColl)
       .add(_0pt5percent_dennisColl).toString()
 
-    /* Expect liquidated coll = 
+    /* Expect liquidated coll =
     0.95% of [A_coll + B_coll + C_coll + D_coll]
     */
     const expectedLiquidatedColl = aliceColl.sub(_0pt5percent_aliceColl)
@@ -1295,7 +1295,7 @@ contract('Gas compensation tests', async accounts => {
 
     const initialPrice = await priceFeed.getPrice()
 
-    // Vary price 
+    // Vary price
     let price = 1
     while (price < 300) {
 
@@ -1374,4 +1374,3 @@ contract('Gas compensation tests', async accounts => {
     }
   })
 })
-

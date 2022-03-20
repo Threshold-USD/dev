@@ -282,7 +282,7 @@ class StabilityPoolProxy extends Proxy {
   }
 
   async provideToSP(...params) {
-    return this.forwardFunction(params, 'provideToSP(uint256,address)')
+    return this.forwardFunction(params, 'provideToSP(uint256)')
   }
 
   async getCompoundedLUSDDeposit(user) {

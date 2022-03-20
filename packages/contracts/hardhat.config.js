@@ -97,7 +97,10 @@ module.exports = {
     etherscan: {
         apiKey: getSecret("ETHERSCAN_API_KEY")
     },
-    mocha: { timeout: 12000000 },
+    mocha: {
+      timeout: 12000000,
+      parallel: true
+    },
     rpc: {
         host: "localhost",
         port: 8545
