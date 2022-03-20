@@ -18,8 +18,6 @@ export interface LiquityStoreBaseState
 |  --- | --- | --- |
 |  [accountBalance](./lib-base.liquitystorebasestate.accountbalance.md) | [Decimal](./lib-base.decimal.md) | User's native currency balance (e.g. Ether). |
 |  [collateralSurplusBalance](./lib-base.liquitystorebasestate.collateralsurplusbalance.md) | [Decimal](./lib-base.decimal.md) | Amount of leftover collateral available for withdrawal to the user. |
-|  [liquidityMiningLQTYReward](./lib-base.liquitystorebasestate.liquiditymininglqtyreward.md) | [Decimal](./lib-base.decimal.md) | Amount of LQTY the user has earned through mining liquidity. |
-|  [liquidityMiningStake](./lib-base.liquitystorebasestate.liquidityminingstake.md) | [Decimal](./lib-base.decimal.md) | Amount of Uniswap ETH/LUSD LP tokens the user has staked in liquidity mining. |
 |  [lqtyBalance](./lib-base.liquitystorebasestate.lqtybalance.md) | [Decimal](./lib-base.decimal.md) | User's LQTY token balance. |
 |  [lqtyStake](./lib-base.liquitystorebasestate.lqtystake.md) | [LQTYStake](./lib-base.lqtystake.md) | User's LQTY stake. |
 |  [lusdBalance](./lib-base.liquitystorebasestate.lusdbalance.md) | [Decimal](./lib-base.decimal.md) | User's LUSD token balance. |
@@ -30,8 +28,5 @@ export interface LiquityStoreBaseState
 |  [total](./lib-base.liquitystorebasestate.total.md) | [Trove](./lib-base.trove.md) | Total collateral and debt in the Liquity system. |
 |  [totalRedistributed](./lib-base.liquitystorebasestate.totalredistributed.md) | [Trove](./lib-base.trove.md) | Total collateral and debt per stake that has been liquidated through redistribution. |
 |  [totalStakedLQTY](./lib-base.liquitystorebasestate.totalstakedlqty.md) | [Decimal](./lib-base.decimal.md) | Total amount of LQTY currently staked. |
-|  [totalStakedUniTokens](./lib-base.liquitystorebasestate.totalstakedunitokens.md) | [Decimal](./lib-base.decimal.md) | Total amount of Uniswap ETH/LUSD LP tokens currently staked in liquidity mining. |
 |  [troveBeforeRedistribution](./lib-base.liquitystorebasestate.trovebeforeredistribution.md) | [TroveWithPendingRedistribution](./lib-base.trovewithpendingredistribution.md) | User's Trove in its state after the last direct modification. |
-|  [uniTokenAllowance](./lib-base.liquitystorebasestate.unitokenallowance.md) | [Decimal](./lib-base.decimal.md) | The liquidity mining contract's allowance of user's Uniswap ETH/LUSD LP tokens. |
-|  [uniTokenBalance](./lib-base.liquitystorebasestate.unitokenbalance.md) | [Decimal](./lib-base.decimal.md) | User's Uniswap ETH/LUSD LP token balance. |
 

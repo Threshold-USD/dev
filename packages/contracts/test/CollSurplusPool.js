@@ -16,7 +16,7 @@ contract('CollSurplusPool', async accounts => {
     owner,
     A, B, C, D, E] = accounts;
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
+  const [bountyAddress, multisig] = accounts.slice(998, 1000)
 
   let borrowerOperations
   let priceFeed
@@ -35,7 +35,7 @@ contract('CollSurplusPool', async accounts => {
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
 
     priceFeed = contracts.priceFeedTestnet
     collSurplusPool = contracts.collSurplusPool

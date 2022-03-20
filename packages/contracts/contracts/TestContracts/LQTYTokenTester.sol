@@ -10,7 +10,6 @@ contract LQTYTokenTester is LQTYToken {
         address _lqtyStakingAddress,
         address _lockupFactoryAddress,
         address _bountyAddress,
-        address _lpRewardsAddress,
         address _multisigAddress
     )
         public
@@ -19,7 +18,6 @@ contract LQTYTokenTester is LQTYToken {
         _lqtyStakingAddress,
         _lockupFactoryAddress,
         _bountyAddress,
-        _lpRewardsAddress,
         _multisigAddress
     )
     {}

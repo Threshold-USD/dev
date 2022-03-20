@@ -136,7 +136,7 @@ class MainnetDeploymentHelper {
     return coreContracts
   }
 
-  async deployLQTYContractsMainnet(bountyAddress, lpRewardsAddress, multisigAddress, deploymentState) {
+  async deployLQTYContractsMainnet(bountyAddress, multisigAddress, deploymentState) {
     const lqtyStakingFactory = await this.getFactory("LQTYStaking")
     const lockupContractFactory_Factory = await this.getFactory("LockupContractFactory")
     const lqtyTokenFactory = await this.getFactory("LQTYToken")
@@ -149,7 +149,6 @@ class MainnetDeploymentHelper {
       lqtyStaking.address,
       lockupContractFactory.address,
       bountyAddress,
-      lpRewardsAddress,
       multisigAddress
     ]
     const lqtyToken = await this.loadOrDeploy(
@@ -173,19 +172,6 @@ class MainnetDeploymentHelper {
       lqtyToken
     }
     return LQTYContracts
-  }
-
-  async deployUnipoolMainnet(deploymentState) {
-    const unipoolFactory = await this.getFactory("Unipool")
-    const unipool = await this.loadOrDeploy(unipoolFactory, 'unipool', deploymentState)
-
-    if (!this.configParams.ETHERSCAN_BASE_URL) {
-      console.log('No Etherscan Url defined, skipping verification')
-    } else {
-      await this.verifyContract('unipool', deploymentState)
-    }
-
-    return unipool
   }
 
   async deployMultiTroveGetterMainnet(liquityCore, deploymentState) {
@@ -328,12 +314,6 @@ class MainnetDeploymentHelper {
 	{gasPrice}
       ))
 
-  }
-
-  async connectUnipoolMainnet(uniPool, LQTYContracts, LUSDWETHPairAddr, duration) {
-    const gasPrice = this.configParams.GAS_PRICE
-    await this.isOwnershipRenounced(uniPool) ||
-      await this.sendAndWaitForTransaction(uniPool.setParams(LQTYContracts.lqtyToken.address, LUSDWETHPairAddr, duration, {gasPrice}))
   }
 
   // --- Verify on Ethrescan ---

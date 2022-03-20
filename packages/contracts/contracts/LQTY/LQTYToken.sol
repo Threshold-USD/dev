@@ -86,8 +86,6 @@ contract LQTYToken is CheckContract, ILQTYToken {
 
     address public immutable lqtyStakingAddress;
 
-    uint internal immutable lpRewardsEntitlement;
-
     ILockupContractFactory public immutable lockupContractFactory;
 
     // --- Events ---
@@ -102,7 +100,6 @@ contract LQTYToken is CheckContract, ILQTYToken {
         address _lqtyStakingAddress,
         address _lockupFactoryAddress,
         address _bountyAddress,
-        address _lpRewardsAddress,
         address _multisigAddress
     )
         public
@@ -129,14 +126,9 @@ contract LQTYToken is CheckContract, ILQTYToken {
         uint bountyEntitlement = _1_MILLION.mul(2); // Allocate 2 million for bounties/hackathons
         _mint(_bountyAddress, bountyEntitlement);
 
-        uint _lpRewardsEntitlement = _1_MILLION.mul(4).div(3);  // Allocate 1.33 million for LP rewards
-        lpRewardsEntitlement = _lpRewardsEntitlement;
-        _mint(_lpRewardsAddress, _lpRewardsEntitlement);
-
         // Allocate the remainder to the LQTY Multisig: (100 - 2 - 32 - 1.33) million = 64.66 million
         uint multisigEntitlement = _1_MILLION.mul(100)
-            .sub(bountyEntitlement)
-            .sub(_lpRewardsEntitlement);
+            .sub(bountyEntitlement);
 
         _mint(_multisigAddress, multisigEntitlement);
     }
@@ -153,10 +145,6 @@ contract LQTYToken is CheckContract, ILQTYToken {
 
     function getDeploymentStartTime() external view override returns (uint256) {
         return deploymentStartTime;
-    }
-
-    function getLpRewardsEntitlement() external view override returns (uint256) {
-        return lpRewardsEntitlement;
     }
 
     function transfer(address recipient, uint256 amount) external override returns (bool) {

@@ -18,11 +18,6 @@
       },
       {
         "internalType": "address",
-        "name": "_lpRewardsAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "_multisigAddress",
         "type": "address"
       }
@@ -239,19 +234,6 @@
   {
     "inputs": [],
     "name": "getDeploymentStartTime",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getLpRewardsEntitlement",
     "outputs": [
       {
         "internalType": "uint256",

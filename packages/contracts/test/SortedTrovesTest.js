@@ -12,24 +12,24 @@ const toBN = th.toBN
 const mv = testHelpers.MoneyValues
 
 contract('SortedTroves', async accounts => {
-  
+
   const assertSortedListIsOrdered = async (contracts) => {
     const price = await contracts.priceFeedTestnet.getPrice()
 
     let trove = await contracts.sortedTroves.getLast()
     while (trove !== (await contracts.sortedTroves.getFirst())) {
-      
+
       // Get the adjacent upper trove ("prev" moves up the list, from lower ICR -> higher ICR)
       const prevTrove = await contracts.sortedTroves.getPrev(trove)
-     
+
       const troveICR = await contracts.troveManager.getCurrentICR(trove, price)
       const prevTroveICR = await contracts.troveManager.getCurrentICR(prevTrove, price)
-      
+
       assert.isTrue(prevTroveICR.gte(troveICR))
 
       const troveNICR = await contracts.troveManager.getNominalICR(trove)
       const prevTroveNICR = await contracts.troveManager.getNominalICR(prevTrove)
-      
+
       assert.isTrue(prevTroveNICR.gte(troveNICR))
 
       // climb the list
@@ -49,7 +49,7 @@ contract('SortedTroves', async accounts => {
   let borrowerOperations
   let lusdToken
 
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
+  const [bountyAddress, multisig] = accounts.slice(998, 1000)
 
   let contracts
 
@@ -65,7 +65,7 @@ contract('SortedTroves', async accounts => {
         contracts.stabilityPool.address,
         contracts.borrowerOperations.address
       )
-      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
 
       priceFeed = contracts.priceFeedTestnet
       sortedTroves = contracts.sortedTroves
@@ -204,7 +204,7 @@ contract('SortedTroves', async accounts => {
 
     // --- findInsertPosition ---
 
-    it("Finds the correct insert position given two addresses that loosely bound the correct position", async () => { 
+    it("Finds the correct insert position given two addresses that loosely bound the correct position", async () => {
       await priceFeed.setPrice(dec(100, 18))
 
       // NICR sorted in descending order
@@ -234,7 +234,7 @@ contract('SortedTroves', async accounts => {
       assert.equal(hints2[1], C )
     })
 
-    //--- Ordering --- 
+    //--- Ordering ---
     // infinte ICR (zero collateral) is not possible anymore, therefore, skipping
     it.skip("stays ordered after troves with 'infinite' ICR receive a redistribution", async () => {
 
@@ -254,7 +254,7 @@ contract('SortedTroves', async accounts => {
       await borrowerOperations.openTrove(th._100pct, dec(5, 21), J, J, { from: J, value: dec(1345, 'ether') })
 
       const price_1 = await priceFeed.getPrice()
-      
+
       // Check troves are ordered
       await assertSortedListIsOrdered(contracts)
 

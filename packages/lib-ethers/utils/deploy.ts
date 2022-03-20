@@ -11,8 +11,6 @@ import {
   _connectToContracts
 } from "../src/contracts";
 
-import { createUniswapV2Pair } from "./UniswapV2Factory";
-
 let silent = true;
 
 export const log = (...args: unknown[]): void => {
@@ -99,8 +97,7 @@ const deployContracts = async (
     }),
     gasPool: await deployContract(deployer, getContractFactory, "GasPool", {
       ...overrides
-    }),
-    unipool: await deployContract(deployer, getContractFactory, "Unipool", { ...overrides })
+    })
   };
 
   return [
@@ -123,7 +120,6 @@ const deployContracts = async (
         addresses.lqtyStaking,
         addresses.lockupContractFactory,
         Wallet.createRandom().address, // _bountyAddress (TODO: parameterize this)
-        addresses.unipool, // _lpRewardsAddress
         Wallet.createRandom().address, // _multisigAddress (TODO: parameterize this)
         { ...overrides }
       ),
@@ -165,9 +161,7 @@ const connectContracts = async (
     priceFeed,
     sortedTroves,
     stabilityPool,
-    gasPool,
-    unipool,
-    uniToken
+    gasPool
   }: _LiquityContracts,
   deployer: Signer,
   overrides?: Overrides
@@ -270,12 +264,6 @@ const connectContracts = async (
       lockupContractFactory.setLQTYTokenAddress(lqtyToken.address, {
         ...overrides,
         nonce
-      }),
-
-    nonce =>
-      unipool.setParams(lqtyToken.address, uniToken.address, 2 * 30 * 24 * 60 * 60, {
-        ...overrides,
-        nonce
       })
   ];
 
@@ -284,22 +272,6 @@ const connectContracts = async (
   let i = 0;
   await Promise.all(txs.map(tx => tx.wait().then(() => log(`Connected ${++i}`))));
 };
-
-const deployMockUniToken = (
-  deployer: Signer,
-  getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
-  overrides?: Overrides
-) =>
-  deployContract(
-    deployer,
-    getContractFactory,
-    "ERC20Mock",
-    "Mock Uniswap V2",
-    "UNI-V2",
-    Wallet.createRandom().address, // initialAccount
-    0, // initialBalance
-    { ...overrides }
-  );
 
 export const deployAndSetupContracts = async (
   deployer: Signer,
@@ -321,10 +293,7 @@ export const deployAndSetupContracts = async (
     version: "unknown",
     deploymentDate: new Date().getTime(),
     bootstrapPeriod: 0,
-    totalStabilityPoolLQTYReward: "0",
-    liquidityMiningLQTYRewardRate: "0",
     _priceFeedIsTestnet,
-    _uniTokenIsMock: !wethAddress,
     _isDev,
 
     ...(await deployContracts(deployer, getContractFactory, _priceFeedIsTestnet, overrides).then(
@@ -332,11 +301,7 @@ export const deployAndSetupContracts = async (
         startBlock,
 
         addresses: {
-          ...addresses,
-
-          uniToken: await (wethAddress
-            ? createUniswapV2Pair(deployer, wethAddress, addresses.lusdToken, overrides)
-            : deployMockUniToken(deployer, getContractFactory, overrides))
+          ...addresses
         }
       })
     ))
@@ -349,14 +314,10 @@ export const deployAndSetupContracts = async (
 
   const lqtyTokenDeploymentTime = await contracts.lqtyToken.getDeploymentStartTime();
   const bootstrapPeriod = await contracts.troveManager.BOOTSTRAP_PERIOD();
-  const liquidityMiningLQTYRewardRate = await contracts.unipool.rewardRate();
 
   return {
     ...deployment,
     deploymentDate: lqtyTokenDeploymentTime.toNumber() * 1000,
-    bootstrapPeriod: bootstrapPeriod.toNumber(),
-    liquidityMiningLQTYRewardRate: `${Decimal.fromBigNumberString(
-      liquidityMiningLQTYRewardRate.toHexString()
-    )}`
+    bootstrapPeriod: bootstrapPeriod.toNumber()
   };
 };

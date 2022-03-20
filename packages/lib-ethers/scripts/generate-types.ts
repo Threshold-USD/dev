@@ -7,7 +7,6 @@ import ActivePool from "../../contracts/artifacts/contracts/ActivePool.sol/Activ
 import BorrowerOperations from "../../contracts/artifacts/contracts/BorrowerOperations.sol/BorrowerOperations.json";
 import CollSurplusPool from "../../contracts/artifacts/contracts/CollSurplusPool.sol/CollSurplusPool.json";
 import DefaultPool from "../../contracts/artifacts/contracts/DefaultPool.sol/DefaultPool.json";
-import ERC20Mock from "../../contracts/artifacts/contracts/LPRewards/TestContracts/ERC20Mock.sol/ERC20Mock.json";
 import GasPool from "../../contracts/artifacts/contracts/GasPool.sol/GasPool.json";
 import HintHelpers from "../../contracts/artifacts/contracts/HintHelpers.sol/HintHelpers.json";
 import IERC20 from "../../contracts/artifacts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json";
@@ -21,7 +20,6 @@ import PriceFeedTestnet from "../../contracts/artifacts/contracts/TestContracts/
 import SortedTroves from "../../contracts/artifacts/contracts/SortedTroves.sol/SortedTroves.json";
 import StabilityPool from "../../contracts/artifacts/contracts/StabilityPool.sol/StabilityPool.json";
 import TroveManager from "../../contracts/artifacts/contracts/TroveManager.sol/TroveManager.json";
-import Unipool from "../../contracts/artifacts/contracts/LPRewards/Unipool.sol/Unipool.json";
 
 const getTupleType = (components: ParamType[], flexible: boolean) => {
   if (components.every(component => component.name)) {
@@ -146,7 +144,6 @@ const contractArtifacts = [
   BorrowerOperations,
   CollSurplusPool,
   DefaultPool,
-  ERC20Mock,
   GasPool,
   HintHelpers,
   IERC20,
@@ -159,8 +156,7 @@ const contractArtifacts = [
   PriceFeedTestnet,
   SortedTroves,
   StabilityPool,
-  TroveManager,
-  Unipool
+  TroveManager
 ];
 
 const contracts = contractArtifacts.map(({ contractName, abi }) => ({

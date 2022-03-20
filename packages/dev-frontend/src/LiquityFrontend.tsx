@@ -16,14 +16,12 @@ import { HamburgerMenu } from "./components/HamburgerMenu";
 import { Header } from "./components/Header";
 
 import { PageSwitcher } from "./pages/PageSwitcher";
-import { Farm } from "./pages/Farm";
 import { RiskyTrovesPage } from "./pages/RiskyTrovesPage";
 import { RedemptionPage } from "./pages/RedemptionPage";
 
 import { TroveViewProvider } from "./components/Trove/context/TroveViewProvider";
 import { StabilityViewProvider } from "./components/Stability/context/StabilityViewProvider";
 import { StakingViewProvider } from "./components/Staking/context/StakingViewProvider";
-import { FarmViewProvider } from "./components/Farm/context/FarmViewProvider";
 
 type LiquityFrontendProps = {
   loader?: React.ReactNode;
@@ -68,9 +66,6 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                       <Route path="/" exact>
                         <PageSwitcher />
                       </Route>
-                      <Route path="/farm">
-                        <Farm />
-                      </Route>
                       <Route path="/risky-troves">
                         <RiskyTrovesPage />
                       </Route>
@@ -80,7 +75,6 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                     </Switch>
                   </Container>
                 </Flex>
-              </FarmViewProvider>
             </StakingViewProvider>
           </StabilityViewProvider>
         </TroveViewProvider>

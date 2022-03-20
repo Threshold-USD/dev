@@ -19,7 +19,6 @@ const ZERO_ADDRESS = th.ZERO_ADDRESS
 contract('Gas cost tests', async accounts => {
   const [owner] = accounts;
   const bountyAddress = accounts[998]
-  const lpRewardsAddress = accounts[999]
   const multisig = accounts[1000]
 
   let priceFeed
@@ -37,7 +36,7 @@ contract('Gas cost tests', async accounts => {
 
   beforeEach(async () => {
     contracts = await deploymentHelper.deployLiquityCore()
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
 
     priceFeed = contracts.priceFeedTestnet
     lusdToken = contracts.lusdToken

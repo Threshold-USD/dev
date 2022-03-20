@@ -15,8 +15,6 @@ const LQTYStaking = artifacts.require("./LQTYStaking.sol")
 const LQTYToken = artifacts.require("./LQTYToken.sol")
 const LockupContractFactory = artifacts.require("./LockupContractFactory.sol")
 
-const Unipool =  artifacts.require("./Unipool.sol")
-
 const LQTYTokenTester = artifacts.require("./LQTYTokenTester.sol")
 const StabilityPoolTester = artifacts.require("./StabilityPoolTester.sol")
 const ActivePoolTester = artifacts.require("./ActivePoolTester.sol")
@@ -70,15 +68,15 @@ class DeploymentHelper {
     }
   }
 
-  static async deployLQTYContracts(bountyAddress, lpRewardsAddress, multisigAddress) {
+  static async deployLQTYContracts(bountyAddress, multisigAddress) {
     const cmdLineArgs = process.argv
     const frameworkPath = cmdLineArgs[1]
     // console.log(`Framework used:  ${frameworkPath}`)
 
     if (frameworkPath.includes("hardhat")) {
-      return this.deployLQTYContractsHardhat(bountyAddress, lpRewardsAddress, multisigAddress)
+      return this.deployLQTYContractsHardhat(bountyAddress, multisigAddress)
     } else if (frameworkPath.includes("truffle")) {
-      return this.deployLQTYContractsTruffle(bountyAddress, lpRewardsAddress, multisigAddress)
+      return this.deployLQTYContractsTruffle(bountyAddress, multisigAddress)
     }
   }
 
@@ -154,7 +152,7 @@ class DeploymentHelper {
     return testerContracts
   }
 
-  static async deployLQTYContractsHardhat(bountyAddress, lpRewardsAddress, multisigAddress) {
+  static async deployLQTYContractsHardhat(bountyAddress, multisigAddress) {
     const lqtyStaking = await LQTYStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
 
@@ -166,7 +164,6 @@ class DeploymentHelper {
       lqtyStaking.address,
       lockupContractFactory.address,
       bountyAddress,
-      lpRewardsAddress,
       multisigAddress
     )
     LQTYToken.setAsDeployed(lqtyToken)
@@ -179,7 +176,7 @@ class DeploymentHelper {
     return LQTYContracts
   }
 
-  static async deployLQTYTesterContractsHardhat(bountyAddress, lpRewardsAddress, multisigAddress) {
+  static async deployLQTYTesterContractsHardhat(bountyAddress, multisigAddress) {
     const lqtyStaking = await LQTYStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
 
@@ -191,7 +188,6 @@ class DeploymentHelper {
       lqtyStaking.address,
       lockupContractFactory.address,
       bountyAddress,
-      lpRewardsAddress,
       multisigAddress
     )
     LQTYTokenTester.setAsDeployed(lqtyToken)
@@ -238,7 +234,7 @@ class DeploymentHelper {
     return coreContracts
   }
 
-  static async deployLQTYContractsTruffle(bountyAddress, lpRewardsAddress, multisigAddress) {
+  static async deployLQTYContractsTruffle(bountyAddress, multisigAddress) {
     const lqtyStaking = await lqtyStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
 
@@ -248,7 +244,6 @@ class DeploymentHelper {
       lqtyStaking.address,
       lockupContractFactory.address,
       bountyAddress,
-      lpRewardsAddress,
       multisigAddress
     )
 
@@ -403,8 +398,5 @@ class DeploymentHelper {
 
   }
 
-  static async connectUnipool(uniPool, LQTYContracts, uniswapPairAddr, duration) {
-    await uniPool.setParams(LQTYContracts.lqtyToken.address, uniswapPairAddr, duration)
-  }
 }
 module.exports = DeploymentHelper

@@ -9,7 +9,7 @@ const dec = th.dec
 
 contract('Deploying the LQTY contracts: LCF, CI, LQTYStaking, and LQTYToken ', async accounts => {
   const [liquityAG, A, B] = accounts;
-  const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
+  const [bountyAddress, multisig] = accounts.slice(998, 1000)
 
   let LQTYContracts
 
@@ -20,7 +20,7 @@ contract('Deploying the LQTY contracts: LCF, CI, LQTYStaking, and LQTYToken ', a
 
   beforeEach(async () => {
     // Deploy all contracts from the first account
-    LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, lpRewardsAddress, multisig)
+    LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
     await deploymentHelper.connectLQTYContracts(LQTYContracts)
 
     lqtyStaking = LQTYContracts.lqtyStaking
@@ -68,13 +68,6 @@ contract('Deploying the LQTY contracts: LCF, CI, LQTYStaking, and LQTYToken ', a
       assert.equal(bountyAddressBal, _2Million)
     })
 
-    it("Mints the correct LQTY amount to the lpRewardsAddress EOA: 1.33 million", async () => {
-      const lpRewardsAddressBal = await lqtyToken.balanceOf(lpRewardsAddress)
-      // 1.3 million as 18-digit decimal
-      const _1pt33Million = "1".concat("3".repeat(24))
-
-      assert.equal(lpRewardsAddressBal, _1pt33Million)
-    })
   })
 
   describe('Connecting LQTYToken to LCF, CI and LQTYStaking', async accounts => {

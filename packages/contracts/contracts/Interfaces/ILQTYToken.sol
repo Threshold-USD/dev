@@ -18,5 +18,4 @@ interface ILQTYToken is IERC20, IERC2612 {
 
     function getDeploymentStartTime() external view returns (uint256);
 
-    function getLpRewardsEntitlement() external view returns (uint256);
 }
