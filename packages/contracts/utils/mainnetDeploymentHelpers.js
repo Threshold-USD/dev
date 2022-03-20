@@ -138,16 +138,13 @@ class MainnetDeploymentHelper {
 
   async deployLQTYContractsMainnet(bountyAddress, multisigAddress, deploymentState) {
     const lqtyStakingFactory = await this.getFactory("LQTYStaking")
-    const lockupContractFactory_Factory = await this.getFactory("LockupContractFactory")
     const lqtyTokenFactory = await this.getFactory("LQTYToken")
 
     const lqtyStaking = await this.loadOrDeploy(lqtyStakingFactory, 'lqtyStaking', deploymentState)
-    const lockupContractFactory = await this.loadOrDeploy(lockupContractFactory_Factory, 'lockupContractFactory', deploymentState)
 
     // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
     const lqtyTokenParams = [
       lqtyStaking.address,
-      lockupContractFactory.address,
       bountyAddress,
       multisigAddress
     ]
@@ -162,13 +159,11 @@ class MainnetDeploymentHelper {
       console.log('No Etherscan Url defined, skipping verification')
     } else {
       await this.verifyContract('lqtyStaking', deploymentState)
-      await this.verifyContract('lockupContractFactory', deploymentState)
       await this.verifyContract('lqtyToken', deploymentState, lqtyTokenParams)
     }
 
     const LQTYContracts = {
       lqtyStaking,
-      lockupContractFactory,
       lqtyToken
     }
     return LQTYContracts
@@ -293,13 +288,6 @@ class MainnetDeploymentHelper {
         contracts.troveManager.address,
 	{gasPrice}
       ))
-  }
-
-  async connectLQTYContractsMainnet(LQTYContracts) {
-    const gasPrice = this.configParams.GAS_PRICE
-    // Set LQTYToken address in LCF
-    await this.isOwnershipRenounced(LQTYContracts.lqtyStaking) ||
-      await this.sendAndWaitForTransaction(LQTYContracts.lockupContractFactory.setLQTYTokenAddress(LQTYContracts.lqtyToken.address, {gasPrice}))
   }
 
   async connectLQTYContractsToCoreMainnet(LQTYContracts, coreContracts) {

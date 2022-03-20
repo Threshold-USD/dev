@@ -8,7 +8,6 @@ contract LQTYTokenTester is LQTYToken {
     constructor
     (
         address _lqtyStakingAddress,
-        address _lockupFactoryAddress,
         address _bountyAddress,
         address _multisigAddress
     )
@@ -16,7 +15,6 @@ contract LQTYTokenTester is LQTYToken {
         LQTYToken
     (
         _lqtyStakingAddress,
-        _lockupFactoryAddress,
         _bountyAddress,
         _multisigAddress
     )

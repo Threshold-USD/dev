@@ -10,7 +10,6 @@ import DefaultPool from "../../contracts/artifacts/contracts/DefaultPool.sol/Def
 import GasPool from "../../contracts/artifacts/contracts/GasPool.sol/GasPool.json";
 import HintHelpers from "../../contracts/artifacts/contracts/HintHelpers.sol/HintHelpers.json";
 import IERC20 from "../../contracts/artifacts/@openzeppelin/contracts/token/ERC20/IERC20.sol/IERC20.json";
-import LockupContractFactory from "../../contracts/artifacts/contracts/LQTY/LockupContractFactory.sol/LockupContractFactory.json";
 import LUSDToken from "../../contracts/artifacts/contracts/LUSDToken.sol/LUSDToken.json";
 import LQTYStaking from "../../contracts/artifacts/contracts/LQTY/LQTYStaking.sol/LQTYStaking.json";
 import LQTYToken from "../../contracts/artifacts/contracts/LQTY/LQTYToken.sol/LQTYToken.json";
@@ -147,7 +146,6 @@ const contractArtifacts = [
   GasPool,
   HintHelpers,
   IERC20,
-  LockupContractFactory,
   LUSDToken,
   LQTYStaking,
   LQTYToken,

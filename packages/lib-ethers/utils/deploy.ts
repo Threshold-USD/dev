@@ -76,12 +76,6 @@ const deployContracts = async (
     }),
     defaultPool: await deployContract(deployer, getContractFactory, "DefaultPool", { ...overrides }),
     hintHelpers: await deployContract(deployer, getContractFactory, "HintHelpers", { ...overrides }),
-    lockupContractFactory: await deployContract(
-      deployer,
-      getContractFactory,
-      "LockupContractFactory",
-      { ...overrides }
-    ),
     lqtyStaking: await deployContract(deployer, getContractFactory, "LQTYStaking", { ...overrides }),
     priceFeed: await deployContract(
       deployer,
@@ -118,7 +112,6 @@ const deployContracts = async (
         getContractFactory,
         "LQTYToken",
         addresses.lqtyStaking,
-        addresses.lockupContractFactory,
         Wallet.createRandom().address, // _bountyAddress (TODO: parameterize this)
         Wallet.createRandom().address, // _multisigAddress (TODO: parameterize this)
         { ...overrides }
@@ -156,7 +149,6 @@ const connectContracts = async (
     defaultPool,
     lqtyToken,
     hintHelpers,
-    lockupContractFactory,
     lqtyStaking,
     priceFeed,
     sortedTroves,
@@ -258,13 +250,7 @@ const connectContracts = async (
         borrowerOperations.address,
         activePool.address,
         { ...overrides, nonce }
-      ),
-
-    nonce =>
-      lockupContractFactory.setLQTYTokenAddress(lqtyToken.address, {
-        ...overrides,
-        nonce
-      })
+      )
   ];
 
   const txs = await Promise.all(connections.map((connect, i) => connect(txCount + i)));

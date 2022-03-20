@@ -9,8 +9,8 @@ const arbitraryDeposit = () =>
     .tuple(fc.float(), fc.float(), fc.float(), fc.float())
     .filter(([initialLUSD, currentLUSD]) => initialLUSD >= currentLUSD)
     .map(
-      ([a, b, c, d]) =>
-        new StabilityDeposit(Decimal.from(a), Decimal.from(b), Decimal.from(c), Decimal.from(d))
+      ([a, b, c]) =>
+        new StabilityDeposit(Decimal.from(a), Decimal.from(b), Decimal.from(c))
     );
 
 const nonZeroDeposit = () => arbitraryDeposit().filter(({ currentLUSD }) => !currentLUSD.isZero);

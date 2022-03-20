@@ -507,8 +507,7 @@ describe("EthersLiquity", () => {
           troveWithVeryLowICR.collateral
             .mul(0.995) // -0.5% gas compensation
             .mulDiv(smallStabilityDeposit, troveWithVeryLowICR.debt)
-            .sub("0.000000000000000005"), // tiny imprecision
-          Decimal.ZERO
+            .sub("0.000000000000000005") // tiny imprecision
         )
       );
     });

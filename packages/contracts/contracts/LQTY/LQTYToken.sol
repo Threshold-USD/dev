@@ -5,7 +5,6 @@ pragma solidity 0.6.11;
 import "../Dependencies/CheckContract.sol";
 import "../Dependencies/SafeMath.sol";
 import "../Interfaces/ILQTYToken.sol";
-import "../Interfaces/ILockupContractFactory.sol";
 import "../Dependencies/console.sol";
 
 /*
@@ -86,32 +85,26 @@ contract LQTYToken is CheckContract, ILQTYToken {
 
     address public immutable lqtyStakingAddress;
 
-    ILockupContractFactory public immutable lockupContractFactory;
-
     // --- Events ---
 
     event LQTYStakingAddressSet(address _lqtyStakingAddress);
-    event LockupContractFactoryAddressSet(address _lockupContractFactoryAddress);
 
     // --- Functions ---
 
     constructor
     (
         address _lqtyStakingAddress,
-        address _lockupFactoryAddress,
         address _bountyAddress,
         address _multisigAddress
     )
         public
     {
         checkContract(_lqtyStakingAddress);
-        checkContract(_lockupFactoryAddress);
 
         multisigAddress = _multisigAddress;
         deploymentStartTime  = block.timestamp;
 
         lqtyStakingAddress = _lqtyStakingAddress;
-        lockupContractFactory = ILockupContractFactory(_lockupFactoryAddress);
 
         bytes32 hashedName = keccak256(bytes(_NAME));
         bytes32 hashedVersion = keccak256(bytes(_VERSION));
@@ -148,11 +141,6 @@ contract LQTYToken is CheckContract, ILQTYToken {
     }
 
     function transfer(address recipient, uint256 amount) external override returns (bool) {
-        // Restrict the multisig's transfers in first year
-        if (_callerIsMultisig() && _isFirstYear()) {
-            _requireRecipientIsRegisteredLC(recipient);
-        }
-
         _requireValidRecipient(recipient);
 
         // Otherwise, standard transfer functionality
@@ -297,11 +285,6 @@ contract LQTYToken is CheckContract, ILQTYToken {
             _recipient != lqtyStakingAddress,
             "LQTY: Cannot transfer tokens directly to the community issuance or staking contract"
         );
-    }
-
-    function _requireRecipientIsRegisteredLC(address _recipient) internal view {
-        require(lockupContractFactory.isRegisteredLockup(_recipient),
-        "LQTYToken: recipient must be a LockupContract registered in the Factory");
     }
 
     function _requireSenderIsNotMultisig(address _sender) internal view {

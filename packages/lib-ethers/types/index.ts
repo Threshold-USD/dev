@@ -283,33 +283,6 @@ export interface IERC20
   extractEvents(logs: Log[], name: "Transfer"): _TypedLogDescription<{ from: string; to: string; value: BigNumber }>[];
 }
 
-interface LockupContractFactoryCalls {
-  NAME(_overrides?: CallOverrides): Promise<string>;
-  SECONDS_IN_ONE_YEAR(_overrides?: CallOverrides): Promise<BigNumber>;
-  isOwner(_overrides?: CallOverrides): Promise<boolean>;
-  isRegisteredLockup(_contractAddress: string, _overrides?: CallOverrides): Promise<boolean>;
-  lockupContractToDeployer(arg0: string, _overrides?: CallOverrides): Promise<string>;
-  lqtyTokenAddress(_overrides?: CallOverrides): Promise<string>;
-  owner(_overrides?: CallOverrides): Promise<string>;
-}
-
-interface LockupContractFactoryTransactions {
-  deployLockupContract(_beneficiary: string, _unlockTime: BigNumberish, _overrides?: Overrides): Promise<void>;
-  setLQTYTokenAddress(_lqtyTokenAddress: string, _overrides?: Overrides): Promise<void>;
-}
-
-export interface LockupContractFactory
-  extends _TypedLiquityContract<LockupContractFactoryCalls, LockupContractFactoryTransactions> {
-  readonly filters: {
-    LQTYTokenAddressSet(_lqtyTokenAddress?: null): EventFilter;
-    LockupContractDeployedThroughFactory(_lockupContractAddress?: null, _beneficiary?: null, _unlockTime?: null, _deployer?: null): EventFilter;
-    OwnershipTransferred(previousOwner?: string | null, newOwner?: string | null): EventFilter;
-  };
-  extractEvents(logs: Log[], name: "LQTYTokenAddressSet"): _TypedLogDescription<{ _lqtyTokenAddress: string }>[];
-  extractEvents(logs: Log[], name: "LockupContractDeployedThroughFactory"): _TypedLogDescription<{ _lockupContractAddress: string; _beneficiary: string; _unlockTime: BigNumber; _deployer: string }>[];
-  extractEvents(logs: Log[], name: "OwnershipTransferred"): _TypedLogDescription<{ previousOwner: string; newOwner: string }>[];
-}
-
 interface LUSDTokenCalls {
   allowance(owner: string, spender: string, _overrides?: CallOverrides): Promise<BigNumber>;
   balanceOf(account: string, _overrides?: CallOverrides): Promise<BigNumber>;
@@ -423,7 +396,6 @@ interface LQTYTokenCalls {
   decimals(_overrides?: CallOverrides): Promise<number>;
   domainSeparator(_overrides?: CallOverrides): Promise<string>;
   getDeploymentStartTime(_overrides?: CallOverrides): Promise<BigNumber>;
-  lockupContractFactory(_overrides?: CallOverrides): Promise<string>;
   lqtyStakingAddress(_overrides?: CallOverrides): Promise<string>;
   multisigAddress(_overrides?: CallOverrides): Promise<string>;
   name(_overrides?: CallOverrides): Promise<string>;
@@ -449,12 +421,10 @@ export interface LQTYToken
   readonly filters: {
     Approval(owner?: string | null, spender?: string | null, value?: null): EventFilter;
     LQTYStakingAddressSet(_lqtyStakingAddress?: null): EventFilter;
-    LockupContractFactoryAddressSet(_lockupContractFactoryAddress?: null): EventFilter;
     Transfer(from?: string | null, to?: string | null, value?: null): EventFilter;
   };
   extractEvents(logs: Log[], name: "Approval"): _TypedLogDescription<{ owner: string; spender: string; value: BigNumber }>[];
   extractEvents(logs: Log[], name: "LQTYStakingAddressSet"): _TypedLogDescription<{ _lqtyStakingAddress: string }>[];
-  extractEvents(logs: Log[], name: "LockupContractFactoryAddressSet"): _TypedLogDescription<{ _lockupContractFactoryAddress: string }>[];
   extractEvents(logs: Log[], name: "Transfer"): _TypedLogDescription<{ from: string; to: string; value: BigNumber }>[];
 }
 

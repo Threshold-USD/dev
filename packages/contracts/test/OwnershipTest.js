@@ -132,24 +132,4 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
       await testSetAddresses(lqtyStaking, 5)
     })
   })
-
-  describe('LockupContractFactory', async accounts => {
-    it("setLQTYAddress(): reverts when called by non-owner, with wrong address, or twice", async () => {
-      await th.assertRevert(lockupContractFactory.setLQTYTokenAddress(lqtyToken.address, { from: alice }))
-
-      const params = [lqtyToken.address]
-
-      // Attempt to use zero address
-      await testZeroAddress(lockupContractFactory, params, 'setLQTYTokenAddress')
-      // Attempt to use non contract
-      await testNonContractAddress(lockupContractFactory, params, 'setLQTYTokenAddress')
-
-      // Owner can successfully set any address
-      const txOwner = await lockupContractFactory.setLQTYTokenAddress(lqtyToken.address, { from: owner })
-
-      assert.isTrue(txOwner.receipt.status)
-      // fails if called twice
-      await th.assertRevert(lockupContractFactory.setLQTYTokenAddress(lqtyToken.address, { from: owner }))
-    })
-  })
 })

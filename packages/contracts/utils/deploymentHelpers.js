@@ -13,7 +13,6 @@ const HintHelpers = artifacts.require("./HintHelpers.sol")
 
 const LQTYStaking = artifacts.require("./LQTYStaking.sol")
 const LQTYToken = artifacts.require("./LQTYToken.sol")
-const LockupContractFactory = artifacts.require("./LockupContractFactory.sol")
 
 const LQTYTokenTester = artifacts.require("./LQTYTokenTester.sol")
 const StabilityPoolTester = artifacts.require("./StabilityPoolTester.sol")
@@ -154,15 +153,12 @@ class DeploymentHelper {
 
   static async deployLQTYContractsHardhat(bountyAddress, multisigAddress) {
     const lqtyStaking = await LQTYStaking.new()
-    const lockupContractFactory = await LockupContractFactory.new()
 
     LQTYStaking.setAsDeployed(lqtyStaking)
-    LockupContractFactory.setAsDeployed(lockupContractFactory)
 
     // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
     const lqtyToken = await LQTYToken.new(
       lqtyStaking.address,
-      lockupContractFactory.address,
       bountyAddress,
       multisigAddress
     )
@@ -170,7 +166,6 @@ class DeploymentHelper {
 
     const LQTYContracts = {
       lqtyStaking,
-      lockupContractFactory,
       lqtyToken
     }
     return LQTYContracts
@@ -178,15 +173,12 @@ class DeploymentHelper {
 
   static async deployLQTYTesterContractsHardhat(bountyAddress, multisigAddress) {
     const lqtyStaking = await LQTYStaking.new()
-    const lockupContractFactory = await LockupContractFactory.new()
 
     LQTYStaking.setAsDeployed(lqtyStaking)
-    LockupContractFactory.setAsDeployed(lockupContractFactory)
 
     // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
     const lqtyToken = await LQTYTokenTester.new(
       lqtyStaking.address,
-      lockupContractFactory.address,
       bountyAddress,
       multisigAddress
     )
@@ -194,7 +186,6 @@ class DeploymentHelper {
 
     const LQTYContracts = {
       lqtyStaking,
-      lockupContractFactory,
       lqtyToken
     }
     return LQTYContracts
@@ -236,20 +227,17 @@ class DeploymentHelper {
 
   static async deployLQTYContractsTruffle(bountyAddress, multisigAddress) {
     const lqtyStaking = await lqtyStaking.new()
-    const lockupContractFactory = await LockupContractFactory.new()
 
     /* Deploy LQTY Token, passing Community Issuance,  LQTYStaking, and Factory addresses
     to the constructor  */
     const lqtyToken = await LQTYToken.new(
       lqtyStaking.address,
-      lockupContractFactory.address,
       bountyAddress,
       multisigAddress
     )
 
     const LQTYContracts = {
       lqtyStaking,
-      lockupContractFactory,
       lqtyToken
     }
     return LQTYContracts
@@ -380,11 +368,6 @@ class DeploymentHelper {
       contracts.sortedTroves.address,
       contracts.troveManager.address
     )
-  }
-
-  static async connectLQTYContracts(LQTYContracts) {
-    // Set LQTYToken address in LCF
-    await LQTYContracts.lockupContractFactory.setLQTYTokenAddress(LQTYContracts.lqtyToken.address)
   }
 
   static async connectLQTYContractsToCore(LQTYContracts, coreContracts) {

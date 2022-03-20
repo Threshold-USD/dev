@@ -11,7 +11,6 @@ const BorrowerOperations = artifacts.require("./BorrowerOperations.sol")
 
 const LQTYStaking = artifacts.require("./LQTY/LQTYStaking.sol")
 const LQTYToken = artifacts.require("./LQTY/LQTYToken.sol")
-const LockupContractFactory = artifacts.require("./LQTY/LockupContractFactory.sol")
 const HintHelpers = artifacts.require("./HintHelpers.sol")
 
 const ActivePoolTester = artifacts.require("./ActivePoolTester.sol")
@@ -41,8 +40,7 @@ const coreContractABIs = [
 
 const LQTYContractABIs = [
   LQTYStaking,
-  LQTYToken,
-  LockupContractFactory
+  LQTYToken
 ]
 
 const TesterContractABIs  = [

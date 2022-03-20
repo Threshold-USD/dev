@@ -20,7 +20,6 @@ import collSurplusPoolAbi from "../abi/CollSurplusPool.json";
 import defaultPoolAbi from "../abi/DefaultPool.json";
 import lqtyTokenAbi from "../abi/LQTYToken.json";
 import hintHelpersAbi from "../abi/HintHelpers.json";
-import lockupContractFactoryAbi from "../abi/LockupContractFactory.json";
 import lqtyStakingAbi from "../abi/LQTYStaking.json";
 import multiTroveGetterAbi from "../abi/MultiTroveGetter.json";
 import priceFeedAbi from "../abi/PriceFeed.json";
@@ -38,7 +37,6 @@ import {
   DefaultPool,
   LQTYToken,
   HintHelpers,
-  LockupContractFactory,
   LQTYStaking,
   MultiTroveGetter,
   PriceFeed,
@@ -165,7 +163,6 @@ export interface _LiquityContracts {
   defaultPool: DefaultPool;
   lqtyToken: LQTYToken;
   hintHelpers: HintHelpers;
-  lockupContractFactory: LockupContractFactory;
   lqtyStaking: LQTYStaking;
   multiTroveGetter: MultiTroveGetter;
   priceFeed: PriceFeed | PriceFeedTestnet;
@@ -195,7 +192,6 @@ const getAbi = (priceFeedIsTestnet: boolean): LiquityContractAbis => ({
   defaultPool: defaultPoolAbi,
   lqtyToken: lqtyTokenAbi,
   hintHelpers: hintHelpersAbi,
-  lockupContractFactory: lockupContractFactoryAbi,
   lqtyStaking: lqtyStakingAbi,
   multiTroveGetter: multiTroveGetterAbi,
   priceFeed: priceFeedIsTestnet ? priceFeedTestnetAbi : priceFeedAbi,
