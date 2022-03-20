@@ -165,40 +165,6 @@ export interface CollSurplusPool
   extractEvents(logs: Log[], name: "TroveManagerAddressChanged"): _TypedLogDescription<{ _newTroveManagerAddress: string }>[];
 }
 
-interface CommunityIssuanceCalls {
-  DECIMAL_PRECISION(_overrides?: CallOverrides): Promise<BigNumber>;
-  ISSUANCE_FACTOR(_overrides?: CallOverrides): Promise<BigNumber>;
-  LQTYSupplyCap(_overrides?: CallOverrides): Promise<BigNumber>;
-  NAME(_overrides?: CallOverrides): Promise<string>;
-  SECONDS_IN_ONE_MINUTE(_overrides?: CallOverrides): Promise<BigNumber>;
-  deploymentTime(_overrides?: CallOverrides): Promise<BigNumber>;
-  isOwner(_overrides?: CallOverrides): Promise<boolean>;
-  lqtyToken(_overrides?: CallOverrides): Promise<string>;
-  owner(_overrides?: CallOverrides): Promise<string>;
-  stabilityPoolAddress(_overrides?: CallOverrides): Promise<string>;
-  totalLQTYIssued(_overrides?: CallOverrides): Promise<BigNumber>;
-}
-
-interface CommunityIssuanceTransactions {
-  issueLQTY(_overrides?: Overrides): Promise<BigNumber>;
-  sendLQTY(_account: string, _LQTYamount: BigNumberish, _overrides?: Overrides): Promise<void>;
-  setAddresses(_lqtyTokenAddress: string, _stabilityPoolAddress: string, _overrides?: Overrides): Promise<void>;
-}
-
-export interface CommunityIssuance
-  extends _TypedLiquityContract<CommunityIssuanceCalls, CommunityIssuanceTransactions> {
-  readonly filters: {
-    LQTYTokenAddressSet(_lqtyTokenAddress?: null): EventFilter;
-    OwnershipTransferred(previousOwner?: string | null, newOwner?: string | null): EventFilter;
-    StabilityPoolAddressSet(_stabilityPoolAddress?: null): EventFilter;
-    TotalLQTYIssuedUpdated(_totalLQTYIssued?: null): EventFilter;
-  };
-  extractEvents(logs: Log[], name: "LQTYTokenAddressSet"): _TypedLogDescription<{ _lqtyTokenAddress: string }>[];
-  extractEvents(logs: Log[], name: "OwnershipTransferred"): _TypedLogDescription<{ previousOwner: string; newOwner: string }>[];
-  extractEvents(logs: Log[], name: "StabilityPoolAddressSet"): _TypedLogDescription<{ _stabilityPoolAddress: string }>[];
-  extractEvents(logs: Log[], name: "TotalLQTYIssuedUpdated"): _TypedLogDescription<{ _totalLQTYIssued: BigNumber }>[];
-}
-
 interface DefaultPoolCalls {
   NAME(_overrides?: CallOverrides): Promise<string>;
   activePoolAddress(_overrides?: CallOverrides): Promise<string>;
@@ -485,7 +451,6 @@ interface LQTYTokenCalls {
   ONE_YEAR_IN_SECONDS(_overrides?: CallOverrides): Promise<BigNumber>;
   allowance(owner: string, spender: string, _overrides?: CallOverrides): Promise<BigNumber>;
   balanceOf(account: string, _overrides?: CallOverrides): Promise<BigNumber>;
-  communityIssuanceAddress(_overrides?: CallOverrides): Promise<string>;
   decimals(_overrides?: CallOverrides): Promise<number>;
   domainSeparator(_overrides?: CallOverrides): Promise<string>;
   getDeploymentStartTime(_overrides?: CallOverrides): Promise<BigNumber>;
@@ -515,13 +480,11 @@ export interface LQTYToken
   extends _TypedLiquityContract<LQTYTokenCalls, LQTYTokenTransactions> {
   readonly filters: {
     Approval(owner?: string | null, spender?: string | null, value?: null): EventFilter;
-    CommunityIssuanceAddressSet(_communityIssuanceAddress?: null): EventFilter;
     LQTYStakingAddressSet(_lqtyStakingAddress?: null): EventFilter;
     LockupContractFactoryAddressSet(_lockupContractFactoryAddress?: null): EventFilter;
     Transfer(from?: string | null, to?: string | null, value?: null): EventFilter;
   };
   extractEvents(logs: Log[], name: "Approval"): _TypedLogDescription<{ owner: string; spender: string; value: BigNumber }>[];
-  extractEvents(logs: Log[], name: "CommunityIssuanceAddressSet"): _TypedLogDescription<{ _communityIssuanceAddress: string }>[];
   extractEvents(logs: Log[], name: "LQTYStakingAddressSet"): _TypedLogDescription<{ _lqtyStakingAddress: string }>[];
   extractEvents(logs: Log[], name: "LockupContractFactoryAddressSet"): _TypedLogDescription<{ _lockupContractFactoryAddress: string }>[];
   extractEvents(logs: Log[], name: "Transfer"): _TypedLogDescription<{ from: string; to: string; value: BigNumber }>[];
@@ -652,7 +615,6 @@ interface StabilityPoolCalls {
   _100pct(_overrides?: CallOverrides): Promise<BigNumber>;
   activePool(_overrides?: CallOverrides): Promise<string>;
   borrowerOperations(_overrides?: CallOverrides): Promise<string>;
-  communityIssuance(_overrides?: CallOverrides): Promise<string>;
   currentEpoch(_overrides?: CallOverrides): Promise<BigNumber>;
   currentScale(_overrides?: CallOverrides): Promise<BigNumber>;
   defaultPool(_overrides?: CallOverrides): Promise<string>;
@@ -681,7 +643,7 @@ interface StabilityPoolCalls {
 interface StabilityPoolTransactions {
   offset(_debtToOffset: BigNumberish, _collToAdd: BigNumberish, _overrides?: Overrides): Promise<void>;
   provideToSP(_amount: BigNumberish, _overrides?: Overrides): Promise<void>;
-  setAddresses(_borrowerOperationsAddress: string, _troveManagerAddress: string, _activePoolAddress: string, _lusdTokenAddress: string, _sortedTrovesAddress: string, _priceFeedAddress: string, _communityIssuanceAddress: string, _overrides?: Overrides): Promise<void>;
+  setAddresses(_borrowerOperationsAddress: string, _troveManagerAddress: string, _activePoolAddress: string, _lusdTokenAddress: string, _sortedTrovesAddress: string, _priceFeedAddress: string, _overrides?: Overrides): Promise<void>;
   withdrawETHGainToTrove(_upperHint: string, _lowerHint: string, _overrides?: Overrides): Promise<void>;
   withdrawFromSP(_amount: BigNumberish, _overrides?: Overrides): Promise<void>;
 }
@@ -691,7 +653,6 @@ export interface StabilityPool
   readonly filters: {
     ActivePoolAddressChanged(_newActivePoolAddress?: null): EventFilter;
     BorrowerOperationsAddressChanged(_newBorrowerOperationsAddress?: null): EventFilter;
-    CommunityIssuanceAddressChanged(_newCommunityIssuanceAddress?: null): EventFilter;
     DefaultPoolAddressChanged(_newDefaultPoolAddress?: null): EventFilter;
     DepositSnapshotUpdated(_depositor?: string | null, _P?: null, _S?: null, _G?: null): EventFilter;
     ETHGainWithdrawn(_depositor?: string | null, _ETH?: null, _LUSDLoss?: null): EventFilter;
@@ -713,7 +674,6 @@ export interface StabilityPool
   };
   extractEvents(logs: Log[], name: "ActivePoolAddressChanged"): _TypedLogDescription<{ _newActivePoolAddress: string }>[];
   extractEvents(logs: Log[], name: "BorrowerOperationsAddressChanged"): _TypedLogDescription<{ _newBorrowerOperationsAddress: string }>[];
-  extractEvents(logs: Log[], name: "CommunityIssuanceAddressChanged"): _TypedLogDescription<{ _newCommunityIssuanceAddress: string }>[];
   extractEvents(logs: Log[], name: "DefaultPoolAddressChanged"): _TypedLogDescription<{ _newDefaultPoolAddress: string }>[];
   extractEvents(logs: Log[], name: "DepositSnapshotUpdated"): _TypedLogDescription<{ _depositor: string; _P: BigNumber; _S: BigNumber; _G: BigNumber }>[];
   extractEvents(logs: Log[], name: "ETHGainWithdrawn"): _TypedLogDescription<{ _depositor: string; _ETH: BigNumber; _LUSDLoss: BigNumber }>[];

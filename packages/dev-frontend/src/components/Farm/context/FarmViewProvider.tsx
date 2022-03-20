@@ -12,21 +12,16 @@ const transition = (view: FarmView, event: FarmEvent): FarmView => {
 
 const getInitialView = (
   liquidityMiningStake: Decimal,
-  remainingLiquidityMiningLQTYReward: Decimal,
   liquidityMiningLQTYReward: Decimal
 ): FarmView => {
-  if (remainingLiquidityMiningLQTYReward.isZero) return "DISABLED";
-  if (liquidityMiningStake.isZero && liquidityMiningLQTYReward.isZero) return "INACTIVE";
-  return "ACTIVE";
+  return "DISABLED";
 };
 
 const selector = ({
   liquidityMiningStake,
-  remainingLiquidityMiningLQTYReward,
   liquidityMiningLQTYReward
 }: LiquityStoreState) => ({
   liquidityMiningStake,
-  remainingLiquidityMiningLQTYReward,
   liquidityMiningLQTYReward
 });
 
@@ -34,14 +29,12 @@ export const FarmViewProvider: React.FC = props => {
   const { children } = props;
   const {
     liquidityMiningStake,
-    remainingLiquidityMiningLQTYReward,
     liquidityMiningLQTYReward
   } = useLiquitySelector(selector);
 
   const [view, setView] = useState<FarmView>(
     getInitialView(
       liquidityMiningStake,
-      remainingLiquidityMiningLQTYReward,
       liquidityMiningLQTYReward
     )
   );

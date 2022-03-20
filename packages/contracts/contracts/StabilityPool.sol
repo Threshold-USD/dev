@@ -8,7 +8,6 @@ import './Interfaces/IBorrowerOperations.sol';
 import './Interfaces/ITroveManager.sol';
 import './Interfaces/ILUSDToken.sol';
 import './Interfaces/ISortedTroves.sol';
-import "./Interfaces/ICommunityIssuance.sol";
 import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/LiquitySafeMath128.sol";
@@ -150,8 +149,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     // Needed to check if there are pending liquidations
     ISortedTroves public sortedTroves;
 
-    ICommunityIssuance public communityIssuance;
-
     uint256 internal ETH;  // deposited ether tracker
 
     // Tracker for LUSD held in the pool. Changes when users deposit/withdraw, and when Trove debt is offset.
@@ -227,7 +224,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     event LUSDTokenAddressChanged(address _newLUSDTokenAddress);
     event SortedTrovesAddressChanged(address _newSortedTrovesAddress);
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event CommunityIssuanceAddressChanged(address _newCommunityIssuanceAddress);
 
     event P_Updated(uint _P);
     event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
@@ -250,8 +246,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         address _activePoolAddress,
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
-        address _priceFeedAddress,
-        address _communityIssuanceAddress
+        address _priceFeedAddress
     )
         external
         override
@@ -263,7 +258,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         checkContract(_lusdTokenAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_priceFeedAddress);
-        checkContract(_communityIssuanceAddress);
 
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
         troveManager = ITroveManager(_troveManagerAddress);
@@ -271,7 +265,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         lusdToken = ILUSDToken(_lusdTokenAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         priceFeed = IPriceFeed(_priceFeedAddress);
-        communityIssuance = ICommunityIssuance(_communityIssuanceAddress);
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -279,7 +272,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         emit LUSDTokenAddressChanged(_lusdTokenAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit PriceFeedAddressChanged(_priceFeedAddress);
-        emit CommunityIssuanceAddressChanged(_communityIssuanceAddress);
 
         _renounceOwnership();
     }
@@ -304,10 +296,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         _requireNonZeroAmount(_amount);
 
         uint initialDeposit = deposits[msg.sender].initialValue;
-
-        ICommunityIssuance communityIssuanceCached = communityIssuance;
-
-        _triggerLQTYIssuance(communityIssuanceCached);
 
         uint depositorETHGain = getDepositorETHGain(msg.sender);
         uint compoundedLUSDDeposit = getCompoundedLUSDDeposit(msg.sender);
@@ -334,10 +322,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         if (_amount !=0) {_requireNoUnderCollateralizedTroves();}
         uint initialDeposit = deposits[msg.sender].initialValue;
         _requireUserHasDeposit(initialDeposit);
-
-        ICommunityIssuance communityIssuanceCached = communityIssuance;
-
-        _triggerLQTYIssuance(communityIssuanceCached);
 
         uint depositorETHGain = getDepositorETHGain(msg.sender);
 
@@ -367,10 +351,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         _requireUserHasTrove(msg.sender);
         _requireUserHasETHGain(msg.sender);
 
-        ICommunityIssuance communityIssuanceCached = communityIssuance;
-
-        _triggerLQTYIssuance(communityIssuanceCached);
-
         uint depositorETHGain = getDepositorETHGain(msg.sender);
 
         uint compoundedLUSDDeposit = getCompoundedLUSDDeposit(msg.sender);
@@ -393,16 +373,11 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     // --- LQTY issuance functions ---
 
-    function _triggerLQTYIssuance(ICommunityIssuance _communityIssuance) internal {
-        uint LQTYIssuance = _communityIssuance.issueLQTY();
-       _updateG(LQTYIssuance);
-    }
-
     function _updateG(uint _LQTYIssuance) internal {
         uint totalLUSD = totalLUSDDeposits; // cached to save an SLOAD
         /*
         * When total deposits is 0, G is not updated. In this case, the LQTY issued can not be obtained by later
-        * depositors - it is missed out on, and remains in the balanceof the CommunityIssuance contract.
+        * depositors - it is missed out on.
         *
         */
         if (totalLUSD == 0 || _LQTYIssuance == 0) {return;}
@@ -417,12 +392,12 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     }
 
     function _computeLQTYPerUnitStaked(uint _LQTYIssuance, uint _totalLUSDDeposits) internal returns (uint) {
-        /*  
-        * Calculate the LQTY-per-unit staked.  Division uses a "feedback" error correction, to keep the 
+        /*
+        * Calculate the LQTY-per-unit staked.  Division uses a "feedback" error correction, to keep the
         * cumulative error low in the running total G:
         *
-        * 1) Form a numerator which compensates for the floor division error that occurred the last time this 
-        * function was called.  
+        * 1) Form a numerator which compensates for the floor division error that occurred the last time this
+        * function was called.
         * 2) Calculate "per-unit-staked" ratio.
         * 3) Multiply the ratio back by its denominator, to reveal the current floor division error.
         * 4) Store this error for use in the next correction when this function is called.
@@ -448,8 +423,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint totalLUSD = totalLUSDDeposits; // cached to save an SLOAD
         if (totalLUSD == 0 || _debtToOffset == 0) { return; }
 
-        _triggerLQTYIssuance(communityIssuance);
-
         (uint ETHGainPerUnitStaked,
             uint LUSDLossPerUnitStaked) = _computeRewardsPerUnitStaked(_collToAdd, _debtToOffset, totalLUSD);
 
@@ -472,8 +445,8 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         * Compute the LUSD and ETH rewards. Uses a "feedback" error correction, to keep
         * the cumulative error in the P and S state variables low:
         *
-        * 1) Form numerators which compensate for the floor division errors that occurred the last time this 
-        * function was called.  
+        * 1) Form numerators which compensate for the floor division errors that occurred the last time this
+        * function was called.
         * 2) Calculate "per-unit-staked" ratios.
         * 3) Multiply each ratio back by its denominator, to reveal the current floor division error.
         * 4) Store these errors for use in the next correction when this function is called.
@@ -483,7 +456,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
         assert(_debtToOffset <= _totalLUSDDeposits);
         if (_debtToOffset == _totalLUSDDeposits) {
-            LUSDLossPerUnitStaked = DECIMAL_PRECISION;  // When the Pool depletes to 0, so does each deposit 
+            LUSDLossPerUnitStaked = DECIMAL_PRECISION;  // When the Pool depletes to 0, so does each deposit
             lastLUSDLossError_Offset = 0;
         } else {
             uint LUSDLossNumerator = _debtToOffset.mul(DECIMAL_PRECISION).sub(lastLUSDLossError_Offset);
@@ -539,7 +512,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
         // If multiplying P by a non-zero product factor would reduce P below the scale boundary, increment the scale
         } else if (currentP.mul(newProductFactor).div(DECIMAL_PRECISION) < SCALE_FACTOR) {
-            newP = currentP.mul(newProductFactor).mul(SCALE_FACTOR).div(DECIMAL_PRECISION); 
+            newP = currentP.mul(newProductFactor).mul(SCALE_FACTOR).div(DECIMAL_PRECISION);
             currentScale = currentScaleCached.add(1);
             emit ScaleUpdated(currentScale);
         } else {

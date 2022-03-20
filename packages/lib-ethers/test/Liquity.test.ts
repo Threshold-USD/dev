@@ -994,9 +994,6 @@ describe("EthersLiquity", () => {
       await increaseTime(2 * 30 * 24 * 60 * 60);
       await liquity.exitLiquidityMining();
 
-      const remainingLQTYReward = await liquity.getRemainingLiquidityMiningLQTYReward();
-      expect(`${remainingLQTYReward}`).to.equal("0");
-
       const lqtyBalance = Number(await liquity.getLQTYBalance());
       expect(lqtyBalance).to.be.within(1333333, 1333334);
     });

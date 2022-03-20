@@ -213,11 +213,6 @@ async function mainnetDeploy(configParams) {
   // assert.equal(generalSafeBal.toString(), '2000000000000000000000000')
   // th.logBN('General Safe balance       ', generalSafeBal)
 
-  // // CommunityIssuance contract
-  // const communityIssuanceBal = await LQTYContracts.lqtyToken.balanceOf(LQTYContracts.communityIssuance.address)
-  // // assert.equal(communityIssuanceBal.toString(), '32000000000000000000000000')
-  // th.logBN('Community Issuance balance', communityIssuanceBal)
-
   // // --- PriceFeed ---
   // console.log("PRICEFEED CHECKS")
   // // Check Pricefeed's status and last good price
@@ -605,14 +600,6 @@ async function mainnetDeploy(configParams) {
   th.logBN("F_LUSD", F_LUSD)
   th.logBN("F_ETH", F_ETH)
 
-
-  // CommunityIssuance
-  console.log("CommunityIssuance state variables:")
-  const totalLQTYIssued = await LQTYContracts.communityIssuance.totalLQTYIssued()
-  th.logBN("Total LQTY issued to depositors / front ends", totalLQTYIssued)
-
-
-  // TODO: Uniswap *LQTY-ETH* pool size (check it's deployed?)
 
 
 

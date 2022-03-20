@@ -54,7 +54,6 @@ def setAddresses(contracts):
         contracts.lusdToken.address,
         contracts.sortedTroves.address,
         contracts.priceFeedTestnet.address,
-        contracts.communityIssuance.address,
         { 'from': accounts[0] }
     )
 
@@ -95,12 +94,6 @@ def setAddresses(contracts):
         { 'from': accounts[0] }
     )
 
-    contracts.communityIssuance.setAddresses(
-        contracts.lqtyToken.address,
-        contracts.stabilityPool.address,
-        { 'from': accounts[0] }
-    )
-
 @pytest.fixture
 def add_accounts():
     if network.show_active() != 'development':
@@ -129,10 +122,8 @@ def contracts():
     )
     # LQTY
     contracts.lqtyStaking = LQTYStaking.deploy({ 'from': accounts[0] })
-    contracts.communityIssuance = CommunityIssuance.deploy({ 'from': accounts[0] })
     contracts.lockupContractFactory = LockupContractFactory.deploy({ 'from': accounts[0] })
     contracts.lqtyToken = LQTYToken.deploy(
-        contracts.communityIssuance.address,
         contracts.lqtyStaking.address,
         contracts.lockupContractFactory.address,
         accounts[0], # bountyAddress

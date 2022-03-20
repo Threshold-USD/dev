@@ -48,11 +48,9 @@ contract('Unipool', function ([_, wallet1, wallet2, wallet3, wallet4, bountyAddr
       that.uni = await Uni.new('Uniswap token', 'LPT', owner, 0);
       that.pool = await Unipool.new();
 
-      const communityIssuance = await NonPayable.new();
       const lqtyStaking = await NonPayable.new();
       const lockupContractFactory = await NonPayable.new();
       that.lqty = await Lqty.new(
-        communityIssuance.address,
         lqtyStaking.address,
         lockupContractFactory.address,
         bountyAddress,

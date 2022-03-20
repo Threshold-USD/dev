@@ -36,7 +36,6 @@ contract('StabilityPool', async accounts => {
   let defaultPool
   let borrowerOperations
   let lqtyToken
-  let communityIssuance
 
   let gasPriceInWei
 
@@ -71,7 +70,6 @@ contract('StabilityPool', async accounts => {
       hintHelpers = contracts.hintHelpers
 
       lqtyToken = LQTYContracts.lqtyToken
-      communityIssuance = LQTYContracts.communityIssuance
 
       await deploymentHelper.connectLQTYContracts(LQTYContracts)
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)

@@ -88,11 +88,6 @@ export interface ReadableLiquity {
   getStabilityDeposit(address?: string): Promise<StabilityDeposit>;
 
   /**
-   * Get the remaining LQTY that will be collectively rewarded to stability depositors.
-   */
-  getRemainingStabilityPoolLQTYReward(): Promise<Decimal>;
-
-  /**
    * Get the total amount of LUSD currently deposited in the Stability Pool.
    */
   getLUSDInStabilityPool(): Promise<Decimal>;
@@ -124,11 +119,6 @@ export interface ReadableLiquity {
    * @param address - Address holding the Uniswap ETH/LUSD LP tokens.
    */
   getUniTokenAllowance(address?: string): Promise<Decimal>;
-
-  /**
-   * Get the remaining LQTY that will be collectively rewarded to liquidity miners.
-   */
-  getRemainingLiquidityMiningLQTYReward(): Promise<Decimal>;
 
   /**
    * Get the amount of Uniswap ETH/LUSD LP tokens currently staked by an address in liquidity mining.

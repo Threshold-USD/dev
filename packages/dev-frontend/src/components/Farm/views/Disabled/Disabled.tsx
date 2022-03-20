@@ -4,7 +4,6 @@ import { LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 import { InfoMessage } from "../../../InfoMessage";
 import { UnstakeAndClaim } from "../UnstakeAndClaim";
-import { RemainingLQTY } from "../RemainingLQTY";
 import { StaticRow } from "../../../Trove/Editor";
 import { GT, LP } from "../../../../strings";
 
@@ -21,9 +20,6 @@ export const Disabled: React.FC = () => {
     <Card>
       <Heading>
         Uniswap Liquidity Farm
-        <Flex sx={{ justifyContent: "flex-end" }}>
-          <RemainingLQTY />
-        </Flex>
       </Heading>
       <Box sx={{ p: [2, 3] }}>
         <InfoMessage title="Liquidity farming period has finished">

@@ -31,19 +31,6 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "_newCommunityIssuanceAddress",
-        "type": "address"
-      }
-    ],
-    "name": "CommunityIssuanceAddressChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
         "name": "_newDefaultPoolAddress",
         "type": "address"
       }
@@ -521,19 +508,6 @@
   },
   {
     "inputs": [],
-    "name": "communityIssuance",
-    "outputs": [
-      {
-        "internalType": "contract ICommunityIssuance",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "currentEpoch",
     "outputs": [
       {
@@ -938,11 +912,6 @@
       {
         "internalType": "address",
         "name": "_priceFeedAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_communityIssuanceAddress",
         "type": "address"
       }
     ],

@@ -12,8 +12,6 @@ import { DisabledEditableRow, StaticRow } from "../Trove/Editor";
 import { ClaimAndMove } from "./actions/ClaimAndMove";
 import { ClaimRewards } from "./actions/ClaimRewards";
 import { useStabilityView } from "./context/StabilityViewContext";
-import { RemainingLQTY } from "./RemainingLQTY";
-import { Yield } from "./Yield";
 import { InfoIcon } from "../InfoIcon";
 
 const selector = ({ stabilityDeposit, trove, lusdInStabilityPool }: LiquityStoreState) => ({
@@ -52,11 +50,6 @@ export const ActiveDeposit: React.FC = () => {
     <Card>
       <Heading>
         Stability Pool
-        {!isWaitingForTransaction && (
-          <Flex sx={{ justifyContent: "flex-end" }}>
-            <RemainingLQTY />
-          </Flex>
-        )}
       </Heading>
       <Box sx={{ p: [2, 3] }}>
         <Box>
@@ -101,9 +94,6 @@ export const ActiveDeposit: React.FC = () => {
                 />
               }
             />
-            <Flex sx={{ justifyContent: "flex-end", flex: 1 }}>
-              <Yield />
-            </Flex>
           </Flex>
         </Box>
 

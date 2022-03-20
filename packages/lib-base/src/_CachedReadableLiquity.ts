@@ -101,13 +101,6 @@ export class _CachedReadableLiquity<T extends unknown[]>
     );
   }
 
-  async getRemainingStabilityPoolLQTYReward(...extraParams: T): Promise<Decimal> {
-    return (
-      this._cache.getRemainingStabilityPoolLQTYReward(...extraParams) ??
-      this._readable.getRemainingStabilityPoolLQTYReward(...extraParams)
-    );
-  }
-
   async getLUSDInStabilityPool(...extraParams: T): Promise<Decimal> {
     return (
       this._cache.getLUSDInStabilityPool(...extraParams) ??
@@ -140,13 +133,6 @@ export class _CachedReadableLiquity<T extends unknown[]>
     return (
       this._cache.getUniTokenAllowance(address, ...extraParams) ??
       this._readable.getUniTokenAllowance(address, ...extraParams)
-    );
-  }
-
-  async getRemainingLiquidityMiningLQTYReward(...extraParams: T): Promise<Decimal> {
-    return (
-      this._cache.getRemainingLiquidityMiningLQTYReward(...extraParams) ??
-      this._readable.getRemainingLiquidityMiningLQTYReward(...extraParams)
     );
   }
 

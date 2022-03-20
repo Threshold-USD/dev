@@ -83,12 +83,6 @@ export function updateStabilityDeposit(
     return;
   }
 
-  if (owner.frontend != stabilityDeposit.frontend) {
-    // FrontEndTagSet is emitted just before UserDepositChanged event
-    // FrontEndTagSet sets the owner.frontend, so we can use that
-    stabilityDeposit.frontend = owner.frontend;
-  }
-
   updateStabilityDepositByOperation(
     event,
     stabilityDeposit,

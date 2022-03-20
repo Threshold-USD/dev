@@ -6,7 +6,6 @@ import { Interface, ParamType } from "@ethersproject/abi";
 import ActivePool from "../../contracts/artifacts/contracts/ActivePool.sol/ActivePool.json";
 import BorrowerOperations from "../../contracts/artifacts/contracts/BorrowerOperations.sol/BorrowerOperations.json";
 import CollSurplusPool from "../../contracts/artifacts/contracts/CollSurplusPool.sol/CollSurplusPool.json";
-import CommunityIssuance from "../../contracts/artifacts/contracts/LQTY/CommunityIssuance.sol/CommunityIssuance.json";
 import DefaultPool from "../../contracts/artifacts/contracts/DefaultPool.sol/DefaultPool.json";
 import ERC20Mock from "../../contracts/artifacts/contracts/LPRewards/TestContracts/ERC20Mock.sol/ERC20Mock.json";
 import GasPool from "../../contracts/artifacts/contracts/GasPool.sol/GasPool.json";
@@ -146,7 +145,6 @@ const contractArtifacts = [
   ActivePool,
   BorrowerOperations,
   CollSurplusPool,
-  CommunityIssuance,
   DefaultPool,
   ERC20Mock,
   GasPool,

@@ -343,10 +343,6 @@ export class SubgraphLiquity implements ReadableLiquity, ObservableLiquity {
     throw new Error("Method not implemented.");
   }
 
-  getRemainingLiquidityMiningLQTYReward(): Promise<Decimal> {
-    throw new Error("Method not implemented.");
-  }
-
   getLiquidityMiningStake(address?: string): Promise<Decimal> {
     throw new Error("Method not implemented.");
   }
@@ -356,10 +352,6 @@ export class SubgraphLiquity implements ReadableLiquity, ObservableLiquity {
   }
 
   getTotalStakedUniTokens(): Promise<Decimal> {
-    throw new Error("Method not implemented.");
-  }
-
-  getRemainingStabilityPoolLQTYReward(): Promise<Decimal> {
     throw new Error("Method not implemented.");
   }
 }

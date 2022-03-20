@@ -42,7 +42,6 @@ interface IStabilityPool {
     event LUSDTokenAddressChanged(address _newLUSDTokenAddress);
     event SortedTrovesAddressChanged(address _newSortedTrovesAddress);
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
-    event CommunityIssuanceAddressChanged(address _newCommunityIssuanceAddress);
 
     event P_Updated(uint _P);
     event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
@@ -69,8 +68,7 @@ interface IStabilityPool {
         address _activePoolAddress,
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
-        address _priceFeedAddress,
-        address _communityIssuanceAddress
+        address _priceFeedAddress
     ) external;
 
     /*

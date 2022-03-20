@@ -4,7 +4,7 @@ contract('Deployment script - Sets correct contract addresses dependencies after
   const [owner] = accounts;
 
   const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
-  
+
   let priceFeed
   let lusdToken
   let sortedTroves
@@ -16,7 +16,6 @@ contract('Deployment script - Sets correct contract addresses dependencies after
   let borrowerOperations
   let lqtyStaking
   let lqtyToken
-  let communityIssuance
   let lockupContractFactory
 
   before(async () => {
@@ -35,7 +34,6 @@ contract('Deployment script - Sets correct contract addresses dependencies after
 
     lqtyStaking = LQTYContracts.lqtyStaking
     lqtyToken = LQTYContracts.lqtyToken
-    communityIssuance = LQTYContracts.communityIssuance
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectLQTYContracts(LQTYContracts)
@@ -300,14 +298,6 @@ contract('Deployment script - Sets correct contract addresses dependencies after
 
   // ---  LQTYToken ---
 
-  // Sets CI in LQTYToken
-  it('Sets the correct CommunityIssuance address in LQTYToken', async () => {
-    const communityIssuanceAddress = communityIssuance.address
-
-    const recordedcommunityIssuanceAddress = await lqtyToken.communityIssuanceAddress()
-    assert.equal(communityIssuanceAddress, recordedcommunityIssuanceAddress)
-  })
-
   // Sets LQTYStaking in LQTYToken
   it('Sets the correct LQTYStaking address in LQTYToken', async () => {
     const lqtyStakingAddress = lqtyStaking.address
@@ -334,20 +324,4 @@ contract('Deployment script - Sets correct contract addresses dependencies after
     assert.equal(lqtyTokenAddress, recordedLQTYTokenAddress)
   })
 
-  // --- CI ---
-
-  // Sets LQTYToken in CommunityIssuance
-  it('Sets the correct LQTYToken address in CommunityIssuance', async () => {
-    const lqtyTokenAddress = lqtyToken.address
-
-    const recordedLQTYTokenAddress = await communityIssuance.lqtyToken()
-    assert.equal(lqtyTokenAddress, recordedLQTYTokenAddress)
-  })
-
-  it('Sets the correct StabilityPool address in CommunityIssuance', async () => {
-    const stabilityPoolAddress = stabilityPool.address
-
-    const recordedStabilityPoolAddress = await communityIssuance.stabilityPoolAddress()
-    assert.equal(stabilityPoolAddress, recordedStabilityPoolAddress)
-  })
 })

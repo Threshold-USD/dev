@@ -76,9 +76,6 @@ const deployContracts = async (
     collSurplusPool: await deployContract(deployer, getContractFactory, "CollSurplusPool", {
       ...overrides
     }),
-    communityIssuance: await deployContract(deployer, getContractFactory, "CommunityIssuance", {
-      ...overrides
-    }),
     defaultPool: await deployContract(deployer, getContractFactory, "DefaultPool", { ...overrides }),
     hintHelpers: await deployContract(deployer, getContractFactory, "HintHelpers", { ...overrides }),
     lockupContractFactory: await deployContract(
@@ -123,7 +120,6 @@ const deployContracts = async (
         deployer,
         getContractFactory,
         "LQTYToken",
-        addresses.communityIssuance,
         addresses.lqtyStaking,
         addresses.lockupContractFactory,
         Wallet.createRandom().address, // _bountyAddress (TODO: parameterize this)
@@ -161,7 +157,6 @@ const connectContracts = async (
     troveManager,
     lusdToken,
     collSurplusPool,
-    communityIssuance,
     defaultPool,
     lqtyToken,
     hintHelpers,
@@ -229,7 +224,6 @@ const connectContracts = async (
         lusdToken.address,
         sortedTroves.address,
         priceFeed.address,
-        communityIssuance.address,
         { ...overrides, nonce }
       ),
 
@@ -274,12 +268,6 @@ const connectContracts = async (
 
     nonce =>
       lockupContractFactory.setLQTYTokenAddress(lqtyToken.address, {
-        ...overrides,
-        nonce
-      }),
-
-    nonce =>
-      communityIssuance.setAddresses(lqtyToken.address, stabilityPool.address, {
         ...overrides,
         nonce
       }),
@@ -361,16 +349,12 @@ export const deployAndSetupContracts = async (
 
   const lqtyTokenDeploymentTime = await contracts.lqtyToken.getDeploymentStartTime();
   const bootstrapPeriod = await contracts.troveManager.BOOTSTRAP_PERIOD();
-  const totalStabilityPoolLQTYReward = await contracts.communityIssuance.LQTYSupplyCap();
   const liquidityMiningLQTYRewardRate = await contracts.unipool.rewardRate();
 
   return {
     ...deployment,
     deploymentDate: lqtyTokenDeploymentTime.toNumber() * 1000,
     bootstrapPeriod: bootstrapPeriod.toNumber(),
-    totalStabilityPoolLQTYReward: `${Decimal.fromBigNumberString(
-      totalStabilityPoolLQTYReward.toHexString()
-    )}`,
     liquidityMiningLQTYRewardRate: `${Decimal.fromBigNumberString(
       liquidityMiningLQTYRewardRate.toHexString()
     )}`

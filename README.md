@@ -280,8 +280,6 @@ The LQTY contracts consist of:
 
 `LQTYStaking.sol` - the staking contract, containing stake and unstake functionality for LQTY holders. This contract receives ETH fees from redemptions, and LUSD fees from new debt issuance.
 
-`CommunityIssuance.sol` - This contract handles the issuance of LQTY tokens to Stability Providers as a function of time. It is controlled by the `StabilityPool`. Upon system launch, the `CommunityIssuance` automatically receives 32 million LQTY - the “community issuance” supply. The contract steadily issues these LQTY tokens to the Stability Providers over time.
-
 `LQTYToken.sol` - This is the LQTY ERC20 contract. It has a hard cap supply of 100 million, and during the first year, restricts transfers from the Liquity admin address, a regular Ethereum address controlled by the project company Liquity AG. **Note that the Liquity admin address has no extra privileges and does not retain any control over the Liquity protocol once deployed.**
 
 ### LQTY Lockup contracts and token vesting
@@ -294,8 +292,6 @@ In the first year after launch:
 
 - The Liquity admin address may transfer tokens **only to verified lockup contracts with an unlock date at least one year after system deployment**
 
-Also, separate LQTY allocations are made at deployent to an EOA that will hold an amount of LQTY for bug bounties/hackathons and to a Uniswap LP reward contract. Aside from these allocations, the only LQTY made freely available in this first year is the LQTY that is publically issued to Stability Providers via the `CommunityIssuance` contract.
-
 ### Lockup Implementation and admin transfer restriction
 
 A `LockupContractFactory` is used to deploy `LockupContracts` in the first year. During the first year, the `LQTYToken` checks that any transfer from the Liquity admin address is to a valid `LockupContract` that is registered in and was deployed through the `LockupContractFactory`.
@@ -304,13 +300,11 @@ A `LockupContractFactory` is used to deploy `LockupContracts` in the first year.
 
 #### Deploy LQTY Contracts
 1. Liquity admin deploys `LockupContractFactory`
-2. Liquity admin deploys `CommunityIssuance`
 3. Liquity admin deploys `LQTYStaking`
 4. Liquity admin creates a Pool in Uniswap for LUSD/ETH and deploys `Unipool` (LP rewards contract), which knows the address of the Pool
 5. Liquity admin deploys `LQTYToken`, which upon deployment:
-- Stores the `CommunityIssuance` and `LockupContractFactory` addresses
-- Mints LQTY tokens to `CommunityIssuance`, the Liquity admin address, the `Unipool` LP rewards address, and the bug bounty address
-6. Liquity admin sets `LQTYToken` address in `LockupContractFactory`, `CommunityIssuance`, `LQTYStaking`, and `Unipool`
+- Stores the `LockupContractFactory` addresses
+6. Liquity admin sets `LQTYToken` address in `LockupContractFactory`, `LQTYStaking`, and `Unipool`
 
 #### Deploy and fund Lockup Contracts
 7. Liquity admin tells `LockupContractFactory` to deploy a `LockupContract` for each beneficiary, with an `unlockTime` set to exactly one year after system deployment
@@ -320,7 +314,6 @@ A `LockupContractFactory` is used to deploy `LockupContracts` in the first year.
 9. Liquity admin deploys the Liquity core system
 10. Liquity admin connects Liquity core system internally (with setters)
 11. Liquity admin connects `LQTYStaking` to Liquity core contracts and `LQTYToken`
-13. Liquity admin connects `CommunityIssuance` to Liquity core contracts and `LQTYToken`
 
 #### During one year lockup period
 - Liquity admin periodically transfers newly vested tokens to team & partners’ `LockupContracts`, as per their vesting schedules
@@ -1120,12 +1113,6 @@ Any time a depositor updates their deposit (withdrawal, top-up) their ETH gain i
 
 This is similar in spirit to the simpler [Scalable Reward Distribution on the Ethereum Network by Bogdan Batog et al](http://batog.info/papers/scalable-reward-distribution.pdf), however, the mathematics is more involved as we handle a compounding, decreasing stake, and a corresponding ETH reward.
 
-## LQTY Issuance to Stability Providers
-
-Stability Providers earn LQTY tokens continuously over time, in proportion to the size of their deposit. This is known as “Community Issuance”, and is handled by `CommunityIssuance.sol`.
-
-Upon system deployment and activation, `CommunityIssuance` holds an initial LQTY supply, currently (provisionally) set at 32 million LQTY tokens.
-
 ### LQTY Issuance schedule
 
 The overall community issuance schedule for LQTY is sub-linear and monotonic. We currently (provisionally) implement a yearly “halving” schedule, described by the cumulative issuance function:
@@ -1146,8 +1133,6 @@ It results in the following cumulative issuance schedule for the community LQTY 
 | 5    | 96.88%                      |
 
 The shape of the LQTY issuance curve is intended to incentivize both early depositors, and long-term deposits.
-
-Although the LQTY issuance curve follows a yearly halving schedule, in practice the `CommunityIssuance` contract use time intervals of one minute, for more fine-grained reward calculations.
 
 ### LQTY Issuance implementation
 

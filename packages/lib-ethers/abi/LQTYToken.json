@@ -3,11 +3,6 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "_communityIssuanceAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
         "name": "_lqtyStakingAddress",
         "type": "address"
       },
@@ -58,19 +53,6 @@
       }
     ],
     "name": "Approval",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_communityIssuanceAddress",
-        "type": "address"
-      }
-    ],
-    "name": "CommunityIssuanceAddressSet",
     "type": "event"
   },
   {
@@ -199,19 +181,6 @@
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "communityIssuanceAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
       }
     ],
     "stateMutability": "view",

@@ -204,11 +204,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     return this._readable.getStabilityDeposit(address, overrides);
   }
 
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getRemainingStabilityPoolLQTYReward} */
-  getRemainingStabilityPoolLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getRemainingStabilityPoolLQTYReward(overrides);
-  }
-
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getLUSDInStabilityPool} */
   getLUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal> {
     return this._readable.getLUSDInStabilityPool(overrides);
@@ -232,18 +227,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getUniTokenAllowance} */
   getUniTokenAllowance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
     return this._readable.getUniTokenAllowance(address, overrides);
-  }
-
-  /** @internal */
-  _getRemainingLiquidityMiningLQTYRewardCalculator(
-    overrides?: EthersCallOverrides
-  ): Promise<(blockTimestamp: number) => Decimal> {
-    return this._readable._getRemainingLiquidityMiningLQTYRewardCalculator(overrides);
-  }
-
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getRemainingLiquidityMiningLQTYReward} */
-  getRemainingLiquidityMiningLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getRemainingLiquidityMiningLQTYReward(overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getLiquidityMiningStake} */

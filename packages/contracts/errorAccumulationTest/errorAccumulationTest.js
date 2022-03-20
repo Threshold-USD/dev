@@ -36,7 +36,6 @@ contract('TroveManager', async accounts => {
 
     lqtyStaking = LQTYContracts.lqtyStaking
     lqtyToken = LQTYContracts.lqtyToken
-    communityIssuance = LQTYContracts.communityIssuance
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectLQTYContracts(LQTYContracts)

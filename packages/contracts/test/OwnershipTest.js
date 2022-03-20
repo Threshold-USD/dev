@@ -9,7 +9,7 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
   const [owner, alice, bob] = accounts;
 
   const [bountyAddress, lpRewardsAddress, multisig] = accounts.slice(997, 1000)
-  
+
   let contracts
   let lusdToken
   let sortedTroves
@@ -20,8 +20,7 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
   let borrowerOperations
 
   let lqtyStaking
-  let communityIssuance
-  let lqtyToken 
+  let lqtyToken
   let lockupContractFactory
 
   before(async () => {
@@ -39,7 +38,6 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
     borrowerOperations = contracts.borrowerOperations
 
     lqtyStaking = LQTYContracts.lqtyStaking
-    communityIssuance = LQTYContracts.communityIssuance
     lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
   })
@@ -129,25 +127,6 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
     })
   })
 
-  describe('CommunityIssuance', async accounts => {
-    it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
-      const params = [lqtyToken.address, stabilityPool.address]
-      await th.assertRevert(communityIssuance.setAddresses(...params, { from: alice }))
-
-      // Attempt to use zero address
-      await testZeroAddress(communityIssuance, params)
-      // Attempt to use non contract
-      await testNonContractAddress(communityIssuance, params)
-
-      // Owner can successfully set any address
-      const txOwner = await communityIssuance.setAddresses(...params, { from: owner })
-
-      assert.isTrue(txOwner.receipt.status)
-      // fails if called twice
-      await th.assertRevert(communityIssuance.setAddresses(...params, { from: owner }))
-    })
-  })
-
   describe('LQTYStaking', async accounts => {
     it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
       await testSetAddresses(lqtyStaking, 5)
@@ -174,4 +153,3 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
     })
   })
 })
-

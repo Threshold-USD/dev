@@ -151,12 +151,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     // (undocumented)
     getPrice(overrides?: EthersCallOverrides): Promise<Decimal>;
     // (undocumented)
-    getRemainingLiquidityMiningLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal>;
-    // @internal (undocumented)
-    _getRemainingLiquidityMiningLQTYRewardCalculator(overrides?: EthersCallOverrides): Promise<(blockTimestamp: number) => Decimal>;
-    // (undocumented)
-    getRemainingStabilityPoolLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal>;
-    // (undocumented)
     getStabilityDeposit(address?: string, overrides?: EthersCallOverrides): Promise<StabilityDeposit>;
     // (undocumented)
     getTotal(overrides?: EthersCallOverrides): Promise<Trove>;
@@ -478,12 +472,6 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     getNumberOfTroves(overrides?: EthersCallOverrides): Promise<number>;
     // (undocumented)
     getPrice(overrides?: EthersCallOverrides): Promise<Decimal>;
-    // (undocumented)
-    getRemainingLiquidityMiningLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal>;
-    // @internal (undocumented)
-    _getRemainingLiquidityMiningLQTYRewardCalculator(overrides?: EthersCallOverrides): Promise<(blockTimestamp: number) => Decimal>;
-    // (undocumented)
-    getRemainingStabilityPoolLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal>;
     // (undocumented)
     getStabilityDeposit(address?: string, overrides?: EthersCallOverrides): Promise<StabilityDeposit>;
     // (undocumented)

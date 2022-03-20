@@ -8,10 +8,8 @@ import { LoadingOverlay } from "../../../LoadingOverlay";
 import { useMyTransactionState } from "../../../Transaction";
 import { DisabledEditableRow, StaticRow } from "../../../Trove/Editor";
 import { useFarmView } from "../../context/FarmViewContext";
-import { RemainingLQTY } from "../RemainingLQTY";
 import { ClaimReward } from "./ClaimReward";
 import { UnstakeAndClaim } from "../UnstakeAndClaim";
-import { Yield } from "../Yield";
 
 const selector = ({
   liquidityMiningStake,
@@ -48,11 +46,6 @@ export const Active: React.FC = () => {
     <Card>
       <Heading>
         Uniswap Liquidity Farm
-        {!isTransactionPending && (
-          <Flex sx={{ justifyContent: "flex-end" }}>
-            <RemainingLQTY />
-          </Flex>
-        )}
       </Heading>
       <Box sx={{ p: [2, 3] }}>
         <Box>
@@ -80,9 +73,6 @@ export const Active: React.FC = () => {
               color={liquidityMiningLQTYReward.nonZero && "success"}
               unit={GT}
             />
-            <Flex sx={{ justifyContent: "flex-end", flex: 1 }}>
-              <Yield />
-            </Flex>
           </Flex>
         </Box>
 

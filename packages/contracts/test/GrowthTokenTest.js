@@ -39,7 +39,6 @@ contract('LQTY Token', async accounts => {
   let contracts
   let lqtyTokenTester
   let lqtyStaking
-  let communityIssuance
 
   let tokenName
   let tokenVersion
@@ -113,7 +112,6 @@ contract('LQTY Token', async accounts => {
 
     lqtyStaking = LQTYContracts.lqtyStaking
     lqtyTokenTester = LQTYContracts.lqtyToken
-    communityIssuance = LQTYContracts.communityIssuance
 
     tokenName = await lqtyTokenTester.name()
     tokenVersion = await lqtyTokenTester.version()
@@ -138,7 +136,7 @@ contract('LQTY Token', async accounts => {
 
   it('totalSupply(): gets the total supply', async () => {
     const total = (await lqtyTokenTester.totalSupply()).toString()
-   
+
     assert.equal(total, dec(100, 24))
   })
 
@@ -254,7 +252,6 @@ contract('LQTY Token', async accounts => {
 
     await assertRevert(lqtyTokenTester.transfer(lqtyTokenTester.address, 1, { from: A }))
     await assertRevert(lqtyTokenTester.transfer(ZERO_ADDRESS, 1, { from: A }))
-    await assertRevert(lqtyTokenTester.transfer(communityIssuance.address, 1, { from: A }))
     await assertRevert(lqtyTokenTester.transfer(lqtyStaking.address, 1, { from: A }))
   })
 
@@ -381,5 +378,3 @@ contract('LQTY Token', async accounts => {
     await assertRevert(tx, 'LQTY: invalid signature')
   })
 })
-
-

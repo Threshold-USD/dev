@@ -4,8 +4,6 @@ import { useLiquity } from "../../../../hooks/LiquityContext";
 import { Icon } from "../../../Icon";
 import { InfoMessage } from "../../../InfoMessage";
 import { useFarmView } from "../../context/FarmViewContext";
-import { RemainingLQTY } from "../RemainingLQTY";
-import { Yield } from "../Yield";
 
 const uniLink = (lusdAddress: string) => `https://app.uniswap.org/#/add/ETH/${lusdAddress}`;
 
@@ -26,9 +24,6 @@ export const Inactive: React.FC = () => {
     <Card>
       <Heading>
         Uniswap Liquidity Farm
-        <Flex sx={{ justifyContent: "flex-end" }}>
-          <RemainingLQTY />
-        </Flex>
       </Heading>
       <Box sx={{ p: [2, 3] }}>
         <InfoMessage title="You aren't farming LQTY.">
@@ -43,9 +38,6 @@ export const Inactive: React.FC = () => {
         </InfoMessage>
 
         <Flex variant="layout.actions">
-          <Flex sx={{ justifyContent: "flex-start", alignItems: "center", flex: 1 }}>
-            <Yield />
-          </Flex>
           <Button onClick={handleStakePressed}>Stake</Button>
         </Flex>
       </Box>

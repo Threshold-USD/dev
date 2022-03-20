@@ -16,7 +16,7 @@ import {
 
 import { MultiTroveGetter } from "../types";
 
-import { decimalify, numberify, panic } from "./_utils";
+import { decimalify, panic } from "./_utils";
 import { EthersCallOverrides, EthersProvider, EthersSigner } from "./types";
 
 import {
@@ -273,17 +273,6 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     );
   }
 
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getRemainingStabilityPoolLQTYReward} */
-  async getRemainingStabilityPoolLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal> {
-    const { communityIssuance } = _getContracts(this.connection);
-
-    const issuanceCap = this.connection.totalStabilityPoolLQTYReward;
-    const totalLQTYIssued = decimalify(await communityIssuance.totalLQTYIssued({ ...overrides }));
-
-    // totalLQTYIssued approaches but never reaches issuanceCap
-    return issuanceCap.sub(totalLQTYIssued);
-  }
-
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getLUSDInStabilityPool} */
   getLUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal> {
     const { stabilityPool } = _getContracts(this.connection);
@@ -321,35 +310,6 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     const { uniToken, unipool } = _getContracts(this.connection);
 
     return uniToken.allowance(address, unipool.address, { ...overrides }).then(decimalify);
-  }
-
-  /** @internal */
-  async _getRemainingLiquidityMiningLQTYRewardCalculator(
-    overrides?: EthersCallOverrides
-  ): Promise<(blockTimestamp: number) => Decimal> {
-    const { unipool } = _getContracts(this.connection);
-
-    const [totalSupply, rewardRate, periodFinish, lastUpdateTime] = await Promise.all([
-      unipool.totalSupply({ ...overrides }),
-      unipool.rewardRate({ ...overrides }).then(decimalify),
-      unipool.periodFinish({ ...overrides }).then(numberify),
-      unipool.lastUpdateTime({ ...overrides }).then(numberify)
-    ]);
-
-    return (blockTimestamp: number) =>
-      rewardRate.mul(
-        Math.max(0, periodFinish - (totalSupply.isZero() ? lastUpdateTime : blockTimestamp))
-      );
-  }
-
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getRemainingLiquidityMiningLQTYReward} */
-  async getRemainingLiquidityMiningLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal> {
-    const [calculateRemainingLQTY, blockTimestamp] = await Promise.all([
-      this._getRemainingLiquidityMiningLQTYRewardCalculator(overrides),
-      this._getBlockTimestamp(overrides?.blockTag)
-    ]);
-
-    return calculateRemainingLQTY(blockTimestamp);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getLiquidityMiningStake} */
@@ -595,12 +555,6 @@ class _BlockPolledReadableEthersLiquity
       : this._readable.getStabilityDeposit(address, overrides);
   }
 
-  async getRemainingStabilityPoolLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._blockHit(overrides)
-      ? this.store.state.remainingStabilityPoolLQTYReward
-      : this._readable.getRemainingStabilityPoolLQTYReward(overrides);
-  }
-
   async getLUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal> {
     return this._blockHit(overrides)
       ? this.store.state.lusdInStabilityPool
@@ -629,12 +583,6 @@ class _BlockPolledReadableEthersLiquity
     return this._userHit(address, overrides)
       ? this.store.state.uniTokenAllowance
       : this._readable.getUniTokenAllowance(address, overrides);
-  }
-
-  async getRemainingLiquidityMiningLQTYReward(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._blockHit(overrides)
-      ? this.store.state.remainingLiquidityMiningLQTYReward
-      : this._readable.getRemainingLiquidityMiningLQTYReward(overrides);
   }
 
   async getLiquidityMiningStake(
@@ -716,10 +664,6 @@ class _BlockPolledReadableEthersLiquity
   }
 
   _getDefaultPool(): Promise<Trove> {
-    throw new Error("Method not implemented.");
-  }
-
-  _getRemainingLiquidityMiningLQTYRewardCalculator(): Promise<(blockTimestamp: number) => Decimal> {
     throw new Error("Method not implemented.");
   }
 }

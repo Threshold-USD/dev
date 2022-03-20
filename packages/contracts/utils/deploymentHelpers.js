@@ -14,12 +14,10 @@ const HintHelpers = artifacts.require("./HintHelpers.sol")
 const LQTYStaking = artifacts.require("./LQTYStaking.sol")
 const LQTYToken = artifacts.require("./LQTYToken.sol")
 const LockupContractFactory = artifacts.require("./LockupContractFactory.sol")
-const CommunityIssuance = artifacts.require("./CommunityIssuance.sol")
 
 const Unipool =  artifacts.require("./Unipool.sol")
 
 const LQTYTokenTester = artifacts.require("./LQTYTokenTester.sol")
-const CommunityIssuanceTester = artifacts.require("./CommunityIssuanceTester.sol")
 const StabilityPoolTester = artifacts.require("./StabilityPoolTester.sol")
 const ActivePoolTester = artifacts.require("./ActivePoolTester.sol")
 const DefaultPoolTester = artifacts.require("./DefaultPoolTester.sol")
@@ -53,7 +51,6 @@ LQTY contracts consist of only those contracts related to the LQTY Token:
 -the LQTY token
 -the Lockup factory and lockup contracts
 -the LQTYStaking contract
--the CommunityIssuance contract 
 */
 
 const ZERO_ADDRESS = '0x' + '0'.repeat(40)
@@ -139,7 +136,6 @@ class DeploymentHelper {
     testerContracts.priceFeedTestnet = await PriceFeedTestnet.new()
     testerContracts.sortedTroves = await SortedTroves.new()
     // Actual tester contracts
-    testerContracts.communityIssuance = await CommunityIssuanceTester.new()
     testerContracts.activePool = await ActivePoolTester.new()
     testerContracts.defaultPool = await DefaultPoolTester.new()
     testerContracts.stabilityPool = await StabilityPoolTester.new()
@@ -161,15 +157,12 @@ class DeploymentHelper {
   static async deployLQTYContractsHardhat(bountyAddress, lpRewardsAddress, multisigAddress) {
     const lqtyStaking = await LQTYStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
-    const communityIssuance = await CommunityIssuance.new()
 
     LQTYStaking.setAsDeployed(lqtyStaking)
     LockupContractFactory.setAsDeployed(lockupContractFactory)
-    CommunityIssuance.setAsDeployed(communityIssuance)
 
-    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor 
+    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
     const lqtyToken = await LQTYToken.new(
-      communityIssuance.address, 
       lqtyStaking.address,
       lockupContractFactory.address,
       bountyAddress,
@@ -181,7 +174,6 @@ class DeploymentHelper {
     const LQTYContracts = {
       lqtyStaking,
       lockupContractFactory,
-      communityIssuance,
       lqtyToken
     }
     return LQTYContracts
@@ -190,15 +182,12 @@ class DeploymentHelper {
   static async deployLQTYTesterContractsHardhat(bountyAddress, lpRewardsAddress, multisigAddress) {
     const lqtyStaking = await LQTYStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
-    const communityIssuance = await CommunityIssuanceTester.new()
 
     LQTYStaking.setAsDeployed(lqtyStaking)
     LockupContractFactory.setAsDeployed(lockupContractFactory)
-    CommunityIssuanceTester.setAsDeployed(communityIssuance)
 
-    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor 
+    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
     const lqtyToken = await LQTYTokenTester.new(
-      communityIssuance.address, 
       lqtyStaking.address,
       lockupContractFactory.address,
       bountyAddress,
@@ -210,7 +199,6 @@ class DeploymentHelper {
     const LQTYContracts = {
       lqtyStaking,
       lockupContractFactory,
-      communityIssuance,
       lqtyToken
     }
     return LQTYContracts
@@ -253,23 +241,20 @@ class DeploymentHelper {
   static async deployLQTYContractsTruffle(bountyAddress, lpRewardsAddress, multisigAddress) {
     const lqtyStaking = await lqtyStaking.new()
     const lockupContractFactory = await LockupContractFactory.new()
-    const communityIssuance = await CommunityIssuance.new()
 
-    /* Deploy LQTY Token, passing Community Issuance,  LQTYStaking, and Factory addresses 
+    /* Deploy LQTY Token, passing Community Issuance,  LQTYStaking, and Factory addresses
     to the constructor  */
     const lqtyToken = await LQTYToken.new(
-      communityIssuance.address, 
       lqtyStaking.address,
       lockupContractFactory.address,
       bountyAddress,
-      lpRewardsAddress, 
+      lpRewardsAddress,
       multisigAddress
     )
 
     const LQTYContracts = {
       lqtyStaking,
       lockupContractFactory,
-      communityIssuance,
       lqtyToken
     }
     return LQTYContracts
@@ -334,7 +319,7 @@ class DeploymentHelper {
       contracts.borrowerOperations.address
     )
 
-    // set contract addresses in the FunctionCaller 
+    // set contract addresses in the FunctionCaller
     await contracts.functionCaller.setTroveManagerAddress(contracts.troveManager.address)
     await contracts.functionCaller.setSortedTrovesAddress(contracts.sortedTroves.address)
 
@@ -353,7 +338,7 @@ class DeploymentHelper {
       LQTYContracts.lqtyStaking.address
     )
 
-    // set contracts in BorrowerOperations 
+    // set contracts in BorrowerOperations
     await contracts.borrowerOperations.setAddresses(
       contracts.troveManager.address,
       contracts.activePool.address,
@@ -374,8 +359,7 @@ class DeploymentHelper {
       contracts.activePool.address,
       contracts.lusdToken.address,
       contracts.sortedTroves.address,
-      contracts.priceFeedTestnet.address,
-      LQTYContracts.communityIssuance.address
+      contracts.priceFeedTestnet.address
     )
 
     await contracts.activePool.setAddresses(
@@ -412,15 +396,11 @@ class DeploymentHelper {
     await LQTYContracts.lqtyStaking.setAddresses(
       LQTYContracts.lqtyToken.address,
       coreContracts.lusdToken.address,
-      coreContracts.troveManager.address, 
+      coreContracts.troveManager.address,
       coreContracts.borrowerOperations.address,
       coreContracts.activePool.address
     )
-  
-    await LQTYContracts.communityIssuance.setAddresses(
-      LQTYContracts.lqtyToken.address,
-      coreContracts.stabilityPool.address
-    )
+
   }
 
   static async connectUnipool(uniPool, LQTYContracts, uniswapPairAddr, duration) {

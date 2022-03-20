@@ -10,7 +10,7 @@ const timeValues = testHelpers.TimeValues
 
 /* Script that logs gas costs for Liquity math functions. */
 contract('Gas costs for math functions', async accounts => {
-  
+
   const bountyAddress = accounts[998]
   const lpRewardsAddress = accounts[999]
 
@@ -42,7 +42,6 @@ contract('Gas costs for math functions', async accounts => {
 
     gtStaking = LQTYContracts.gtStaking
     lqtyToken = LQTYContracts.lqtyToken
-    communityIssuance = LQTYContracts.communityIssuance
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
@@ -76,7 +75,7 @@ contract('Gas costs for math functions', async accounts => {
 
   // --- Vary the exponent  ---
 
-  // Multiple calls per test with random bases show that gas costs do not vary according to base 
+  // Multiple calls per test with random bases show that gas costs do not vary according to base
 
   it("", async () => {
     const n = 2
@@ -109,7 +108,7 @@ contract('Gas costs for math functions', async accounts => {
   })
 
   it("", async () => {
-    const n = 2592000  // Seconds in 1 month 
+    const n = 2592000  // Seconds in 1 month
     const runs = 100
     const message = `exponentiation: n = ${n}, runs = ${runs}`
     const gasResults = await exponentiate(mathTester, 0.9999999999, 0.999999999999999999, n, runs)
@@ -119,7 +118,7 @@ contract('Gas costs for math functions', async accounts => {
   })
 
   it("", async () => {
-    const n = 43200  // Minutes in 1 month 
+    const n = 43200  // Minutes in 1 month
     const runs = 100
     const message = `exponentiation: n = ${n}, runs = ${runs}`
     const gasResults = await exponentiate(mathTester, 0.9999999999, 0.999999999999999999, n, runs)
@@ -164,7 +163,7 @@ contract('Gas costs for math functions', async accounts => {
 
     data50Years.push(`exponentiation: exponent vs gas cost: exponent in units of minutes, max exponent is 50 years \n`)
 
-    
+
     for (let n = 2; n <= timeValues.MINUTES_IN_ONE_YEAR * 50; n += timeValues.MINUTES_IN_ONE_WEEK) {
       console.log(`n: ${n}`)
       const runs = 1
@@ -186,4 +185,3 @@ contract('Gas costs for math functions', async accounts => {
 
 
 })
-
