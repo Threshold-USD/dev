@@ -83,6 +83,7 @@ interface IStabilityPool {
      * - User has a non zero deposit
      * ---
      * - Sends all depositor's accumulated gains (ETH) to depositor
+     * - Decreases deposit stake, and takes new snapshot.
      *
      * If _amount > userDeposit, the user withdraws all of their compounded deposit.
      */

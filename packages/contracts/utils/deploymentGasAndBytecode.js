@@ -107,7 +107,6 @@ async function main() {
   const testerContracts = await dh.deployTesterContractsHardhat()
 
   await dh.connectCoreContracts(coreContracts, LQTYContracts)
-  await dh.connectLQTYContracts(LQTYContracts)
   await dh.connectLQTYContractsToCore(LQTYContracts, coreContracts)
 
 

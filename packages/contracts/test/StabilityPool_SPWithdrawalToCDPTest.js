@@ -72,7 +72,6 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       defaultPool = contracts.defaultPool
       borrowerOperations = contracts.borrowerOperations
 
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
     })

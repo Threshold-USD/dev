@@ -117,7 +117,6 @@ contract('LQTY Token', async accounts => {
     tokenVersion = await lqtyTokenTester.version()
     chainId = await lqtyTokenTester.getChainId()
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
   })

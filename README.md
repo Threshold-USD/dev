@@ -75,8 +75,6 @@ Visit [liquity.org](https://www.liquity.org) to find out more and join the discu
   - [Hint Helper Functions - `HintHelpers.sol`](#hint-helper-functions---hinthelperssol)
   - [Stability Pool Functions - `StabilityPool.sol`](#stability-pool-functions---stabilitypoolsol)
   - [LQTY Staking Functions  `LQTYStaking.sol`](#lqty-staking-functions--lqtystakingsol)
-  - [Lockup Contract Factory `LockupContractFactory.sol`](#lockup-contract-factory-lockupcontractfactorysol)
-  - [Lockup contract - `LockupContract.sol`](#lockup-contract---lockupcontractsol)
   - [LUSD token `LUSDToken.sol` and LQTY token `LQTYToken.sol`](#lusd-token-lusdtokensol-and-lqty-token-lqtytokensol)
 - [Supplying Hints to Trove operations](#supplying-hints-to-trove-operations)
   - [Hints for `redeemCollateral`](#hints-for-redeemcollateral)
@@ -282,57 +280,16 @@ The LQTY contracts consist of:
 
 `LQTYToken.sol` - This is the LQTY ERC20 contract. It has a hard cap supply of 100 million, and during the first year, restricts transfers from the Liquity admin address, a regular Ethereum address controlled by the project company Liquity AG. **Note that the Liquity admin address has no extra privileges and does not retain any control over the Liquity protocol once deployed.**
 
-### LQTY Lockup contracts and token vesting
-
-Some LQTY is reserved for team members and partners, and is locked up for one year upon system launch. Additionally, some team members receive LQTY vested on a monthly basis, which during the first year, is transferred directly to their lockup contract.
-
-In the first year after launch:
-
-- All team members and partners are unable to access their locked up LQTY tokens
-
-- The Liquity admin address may transfer tokens **only to verified lockup contracts with an unlock date at least one year after system deployment**
-
-### Lockup Implementation and admin transfer restriction
-
-A `LockupContractFactory` is used to deploy `LockupContracts` in the first year. During the first year, the `LQTYToken` checks that any transfer from the Liquity admin address is to a valid `LockupContract` that is registered in and was deployed through the `LockupContractFactory`.
-
 ### Launch sequence and vesting process
 
 #### Deploy LQTY Contracts
-1. Liquity admin deploys `LockupContractFactory`
 3. Liquity admin deploys `LQTYStaking`
 4. Liquity admin creates a Pool in Uniswap for LUSD/ETH and deploys `Unipool` (LP rewards contract), which knows the address of the Pool
-5. Liquity admin deploys `LQTYToken`, which upon deployment:
-- Stores the `LockupContractFactory` addresses
-6. Liquity admin sets `LQTYToken` address in `LockupContractFactory`, `LQTYStaking`, and `Unipool`
-
-#### Deploy and fund Lockup Contracts
-7. Liquity admin tells `LockupContractFactory` to deploy a `LockupContract` for each beneficiary, with an `unlockTime` set to exactly one year after system deployment
-8. Liquity admin transfers LQTY to each `LockupContract`, according to their entitlement
 
 #### Deploy Liquity Core
 9. Liquity admin deploys the Liquity core system
 10. Liquity admin connects Liquity core system internally (with setters)
 11. Liquity admin connects `LQTYStaking` to Liquity core contracts and `LQTYToken`
-
-#### During one year lockup period
-- Liquity admin periodically transfers newly vested tokens to team & partners’ `LockupContracts`, as per their vesting schedules
-- Liquity admin may only transfer LQTY to `LockupContracts`
-- Anyone may deploy new `LockupContracts` via the Factory, setting any `unlockTime` that is >= 1 year from system deployment
-
-#### Upon end of one year lockup period
-- All beneficiaries may withdraw their entire entitlements
-- Liquity admin address restriction on LQTY transfers is automatically lifted, and Liquity admin may now transfer LQTY to any address
-- Anyone may deploy new `LockupContracts` via the Factory, setting any `unlockTime` in the future
-
-#### Post-lockup period
-- Liquity admin periodically transfers newly vested tokens to team & partners, directly to their individual addresses, or to a fresh lockup contract if required.
-
-_NOTE: In the final architecture, a multi-sig contract will be used to move LQTY Tokens, rather than the single Liquity admin EOA. It will be deployed at the start of the sequence, and have its address recorded in  `LQTYToken` in step 4, and receive LQTY tokens. It will be used to move LQTY in step 7, and during & after the lockup period. The Liquity admin EOA will only be used for deployment of contracts in steps 1-4 and 9._
-
-_The current code does not utilize a multi-sig. It implements the launch architecture outlined above._
-
-_Additionally, a LP staking contract will receive the initial LP staking reward allowance, rather than an EOA. It will be used to hold and issue LQTY to users who stake LP tokens that correspond to certain pools on DEXs._
 
 ## Core System Architecture
 
@@ -784,14 +741,6 @@ The number of Troves to consider for redemption can be capped by passing a non-z
  `stake(uint _LQTYamount)`: sends `_LQTYAmount` from the caller to the staking contract, and increases their stake. If the caller already has a non-zero stake, it pays out their accumulated ETH and LUSD gains from staking.
 
  `unstake(uint _LQTYamount)`: reduces the caller’s stake by `_LQTYamount`, up to a maximum of their entire stake. It pays out their accumulated ETH and LUSD gains from staking.
-
-### Lockup Contract Factory `LockupContractFactory.sol`
-
-`deployLockupContract(address _beneficiary, uint _unlockTime)`; Deploys a `LockupContract`, and sets the beneficiary’s address, and the `_unlockTime` - the instant in time at which the LQTY can be withrawn by the beneficiary.
-
-### Lockup contract - `LockupContract.sol`
-
-`withdrawLQTY()`: When the current time is later than the `unlockTime` and the caller is the beneficiary, it transfers their LQTY to them.
 
 ### LUSD token `LUSDToken.sol` and LQTY token `LQTYToken.sol`
 

@@ -32,8 +32,6 @@ import "../Dependencies/console.sol";
 * 8) (64 + 2/3) million tokens are minted at deployment to the Liquity multisig
 *
 * 9) Until one year from deployment:
-* -Liquity multisig may only transfer() tokens to LockupContracts that have been deployed via & registered in the
-*  LockupContractFactory
 * -approve(), increaseAllowance(), decreaseAllowance() revert when called by the multisig
 * -transferFrom() reverts when the multisig is the sender
 * -sendToLQTYStaking() reverts when the multisig is the sender, blocking the multisig from staking its LQTY.

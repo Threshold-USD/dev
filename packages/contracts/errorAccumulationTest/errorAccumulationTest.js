@@ -37,7 +37,6 @@ contract('TroveManager', async accounts => {
     lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
   })

@@ -57,7 +57,6 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, coreContracts)
 

@@ -342,7 +342,6 @@ contract('Fee arithmetic tests', async accounts => {
     contracts = await deploymentHelper.deployLiquityCore()
     const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
   })

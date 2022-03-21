@@ -71,7 +71,6 @@ contract('StabilityPool', async accounts => {
 
       lqtyToken = LQTYContracts.lqtyToken
 
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 

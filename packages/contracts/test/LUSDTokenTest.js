@@ -72,7 +72,6 @@ contract('LUSDToken', async accounts => {
       const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
 
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 
       lusdTokenOriginal = contracts.lusdToken

@@ -224,7 +224,6 @@ contract("PoolManager - random liquidations/deposits, then check all depositors 
       borrowerOperations = contracts.borrowerOperations
       sortedTroves = contracts.sortedTroves
 
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
     })

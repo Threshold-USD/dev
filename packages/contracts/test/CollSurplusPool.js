@@ -42,7 +42,6 @@ contract('CollSurplusPool', async accounts => {
     borrowerOperations = contracts.borrowerOperations
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
   })
 

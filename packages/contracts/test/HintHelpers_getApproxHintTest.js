@@ -88,7 +88,6 @@ contract('HintHelpers', async accounts => {
     priceFeed = contracts.priceFeedTestnet
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 
     numAccounts = 10

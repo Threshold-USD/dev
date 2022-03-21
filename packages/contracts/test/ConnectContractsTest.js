@@ -36,7 +36,6 @@ contract('Deployment script - Sets correct contract addresses dependencies after
     lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, coreContracts)
   })

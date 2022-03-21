@@ -66,7 +66,6 @@ contract('BorrowerWrappers', async accounts => {
     contracts = await deploymentHelper.deployLUSDToken(contracts)
     const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat(bountyAddress, multisig)
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 

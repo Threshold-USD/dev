@@ -73,7 +73,6 @@ contract('SortedTroves', async accounts => {
       borrowerOperations = contracts.borrowerOperations
       lusdToken = contracts.lusdToken
 
-      await deploymentHelper.connectLQTYContracts(LQTYContracts)
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
     })

@@ -72,7 +72,6 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     borrowerOperations = contracts.borrowerOperations
     collSurplusPool = contracts.collSurplusPool
 
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
   })

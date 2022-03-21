@@ -44,7 +44,6 @@ contract('Gas costs for math functions', async accounts => {
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContracts(LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
   })
 
