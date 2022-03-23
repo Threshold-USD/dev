@@ -2,17 +2,18 @@ import { Theme, ThemeUIStyleObject } from "theme-ui";
 
 const baseColors = {
   blue: "#1542cd",
-  purple: "#745ddf",
+  purple: "#7C08F9",
   cyan: "#2eb6ea",
   green: "#28c081",
   yellow: "#fd9d28",
   red: "#dc2c10",
-  lightRed: "#ff755f"
+  lightRed: "#ff755f",
+  grey: "#e8eef3"
 };
 
 const colors = {
-  primary: baseColors.blue,
-  secondary: baseColors.purple,
+  primary: baseColors.purple,
+  secondary: baseColors.blue,
   accent: baseColors.cyan,
 
   success: baseColors.green,
@@ -20,8 +21,10 @@ const colors = {
   danger: baseColors.red,
   dangerHover: baseColors.lightRed,
   info: baseColors.blue,
+  border: baseColors.grey,
   invalid: "pink",
 
+  menu: "#939393",
   text: "#293147",
   background: "white",
   muted: "#eaebed"
@@ -69,6 +72,10 @@ const iconButton: ThemeUIStyleObject = {
   padding: 0,
   width: "40px",
   height: "40px",
+  stroke: "#000",
+  ":hover": {
+    stroke: "#7C08F9",
+  },
 
   background: "none",
 
@@ -335,7 +342,7 @@ const theme: Theme = {
       justifyContent: "space-between",
       alignItems: "stretch",
 
-      position: ["fixed", "relative"],
+      position: "fixed",
       width: "100vw",
       top: 0,
       zIndex: 1,
@@ -343,8 +350,26 @@ const theme: Theme = {
       px: [2, "12px", "12px", 5],
       py: [2, "12px", "12px"],
 
-      ...headerGradient,
-      boxShadow: [1, "none"]
+      borderBottom: 1,
+      borderColor: "border",
+      background: "white"
+    },
+
+    sideBar: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "stretch",
+
+      position: "fixed",
+      height: "100%",
+      width: "17em",
+      top: 0,
+      zIndex: 0,
+      borderRight: 1,
+      borderColor: "border",
+
+      px: [2, "12px", "12px", 5],
+      py: [2, "12px", "12px"],
     },
 
     footer: {
@@ -360,10 +385,12 @@ const theme: Theme = {
     },
 
     main: {
+      display: "flex",
+      alignItems: "center",
       width: "100%",
       maxWidth: "912px",
-      mx: "auto",
-      mt: ["40px", 0],
+      mx: ["20px", "auto"],
+      mt: "60px",
       mb: ["40px", "40px"],
       px: cardGapX
     },
@@ -454,10 +481,13 @@ const theme: Theme = {
 
   styles: {
     root: {
+      position: "relative",
+
       fontFamily: "body",
       lineHeight: "body",
       fontWeight: "body",
 
+      width: "100%",
       height: "100%",
 
       "#root": {
@@ -479,10 +509,9 @@ const theme: Theme = {
       py: 1,
       fontWeight: "medium",
       fontSize: 2,
-      textTransform: "uppercase",
-      letterSpacing: "2px",
-      width: ["100%", "auto"],
-      mt: [3, "auto"]
+      textTransform: "capitalize",
+      mt: [3],
+      color: "menu"
     }
   }
 };
