@@ -72,7 +72,7 @@ const UnsupportedMainnetFallback: React.FC = () => (
 
 const App = () => {
   const loader = (
-    <Flex sx={{ alignItems: "center", justifyContent: "center", height: "100vh" }}>
+    <Flex sx={{ alignItems: "center", justifyContent: "center", height: "100vh", width: "100vw" }}>
       <Spinner sx={{ m: 2, color: "text" }} size="32px" />
       <Heading>Loading...</Heading>
     </Flex>

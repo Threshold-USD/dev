@@ -8,7 +8,10 @@ import { LiquityStoreProvider } from "@liquity/lib-react";
 
 import { useLiquity } from "./hooks/LiquityContext";
 import { TransactionMonitor } from "./components/Transaction";
+import { Nav } from "./components/Nav";
 import { UserAccount } from "./components/UserAccount";
+import { SideBar } from "./components/SideBar";
+// import { Social } from "./components/Social";
 import { SystemStatsPopup } from "./components/SystemStatsPopup";
 import { Header } from "./components/Header";
 
@@ -51,6 +54,10 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                     <UserAccount />
                     <SystemStatsPopup />
                   </Header>
+                  <SideBar>
+                    <Nav />
+                    {/*<Social />*/}
+                  </SideBar>
 
                   <Container
                     variant="main"
