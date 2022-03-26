@@ -19,7 +19,6 @@ import {
   faCog,
   faCheck,
   faPlug,
-  faExclamationCircle,
   faAngleUp,
   faAngleDoubleUp,
   faAngleDown,
@@ -27,7 +26,11 @@ import {
   faPen,
   faHandPaper,
   faHeartbeat,
-  faBars
+  faBars,
+  faTable,
+  faColumns,
+  faBook,
+  faExchangeAlt
 } from "@fortawesome/free-solid-svg-icons";
 import { faClipboard, faQuestionCircle } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon, FontAwesomeIconProps } from "@fortawesome/react-fontawesome";
@@ -52,7 +55,6 @@ library.add(
   faExternalLinkAlt,
   faCog,
   faPlug,
-  faExclamationCircle,
   faAngleUp,
   faAngleDoubleUp,
   faAngleDown,
@@ -61,7 +63,11 @@ library.add(
   faHandPaper,
   faHeartbeat,
   faBars,
-  faQuestionCircle
+  faQuestionCircle,
+  faTable,
+  faColumns,
+  faBook,
+  faExchangeAlt
 );
 
 const getIcon = (name: IconName): IconProp => {

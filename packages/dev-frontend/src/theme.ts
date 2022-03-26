@@ -152,7 +152,7 @@ const headerGradient: ThemeUIStyleObject = {
 };
 
 const theme: Theme = {
-  breakpoints: ["48em", "52em", "64em"],
+  breakpoints: ["100em", "140em"],
 
   space: [0, 4, 8, 16, 32, 64, 128, 256, 512],
 
@@ -348,7 +348,7 @@ const theme: Theme = {
       zIndex: 1,
 
       px: [2, "12px", "12px", 5],
-      py: [2, "12px", "12px"],
+      py: "17px",
 
       borderBottom: 1,
       borderColor: "border",
@@ -356,20 +356,19 @@ const theme: Theme = {
     },
 
     sideBar: {
-      display: "flex",
+      display: ["none", "flex"],
       justifyContent: "space-between",
       alignItems: "stretch",
 
       position: "fixed",
       height: "100%",
-      width: "17em",
+      width: "19em",
       top: 0,
       zIndex: 0,
       borderRight: 1,
       borderColor: "border",
-
-      px: [2, "12px", "12px", 5],
-      py: [2, "12px", "12px"],
+      background: "white",
+      pt: "7em",
     },
 
     footer: {
@@ -389,10 +388,10 @@ const theme: Theme = {
       alignItems: "center",
       width: "100%",
       maxWidth: "912px",
-      mx: ["20px", "auto"],
-      mt: "60px",
+      mx: ["auto"],
+      mt: ["80px"],
       mb: ["40px", "40px"],
-      px: cardGapX
+      px: ["20px", cardGapX]
     },
 
     columns: {
@@ -476,7 +475,8 @@ const theme: Theme = {
       color: "slate",
       fontSize: 1,
       fontWeight: "body"
-    }
+    },
+
   },
 
   styles: {
@@ -500,19 +500,37 @@ const theme: Theme = {
       ":hover": { color: "accent" },
       textDecoration: "none",
       fontWeight: "bold"
-    }
+    },
   },
 
   links: {
     nav: {
+      display: "flex",
+      alignItems: "center", 
+      mb: 2,
       px: 2,
       py: 1,
-      fontWeight: "medium",
-      fontSize: 2,
+      pl: "3em",
+      fontWeight: "bold",
+      fontSize: ".9rem",
       textTransform: "capitalize",
       mt: [3],
-      color: "menu"
-    }
+      color: "menu",
+      gap: "1em",
+      textDecoration: "none",
+      ":hover, :enabled": {
+        color: "primary",
+      },
+    },
+    socialIcons: {
+      display: "flex",
+      mx: 3,
+      my: 4,
+      color: "primary",
+      ":hover, :enabled": {
+        color: "primary",
+      },
+    },
   }
 };
 
