@@ -44,16 +44,14 @@ const select = ({
   total,
   lusdInStabilityPool,
   borrowingRate,
-  redemptionRate,
-  totalStakedLQTY
+  redemptionRate
 }: LiquityStoreState) => ({
   numberOfTroves,
   price,
   total,
   lusdInStabilityPool,
   borrowingRate,
-  redemptionRate,
-  totalStakedLQTY
+  redemptionRate
 });
 
 export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", showBalances }) => {
@@ -68,8 +66,7 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
     price,
     lusdInStabilityPool,
     total,
-    borrowingRate,
-    totalStakedLQTY
+    borrowingRate
   } = useLiquitySelector(select);
 
   const lusdInStabilityPoolPct =
@@ -118,13 +115,7 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
           {lusdInStabilityPool.shorten()}
           <Text sx={{ fontSize: 1 }}>&nbsp;({lusdInStabilityPoolPct.toString(1)})</Text>
         </Statistic>
-      )}
-      <Statistic
-        name="Staked LQTY"
-        tooltip="The total amount of LQTY that is staked for earning fee revenue."
-      >
-        {totalStakedLQTY.shorten()}
-      </Statistic>
+      )}      
       <Statistic
         name="Total Collateral Ratio"
         tooltip="The ratio of the Dollar value of the entire system collateral at the current ETH:USD price, to the entire system debt."

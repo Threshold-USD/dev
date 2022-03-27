@@ -4,7 +4,6 @@ import {
   Decimal,
   Fees,
   LiquityStore,
-  LQTYStake,
   ReadableLiquity,
   StabilityDeposit,
   Trove,
@@ -383,29 +382,6 @@ export class ReadableEthersLiquity implements ReadableLiquity {
 
     return createFees(blockTimestamp, total.collateralRatioIsBelowCritical(price));
   }
-
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getLQTYStake} */
-  async getLQTYStake(address?: string, overrides?: EthersCallOverrides): Promise<LQTYStake> {
-    address ??= _requireAddress(this.connection);
-    const { lqtyStaking } = _getContracts(this.connection);
-
-    const [stakedLQTY, collateralGain, lusdGain] = await Promise.all(
-      [
-        lqtyStaking.stakes(address, { ...overrides }),
-        lqtyStaking.getPendingETHGain(address, { ...overrides }),
-        lqtyStaking.getPendingLUSDGain(address, { ...overrides })
-      ].map(getBigNumber => getBigNumber.then(decimalify))
-    );
-
-    return new LQTYStake(stakedLQTY, collateralGain, lusdGain);
-  }
-
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTotalStakedLQTY} */
-  async getTotalStakedLQTY(overrides?: EthersCallOverrides): Promise<Decimal> {
-    const { lqtyStaking } = _getContracts(this.connection);
-
-    return lqtyStaking.totalLQTYStaked({ ...overrides }).then(decimalify);
-  }
 }
 
 type Resolved<T> = T extends Promise<infer U> ? U : T;
@@ -556,18 +532,6 @@ class _BlockPolledReadableEthersLiquity
 
   async getFees(overrides?: EthersCallOverrides): Promise<Fees> {
     return this._blockHit(overrides) ? this.store.state.fees : this._readable.getFees(overrides);
-  }
-
-  async getLQTYStake(address?: string, overrides?: EthersCallOverrides): Promise<LQTYStake> {
-    return this._userHit(address, overrides)
-      ? this.store.state.lqtyStake
-      : this._readable.getLQTYStake(address, overrides);
-  }
-
-  async getTotalStakedLQTY(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._blockHit(overrides)
-      ? this.store.state.totalStakedLQTY
-      : this._readable.getTotalStakedLQTY(overrides);
   }
 
   getTroves(

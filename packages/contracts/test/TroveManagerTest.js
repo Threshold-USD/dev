@@ -544,7 +544,6 @@ contract('TroveManager', async accounts => {
     assert.equal(TCR_Before, TCR_After)
   })
 
-
   it("liquidate(): Pool offsets increase the TCR", async () => {
     // Whale provides LUSD to SP
     const spDeposit = toBN(dec(100, 24))
@@ -1202,7 +1201,6 @@ contract('TroveManager', async accounts => {
     assert.equal(TCR_Before, TCR_After)
     assert.equal(listSize_Before, listSize_After)
   })
-
 
   it("liquidateTroves(): liquidates based on entire/collateral debt (including pending rewards), not raw collateral/debt", async () => {
     await openTrove({ ICR: toBN(dec(400, 16)), extraParams: { from: alice } })

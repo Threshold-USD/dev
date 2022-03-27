@@ -21,7 +21,6 @@ import { RedemptionPage } from "./pages/RedemptionPage";
 
 import { TroveViewProvider } from "./components/Trove/context/TroveViewProvider";
 import { StabilityViewProvider } from "./components/Stability/context/StabilityViewProvider";
-import { StakingViewProvider } from "./components/Staking/context/StakingViewProvider";
 
 type LiquityFrontendProps = {
   loader?: React.ReactNode;
@@ -75,7 +74,6 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                     </Switch>
                   </Container>
                 </Flex>
-            </StakingViewProvider>
           </StabilityViewProvider>
         </TroveViewProvider>
       </Router>

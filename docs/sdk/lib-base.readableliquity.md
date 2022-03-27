@@ -23,7 +23,6 @@ Implemented by [EthersLiquity](./lib-ethers.ethersliquity.md)<!-- -->.
 |  [getCollateralSurplusBalance(address)](./lib-base.readableliquity.getcollateralsurplusbalance.md) | Get the amount of leftover collateral available for withdrawal by an address. |
 |  [getFees()](./lib-base.readableliquity.getfees.md) | Get a calculator for current fees. |
 |  [getLQTYBalance(address)](./lib-base.readableliquity.getlqtybalance.md) | Get the amount of LQTY held by an address. |
-|  [getLQTYStake(address)](./lib-base.readableliquity.getlqtystake.md) | Get the current state of an LQTY Stake. |
 |  [getLUSDBalance(address)](./lib-base.readableliquity.getlusdbalance.md) | Get the amount of LUSD held by an address. |
 |  [getLUSDInStabilityPool()](./lib-base.readableliquity.getlusdinstabilitypool.md) | Get the total amount of LUSD currently deposited in the Stability Pool. |
 |  [getNumberOfTroves()](./lib-base.readableliquity.getnumberoftroves.md) | Get number of Troves that are currently open. |
@@ -31,7 +30,6 @@ Implemented by [EthersLiquity](./lib-ethers.ethersliquity.md)<!-- -->.
 |  [getStabilityDeposit(address)](./lib-base.readableliquity.getstabilitydeposit.md) | Get the current state of a Stability Deposit. |
 |  [getTotal()](./lib-base.readableliquity.gettotal.md) | Get the total amount of collateral and debt in the Liquity system. |
 |  [getTotalRedistributed()](./lib-base.readableliquity.gettotalredistributed.md) | Get the total collateral and debt per stake that has been liquidated through redistribution. |
-|  [getTotalStakedLQTY()](./lib-base.readableliquity.gettotalstakedlqty.md) | Get the total amount of LQTY currently staked. |
 |  [getTrove(address)](./lib-base.readableliquity.gettrove.md) | Get the current state of a Trove. |
 |  [getTroveBeforeRedistribution(address)](./lib-base.readableliquity.gettrovebeforeredistribution.md) | Get a Trove in its state after the last direct modification. |
 |  [getTroves(params)](./lib-base.readableliquity.gettroves_1.md) | Get a slice from the list of Troves. |

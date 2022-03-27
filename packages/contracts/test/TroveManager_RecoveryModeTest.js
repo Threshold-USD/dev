@@ -540,7 +540,6 @@ contract('TroveManager - in Recovery Mode', async accounts => {
     assert.equal(alice_ICR, dec(133, 16))
     assert.equal(dennis_ICR, dec(133, 16))
 
-    // console.log(`TCR: ${await th.getTCR(contracts)}`)
     // Try to liquidate Bob
     await assertRevert(troveManager.liquidate(bob, { from: owner }), "TroveManager: nothing to liquidate")
 
@@ -2796,12 +2795,10 @@ contract('TroveManager - in Recovery Mode', async accounts => {
      but it will be enough to liquidate Dennis. Afterwards the pool will be empty,
      so Erin won’t liquidated. */
     const tx = await troveManager.liquidateTroves(10)
-    console.log('gasUsed: ', tx.receipt.gasUsed)
 
     // Check A, B and D are closed
     assert.isFalse(await sortedTroves.contains(alice))
     assert.isFalse(await sortedTroves.contains(bob))
-    console.log(await sortedTroves.contains(carol))
     assert.isFalse(await sortedTroves.contains(dennis))
 
     // Check whale, C and E stay active
@@ -2851,7 +2848,6 @@ contract('TroveManager - in Recovery Mode', async accounts => {
      Note that, compared to the previous test, this one will make 1 more loop iteration,
      so it will consume more gas. */
     const tx = await troveManager.liquidateTroves(10)
-    console.log('gasUsed: ', tx.receipt.gasUsed)
 
     // Check A, B and D are closed
     assert.isFalse(await sortedTroves.contains(alice))
@@ -3455,7 +3451,6 @@ contract('TroveManager - in Recovery Mode', async accounts => {
      so Erin won’t liquidated. */
     const trovesToLiquidate = [alice, bob, carol, dennis, erin]
     const tx = await troveManager.batchLiquidateTroves(trovesToLiquidate)
-    console.log('gasUsed: ', tx.receipt.gasUsed)
 
     // Check A, B and D are closed
     assert.isFalse(await sortedTroves.contains(alice))
@@ -3509,7 +3504,6 @@ contract('TroveManager - in Recovery Mode', async accounts => {
      so it will consume more gas. */
     const trovesToLiquidate = [alice, bob, carol, dennis, erin]
     const tx = await troveManager.batchLiquidateTroves(trovesToLiquidate)
-    console.log('gasUsed: ', tx.receipt.gasUsed)
 
     // Check A, B and D are closed
     assert.isFalse(await sortedTroves.contains(alice))

@@ -2,7 +2,6 @@ import { Decimal } from "./Decimal";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { StabilityDeposit } from "./StabilityDeposit";
 import { Fees } from "./Fees";
-import { LQTYStake } from "./LQTYStake";
 
 
 /**
@@ -134,16 +133,4 @@ export interface ReadableLiquity {
    * Get a calculator for current fees.
    */
   getFees(): Promise<Fees>;
-
-  /**
-   * Get the current state of an LQTY Stake.
-   *
-   * @param address - Address that owns the LQTY Stake.
-   */
-  getLQTYStake(address?: string): Promise<LQTYStake>;
-
-  /**
-   * Get the total amount of LQTY currently staked.
-   */
-  getTotalStakedLQTY(): Promise<Decimal>;
 }

@@ -257,19 +257,4 @@ export interface PopulatableLiquity<R = unknown, S = unknown, P = unknown>
     PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>
   >;
 
-  /** {@inheritDoc TransactableLiquity.stakeLQTY} */
-  stakeLQTY(
-    amount: Decimalish
-  ): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
-
-  /** {@inheritDoc TransactableLiquity.unstakeLQTY} */
-  unstakeLQTY(
-    amount: Decimalish
-  ): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
-
-  /** {@inheritDoc TransactableLiquity.withdrawGainsFromStaking} */
-  withdrawGainsFromStaking(): Promise<
-    PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>
-  >;
-
 }

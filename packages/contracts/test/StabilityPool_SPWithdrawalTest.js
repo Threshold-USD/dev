@@ -1451,7 +1451,6 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       assert.isTrue(txL1.receipt.status)
 
       const aliceDeposit = (await stabilityPool.getCompoundedLUSDDeposit(alice)).toString()
-      console.log(`alice deposit: ${aliceDeposit}`)
       assert.equal(aliceDeposit, 0)
     })
 

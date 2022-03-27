@@ -675,6 +675,7 @@ class TestHelper {
     if (!upperHint) upperHint = this.ZERO_ADDRESS
     if (!lowerHint) lowerHint = this.ZERO_ADDRESS
 
+    // minimum trove size
     const MIN_DEBT = (
       await this.getNetBorrowingAmount(contracts, await contracts.borrowerOperations.MIN_NET_DEBT())
     ).add(this.toBN(1)) // add 1 to avoid rounding issues
@@ -692,6 +693,14 @@ class TestHelper {
     }
 
     const tx = await contracts.borrowerOperations.openTrove(maxFeePercentage, lusdAmount, upperHint, lowerHint, extraParams)
+    // console.log("maxFeePercentage", maxFeePercentage / 10000000000000000)
+    // console.log("MIN_DEBT",               MIN_DEBT / 1000000000000000000)
+    // console.log("extraLUSDAmount", extraLUSDAmount / 1000000000000000000)
+    // console.log("lusdAmount", lusdAmount / 1000000000000000000)
+    // console.log("ICR: ", ICR / 10000000000000000, "%")
+    // console.log("total Debt: ", totalDebt / 1000000000000000000)
+    // console.log("net Debt: ", netDebt / 1000000000000000000)
+    // console.log('----------------------------------')
 
     return {
       lusdAmount,

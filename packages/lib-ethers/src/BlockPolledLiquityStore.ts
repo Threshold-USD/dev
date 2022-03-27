@@ -6,7 +6,6 @@ import {
   LiquityStoreBaseState,
   TroveWithPendingRedistribution,
   StabilityDeposit,
-  LQTYStake,
   LiquityStore,
   Fees
 } from "@liquity/lib-base";
@@ -100,7 +99,6 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
       totalRedistributed: this._readable.getTotalRedistributed({ blockTag }),
       total: this._readable.getTotal({ blockTag }),
       lusdInStabilityPool: this._readable.getLUSDInStabilityPool({ blockTag }),
-      totalStakedLQTY: this._readable.getTotalStakedLQTY({ blockTag }),
       _riskiestTroveBeforeRedistribution: this._getRiskiestTroveBeforeRedistribution({ blockTag }),
 
       ...(userAddress
@@ -114,8 +112,7 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
             troveBeforeRedistribution: this._readable.getTroveBeforeRedistribution(userAddress, {
               blockTag
             }),
-            stabilityDeposit: this._readable.getStabilityDeposit(userAddress, { blockTag }),
-            lqtyStake: this._readable.getLQTYStake(userAddress, { blockTag })
+            stabilityDeposit: this._readable.getStabilityDeposit(userAddress, { blockTag })
           }
         : {
             accountBalance: Decimal.ZERO,
@@ -130,8 +127,7 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
               Decimal.ZERO,
               Decimal.ZERO,
               Decimal.ZERO
-            ),
-            lqtyStake: new LQTYStake()
+            )
           })
     });
 

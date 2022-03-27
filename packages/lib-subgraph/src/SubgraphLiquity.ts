@@ -5,7 +5,6 @@ import { getAddress } from "@ethersproject/address";
 import {
   Decimal,
   Fees,
-  LQTYStake,
   ObservableLiquity,
   ReadableLiquity,
   StabilityDeposit,
@@ -324,14 +323,6 @@ export class SubgraphLiquity implements ReadableLiquity, ObservableLiquity {
   }
 
   getFees(): Promise<Fees> {
-    throw new Error("Method not implemented.");
-  }
-
-  getLQTYStake(address?: string): Promise<LQTYStake> {
-    throw new Error("Method not implemented.");
-  }
-
-  getTotalStakedLQTY(): Promise<Decimal> {
     throw new Error("Method not implemented.");
   }
 }

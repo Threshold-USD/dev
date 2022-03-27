@@ -441,7 +441,6 @@ contract('Gas cost tests', async accounts => {
     assert.isFalse(await sortedTroves.contains(accounts[500]))
 
     const TCR = await troveManager.getTCR(await priceFeed.getPrice())
-    console.log(`TCR: ${TCR}`)
 
     // Check Recovery Mode is false
     assert.isFalse(await troveManager.checkRecoveryMode(await priceFeed.getPrice()))
@@ -482,7 +481,6 @@ contract('Gas cost tests', async accounts => {
     assert.isFalse(await sortedTroves.contains(accounts[500]))
 
     const TCR = await troveManager.getTCR(await priceFeed.getPrice())
-    console.log(`TCR: ${TCR}`)
 
     // Check Recovery Mode is false
     assert.isFalse(await troveManager.checkRecoveryMode(await priceFeed.getPrice()))
@@ -524,7 +522,7 @@ contract('Gas cost tests', async accounts => {
     assert.isFalse(await sortedTroves.contains(accounts[500]))
 
     const TCR = await troveManager.getTCR(await priceFeed.getPrice())
-    console.log(`TCR: ${TCR}`)
+
     // 1451258961356880573
     // Check Recovery Mode is false
     assert.isFalse(await troveManager.checkRecoveryMode(await priceFeed.getPrice()))

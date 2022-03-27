@@ -3,7 +3,6 @@ import { Signer } from "@ethersproject/abstract-signer";
 import {
   Decimal,
   Decimalish,
-  LQTYStake,
   LUSD_MINIMUM_DEBT,
   StabilityDeposit,
   TransactableLiquity,
@@ -39,8 +38,6 @@ type GasHistograms = Pick<
   | "redeemLUSD"
   | "depositLUSDInStabilityPool"
   | "withdrawLUSDFromStabilityPool"
-  | "stakeLQTY"
-  | "unstakeLQTY"
 >;
 
 export class Fixture {
@@ -76,9 +73,7 @@ export class Fixture {
       closeTrove: new GasHistogram(),
       redeemLUSD: new GasHistogram(),
       depositLUSDInStabilityPool: new GasHistogram(),
-      withdrawLUSDFromStabilityPool: new GasHistogram(),
-      stakeLQTY: new GasHistogram(),
-      unstakeLQTY: new GasHistogram()
+      withdrawLUSDFromStabilityPool: new GasHistogram()
     };
   }
 
@@ -389,50 +384,11 @@ export class Fixture {
     }
   }
 
-  async stakeRandomAmount(userAddress: string, liquity: Liquity) {
-    const lqtyBalance = await this.funderLiquity.getLQTYBalance();
-    const amount = lqtyBalance.mul(Math.random() / 2);
-
-    await this.funderLiquity.sendLQTY(userAddress, amount);
-
-    if (amount.eq(0)) {
-      console.log(`// [${shortenAddress(userAddress)}] stakeLQTY(${amount}) expected to fail`);
-
-      await this.gasHistograms.stakeLQTY.expectFailure(() =>
-        liquity.stakeLQTY(amount, { gasPrice: 0 })
-      );
-    } else {
-      console.log(`[${shortenAddress(userAddress)}] stakeLQTY(${amount})`);
-
-      await this.gasHistograms.stakeLQTY.expectSuccess(() =>
-        liquity.send.stakeLQTY(amount, { gasPrice: 0 })
-      );
-    }
-  }
-
-  async unstakeRandomAmount(userAddress: string, liquity: Liquity, stake: LQTYStake) {
-    const amount = stake.stakedLQTY.mul(1.1 * Math.random()).add(10 * Math.random());
-
-    console.log(`[${shortenAddress(userAddress)}] unstakeLQTY(${amount})`);
-
-    await this.gasHistograms.unstakeLQTY.expectSuccess(() =>
-      liquity.send.unstakeLQTY(amount, { gasPrice: 0 })
-    );
-  }
-
   async sweepLUSD(liquity: Liquity) {
     const lusdBalance = await liquity.getLUSDBalance();
 
     if (lusdBalance.nonZero) {
       await liquity.sendLUSD(this.funderAddress, lusdBalance, { gasPrice: 0 });
-    }
-  }
-
-  async sweepLQTY(liquity: Liquity) {
-    const lqtyBalance = await liquity.getLQTYBalance();
-
-    if (lqtyBalance.nonZero) {
-      await liquity.sendLQTY(this.funderAddress, lqtyBalance, { gasPrice: 0 });
     }
   }
 

@@ -4,7 +4,6 @@ import { Decimal } from "./Decimal";
 import { StabilityDeposit } from "./StabilityDeposit";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { Fees } from "./Fees";
-import { LQTYStake } from "./LQTYStake";
 
 /**
  * State variables read from the blockchain.
@@ -64,12 +63,6 @@ export interface LiquityStoreBaseState {
 
   /** @internal */
   _feesInNormalMode: Fees;
-
-  /** User's LQTY stake. */
-  lqtyStake: LQTYStake;
-
-  /** Total amount of LQTY currently staked. */
-  totalStakedLQTY: Decimal;
 
   /** @internal */
   _riskiestTroveBeforeRedistribution: TroveWithPendingRedistribution;
@@ -355,20 +348,6 @@ export abstract class LiquityStore<T = unknown> {
         equals,
         baseState._feesInNormalMode,
         baseStateUpdate._feesInNormalMode
-      ),
-
-      lqtyStake: this._updateIfChanged(
-        equals,
-        "lqtyStake",
-        baseState.lqtyStake,
-        baseStateUpdate.lqtyStake
-      ),
-
-      totalStakedLQTY: this._updateIfChanged(
-        eq,
-        "totalStakedLQTY",
-        baseState.totalStakedLQTY,
-        baseStateUpdate.totalStakedLQTY
       ),
 
       _riskiestTroveBeforeRedistribution: this._silentlyUpdateIfChanged(

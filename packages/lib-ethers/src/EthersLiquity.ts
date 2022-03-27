@@ -8,7 +8,6 @@ import {
   Fees,
   LiquidationDetails,
   LiquityStore,
-  LQTYStake,
   RedemptionDetails,
   StabilityDeposit,
   StabilityDepositChangeDetails,
@@ -254,16 +253,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     return this._readable.getFees(overrides);
   }
 
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getLQTYStake} */
-  getLQTYStake(address?: string, overrides?: EthersCallOverrides): Promise<LQTYStake> {
-    return this._readable.getLQTYStake(address, overrides);
-  }
-
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTotalStakedLQTY} */
-  getTotalStakedLQTY(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getTotalStakedLQTY(overrides);
-  }
-
   /**
    * {@inheritDoc @liquity/lib-base#TransactableLiquity.openTrove}
    *
@@ -507,39 +496,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    */
   claimCollateralSurplus(overrides?: EthersTransactionOverrides): Promise<void> {
     return this.send.claimCollateralSurplus(overrides).then(waitForSuccess);
-  }
-
-  /**
-   * {@inheritDoc @liquity/lib-base#TransactableLiquity.stakeLQTY}
-   *
-   * @throws
-   * Throws {@link EthersTransactionFailedError} in case of transaction failure.
-   * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
-   */
-  stakeLQTY(amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<void> {
-    return this.send.stakeLQTY(amount, overrides).then(waitForSuccess);
-  }
-
-  /**
-   * {@inheritDoc @liquity/lib-base#TransactableLiquity.unstakeLQTY}
-   *
-   * @throws
-   * Throws {@link EthersTransactionFailedError} in case of transaction failure.
-   * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
-   */
-  unstakeLQTY(amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<void> {
-    return this.send.unstakeLQTY(amount, overrides).then(waitForSuccess);
-  }
-
-  /**
-   * {@inheritDoc @liquity/lib-base#TransactableLiquity.withdrawGainsFromStaking}
-   *
-   * @throws
-   * Throws {@link EthersTransactionFailedError} in case of transaction failure.
-   * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
-   */
-  withdrawGainsFromStaking(overrides?: EthersTransactionOverrides): Promise<void> {
-    return this.send.withdrawGainsFromStaking(overrides).then(waitForSuccess);
   }
 }
 

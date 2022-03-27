@@ -36,11 +36,8 @@ Implemented by [PopulatableEthersLiquity](./lib-ethers.populatableethersliquity.
 |  [repayLUSD(amount)](./lib-base.populatableliquity.repaylusd.md) | Adjust existing Trove by repaying some of its debt. |
 |  [sendLQTY(toAddress, amount)](./lib-base.populatableliquity.sendlqty.md) | Send LQTY tokens to an address. |
 |  [sendLUSD(toAddress, amount)](./lib-base.populatableliquity.sendlusd.md) | Send LUSD tokens to an address. |
-|  [stakeLQTY(amount)](./lib-base.populatableliquity.stakelqty.md) | Stake LQTY to start earning fee revenue or increase existing stake. |
 |  [transferCollateralGainToTrove()](./lib-base.populatableliquity.transfercollateralgaintotrove.md) | Transfer [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit to Trove. |
-|  [unstakeLQTY(amount)](./lib-base.populatableliquity.unstakelqty.md) | Withdraw LQTY from staking. |
 |  [withdrawCollateral(amount)](./lib-base.populatableliquity.withdrawcollateral.md) | Adjust existing Trove by withdrawing some of its collateral. |
 |  [withdrawGainsFromStabilityPool()](./lib-base.populatableliquity.withdrawgainsfromstabilitypool.md) | Withdraw [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit. |
-|  [withdrawGainsFromStaking()](./lib-base.populatableliquity.withdrawgainsfromstaking.md) | Withdraw [collateral gain](./lib-base.lqtystake.collateralgain.md) and [LUSD gain](./lib-base.lqtystake.lusdgain.md) from LQTY stake. |
 |  [withdrawLUSDFromStabilityPool(amount)](./lib-base.populatableliquity.withdrawlusdfromstabilitypool.md) | Withdraw LUSD from Stability Deposit. |
 

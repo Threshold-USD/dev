@@ -1,6 +1,5 @@
 import { Decimal } from "./Decimal";
 import { Fees } from "./Fees";
-import { LQTYStake } from "./LQTYStake";
 import { StabilityDeposit } from "./StabilityDeposit";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { ReadableLiquity, TroveListingParams } from "./ReadableLiquity";
@@ -154,20 +153,6 @@ export class _CachedReadableLiquity<T extends unknown[]>
 
   async getFees(...extraParams: T): Promise<Fees> {
     return this._cache.getFees(...extraParams) ?? this._readable.getFees(...extraParams);
-  }
-
-  async getLQTYStake(address?: string, ...extraParams: T): Promise<LQTYStake> {
-    return (
-      this._cache.getLQTYStake(address, ...extraParams) ??
-      this._readable.getLQTYStake(address, ...extraParams)
-    );
-  }
-
-  async getTotalStakedLQTY(...extraParams: T): Promise<Decimal> {
-    return (
-      this._cache.getTotalStakedLQTY(...extraParams) ??
-      this._readable.getTotalStakedLQTY(...extraParams)
-    );
   }
 
 }

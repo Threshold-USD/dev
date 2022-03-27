@@ -1264,35 +1264,4 @@ export class PopulatableEthersLiquity
     return populateRedemption(attemptedLUSDAmount, maxRedemptionRate, truncatedAmount, partialHints);
   }
 
-  /** {@inheritDoc @liquity/lib-base#PopulatableLiquity.stakeLQTY} */
-  async stakeLQTY(
-    amount: Decimalish,
-    overrides?: EthersTransactionOverrides
-  ): Promise<PopulatedEthersLiquityTransaction<void>> {
-    const { lqtyStaking } = _getContracts(this._readable.connection);
-
-    return this._wrapSimpleTransaction(
-      await lqtyStaking.estimateAndPopulate.stake({ ...overrides }, id, Decimal.from(amount).hex)
-    );
-  }
-
-  /** {@inheritDoc @liquity/lib-base#PopulatableLiquity.unstakeLQTY} */
-  async unstakeLQTY(
-    amount: Decimalish,
-    overrides?: EthersTransactionOverrides
-  ): Promise<PopulatedEthersLiquityTransaction<void>> {
-    const { lqtyStaking } = _getContracts(this._readable.connection);
-
-    return this._wrapSimpleTransaction(
-      await lqtyStaking.estimateAndPopulate.unstake({ ...overrides }, id, Decimal.from(amount).hex)
-    );
-  }
-
-  /** {@inheritDoc @liquity/lib-base#PopulatableLiquity.withdrawGainsFromStaking} */
-  withdrawGainsFromStaking(
-    overrides?: EthersTransactionOverrides
-  ): Promise<PopulatedEthersLiquityTransaction<void>> {
-    return this.unstakeLQTY(Decimal.ZERO, overrides);
-  }
-
 }

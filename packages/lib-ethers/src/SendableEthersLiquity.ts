@@ -194,27 +194,4 @@ export class SendableEthersLiquity
   ): Promise<SentEthersLiquityTransaction<void>> {
     return this._populate.claimCollateralSurplus(overrides).then(sendTransaction);
   }
-
-  /** {@inheritDoc @liquity/lib-base#SendableLiquity.stakeLQTY} */
-  stakeLQTY(
-    amount: Decimalish,
-    overrides?: EthersTransactionOverrides
-  ): Promise<SentEthersLiquityTransaction<void>> {
-    return this._populate.stakeLQTY(amount, overrides).then(sendTransaction);
-  }
-
-  /** {@inheritDoc @liquity/lib-base#SendableLiquity.unstakeLQTY} */
-  unstakeLQTY(
-    amount: Decimalish,
-    overrides?: EthersTransactionOverrides
-  ): Promise<SentEthersLiquityTransaction<void>> {
-    return this._populate.unstakeLQTY(amount, overrides).then(sendTransaction);
-  }
-
-  /** {@inheritDoc @liquity/lib-base#SendableLiquity.withdrawGainsFromStaking} */
-  withdrawGainsFromStaking(
-    overrides?: EthersTransactionOverrides
-  ): Promise<SentEthersLiquityTransaction<void>> {
-    return this._populate.withdrawGainsFromStaking(overrides).then(sendTransaction);
-  }
 }

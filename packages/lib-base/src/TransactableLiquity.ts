@@ -404,43 +404,4 @@ export interface TransactableLiquity {
    * Throws {@link TransactionFailedError} in case of transaction failure.
    */
   claimCollateralSurplus(): Promise<void>;
-
-  /**
-   * Stake LQTY to start earning fee revenue or increase existing stake.
-   *
-   * @param amount - Amount of LQTY to add to new or existing stake.
-   *
-   * @throws
-   * Throws {@link TransactionFailedError} in case of transaction failure.
-   *
-   * @remarks
-   * As a side-effect, the transaction will also pay out an existing LQTY stake's
-   * {@link @liquity/lib-base#LQTYStake.collateralGain | collateral gain} and
-   * {@link @liquity/lib-base#LQTYStake.lusdGain | LUSD gain}.
-   */
-  stakeLQTY(amount: Decimalish): Promise<void>;
-
-  /**
-   * Withdraw LQTY from staking.
-   *
-   * @param amount - Amount of LQTY to withdraw.
-   *
-   * @throws
-   * Throws {@link TransactionFailedError} in case of transaction failure.
-   *
-   * @remarks
-   * As a side-effect, the transaction will also pay out the LQTY stake's
-   * {@link @liquity/lib-base#LQTYStake.collateralGain | collateral gain} and
-   * {@link @liquity/lib-base#LQTYStake.lusdGain | LUSD gain}.
-   */
-  unstakeLQTY(amount: Decimalish): Promise<void>;
-
-  /**
-   * Withdraw {@link @liquity/lib-base#LQTYStake.collateralGain | collateral gain} and
-   * {@link @liquity/lib-base#LQTYStake.lusdGain | LUSD gain} from LQTY stake.
-   *
-   * @throws
-   * Throws {@link TransactionFailedError} in case of transaction failure.
-   */
-  withdrawGainsFromStaking(): Promise<void>;
 }

@@ -1121,16 +1121,7 @@ contract('BorrowerOperations', async accounts => {
       const baseRate_1 = await troveManager.baseRate()
       assert.equal(baseRate_1, '0')
 
-      // A artificially receives LQTY, then stakes it
-      await lqtyToken.unprotectedMint(A, dec(100, 18))
-      await lqtyStaking.stake(dec(100, 18), { from: A })
-
-      // 2 hours pass
-      th.fastForwardTime(7200, web3.currentProvider)
-
-      // Check LQTY LUSD balance before == 0
       const F_LUSD_Before = await lqtyStaking.F_LUSD()
-      assert.equal(F_LUSD_Before, '0')
 
       // D withdraws LUSD
       await borrowerOperations.withdrawLUSD(th._100pct, dec(37, 18), D, D, { from: D })
@@ -1894,7 +1885,6 @@ contract('BorrowerOperations', async accounts => {
 
       // Check staking LUSD balance before == 0
       const F_LUSD_Before = await lqtyStaking.F_LUSD()
-      assert.isTrue(F_LUSD_Before.eq(toBN('0')))
 
       // D adjusts trove
       await borrowerOperations.adjustTrove(th._100pct, 0, dec(37, 18), true, D, D, { from: D })
@@ -3507,7 +3497,7 @@ contract('BorrowerOperations', async accounts => {
       assert.isTrue(LUSDRequest_D.eq(LUSDBalance_D))
     })
 
-    it("openTrove(): Borrowing at zero base rate changes the LQTY staking contract LUSD fees-per-unit-staked", async () => {
+    it("openTrove(): Borrowing at zero base rate changes the LQTY staking contract LUSD fees collected", async () => {
       await openTrove({ extraLUSDAmount: toBN(dec(5000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
       await openTrove({ extraLUSDAmount: toBN(dec(5000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
       await openTrove({ extraLUSDAmount: toBN(dec(5000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
@@ -3521,18 +3511,13 @@ contract('BorrowerOperations', async accounts => {
 
       // Check LUSD reward per LQTY staked == 0
       const F_LUSD_Before = await lqtyStaking.F_LUSD()
-      assert.equal(F_LUSD_Before, '0')
-
-      // A stakes LQTY
-      await lqtyToken.unprotectedMint(A, dec(100, 18))
-      await lqtyStaking.stake(dec(100, 18), { from: A })
 
       // D opens trove
       await openTrove({ extraLUSDAmount: toBN(dec(37, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: D } })
 
       // Check LUSD reward per LQTY staked > 0
       const F_LUSD_After = await lqtyStaking.F_LUSD()
-      assert.isTrue(F_LUSD_After.gt(toBN('0')))
+      assert.isTrue(F_LUSD_After.gt(F_LUSD_Before))
     })
 
     it("openTrove(): Borrowing at zero base rate charges minimum fee", async () => {

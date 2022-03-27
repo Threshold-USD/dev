@@ -156,32 +156,6 @@ dataSources:
       eventHandlers:
         - event: CollBalanceUpdated(indexed address,uint256)
           handler: handleCollSurplusBalanceUpdated
-  - name: LQTYStaking
-    kind: ethereum/contract
-    network: mainnet
-    source:
-      abi: LQTYStaking
-      address: "${addresses.lqtyStaking}"
-      startBlock: ${startBlock}
-    mapping:
-      file: ./src/mappings/LqtyStake.ts
-      language: wasm/assemblyscript
-      kind: ethereum/events
-      apiVersion: 0.0.4
-      entities:
-        - Global
-        - User
-        - Transaction
-        - LqtyStake
-        - LqtyStakeChange
-      abis:
-        - name: LQTYStaking
-          file: ../lib-ethers/abi/LQTYStaking.json
-      eventHandlers:
-        - event: StakeChanged(indexed address,uint256)
-          handler: handleStakeChanged
-        - event: StakingGainsWithdrawn(indexed address,uint256,uint256)
-          handler: handleStakeGainsWithdrawn
 ${[
   ["LUSDToken", addresses.lusdToken],
   ["LQTYToken", addresses.lqtyToken]

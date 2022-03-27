@@ -14,7 +14,4 @@ contract LQTYStakingScript is CheckContract {
         LQTYStaking = ILQTYStaking(_lqtyStakingAddress);
     }
 
-    function stake(uint _LQTYamount) external {
-        LQTYStaking.stake(_LQTYamount);
-    }
 }

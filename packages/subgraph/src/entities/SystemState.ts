@@ -5,8 +5,7 @@ import {
   PriceChange,
   TroveChange,
   StabilityDepositChange,
-  CollSurplusChange,
-  LqtyStakeChange
+  CollSurplusChange
 } from "../../generated/schema";
 
 import {
@@ -197,16 +196,6 @@ export function updateSystemStateByCollSurplusChange(collSurplusChange: CollSurp
 
   systemState.collSurplusPoolBalance = systemState.collSurplusPoolBalance.plus(
     collSurplusChange.collSurplusChange
-  );
-
-  bumpSystemState(systemState);
-}
-
-export function updateSystemStateByLqtyStakeChange(stakeChange: LqtyStakeChange): void {
-  let systemState = getCurrentSystemState();
-
-  systemState.totalLQTYTokensStaked = systemState.totalLQTYTokensStaked.plus(
-    stakeChange.stakedAmountChange
   );
 
   bumpSystemState(systemState);

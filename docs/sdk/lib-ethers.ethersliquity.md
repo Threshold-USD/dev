@@ -39,7 +39,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [getCollateralSurplusBalance(address, overrides)](./lib-ethers.ethersliquity.getcollateralsurplusbalance.md) |  | Get the amount of leftover collateral available for withdrawal by an address. |
 |  [getFees(overrides)](./lib-ethers.ethersliquity.getfees.md) |  | Get a calculator for current fees. |
 |  [getLQTYBalance(address, overrides)](./lib-ethers.ethersliquity.getlqtybalance.md) |  | Get the amount of LQTY held by an address. |
-|  [getLQTYStake(address, overrides)](./lib-ethers.ethersliquity.getlqtystake.md) |  | Get the current state of an LQTY Stake. |
 |  [getLUSDBalance(address, overrides)](./lib-ethers.ethersliquity.getlusdbalance.md) |  | Get the amount of LUSD held by an address. |
 |  [getLUSDInStabilityPool(overrides)](./lib-ethers.ethersliquity.getlusdinstabilitypool.md) |  | Get the total amount of LUSD currently deposited in the Stability Pool. |
 |  [getNumberOfTroves(overrides)](./lib-ethers.ethersliquity.getnumberoftroves.md) |  | Get number of Troves that are currently open. |
@@ -47,7 +46,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [getStabilityDeposit(address, overrides)](./lib-ethers.ethersliquity.getstabilitydeposit.md) |  | Get the current state of a Stability Deposit. |
 |  [getTotal(overrides)](./lib-ethers.ethersliquity.gettotal.md) |  | Get the total amount of collateral and debt in the Liquity system. |
 |  [getTotalRedistributed(overrides)](./lib-ethers.ethersliquity.gettotalredistributed.md) |  | Get the total collateral and debt per stake that has been liquidated through redistribution. |
-|  [getTotalStakedLQTY(overrides)](./lib-ethers.ethersliquity.gettotalstakedlqty.md) |  | Get the total amount of LQTY currently staked. |
 |  [getTrove(address, overrides)](./lib-ethers.ethersliquity.gettrove.md) |  | Get the current state of a Trove. |
 |  [getTroveBeforeRedistribution(address, overrides)](./lib-ethers.ethersliquity.gettrovebeforeredistribution.md) |  | Get a Trove in its state after the last direct modification. |
 |  [getTroves(params, overrides)](./lib-ethers.ethersliquity.gettroves_1.md) |  | Get a slice from the list of Troves. |
@@ -60,11 +58,8 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [repayLUSD(amount, overrides)](./lib-ethers.ethersliquity.repaylusd.md) |  | Adjust existing Trove by repaying some of its debt. |
 |  [sendLQTY(toAddress, amount, overrides)](./lib-ethers.ethersliquity.sendlqty.md) |  | Send LQTY tokens to an address. |
 |  [sendLUSD(toAddress, amount, overrides)](./lib-ethers.ethersliquity.sendlusd.md) |  | Send LUSD tokens to an address. |
-|  [stakeLQTY(amount, overrides)](./lib-ethers.ethersliquity.stakelqty.md) |  | Stake LQTY to start earning fee revenue or increase existing stake. |
 |  [transferCollateralGainToTrove(overrides)](./lib-ethers.ethersliquity.transfercollateralgaintotrove.md) |  | Transfer [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit to Trove. |
-|  [unstakeLQTY(amount, overrides)](./lib-ethers.ethersliquity.unstakelqty.md) |  | Withdraw LQTY from staking. |
 |  [withdrawCollateral(amount, overrides)](./lib-ethers.ethersliquity.withdrawcollateral.md) |  | Adjust existing Trove by withdrawing some of its collateral. |
 |  [withdrawGainsFromStabilityPool(overrides)](./lib-ethers.ethersliquity.withdrawgainsfromstabilitypool.md) |  | Withdraw [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit. |
-|  [withdrawGainsFromStaking(overrides)](./lib-ethers.ethersliquity.withdrawgainsfromstaking.md) |  | Withdraw [collateral gain](./lib-base.lqtystake.collateralgain.md) and [LUSD gain](./lib-base.lqtystake.lusdgain.md) from LQTY stake. |
 |  [withdrawLUSDFromStabilityPool(amount, overrides)](./lib-ethers.ethersliquity.withdrawlusdfromstabilitypool.md) |  | Withdraw LUSD from Stability Deposit. |
 

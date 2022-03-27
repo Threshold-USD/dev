@@ -431,7 +431,6 @@ async function mainnetDeploy(configParams) {
 
   // TCR
   const TCR = await liquityCore.troveManager.getTCR(chainlinkPrice)
-  console.log(`TCR: ${TCR}`)
 
   // current borrowing rate
   const baseRate = await liquityCore.troveManager.baseRate()
@@ -442,10 +441,6 @@ async function mainnetDeploy(configParams) {
   // total SP deposits
   const totalSPDeposits = await liquityCore.stabilityPool.getTotalLUSDDeposits()
   th.logBN("Total LUSD SP deposits", totalSPDeposits)
-
-  // total LQTY Staked in LQTYStaking
-  const totalLQTYStaked = await LQTYContracts.lqtyStaking.totalLQTYStaked()
-  th.logBN("Total LQTY staked", totalLQTYStaked)
 
   // --- State variables ---
 

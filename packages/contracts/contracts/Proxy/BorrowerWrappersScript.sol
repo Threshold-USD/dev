@@ -81,13 +81,11 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
 
     function claimSPRewardsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
         uint collBalanceBefore = address(this).balance;
-        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
 
         // Claim rewards
         stabilityPool.withdrawFromSP(0);
 
         uint collBalanceAfter = address(this).balance;
-        uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
         uint claimedCollateral = collBalanceAfter.sub(collBalanceBefore);
 
         // Add claimed ETH to trove, get more LUSD and stake it into the Stability Pool
@@ -100,21 +98,11 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
                 stabilityPool.provideToSP(LUSDAmount);
             }
         }
-
-        // Stake claimed LQTY
-        uint claimedLQTY = lqtyBalanceAfter.sub(lqtyBalanceBefore);
-        if (claimedLQTY > 0) {
-            lqtyStaking.stake(claimedLQTY);
-        }
     }
 
     function claimStakingGainsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
         uint collBalanceBefore = address(this).balance;
         uint lusdBalanceBefore = lusdToken.balanceOf(address(this));
-        uint lqtyBalanceBefore = lqtyToken.balanceOf(address(this));
-
-        // Claim gains
-        lqtyStaking.unstake(0);
 
         uint gainedCollateral = address(this).balance.sub(collBalanceBefore); // stack too deep issues :'(
         uint gainedLUSD = lusdToken.balanceOf(address(this)).sub(lusdBalanceBefore);
@@ -130,13 +118,6 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         uint totalLUSD = gainedLUSD.add(netLUSDAmount);
         if (totalLUSD > 0) {
             stabilityPool.provideToSP(totalLUSD);
-
-            // Providing to Stability Pool also triggers LQTY claim, so stake it if any
-            uint lqtyBalanceAfter = lqtyToken.balanceOf(address(this));
-            uint claimedLQTY = lqtyBalanceAfter.sub(lqtyBalanceBefore);
-            if (claimedLQTY > 0) {
-                lqtyStaking.stake(claimedLQTY);
-            }
         }
 
     }

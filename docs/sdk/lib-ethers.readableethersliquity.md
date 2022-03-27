@@ -31,7 +31,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [getCollateralSurplusBalance(address, overrides)](./lib-ethers.readableethersliquity.getcollateralsurplusbalance.md) |  | Get the amount of leftover collateral available for withdrawal by an address. |
 |  [getFees(overrides)](./lib-ethers.readableethersliquity.getfees.md) |  | Get a calculator for current fees. |
 |  [getLQTYBalance(address, overrides)](./lib-ethers.readableethersliquity.getlqtybalance.md) |  | Get the amount of LQTY held by an address. |
-|  [getLQTYStake(address, overrides)](./lib-ethers.readableethersliquity.getlqtystake.md) |  | Get the current state of an LQTY Stake. |
 |  [getLUSDBalance(address, overrides)](./lib-ethers.readableethersliquity.getlusdbalance.md) |  | Get the amount of LUSD held by an address. |
 |  [getLUSDInStabilityPool(overrides)](./lib-ethers.readableethersliquity.getlusdinstabilitypool.md) |  | Get the total amount of LUSD currently deposited in the Stability Pool. |
 |  [getNumberOfTroves(overrides)](./lib-ethers.readableethersliquity.getnumberoftroves.md) |  | Get number of Troves that are currently open. |
@@ -39,7 +38,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [getStabilityDeposit(address, overrides)](./lib-ethers.readableethersliquity.getstabilitydeposit.md) |  | Get the current state of a Stability Deposit. |
 |  [getTotal(overrides)](./lib-ethers.readableethersliquity.gettotal.md) |  | Get the total amount of collateral and debt in the Liquity system. |
 |  [getTotalRedistributed(overrides)](./lib-ethers.readableethersliquity.gettotalredistributed.md) |  | Get the total collateral and debt per stake that has been liquidated through redistribution. |
-|  [getTotalStakedLQTY(overrides)](./lib-ethers.readableethersliquity.gettotalstakedlqty.md) |  | Get the total amount of LQTY currently staked. |
 |  [getTrove(address, overrides)](./lib-ethers.readableethersliquity.gettrove.md) |  | Get the current state of a Trove. |
 |  [getTroveBeforeRedistribution(address, overrides)](./lib-ethers.readableethersliquity.gettrovebeforeredistribution.md) |  | Get a Trove in its state after the last direct modification. |
 |  [getTroves(params, overrides)](./lib-ethers.readableethersliquity.gettroves_1.md) |  | Get a slice from the list of Troves. |

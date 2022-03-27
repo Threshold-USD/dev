@@ -6,7 +6,7 @@ const TroveManagerTester = artifacts.require("./TroveManagerTester")
 const LUSDToken = artifacts.require("./LUSDToken.sol")
 
 contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async accounts => {
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
+  const [bountyAddress, _ , multisig] = accounts.slice(997, 1000)
   const [
     owner,
     alice, bob, carol, dennis, erin, freddy, greta, harry, ida,

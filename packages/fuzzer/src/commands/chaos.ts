@@ -89,14 +89,6 @@ export const chaos = async ({
         } else {
           await fixture.withdrawRandomAmountFromStabilityPool(user.address, liquity, deposit);
         }
-      } else if (x < 0.9) {
-        const stake = await liquity.getLQTYStake();
-
-        if (stake.stakedLQTY.isZero || x < 0.8) {
-          await fixture.stakeRandomAmount(user.address, liquity);
-        } else {
-          await fixture.unstakeRandomAmount(user.address, liquity, stake);
-        }
       } else {
         await fixture.redeemRandomAmount(user.address, liquity);
       }
