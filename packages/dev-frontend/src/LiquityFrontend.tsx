@@ -12,7 +12,7 @@ import { Nav } from "./components/Nav";
 import { UserAccount } from "./components/UserAccount";
 import { SideBar } from "./components/SideBar";
 // import { Social } from "./components/Social";
-import { SystemStatsPopup } from "./components/SystemStatsPopup";
+import { HamburgerMenu } from "./components/HamburgerMenu";
 import { Header } from "./components/Header";
 
 import { PageSwitcher } from "./pages/PageSwitcher";
@@ -52,7 +52,7 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                 <Flex sx={{ flexDirection: "column", minHeight: "100%", backgroundColor: "#F7FAFC" }}>
                   <Header>
                     <UserAccount />
-                    <SystemStatsPopup />
+                    <HamburgerMenu />
                   </Header>
                   <SideBar>
                     <Nav />

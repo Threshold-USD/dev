@@ -143,7 +143,6 @@ const modalOverlay: ThemeUIStyleObject = {
 
   left: 0,
   top: 0,
-  width: "100vw",
   height: "100vh"
 };
 
@@ -239,7 +238,6 @@ const theme: Theme = {
     icon: {
       ...iconButton,
       color: "primary",
-      ":enabled:hover": { color: "accent" }
     },
 
     dangerIcon: {
@@ -296,7 +294,8 @@ const theme: Theme = {
       left: 3,
       mt: "72px",
       height: "80%",
-      overflowY: "scroll"
+      overflowY: "scroll",
+      bg: "white"
     },
 
     tooltip: {
@@ -427,7 +426,7 @@ const theme: Theme = {
     modalOverlay: {
       ...modalOverlay,
 
-      bg: "rgba(0, 0, 0, 0.8)",
+      bg: "white",
 
       display: "flex",
       justifyContent: "center",
@@ -443,8 +442,6 @@ const theme: Theme = {
       ...modalOverlay,
 
       display: ["block", "none"],
-
-      bg: "rgba(255, 255, 255, 0.8)"
     },
 
     infoMessage: {

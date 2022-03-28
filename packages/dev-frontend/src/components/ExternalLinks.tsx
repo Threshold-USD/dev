@@ -4,7 +4,7 @@ import { Icon } from "./Icon";
 export const ExternalLinks: React.FC = () => {
   return (
     <>
-      <Link variant="nav" href="/">
+      <Link variant="nav" href="https://github.com/Threshold-USD/dev" target="_blank">
         <Icon name="book" />
         Documentation
       </Link>
