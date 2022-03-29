@@ -21,8 +21,6 @@ import "../Dependencies/console.sol";
 * transfer() and transferFrom() calls. The purpose is to protect users from losing tokens by mistakenly sending LQTY directly to a Liquity
 * core contract, when they should rather call the right function.
 *
-* 2) sendToLQTYStaking(): callable only by Liquity core contracts, which move LQTY tokens from user -> LQTYStaking contract.
-*
 * 3) Supply hard-capped at 100 million
 *
 * 5) The bug bounties / hackathons allocation of 2 million tokens is minted at deployment to an EOA
@@ -34,7 +32,6 @@ import "../Dependencies/console.sol";
 * 9) Until one year from deployment:
 * -approve(), increaseAllowance(), decreaseAllowance() revert when called by the multisig
 * -transferFrom() reverts when the multisig is the sender
-* -sendToLQTYStaking() reverts when the multisig is the sender, blocking the multisig from staking its LQTY.
 *
 * After one year has passed since deployment of the LQTYToken, the restrictions on multisig operations are lifted
 * and the multisig has the same rights as any other address.
@@ -81,28 +78,19 @@ contract LQTYToken is CheckContract, ILQTYToken {
     uint internal immutable deploymentStartTime;
     address public immutable multisigAddress;
 
-    address public immutable lqtyStakingAddress;
-
-    // --- Events ---
-
-    event LQTYStakingAddressSet(address _lqtyStakingAddress);
 
     // --- Functions ---
 
     constructor
     (
-        address _lqtyStakingAddress,
         address _bountyAddress,
         address _multisigAddress
     )
         public
     {
-        checkContract(_lqtyStakingAddress);
 
         multisigAddress = _multisigAddress;
         deploymentStartTime  = block.timestamp;
-
-        lqtyStakingAddress = _lqtyStakingAddress;
 
         bytes32 hashedName = keccak256(bytes(_NAME));
         bytes32 hashedVersion = keccak256(bytes(_VERSION));
@@ -179,12 +167,6 @@ contract LQTYToken is CheckContract, ILQTYToken {
 
         _approve(msg.sender, spender, _allowances[msg.sender][spender].sub(subtractedValue, "ERC20: decreased allowance below zero"));
         return true;
-    }
-
-    function sendToLQTYStaking(address _sender, uint256 _amount) external override {
-        _requireCallerIsLQTYStaking();
-        if (_isFirstYear()) { _requireSenderIsNotMultisig(_sender); }  // Prevent the multisig from staking LQTY
-        _transfer(_sender, lqtyStakingAddress, _amount);
     }
 
     // --- EIP 2612 functionality ---
@@ -279,10 +261,6 @@ contract LQTYToken is CheckContract, ILQTYToken {
             _recipient != address(this),
             "LQTY: Cannot transfer tokens directly to the LQTY token contract or the zero address"
         );
-        require(
-            _recipient != lqtyStakingAddress,
-            "LQTY: Cannot transfer tokens directly to the community issuance or staking contract"
-        );
     }
 
     function _requireSenderIsNotMultisig(address _sender) internal view {
@@ -291,10 +269,6 @@ contract LQTYToken is CheckContract, ILQTYToken {
 
     function _requireCallerIsNotMultisig() internal view {
         require(!_callerIsMultisig(), "LQTYToken: caller must not be the multisig");
-    }
-
-    function _requireCallerIsLQTYStaking() internal view {
-         require(msg.sender == lqtyStakingAddress, "LQTYToken: caller must be the LQTYStaking contract");
     }
 
     // --- Optional functions ---

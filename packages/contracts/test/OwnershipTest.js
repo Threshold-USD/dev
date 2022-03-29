@@ -129,7 +129,7 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
 
   describe('LQTYStaking', async accounts => {
     it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
-      await testSetAddresses(lqtyStaking, 5)
+      await testSetAddresses(lqtyStaking, 4)
     })
   })
 })

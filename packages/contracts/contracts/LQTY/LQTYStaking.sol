@@ -7,7 +7,6 @@ import "../Dependencies/SafeMath.sol";
 import "../Dependencies/Ownable.sol";
 import "../Dependencies/CheckContract.sol";
 import "../Dependencies/console.sol";
-import "../Interfaces/ILQTYToken.sol";
 import "../Interfaces/ILQTYStaking.sol";
 import "../Dependencies/LiquityMath.sol";
 import "../Interfaces/ILUSDToken.sol";
@@ -32,7 +31,6 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
         uint F_LUSD_Snapshot;
     }
 
-    ILQTYToken public lqtyToken;
     ILUSDToken public lusdToken;
 
     address public troveManagerAddress;
@@ -41,7 +39,6 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
 
     // --- Events ---
 
-    event LQTYTokenAddressSet(address _lqtyTokenAddress);
     event LUSDTokenAddressSet(address _lusdTokenAddress);
     event TroveManagerAddressSet(address _troveManager);
     event BorrowerOperationsAddressSet(address _borrowerOperationsAddress);
@@ -54,7 +51,6 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
 
     function setAddresses
     (
-        address _lqtyTokenAddress,
         address _lusdTokenAddress,
         address _troveManagerAddress,
         address _borrowerOperationsAddress,
@@ -64,20 +60,17 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
         onlyOwner
         override
     {
-        checkContract(_lqtyTokenAddress);
         checkContract(_lusdTokenAddress);
         checkContract(_troveManagerAddress);
         checkContract(_borrowerOperationsAddress);
         checkContract(_activePoolAddress);
 
-        lqtyToken = ILQTYToken(_lqtyTokenAddress);
         lusdToken = ILUSDToken(_lusdTokenAddress);
         troveManagerAddress = _troveManagerAddress;
         borrowerOperationsAddress = _borrowerOperationsAddress;
         activePoolAddress = _activePoolAddress;
 
-        emit LQTYTokenAddressSet(_lqtyTokenAddress);
-        emit LQTYTokenAddressSet(_lusdTokenAddress);
+        emit LUSDTokenAddressSet(_lusdTokenAddress);
         emit TroveManagerAddressSet(_troveManagerAddress);
         emit BorrowerOperationsAddressSet(_borrowerOperationsAddress);
         emit ActivePoolAddressSet(_activePoolAddress);

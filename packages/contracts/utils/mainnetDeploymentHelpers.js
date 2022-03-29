@@ -144,7 +144,6 @@ class MainnetDeploymentHelper {
 
     // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
     const lqtyTokenParams = [
-      lqtyStaking.address,
       bountyAddress,
       multisigAddress
     ]
@@ -294,7 +293,6 @@ class MainnetDeploymentHelper {
     const gasPrice = this.configParams.GAS_PRICE
     await this.isOwnershipRenounced(LQTYContracts.lqtyStaking) ||
       await this.sendAndWaitForTransaction(LQTYContracts.lqtyStaking.setAddresses(
-        LQTYContracts.lqtyToken.address,
         coreContracts.lusdToken.address,
         coreContracts.troveManager.address,
         coreContracts.borrowerOperations.address,

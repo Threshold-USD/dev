@@ -86,7 +86,6 @@ def setAddresses(contracts):
 
     # LQTY
     contracts.lqtyStaking.setAddresses(
-        contracts.lqtyToken.address,
         contracts.lusdToken.address,
         contracts.troveManager.address,
         contracts.borrowerOperations.address,

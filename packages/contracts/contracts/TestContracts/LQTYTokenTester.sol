@@ -7,14 +7,12 @@ import "../LQTY/LQTYToken.sol";
 contract LQTYTokenTester is LQTYToken {
     constructor
     (
-        address _lqtyStakingAddress,
         address _bountyAddress,
         address _multisigAddress
     )
         public
         LQTYToken
     (
-        _lqtyStakingAddress,
         _bountyAddress,
         _multisigAddress
     )
@@ -24,13 +22,6 @@ contract LQTYTokenTester is LQTYToken {
         // No check for the caller here
 
         _mint(account, amount);
-    }
-
-    function unprotectedSendToLQTYStaking(address _sender, uint256 _amount) external {
-        // No check for the caller here
-
-        if (_isFirstYear()) {_requireSenderIsNotMultisig(_sender);}
-        _transfer(_sender, lqtyStakingAddress, _amount);
     }
 
     function callInternalApprove(address owner, address spender, uint256 amount) external returns (bool) {

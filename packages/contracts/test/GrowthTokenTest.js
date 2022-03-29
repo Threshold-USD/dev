@@ -251,7 +251,6 @@ contract('LQTY Token', async accounts => {
 
     await assertRevert(lqtyTokenTester.transfer(lqtyTokenTester.address, 1, { from: A }))
     await assertRevert(lqtyTokenTester.transfer(ZERO_ADDRESS, 1, { from: A }))
-    await assertRevert(lqtyTokenTester.transfer(lqtyStaking.address, 1, { from: A }))
   })
 
   it('transfer(): transfer to or from the zero-address reverts', async () => {
@@ -298,25 +297,6 @@ contract('LQTY Token', async accounts => {
 
     const A_allowanceAfterDecrease = await lqtyTokenTester.allowance(B, A)
     assert.equal(A_allowanceAfterDecrease, '0')
-  })
-
-  it('sendToLQTYStaking(): changes balances of LQTYStaking and calling account by the correct amounts', async () => {
-    // mint some tokens to A
-    await lqtyTokenTester.unprotectedMint(A, dec(150, 18))
-
-    // Check caller and LQTYStaking balance before
-    const A_BalanceBefore = await lqtyTokenTester.balanceOf(A)
-    assert.equal(A_BalanceBefore, dec(150, 18))
-    const lqtyStakingBalanceBefore = await lqtyTokenTester.balanceOf(lqtyStaking.address)
-    assert.equal(lqtyStakingBalanceBefore, '0')
-
-    await lqtyTokenTester.unprotectedSendToLQTYStaking(A, dec(37, 18))
-
-    // Check caller and LQTYStaking balance before
-    const A_BalanceAfter = await lqtyTokenTester.balanceOf(A)
-    assert.equal(A_BalanceAfter, dec(113, 18))
-    const lqtyStakingBalanceAfter = await lqtyTokenTester.balanceOf(lqtyStaking.address)
-    assert.equal(lqtyStakingBalanceAfter, dec(37, 18))
   })
 
   // EIP2612 tests

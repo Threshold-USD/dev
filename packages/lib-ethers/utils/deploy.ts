@@ -111,7 +111,6 @@ const deployContracts = async (
         deployer,
         getContractFactory,
         "LQTYToken",
-        addresses.lqtyStaking,
         Wallet.createRandom().address, // _bountyAddress (TODO: parameterize this)
         Wallet.createRandom().address, // _multisigAddress (TODO: parameterize this)
         { ...overrides }
@@ -244,7 +243,6 @@ const connectContracts = async (
 
     nonce =>
       lqtyStaking.setAddresses(
-        lqtyToken.address,
         lusdToken.address,
         troveManager.address,
         borrowerOperations.address,

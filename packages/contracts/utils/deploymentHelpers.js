@@ -158,7 +158,6 @@ class DeploymentHelper {
 
     // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
     const lqtyToken = await LQTYToken.new(
-      lqtyStaking.address,
       bountyAddress,
       multisigAddress
     )
@@ -178,7 +177,6 @@ class DeploymentHelper {
 
     // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
     const lqtyToken = await LQTYTokenTester.new(
-      lqtyStaking.address,
       bountyAddress,
       multisigAddress
     )
@@ -231,7 +229,6 @@ class DeploymentHelper {
     /* Deploy LQTY Token, passing Community Issuance,  LQTYStaking, and Factory addresses
     to the constructor  */
     const lqtyToken = await LQTYToken.new(
-      lqtyStaking.address,
       bountyAddress,
       multisigAddress
     )
@@ -372,7 +369,6 @@ class DeploymentHelper {
 
   static async connectLQTYContractsToCore(LQTYContracts, coreContracts) {
     await LQTYContracts.lqtyStaking.setAddresses(
-      LQTYContracts.lqtyToken.address,
       coreContracts.lusdToken.address,
       coreContracts.troveManager.address,
       coreContracts.borrowerOperations.address,

@@ -345,30 +345,6 @@ async function mainnetDeploy(configParams) {
   // account2LockupContractBal = await LQTYContracts.lqtyToken.balanceOf(account2LockupContract.address)
   // th.logBN("account2's LC LQTY bal LC withdrawal attempt", account2LockupContractBal)
 
-  // // --- Stake LQTY ---
-  // console.log("CHECK DEPLOYER STAKING LQTY")
-
-  // // Log deployer LQTY bal and stake before staking
-  // deployerLQTYBal = await LQTYContracts.lqtyToken.balanceOf(deployerWallet.address)
-  // th.logBN("deployer LQTY bal before staking", deployerLQTYBal)
-  // let deployerLQTYStake = await LQTYContracts.lqtyStaking.stakes(deployerWallet.address)
-  // th.logBN("deployer stake before staking", deployerLQTYStake)
-
-  // // stake 13 LQTY
-  // await mdh.sendAndWaitForTransaction(LQTYContracts.lqtyStaking.stake(dec(13, 18), { gasPrice, gasLimit: 1000000 }))
-
-  // // Log deployer LQTY bal and stake after staking
-  // deployerLQTYBal = await LQTYContracts.lqtyToken.balanceOf(deployerWallet.address)
-  // th.logBN("deployer LQTY bal after staking", deployerLQTYBal)
-  // deployerLQTYStake = await LQTYContracts.lqtyStaking.stakes(deployerWallet.address)
-  // th.logBN("deployer stake after staking", deployerLQTYStake)
-
-  // // Log deployer rev share immediately after staking
-  // let deployerLUSDRevShare = await LQTYContracts.lqtyStaking.getPendingLUSDGain(deployerWallet.address)
-  // th.logBN("deployer pending LUSD revenue share", deployerLUSDRevShare)
-
-
-
   // // --- 2nd Account opens trove ---
   // const trove2Status = await liquityCore.troveManager.getTroveStatus(account2Wallet.address)
   // if (trove2Status.toString() != '1') {
@@ -389,19 +365,12 @@ async function mainnetDeploy(configParams) {
   // th.logBN('acct2 stake', acct2Trove[2])
   // console.log(`acct2 trove status: ${acct2Trove[3]}`)
 
-  // // Log deployer's pending LUSD gain - check fees went to staker (deloyer)
-  // deployerLUSDRevShare = await LQTYContracts.lqtyStaking.getPendingLUSDGain(deployerWallet.address)
-  // th.logBN("deployer pending LUSD revenue share from staking, after acct 2 opened trove", deployerLUSDRevShare)
-
   // //  --- deployer withdraws staking gains ---
   // console.log("CHECK DEPLOYER WITHDRAWING STAKING GAINS")
 
   // // check deployer's LUSD balance before withdrawing staking gains
   // deployerLUSDBal = await liquityCore.lusdToken.balanceOf(deployerWallet.address)
   // th.logBN('deployer LUSD bal before withdrawing staking gains', deployerLUSDBal)
-
-  // // Deployer withdraws staking gains
-  // await mdh.sendAndWaitForTransaction(LQTYContracts.lqtyStaking.unstake(0, { gasPrice, gasLimit: 1000000 }))
 
   // // check deployer's LUSD balance after withdrawing staking gains
   // deployerLUSDBal = await liquityCore.lusdToken.balanceOf(deployerWallet.address)

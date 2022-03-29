@@ -5,8 +5,6 @@ pragma solidity 0.6.11;
 interface ILQTYStaking {
 
     // --- Events --
-
-    event LQTYTokenAddressSet(address _lqtyTokenAddress);
     event LUSDTokenAddressSet(address _lusdTokenAddress);
     event TroveManagerAddressSet(address _troveManager);
     event BorrowerOperationsAddressSet(address _borrowerOperationsAddress);
@@ -19,7 +17,6 @@ interface ILQTYStaking {
 
     function setAddresses
     (
-        address _lqtyTokenAddress,
         address _lusdTokenAddress,
         address _troveManagerAddress,
         address _borrowerOperationsAddress,

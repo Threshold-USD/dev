@@ -7,13 +7,8 @@ import "../Dependencies/IERC2612.sol";
 
 interface ILQTYToken is IERC20, IERC2612 {
 
-    // --- Events ---
-
-    event LQTYStakingAddressSet(address _lqtyStakingAddress);
 
     // --- Functions ---
-
-    function sendToLQTYStaking(address _sender, uint256 _amount) external;
 
     function getDeploymentStartTime() external view returns (uint256);
 

@@ -255,14 +255,6 @@ contract('Deployment script - Sets correct contract addresses dependencies after
 
   // --- LQTY Staking ---
 
-  // Sets LQTYToken in LQTYStaking
-  it('Sets the correct LQTYToken address in LQTYStaking', async () => {
-    const lqtyTokenAddress = lqtyToken.address
-
-    const recordedLQTYTokenAddress = await lqtyStaking.lqtyToken()
-    assert.equal(lqtyTokenAddress, recordedLQTYTokenAddress)
-  })
-
   // Sets ActivePool in LQTYStaking
   it('Sets the correct ActivePool address in LQTYStaking', async () => {
     const activePoolAddress = activePool.address
@@ -293,16 +285,6 @@ contract('Deployment script - Sets correct contract addresses dependencies after
 
     const recordedBorrowerOperationsAddress = await lqtyStaking.borrowerOperationsAddress()
     assert.equal(borrowerOperationsAddress, recordedBorrowerOperationsAddress)
-  })
-
-  // ---  LQTYToken ---
-
-  // Sets LQTYStaking in LQTYToken
-  it('Sets the correct LQTYStaking address in LQTYToken', async () => {
-    const lqtyStakingAddress = lqtyStaking.address
-
-    const recordedLQTYStakingAddress =  await lqtyToken.lqtyStakingAddress()
-    assert.equal(lqtyStakingAddress, recordedLQTYStakingAddress)
   })
 
 })
