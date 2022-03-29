@@ -151,7 +151,7 @@ const headerGradient: ThemeUIStyleObject = {
 };
 
 const theme: Theme = {
-  breakpoints: ["100em", "140em"],
+  breakpoints: ["45em", "80em", "140em"],
 
   space: [0, 4, 8, 16, 32, 64, 128, 256, 512],
 
@@ -177,7 +177,8 @@ const theme: Theme = {
 
     light: 200,
     medium: 500,
-    bold: 600
+    bold: 600,
+    extrabold: 700,
   },
 
   lineHeights: {
@@ -346,8 +347,8 @@ const theme: Theme = {
       top: 0,
       zIndex: 1,
 
-      px: [2, "12px", "12px", 5],
-      py: "17px",
+      px: ["1.5em", "2.5em"],
+      py: "19px",
 
       borderBottom: 1,
       borderColor: "border",
@@ -386,11 +387,12 @@ const theme: Theme = {
       display: "flex",
       alignItems: "center",
       width: "100%",
-      maxWidth: "912px",
+      maxWidth: ["728px","1540px"],
       mx: ["auto"],
       mt: ["80px"],
       mb: ["40px", "40px"],
-      px: ["20px", cardGapX]
+      pl: ["","20em"],
+      px: ["20px",]
     },
 
     columns: {
@@ -401,11 +403,11 @@ const theme: Theme = {
 
     left: {
       pr: cardGapX,
-      width: ["100%", "58%"]
+      width: ["100%", "100%", "58%"]
     },
 
     right: {
-      width: ["100%", "42%"]
+      width: ["100%", "100%", "42%"]
     },
 
     actions: {
