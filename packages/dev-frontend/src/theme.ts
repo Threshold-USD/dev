@@ -342,7 +342,6 @@ const theme: Theme = {
       display: "flex",
       alignItems: "center", 
       bg: "black",
-      mr: [0, 0, "1em"],
       px: "1em",
       py: ".5em",
       gap: "1em",
@@ -361,6 +360,7 @@ const theme: Theme = {
     },
 
     header: {
+      
       display: "flex",
       justifyContent: "space-between",
       alignItems: "stretch",
@@ -533,7 +533,7 @@ const theme: Theme = {
       px: 2,
       py: 1,
       pl: "3em",
-      fontWeight: "semibol",
+      fontWeight: "semibold",
       fontSize: ".9rem",
       textTransform: "capitalize",
       mt: [3],
