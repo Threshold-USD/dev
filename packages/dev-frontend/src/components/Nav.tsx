@@ -1,7 +1,9 @@
 import { Flex, Box } from "theme-ui";
 import { Link } from "./Link";
 import { Icon } from "./Icon";
+
 import { ExternalLinks } from "./ExternalLinks";
+import { UserAccount } from "./UserAccount";
 
 export const Nav: React.FC = () => {
   return (
@@ -38,6 +40,9 @@ export const Nav: React.FC = () => {
           <Icon name="exclamation-triangle" />
           Risky Vaults
         </Link>
+        <Flex sx={{ mt:"1.5em", alignSelf: "center", display: ["flex", "none"] }}>
+          <UserAccount />
+        </Flex>
       </Flex>
       <Flex sx={{ justifyContent: "end", flexDirection: "column", flex: 1 }}>
         <ExternalLinks />

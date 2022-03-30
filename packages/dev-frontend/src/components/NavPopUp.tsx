@@ -10,6 +10,7 @@ export const NavPopUp: React.FC = ({ children }) => {
           sx={{
             display: "flex",
             mt: "4.5em",
+            pt: "1em",
             height: "100%",
             width: "17em",
             position: "absolute",
