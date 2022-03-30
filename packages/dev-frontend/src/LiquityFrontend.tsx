@@ -56,13 +56,10 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                   </Header>
                   <SideBar>
                     <Nav />
-                    {/*<Social />*/}
                   </SideBar>
-
                   <Container
                     variant="main"
                     sx={{
-                      display: "flex",
                       flexGrow: 1,
                       flexDirection: "column",
                       alignItems: "center",

@@ -8,7 +8,8 @@ export const NavPopUp: React.FC = ({ children }) => {
       <Flex sx={{ alignItems: "start", flex: 1 }}>
         <Box
           sx={{
-            mt: "3em",
+            display: "flex",
+            mt: "4.5em",
             height: "100%",
             width: "17em",
             position: "absolute",

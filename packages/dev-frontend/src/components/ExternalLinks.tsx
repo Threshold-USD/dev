@@ -11,7 +11,8 @@ export const ExternalLinks: React.FC = () => {
       <Flex sx={{
         display: "flex",
         flexDirection: "row",
-        alignSelf: "center"
+        alignSelf: "center",
+        bottom: 0
       }}>
         <Link variant="socialIcons" href="https://discord.com/invite/WXK9PC6SRF" target="_blank">
           <Image src="./icons/discord.svg" />

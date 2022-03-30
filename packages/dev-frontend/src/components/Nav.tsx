@@ -7,9 +7,9 @@ export const Nav: React.FC = () => {
   return (
     <Box sx={{
       display: "flex",
-      flexGrow: 1,
-      justifyContent: "flex-start",
+      justifyContent: "space-between",
       flexDirection: "column",
+      width: "100%"
     }}>
       <Flex sx={{
         display: "flex",
@@ -17,11 +17,13 @@ export const Nav: React.FC = () => {
         flexDirection: "column",
       }}>
         <Link to="/">
-          <Icon name="columns" />
+          <Icon name="chart-bar" />
           Dashboard
         </Link>
-        <Link to="/borrow">
-          <Icon name="exchange-alt" />
+        <Link to="/borrow" >
+          <Flex sx={{ transform: "rotate(155deg)" }}>
+            <Icon name="exchange-alt" />
+          </Flex>
           Borrow
         </Link>
         <Link to="/earn">
@@ -37,7 +39,7 @@ export const Nav: React.FC = () => {
           Risky Vaults
         </Link>
       </Flex>
-      <Flex sx={{ justifyContent: "flex-end", flexDirection: "column", mr: 3, flex: 1 }}>
+      <Flex sx={{ justifyContent: "end", flexDirection: "column", flex: 1 }}>
         <ExternalLinks />
       </Flex>
     </Box>

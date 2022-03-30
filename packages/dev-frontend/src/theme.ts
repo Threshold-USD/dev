@@ -157,11 +157,11 @@ const theme: Theme = {
 
   fonts: {
     body: [
+      "Roboto",
       "system-ui",
       "-apple-system",
       "BlinkMacSystemFont",
       '"Segoe UI"',
-      "Roboto",
       '"Helvetica Neue"',
       "sans-serif"
     ].join(", "),
@@ -337,6 +337,29 @@ const theme: Theme = {
   },
 
   layout: {
+
+    userAccount: {
+      display: "flex",
+      alignItems: "center", 
+      bg: "black",
+      mr: [0, 0, "1em"],
+      px: "1em",
+      py: ".5em",
+      gap: "1em",
+      backgroundColor: "#EDF2F7",
+      borderRadius: ".5em"
+    },
+    
+    account: {
+      display: "flex",
+      px: "1em",
+      py: ".1em", 
+      bg:"white", 
+      justifyContent: "center",
+      backgroundColor: "#CBD5E0",
+      borderRadius: ".4em"
+    },
+
     header: {
       display: "flex",
       justifyContent: "space-between",
@@ -389,7 +412,7 @@ const theme: Theme = {
       width: "100%",
       maxWidth: ["728px","1540px"],
       mx: ["auto"],
-      mt: ["80px"],
+      mt: "80px",
       mb: ["40px", "40px"],
       pl: ["","20em"],
       px: ["20px",]
@@ -510,7 +533,7 @@ const theme: Theme = {
       px: 2,
       py: 1,
       pl: "3em",
-      fontWeight: "bold",
+      fontWeight: "semibol",
       fontSize: ".9rem",
       textTransform: "capitalize",
       mt: [3],
@@ -524,10 +547,19 @@ const theme: Theme = {
     socialIcons: {
       display: "flex",
       mx: 3,
-      my: 4,
+      mt: 4,
+      mb: ["6em", "2em"],
       color: "primary",
       ":hover, :enabled": {
         color: "primary",
+      },
+    },
+    logo: {
+      display: "flex",
+      alignItems: "center",
+      color: "black",
+      ":visited": {
+        color: "black",
       },
     },
   }
