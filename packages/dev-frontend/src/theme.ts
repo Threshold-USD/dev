@@ -406,6 +406,13 @@ const theme: Theme = {
       bg: "muted"
     },
 
+    wrapper: {
+      display: "flex",
+      flexDirection: "column",
+      minHeight: "100%",
+      backgroundColor: "#F7FAFC"
+    },
+
     main: {
       display: "flex",
       alignItems: "center",

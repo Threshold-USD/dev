@@ -49,7 +49,7 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
           <StabilityViewProvider>
             <StakingViewProvider>
               <FarmViewProvider>
-                <Flex sx={{ flexDirection: "column", minHeight: "100%", backgroundColor: "#F7FAFC" }}>
+                <Flex variant="layout.wrapper">
                   <Header>
                     <HamburgerMenu />
                   </Header>
