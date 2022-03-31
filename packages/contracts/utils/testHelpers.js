@@ -1122,11 +1122,6 @@ class TestHelper {
     return Number(days) * (60 * 60 * 24)
   }
 
-  static async getTimeFromSystemDeployment(lqtyToken, web3, timePassedSinceDeployment) {
-    const deploymentTime = await lqtyToken.getDeploymentStartTime()
-    return this.toBN(deploymentTime).add(this.toBN(timePassedSinceDeployment))
-  }
-
   // --- Assert functions ---
 
   static async assertRevert(txPromise, message = undefined) {

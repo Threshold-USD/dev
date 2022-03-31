@@ -46,7 +46,6 @@ contract('BorrowerOperations', async accounts => {
   let defaultPool
   let borrowerOperations
   let lqtyStaking
-  let lqtyToken
 
   let contracts
 
@@ -93,7 +92,6 @@ contract('BorrowerOperations', async accounts => {
       hintHelpers = contracts.hintHelpers
 
       lqtyStaking = LQTYContracts.lqtyStaking
-      lqtyToken = LQTYContracts.lqtyToken
       lockupContractFactory = LQTYContracts.lockupContractFactory
 
       LUSD_GAS_COMPENSATION = await borrowerOperations.LUSD_GAS_COMPENSATION()

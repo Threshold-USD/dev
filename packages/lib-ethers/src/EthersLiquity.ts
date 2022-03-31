@@ -213,11 +213,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     return this._readable.getLUSDBalance(address, overrides);
   }
 
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getLQTYBalance} */
-  getLQTYBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getLQTYBalance(address, overrides);
-  }
-
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getCollateralSurplusBalance} */
   getCollateralSurplusBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
     return this._readable.getCollateralSurplusBalance(address, overrides);
@@ -455,21 +450,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     overrides?: EthersTransactionOverrides
   ): Promise<void> {
     return this.send.sendLUSD(toAddress, amount, overrides).then(waitForSuccess);
-  }
-
-  /**
-   * {@inheritDoc @liquity/lib-base#TransactableLiquity.sendLQTY}
-   *
-   * @throws
-   * Throws {@link EthersTransactionFailedError} in case of transaction failure.
-   * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
-   */
-  sendLQTY(
-    toAddress: string,
-    amount: Decimalish,
-    overrides?: EthersTransactionOverrides
-  ): Promise<void> {
-    return this.send.sendLQTY(toAddress, amount, overrides).then(waitForSuccess);
   }
 
   /**

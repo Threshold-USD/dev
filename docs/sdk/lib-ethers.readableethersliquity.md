@@ -30,7 +30,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [connect(signerOrProvider, optionalParams)](./lib-ethers.readableethersliquity.connect_1.md) | <code>static</code> |  |
 |  [getCollateralSurplusBalance(address, overrides)](./lib-ethers.readableethersliquity.getcollateralsurplusbalance.md) |  | Get the amount of leftover collateral available for withdrawal by an address. |
 |  [getFees(overrides)](./lib-ethers.readableethersliquity.getfees.md) |  | Get a calculator for current fees. |
-|  [getLQTYBalance(address, overrides)](./lib-ethers.readableethersliquity.getlqtybalance.md) |  | Get the amount of LQTY held by an address. |
 |  [getLUSDBalance(address, overrides)](./lib-ethers.readableethersliquity.getlusdbalance.md) |  | Get the amount of LUSD held by an address. |
 |  [getLUSDInStabilityPool(overrides)](./lib-ethers.readableethersliquity.getlusdinstabilitypool.md) |  | Get the total amount of LUSD currently deposited in the Stability Pool. |
 |  [getNumberOfTroves(overrides)](./lib-ethers.readableethersliquity.getnumberoftroves.md) |  | Get number of Troves that are currently open. |

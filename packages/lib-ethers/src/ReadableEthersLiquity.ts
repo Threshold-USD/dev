@@ -284,14 +284,6 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     return lusdToken.balanceOf(address, { ...overrides }).then(decimalify);
   }
 
-  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getLQTYBalance} */
-  getLQTYBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
-    address ??= _requireAddress(this.connection);
-    const { lqtyToken } = _getContracts(this.connection);
-
-    return lqtyToken.balanceOf(address, { ...overrides }).then(decimalify);
-  }
-
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getCollateralSurplusBalance} */
   getCollateralSurplusBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
     address ??= _requireAddress(this.connection);
@@ -499,12 +491,6 @@ class _BlockPolledReadableEthersLiquity
     return this._userHit(address, overrides)
       ? this.store.state.lusdBalance
       : this._readable.getLUSDBalance(address, overrides);
-  }
-
-  async getLQTYBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._userHit(address, overrides)
-      ? this.store.state.lqtyBalance
-      : this._readable.getLQTYBalance(address, overrides);
   }
 
   async getCollateralSurplusBalance(

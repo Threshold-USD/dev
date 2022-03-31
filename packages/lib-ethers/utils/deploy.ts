@@ -107,15 +107,6 @@ const deployContracts = async (
         { ...overrides }
       ),
 
-      lqtyToken: await deployContract(
-        deployer,
-        getContractFactory,
-        "LQTYToken",
-        Wallet.createRandom().address, // _bountyAddress (TODO: parameterize this)
-        Wallet.createRandom().address, // _multisigAddress (TODO: parameterize this)
-        { ...overrides }
-      ),
-
       multiTroveGetter: await deployContract(
         deployer,
         getContractFactory,
@@ -146,7 +137,6 @@ const connectContracts = async (
     lusdToken,
     collSurplusPool,
     defaultPool,
-    lqtyToken,
     hintHelpers,
     lqtyStaking,
     priceFeed,
@@ -295,12 +285,7 @@ export const deployAndSetupContracts = async (
   log("Connecting contracts...");
   await connectContracts(contracts, deployer, overrides);
 
-  const lqtyTokenDeploymentTime = await contracts.lqtyToken.getDeploymentStartTime();
-  const bootstrapPeriod = await contracts.troveManager.BOOTSTRAP_PERIOD();
-
   return {
-    ...deployment,
-    deploymentDate: lqtyTokenDeploymentTime.toNumber() * 1000,
-    bootstrapPeriod: bootstrapPeriod.toNumber()
+    ...deployment
   };
 };

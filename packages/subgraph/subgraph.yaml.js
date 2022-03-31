@@ -157,8 +157,7 @@ dataSources:
         - event: CollBalanceUpdated(indexed address,uint256)
           handler: handleCollSurplusBalanceUpdated
 ${[
-  ["LUSDToken", addresses.lusdToken],
-  ["LQTYToken", addresses.lqtyToken]
+  ["LUSDToken", addresses.lusdToken]
 ].map(
   ([name, address]) => yaml`
   - name: ${name}

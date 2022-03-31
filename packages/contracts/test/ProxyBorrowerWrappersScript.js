@@ -2,7 +2,6 @@ const deploymentHelper = require("../utils/deploymentHelpers.js")
 const testHelpers = require("../utils/testHelpers.js")
 
 const TroveManagerTester = artifacts.require("TroveManagerTester")
-const LQTYTokenTester = artifacts.require("LQTYTokenTester")
 
 const th = testHelpers.TestHelper
 
@@ -47,8 +46,6 @@ contract('BorrowerWrappers', async accounts => {
   let collSurplusPool
   let borrowerOperations
   let borrowerWrappers
-  let lqtyTokenOriginal
-  let lqtyToken
   let lqtyStaking
 
   let contracts
@@ -70,7 +67,6 @@ contract('BorrowerWrappers', async accounts => {
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 
     troveManagerOriginal = contracts.troveManager
-    lqtyTokenOriginal = LQTYContracts.lqtyToken
 
     const users = [ alice, bob, carol, dennis, whale, A, B, C, D, E, defaulter_1, defaulter_2 ]
     await deploymentHelper.deployProxyScripts(contracts, LQTYContracts, owner, users)
@@ -86,7 +82,6 @@ contract('BorrowerWrappers', async accounts => {
     borrowerOperations = contracts.borrowerOperations
     borrowerWrappers = contracts.borrowerWrappers
     lqtyStaking = LQTYContracts.lqtyStaking
-    lqtyToken = LQTYContracts.lqtyToken
 
     LUSD_GAS_COMPENSATION = await borrowerOperations.LUSD_GAS_COMPENSATION()
   })

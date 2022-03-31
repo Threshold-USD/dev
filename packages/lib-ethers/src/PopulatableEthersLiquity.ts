@@ -1176,24 +1176,6 @@ export class PopulatableEthersLiquity
     );
   }
 
-  /** {@inheritDoc @liquity/lib-base#PopulatableLiquity.sendLQTY} */
-  async sendLQTY(
-    toAddress: string,
-    amount: Decimalish,
-    overrides?: EthersTransactionOverrides
-  ): Promise<PopulatedEthersLiquityTransaction<void>> {
-    const { lqtyToken } = _getContracts(this._readable.connection);
-
-    return this._wrapSimpleTransaction(
-      await lqtyToken.estimateAndPopulate.transfer(
-        { ...overrides },
-        id,
-        toAddress,
-        Decimal.from(amount).hex
-      )
-    );
-  }
-
   /** {@inheritDoc @liquity/lib-base#PopulatableLiquity.redeemLUSD} */
   async redeemLUSD(
     amount: Decimalish,

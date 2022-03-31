@@ -33,7 +33,6 @@ Implemented by [EthersLiquity](./lib-ethers.ethersliquity.md)<!-- -->.
 |  [openTrove(params, maxBorrowingRate)](./lib-base.transactableliquity.opentrove.md) | Open a new Trove by depositing collateral and borrowing LUSD. |
 |  [redeemLUSD(amount, maxRedemptionRate)](./lib-base.transactableliquity.redeemlusd.md) | Redeem LUSD to native currency (e.g. Ether) at face value. |
 |  [repayLUSD(amount)](./lib-base.transactableliquity.repaylusd.md) | Adjust existing Trove by repaying some of its debt. |
-|  [sendLQTY(toAddress, amount)](./lib-base.transactableliquity.sendlqty.md) | Send LQTY tokens to an address. |
 |  [sendLUSD(toAddress, amount)](./lib-base.transactableliquity.sendlusd.md) | Send LUSD tokens to an address. |
 |  [transferCollateralGainToTrove()](./lib-base.transactableliquity.transfercollateralgaintotrove.md) | Transfer [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit to Trove. |
 |  [withdrawCollateral(amount)](./lib-base.transactableliquity.withdrawcollateral.md) | Adjust existing Trove by withdrawing some of its collateral. |

@@ -12,9 +12,7 @@ const BorrowerOperations = artifacts.require("./BorrowerOperations.sol")
 const HintHelpers = artifacts.require("./HintHelpers.sol")
 
 const LQTYStaking = artifacts.require("./LQTYStaking.sol")
-const LQTYToken = artifacts.require("./LQTYToken.sol")
 
-const LQTYTokenTester = artifacts.require("./LQTYTokenTester.sol")
 const StabilityPoolTester = artifacts.require("./StabilityPoolTester.sol")
 const ActivePoolTester = artifacts.require("./ActivePoolTester.sol")
 const DefaultPoolTester = artifacts.require("./DefaultPoolTester.sol")
@@ -156,16 +154,8 @@ class DeploymentHelper {
 
     LQTYStaking.setAsDeployed(lqtyStaking)
 
-    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
-    const lqtyToken = await LQTYToken.new(
-      bountyAddress,
-      multisigAddress
-    )
-    LQTYToken.setAsDeployed(lqtyToken)
-
     const LQTYContracts = {
-      lqtyStaking,
-      lqtyToken
+      lqtyStaking
     }
     return LQTYContracts
   }
@@ -175,16 +165,8 @@ class DeploymentHelper {
 
     LQTYStaking.setAsDeployed(lqtyStaking)
 
-    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
-    const lqtyToken = await LQTYTokenTester.new(
-      bountyAddress,
-      multisigAddress
-    )
-    LQTYTokenTester.setAsDeployed(lqtyToken)
-
     const LQTYContracts = {
-      lqtyStaking,
-      lqtyToken
+      lqtyStaking
     }
     return LQTYContracts
   }
@@ -226,16 +208,8 @@ class DeploymentHelper {
   static async deployLQTYContractsTruffle(bountyAddress, multisigAddress) {
     const lqtyStaking = await lqtyStaking.new()
 
-    /* Deploy LQTY Token, passing Community Issuance,  LQTYStaking, and Factory addresses
-    to the constructor  */
-    const lqtyToken = await LQTYToken.new(
-      bountyAddress,
-      multisigAddress
-    )
-
     const LQTYContracts = {
-      lqtyStaking,
-      lqtyToken
+      lqtyStaking
     }
     return LQTYContracts
   }
@@ -281,9 +255,6 @@ class DeploymentHelper {
 
     const lusdTokenScript = await TokenScript.new(contracts.lusdToken.address)
     contracts.lusdToken = new TokenProxy(owner, proxies, lusdTokenScript.address, contracts.lusdToken)
-
-    const lqtyTokenScript = await TokenScript.new(LQTYContracts.lqtyToken.address)
-    LQTYContracts.lqtyToken = new TokenProxy(owner, proxies, lqtyTokenScript.address, LQTYContracts.lqtyToken)
 
     const lqtyStakingScript = await LQTYStakingScript.new(LQTYContracts.lqtyStaking.address)
     LQTYContracts.lqtyStaking = new LQTYStakingProxy(owner, proxies, lqtyStakingScript.address, LQTYContracts.lqtyStaking)

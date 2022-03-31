@@ -7,21 +7,19 @@ import { useLiquity } from "../hooks/LiquityContext";
 import { COIN, GT } from "../strings";
 import { Statistic } from "./Statistic";
 
-const selectBalances = ({ accountBalance, lusdBalance, lqtyBalance }: LiquityStoreState) => ({
+const selectBalances = ({ accountBalance, lusdBalance }: LiquityStoreState) => ({
   accountBalance,
-  lusdBalance,
-  lqtyBalance
+  lusdBalance
 });
 
 const Balances: React.FC = () => {
-  const { accountBalance, lusdBalance, lqtyBalance } = useLiquitySelector(selectBalances);
+  const { accountBalance, lusdBalance } = useLiquitySelector(selectBalances);
 
   return (
     <Box sx={{ mb: 3 }}>
       <Heading>My Account Balances</Heading>
       <Statistic name="ETH"> {accountBalance.prettify(4)}</Statistic>
       <Statistic name={COIN}> {lusdBalance.prettify()}</Statistic>
-      <Statistic name={GT}>{lqtyBalance.prettify()}</Statistic>
     </Box>
   );
 };
@@ -115,7 +113,7 @@ export const SystemStats: React.FC<SystemStatsProps> = ({ variant = "info", show
           {lusdInStabilityPool.shorten()}
           <Text sx={{ fontSize: 1 }}>&nbsp;({lusdInStabilityPoolPct.toString(1)})</Text>
         </Statistic>
-      )}      
+      )}
       <Statistic
         name="Total Collateral Ratio"
         tooltip="The ratio of the Dollar value of the entire system collateral at the current ETH:USD price, to the entire system debt."

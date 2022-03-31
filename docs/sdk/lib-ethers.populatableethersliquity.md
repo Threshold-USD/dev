@@ -34,7 +34,6 @@ export declare class PopulatableEthersLiquity implements PopulatableLiquity<Ethe
 |  [openTrove(params, maxBorrowingRateOrOptionalParams, overrides)](./lib-ethers.populatableethersliquity.opentrove.md) |  | Open a new Trove by depositing collateral and borrowing LUSD. |
 |  [redeemLUSD(amount, maxRedemptionRate, overrides)](./lib-ethers.populatableethersliquity.redeemlusd.md) |  | Redeem LUSD to native currency (e.g. Ether) at face value. |
 |  [repayLUSD(amount, overrides)](./lib-ethers.populatableethersliquity.repaylusd.md) |  | Adjust existing Trove by repaying some of its debt. |
-|  [sendLQTY(toAddress, amount, overrides)](./lib-ethers.populatableethersliquity.sendlqty.md) |  | Send LQTY tokens to an address. |
 |  [sendLUSD(toAddress, amount, overrides)](./lib-ethers.populatableethersliquity.sendlusd.md) |  | Send LUSD tokens to an address. |
 |  [transferCollateralGainToTrove(overrides)](./lib-ethers.populatableethersliquity.transfercollateralgaintotrove.md) |  | Transfer [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit to Trove. |
 |  [withdrawCollateral(amount, overrides)](./lib-ethers.populatableethersliquity.withdrawcollateral.md) |  | Adjust existing Trove by withdrawing some of its collateral. |

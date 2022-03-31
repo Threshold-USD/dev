@@ -138,32 +138,17 @@ class MainnetDeploymentHelper {
 
   async deployLQTYContractsMainnet(bountyAddress, multisigAddress, deploymentState) {
     const lqtyStakingFactory = await this.getFactory("LQTYStaking")
-    const lqtyTokenFactory = await this.getFactory("LQTYToken")
 
     const lqtyStaking = await this.loadOrDeploy(lqtyStakingFactory, 'lqtyStaking', deploymentState)
-
-    // Deploy LQTY Token, passing Community Issuance and Factory addresses to the constructor
-    const lqtyTokenParams = [
-      bountyAddress,
-      multisigAddress
-    ]
-    const lqtyToken = await this.loadOrDeploy(
-      lqtyTokenFactory,
-      'lqtyToken',
-      deploymentState,
-      lqtyTokenParams
-    )
 
     if (!this.configParams.ETHERSCAN_BASE_URL) {
       console.log('No Etherscan Url defined, skipping verification')
     } else {
       await this.verifyContract('lqtyStaking', deploymentState)
-      await this.verifyContract('lqtyToken', deploymentState, lqtyTokenParams)
     }
 
     const LQTYContracts = {
-      lqtyStaking,
-      lqtyToken
+      lqtyStaking
     }
     return LQTYContracts
   }

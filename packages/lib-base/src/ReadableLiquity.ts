@@ -99,13 +99,6 @@ export interface ReadableLiquity {
   getLUSDBalance(address?: string): Promise<Decimal>;
 
   /**
-   * Get the amount of LQTY held by an address.
-   *
-   * @param address - Address whose balance should be retrieved.
-   */
-  getLQTYBalance(address?: string): Promise<Decimal>;
-
-  /**
    * Get the amount of leftover collateral available for withdrawal by an address.
    *
    * @remarks

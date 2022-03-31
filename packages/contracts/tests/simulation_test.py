@@ -120,12 +120,6 @@ def contracts():
     )
     # LQTY
     contracts.lqtyStaking = LQTYStaking.deploy({ 'from': accounts[0] })
-    contracts.lqtyToken = LQTYToken.deploy(
-        contracts.lqtyStaking.address,
-        accounts[0], # bountyAddress
-        accounts[0],  # multisigAddress
-        { 'from': accounts[0] }
-    )
 
     setAddresses(contracts)
 

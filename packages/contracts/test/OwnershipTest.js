@@ -20,7 +20,6 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
   let borrowerOperations
 
   let lqtyStaking
-  let lqtyToken
   let lockupContractFactory
 
   before(async () => {
@@ -38,7 +37,6 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
     borrowerOperations = contracts.borrowerOperations
 
     lqtyStaking = LQTYContracts.lqtyStaking
-    lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
   })
 

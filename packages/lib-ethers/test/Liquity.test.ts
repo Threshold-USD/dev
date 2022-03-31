@@ -378,7 +378,7 @@ describe("EthersLiquity", () => {
     it("should close the Trove with some LUSD from another user", async () => {
       const price = await liquity.getPrice();
       const initialTrove = await liquity.getTrove();
-      const lusdBalance = await liquity.getLQTYBalance();
+      const lusdBalance = await liquity.getLUSDBalance();
       const lusdShortage = initialTrove.netDebt.sub(lusdBalance);
 
       let funderTrove = Trove.create({ depositCollateral: 1, borrowLUSD: lusdShortage });

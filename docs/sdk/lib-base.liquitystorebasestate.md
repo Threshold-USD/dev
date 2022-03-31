@@ -18,7 +18,6 @@ export interface LiquityStoreBaseState
 |  --- | --- | --- |
 |  [accountBalance](./lib-base.liquitystorebasestate.accountbalance.md) | [Decimal](./lib-base.decimal.md) | User's native currency balance (e.g. Ether). |
 |  [collateralSurplusBalance](./lib-base.liquitystorebasestate.collateralsurplusbalance.md) | [Decimal](./lib-base.decimal.md) | Amount of leftover collateral available for withdrawal to the user. |
-|  [lqtyBalance](./lib-base.liquitystorebasestate.lqtybalance.md) | [Decimal](./lib-base.decimal.md) | User's LQTY token balance. |
 |  [lusdBalance](./lib-base.liquitystorebasestate.lusdbalance.md) | [Decimal](./lib-base.decimal.md) | User's LUSD token balance. |
 |  [lusdInStabilityPool](./lib-base.liquitystorebasestate.lusdinstabilitypool.md) | [Decimal](./lib-base.decimal.md) | Total amount of LUSD currently deposited in the Stability Pool. |
 |  [numberOfTroves](./lib-base.liquitystorebasestate.numberoftroves.md) | number | Number of Troves that are currently open. |

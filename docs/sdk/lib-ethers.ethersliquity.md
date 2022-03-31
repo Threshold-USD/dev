@@ -38,7 +38,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [depositLUSDInStabilityPool(amount, overrides)](./lib-ethers.ethersliquity.depositlusdinstabilitypool.md) |  | Make a new Stability Deposit, or top up existing one. |
 |  [getCollateralSurplusBalance(address, overrides)](./lib-ethers.ethersliquity.getcollateralsurplusbalance.md) |  | Get the amount of leftover collateral available for withdrawal by an address. |
 |  [getFees(overrides)](./lib-ethers.ethersliquity.getfees.md) |  | Get a calculator for current fees. |
-|  [getLQTYBalance(address, overrides)](./lib-ethers.ethersliquity.getlqtybalance.md) |  | Get the amount of LQTY held by an address. |
 |  [getLUSDBalance(address, overrides)](./lib-ethers.ethersliquity.getlusdbalance.md) |  | Get the amount of LUSD held by an address. |
 |  [getLUSDInStabilityPool(overrides)](./lib-ethers.ethersliquity.getlusdinstabilitypool.md) |  | Get the total amount of LUSD currently deposited in the Stability Pool. |
 |  [getNumberOfTroves(overrides)](./lib-ethers.ethersliquity.getnumberoftroves.md) |  | Get number of Troves that are currently open. |
@@ -56,7 +55,6 @@ The constructor for this class is marked as internal. Third-party code should no
 |  [openTrove(params, maxBorrowingRateOrOptionalParams, overrides)](./lib-ethers.ethersliquity.opentrove.md) |  | Open a new Trove by depositing collateral and borrowing LUSD. |
 |  [redeemLUSD(amount, maxRedemptionRate, overrides)](./lib-ethers.ethersliquity.redeemlusd.md) |  | Redeem LUSD to native currency (e.g. Ether) at face value. |
 |  [repayLUSD(amount, overrides)](./lib-ethers.ethersliquity.repaylusd.md) |  | Adjust existing Trove by repaying some of its debt. |
-|  [sendLQTY(toAddress, amount, overrides)](./lib-ethers.ethersliquity.sendlqty.md) |  | Send LQTY tokens to an address. |
 |  [sendLUSD(toAddress, amount, overrides)](./lib-ethers.ethersliquity.sendlusd.md) |  | Send LUSD tokens to an address. |
 |  [transferCollateralGainToTrove(overrides)](./lib-ethers.ethersliquity.transfercollateralgaintotrove.md) |  | Transfer [collateral gain](./lib-base.stabilitydeposit.collateralgain.md) from Stability Deposit to Trove. |
 |  [withdrawCollateral(amount, overrides)](./lib-ethers.ethersliquity.withdrawcollateral.md) |  | Adjust existing Trove by withdrawing some of its collateral. |

@@ -219,12 +219,6 @@ export interface SendableLiquity<R = unknown, S = unknown>
     amount: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
 
-  /** {@inheritDoc TransactableLiquity.sendLQTY} */
-  sendLQTY(
-    toAddress: string,
-    amount: Decimalish
-  ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
-
   /** {@inheritDoc TransactableLiquity.redeemLUSD} */
   redeemLUSD(
     amount: Decimalish,

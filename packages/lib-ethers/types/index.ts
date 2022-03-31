@@ -378,41 +378,6 @@ export interface LQTYStaking
   extractEvents(logs: Log[], name: "TroveManagerAddressSet"): _TypedLogDescription<{ _troveManager: string }>[];
 }
 
-interface LQTYTokenCalls {
-  ONE_YEAR_IN_SECONDS(_overrides?: CallOverrides): Promise<BigNumber>;
-  allowance(owner: string, spender: string, _overrides?: CallOverrides): Promise<BigNumber>;
-  balanceOf(account: string, _overrides?: CallOverrides): Promise<BigNumber>;
-  decimals(_overrides?: CallOverrides): Promise<number>;
-  domainSeparator(_overrides?: CallOverrides): Promise<string>;
-  getDeploymentStartTime(_overrides?: CallOverrides): Promise<BigNumber>;
-  multisigAddress(_overrides?: CallOverrides): Promise<string>;
-  name(_overrides?: CallOverrides): Promise<string>;
-  nonces(owner: string, _overrides?: CallOverrides): Promise<BigNumber>;
-  permitTypeHash(_overrides?: CallOverrides): Promise<string>;
-  symbol(_overrides?: CallOverrides): Promise<string>;
-  totalSupply(_overrides?: CallOverrides): Promise<BigNumber>;
-  version(_overrides?: CallOverrides): Promise<string>;
-}
-
-interface LQTYTokenTransactions {
-  approve(spender: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;
-  decreaseAllowance(spender: string, subtractedValue: BigNumberish, _overrides?: Overrides): Promise<boolean>;
-  increaseAllowance(spender: string, addedValue: BigNumberish, _overrides?: Overrides): Promise<boolean>;
-  permit(owner: string, spender: string, amount: BigNumberish, deadline: BigNumberish, v: BigNumberish, r: BytesLike, s: BytesLike, _overrides?: Overrides): Promise<void>;
-  transfer(recipient: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;
-  transferFrom(sender: string, recipient: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;
-}
-
-export interface LQTYToken
-  extends _TypedLiquityContract<LQTYTokenCalls, LQTYTokenTransactions> {
-  readonly filters: {
-    Approval(owner?: string | null, spender?: string | null, value?: null): EventFilter;
-    Transfer(from?: string | null, to?: string | null, value?: null): EventFilter;
-  };
-  extractEvents(logs: Log[], name: "Approval"): _TypedLogDescription<{ owner: string; spender: string; value: BigNumber }>[];
-  extractEvents(logs: Log[], name: "Transfer"): _TypedLogDescription<{ from: string; to: string; value: BigNumber }>[];
-}
-
 interface MultiTroveGetterCalls {
   getMultipleSortedTroves(_startIdx: BigNumberish, _count: BigNumberish, _overrides?: CallOverrides): Promise<{ owner: string; debt: BigNumber; coll: BigNumber; stake: BigNumber; snapshotETH: BigNumber; snapshotLUSDDebt: BigNumber }[]>;
   sortedTroves(_overrides?: CallOverrides): Promise<string>;

@@ -12,7 +12,6 @@ import HintHelpers from "../../contracts/artifacts/contracts/HintHelpers.sol/Hin
 import IERC20 from "../../contracts/artifacts/contracts/Dependencies/IERC20.sol/IERC20.json";
 import LUSDToken from "../../contracts/artifacts/contracts/LUSDToken.sol/LUSDToken.json";
 import LQTYStaking from "../../contracts/artifacts/contracts/LQTY/LQTYStaking.sol/LQTYStaking.json";
-import LQTYToken from "../../contracts/artifacts/contracts/LQTY/LQTYToken.sol/LQTYToken.json";
 import MultiTroveGetter from "../../contracts/artifacts/contracts/MultiTroveGetter.sol/MultiTroveGetter.json";
 import PriceFeed from "../../contracts/artifacts/contracts/PriceFeed.sol/PriceFeed.json";
 import PriceFeedTestnet from "../../contracts/artifacts/contracts/TestContracts/PriceFeedTestnet.sol/PriceFeedTestnet.json";
@@ -148,7 +147,6 @@ const contractArtifacts = [
   IERC20,
   LUSDToken,
   LQTYStaking,
-  LQTYToken,
   MultiTroveGetter,
   PriceFeed,
   PriceFeedTestnet,

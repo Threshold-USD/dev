@@ -35,7 +35,6 @@ contract('StabilityPool', async accounts => {
   let stabilityPool
   let defaultPool
   let borrowerOperations
-  let lqtyToken
 
   let gasPriceInWei
 
@@ -68,8 +67,6 @@ contract('StabilityPool', async accounts => {
       defaultPool = contracts.defaultPool
       borrowerOperations = contracts.borrowerOperations
       hintHelpers = contracts.hintHelpers
-
-      lqtyToken = LQTYContracts.lqtyToken
 
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)

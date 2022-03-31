@@ -130,8 +130,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     // @internal (undocumented)
     _getFeesFactory(overrides?: EthersCallOverrides): Promise<(blockTimestamp: number, recoveryMode: boolean) => Fees>;
     // (undocumented)
-    getLQTYBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal>;
-    // (undocumented)
     getLUSDBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal>;
     // (undocumented)
     getLUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal>;
@@ -169,8 +167,6 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     // (undocumented)
     repayLUSD(amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<TroveAdjustmentDetails>;
     readonly send: SendableEthersLiquity;
-    // (undocumented)
-    sendLQTY(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<void>;
     // (undocumented)
     sendLUSD(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<void>;
     // @internal (undocumented)
@@ -306,8 +302,6 @@ export class PopulatableEthersLiquity implements PopulatableLiquity<EthersTransa
     // (undocumented)
     repayLUSD(amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<PopulatedEthersLiquityTransaction<TroveAdjustmentDetails>>;
     // (undocumented)
-    sendLQTY(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<PopulatedEthersLiquityTransaction<void>>;
-    // (undocumented)
     sendLUSD(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<PopulatedEthersLiquityTransaction<void>>;
     // @internal (undocumented)
     setPrice(price: Decimalish, overrides?: EthersTransactionOverrides): Promise<PopulatedEthersLiquityTransaction<void>>;
@@ -404,8 +398,6 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     // @internal (undocumented)
     _getFeesFactory(overrides?: EthersCallOverrides): Promise<(blockTimestamp: number, recoveryMode: boolean) => Fees>;
     // (undocumented)
-    getLQTYBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal>;
-    // (undocumented)
     getLUSDBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal>;
     // (undocumented)
     getLUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal>;
@@ -466,8 +458,6 @@ export class SendableEthersLiquity implements SendableLiquity<EthersTransactionR
     redeemLUSD(amount: Decimalish, maxRedemptionRate?: Decimalish, overrides?: EthersTransactionOverrides): Promise<SentEthersLiquityTransaction<RedemptionDetails>>;
     // (undocumented)
     repayLUSD(amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<SentEthersLiquityTransaction<TroveAdjustmentDetails>>;
-    // (undocumented)
-    sendLQTY(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<SentEthersLiquityTransaction<void>>;
     // (undocumented)
     sendLUSD(toAddress: string, amount: Decimalish, overrides?: EthersTransactionOverrides): Promise<SentEthersLiquityTransaction<void>>;
     // @internal (undocumented)

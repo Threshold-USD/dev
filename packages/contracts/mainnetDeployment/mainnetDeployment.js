@@ -64,12 +64,6 @@ async function mainnetDeploy(configParams) {
   // Log LQTY addresses
   await mdh.logContractObjects(LQTYContracts)
 
-  // let latestBlock = await ethers.provider.getBlockNumber()
-  let deploymentStartTime = await LQTYContracts.lqtyToken.getDeploymentStartTime()
-
-  console.log(`deployment start time: ${deploymentStartTime}`)
-  const oneYearFromDeployment = (Number(deploymentStartTime) + timeVals.SECONDS_IN_ONE_YEAR).toString()
-  console.log(`time oneYearFromDeployment: ${oneYearFromDeployment}`)
 
   // // --- TESTS AND CHECKS  ---
 
@@ -99,50 +93,6 @@ async function mainnetDeploy(configParams) {
   let tellorPriceResponse = await liquityCore.tellorCaller.getTellorCurrentValue(1) // id == 1: the ETH-USD request ID
   console.log(`current Tellor price: ${tellorPriceResponse[1]}`)
   console.log(`current Tellor timestamp: ${tellorPriceResponse[2]}`)
-
-  // // --- Lockup Contracts ---
-  console.log("LOCKUP CONTRACT CHECKS")
-  // Check lockup contracts exist for each beneficiary with correct unlock time
-  for (investor of Object.keys(lockupContracts)) {
-    const lockupContract = lockupContracts[investor]
-    // check LC references correct LQTYToken
-    const storedLQTYTokenAddr = await lockupContract.lqtyToken()
-    assert.equal(LQTYContracts.lqtyToken.address, storedLQTYTokenAddr)
-    // Check contract has stored correct beneficary
-    const onChainBeneficiary = await lockupContract.beneficiary()
-    assert.equal(configParams.beneficiaries[investor].toLowerCase(), onChainBeneficiary.toLowerCase())
-    // Check correct unlock time (1 yr from deployment)
-    const unlockTime = await lockupContract.unlockTime()
-    assert.equal(oneYearFromDeployment, unlockTime)
-
-    console.log(
-      `lockupContract addr: ${lockupContract.address},
-            stored LQTYToken addr: ${storedLQTYTokenAddr}
-            beneficiary: ${investor},
-            beneficiary addr: ${configParams.beneficiaries[investor]},
-            on-chain beneficiary addr: ${onChainBeneficiary},
-            unlockTime: ${unlockTime}
-            `
-    )
-  }
-
-  // // --- Check correct addresses set in LQTYToken
-  // console.log("STORED ADDRESSES IN LQTY TOKEN")
-  // const storedMultisigAddress = await LQTYContracts.lqtyToken.multisigAddress()
-  // assert.equal(configParams.liquityAddrs.LQTY_SAFE.toLowerCase(), storedMultisigAddress.toLowerCase())
-  // console.log(`multi-sig address stored in LQTYToken : ${th.squeezeAddr(storedMultisigAddress)}`)
-  // console.log(`LQTY Safe address: ${th.squeezeAddr(configParams.liquityAddrs.LQTY_SAFE)}`)
-
-  // // --- LQTY allowances of different addresses ---
-  // // LQTY Safe
-  // const lqtySafeBal = await LQTYContracts.lqtyToken.balanceOf(configParams.liquityAddrs.LQTY_SAFE)
-  // assert.equal(lqtySafeBal.toString(), '64666666666666666666666667')
-  // th.logBN('LQTY Safe balance     ', lqtySafeBal)
-
-  // // Bounties/hackathons (General Safe)
-  // const generalSafeBal = await LQTYContracts.lqtyToken.balanceOf(configParams.liquityAddrs.GENERAL_SAFE)
-  // assert.equal(generalSafeBal.toString(), '2000000000000000000000000')
-  // th.logBN('General Safe balance       ', generalSafeBal)
 
   // // --- PriceFeed ---
   // console.log("PRICEFEED CHECKS")
@@ -287,64 +237,6 @@ async function mainnetDeploy(configParams) {
   // th.logBN("LUSD-ETH Pair's LUSD reserves after provision", reserves[0])
   // th.logBN("LUSD-ETH Pair's ETH reserves after provision", reserves[1])
 
-
-
-  // // --- Make SP deposit and earn LQTY ---
-  // console.log("CHECK DEPLOYER MAKING DEPOSIT AND EARNING LQTY")
-
-  // let SPDeposit = await liquityCore.stabilityPool.getCompoundedLUSDDeposit(deployerWallet.address)
-  // th.logBN("deployer SP deposit before making deposit", SPDeposit)
-
-  // // Provide to SP
-  // await mdh.sendAndWaitForTransaction(liquityCore.stabilityPool.provideToSP(dec(15, 18), { gasPrice, gasLimit: 400000 }))
-
-  // // Get SP deposit
-  // SPDeposit = await liquityCore.stabilityPool.getCompoundedLUSDDeposit(deployerWallet.address)
-  // th.logBN("deployer SP deposit after depositing 15 LUSD", SPDeposit)
-
-  // console.log("wait 90 seconds before withdrawing...")
-  // // wait 90 seconds
-  // await configParams.waitFunction()
-
-  // // Withdraw from SP
-  // // await mdh.sendAndWaitForTransaction(liquityCore.stabilityPool.withdrawFromSP(dec(1000, 18), { gasPrice, gasLimit: 400000 }))
-
-  // // SPDeposit = await liquityCore.stabilityPool.getCompoundedLUSDDeposit(deployerWallet.address)
-  // // th.logBN("deployer SP deposit after full withdrawal", SPDeposit)
-
-  // // deployerLQTYBal = await LQTYContracts.lqtyToken.balanceOf(deployerWallet.address)
-  // // th.logBN("deployer LQTY Balance after SP deposit withdrawal", deployerLQTYBal)
-
-
-
-  // // ---  Attempt withdrawal from LC  ---
-  // console.log("CHECK BENEFICIARY ATTEMPTING WITHDRAWAL FROM LC")
-
-  // // connect Acct2 wallet to the LC they are beneficiary of
-  // let account2LockupContract = await lockupContracts["ACCOUNT_2"].connect(account2Wallet)
-
-  // // Deployer funds LC with 10 LQTY
-  // // await mdh.sendAndWaitForTransaction(LQTYContracts.lqtyToken.transfer(account2LockupContract.address, dec(10, 18), { gasPrice }))
-
-  // // account2 LQTY bal
-  // let account2bal = await LQTYContracts.lqtyToken.balanceOf(account2Wallet.address)
-  // th.logBN("account2 LQTY bal before withdrawal attempt", account2bal)
-
-  // // Check LC LQTY bal
-  // let account2LockupContractBal = await LQTYContracts.lqtyToken.balanceOf(account2LockupContract.address)
-  // th.logBN("account2's LC LQTY bal before withdrawal attempt", account2LockupContractBal)
-
-  // // Acct2 attempts withdrawal from  LC
-  // await mdh.sendAndWaitForTransaction(account2LockupContract.withdrawLQTY({ gasPrice, gasLimit: 1000000 }))
-
-  // // Acct LQTY bal
-  // account2bal = await LQTYContracts.lqtyToken.balanceOf(account2Wallet.address)
-  // th.logBN("account2's LQTY bal after LC withdrawal attempt", account2bal)
-
-  // // Check LC bal
-  // account2LockupContractBal = await LQTYContracts.lqtyToken.balanceOf(account2LockupContract.address)
-  // th.logBN("account2's LC LQTY bal LC withdrawal attempt", account2LockupContractBal)
-
   // // --- 2nd Account opens trove ---
   // const trove2Status = await liquityCore.troveManager.getTroveStatus(account2Wallet.address)
   // if (trove2Status.toString() != '1') {
@@ -445,101 +337,6 @@ async function mainnetDeploy(configParams) {
   th.logBN("F_LUSD", F_LUSD)
   th.logBN("F_ETH", F_ETH)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // ************************
-  // --- NOT FOR APRIL 5: Deploy a LQTYToken2 with General Safe as beneficiary to test minting LQTY showing up in Gnosis App  ---
-
-  // // General Safe LQTY bal before:
-  // const realGeneralSafeAddr = "0xF06016D822943C42e3Cb7FC3a6A3B1889C1045f8"
-
-  //   const LQTYToken2EthersFactory = await ethers.getContractFactory("LQTYToken2", deployerWallet)
-  //   const lqtyToken2 = await LQTYToken2EthersFactory.deploy(
-  //     "0xF41E0DD45d411102ed74c047BdA544396cB71E27",  // CI param: LC1
-  //     "0x9694a04263593AC6b895Fc01Df5929E1FC7495fA", // LQTY Staking param: LC2
-  //     "0x98f95E112da23c7b753D8AE39515A585be6Fb5Ef", // LCF param: LC3
-  //     realGeneralSafeAddr,  // bounty/hackathon param: REAL general safe addr
-  //     "0x98f95E112da23c7b753D8AE39515A585be6Fb5Ef", // LP rewards param: LC3
-  //     deployerWallet.address, // multisig param: deployer wallet
-  //     {gasPrice, gasLimit: 10000000}
-  //   )
-
-  //   console.log(`lqty2 address: ${lqtyToken2.address}`)
-
-  //   let generalSafeLQTYBal = await lqtyToken2.balanceOf(realGeneralSafeAddr)
-  //   console.log(`generalSafeLQTYBal: ${generalSafeLQTYBal}`)
-
-
-
-  // ************************
-  // --- NOT FOR APRIL 5: Test short-term lockup contract LQTY withdrawal on mainnet ---
-
-  // now = (await ethers.provider.getBlock(latestBlock)).timestamp
-
-  // const LCShortTermEthersFactory = await ethers.getContractFactory("LockupContractShortTerm", deployerWallet)
-
-  // new deployment
-  // const LCshortTerm = await LCShortTermEthersFactory.deploy(
-  //   LQTYContracts.lqtyToken.address,
-  //   deployerWallet.address,
-  //   now,
-  //   {gasPrice, gasLimit: 1000000}
-  // )
-
-  // LCshortTerm.deployTransaction.wait()
-
-  // existing deployment
-  // const deployedShortTermLC = await new ethers.Contract(
-  //   "0xbA8c3C09e9f55dA98c5cF0C28d15Acb927792dC7",
-  //   LCShortTermEthersFactory.interface,
-  //   deployerWallet
-  // )
-
-  // new deployment
-  // console.log(`Short term LC Address:  ${LCshortTerm.address}`)
-  // console.log(`recorded beneficiary in short term LC:  ${await LCshortTerm.beneficiary()}`)
-  // console.log(`recorded short term LC name:  ${await LCshortTerm.NAME()}`)
-
-  // existing deployment
-  //   console.log(`Short term LC Address:  ${deployedShortTermLC.address}`)
-  //   console.log(`recorded beneficiary in short term LC:  ${await deployedShortTermLC.beneficiary()}`)
-  //   console.log(`recorded short term LC name:  ${await deployedShortTermLC.NAME()}`)
-  //   console.log(`recorded short term LC name:  ${await deployedShortTermLC.unlockTime()}`)
-  //   now = (await ethers.provider.getBlock(latestBlock)).timestamp
-  //   console.log(`time now: ${now}`)
-
-  //   // check deployer LQTY bal
-  //   let deployerLQTYBal = await LQTYContracts.lqtyToken.balanceOf(deployerWallet.address)
-  //   console.log(`deployerLQTYBal before he withdraws: ${deployerLQTYBal}`)
-
-  //   // check LC LQTY bal
-  //   let LC_LQTYBal = await LQTYContracts.lqtyToken.balanceOf(deployedShortTermLC.address)
-  //   console.log(`LC LQTY bal before withdrawal: ${LC_LQTYBal}`)
-
-  // // withdraw from LC
-  // const withdrawFromShortTermTx = await deployedShortTermLC.withdrawLQTY( {gasPrice, gasLimit: 1000000})
-  // withdrawFromShortTermTx.wait()
-
-  // // check deployer bal after LC withdrawal
-  // deployerLQTYBal = await LQTYContracts.lqtyToken.balanceOf(deployerWallet.address)
-  // console.log(`deployerLQTYBal after he withdraws: ${deployerLQTYBal}`)
-
-  //   // check LC LQTY bal
-  //   LC_LQTYBal = await LQTYContracts.lqtyToken.balanceOf(deployedShortTermLC.address)
-  //   console.log(`LC LQTY bal after withdrawal: ${LC_LQTYBal}`)
 }
 
 module.exports = {

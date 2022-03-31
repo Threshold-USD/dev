@@ -20,9 +20,6 @@ export interface LiquityStoreBaseState {
   /** User's LUSD token balance. */
   lusdBalance: Decimal;
 
-  /** User's LQTY token balance. */
-  lqtyBalance: Decimal;
-
   /**
    * Amount of leftover collateral available for withdrawal to the user.
    *
@@ -296,13 +293,6 @@ export abstract class LiquityStore<T = unknown> {
         "lusdBalance",
         baseState.lusdBalance,
         baseStateUpdate.lusdBalance
-      ),
-
-      lqtyBalance: this._updateIfChanged(
-        eq,
-        "lqtyBalance",
-        baseState.lqtyBalance,
-        baseStateUpdate.lqtyBalance
       ),
 
       collateralSurplusBalance: this._updateIfChanged(

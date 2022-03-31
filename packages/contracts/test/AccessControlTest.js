@@ -33,7 +33,6 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   let borrowerOperations
 
   let lqtyStaking
-  let lqtyToken
   let lockupContractFactory
 
   before(async () => {
@@ -54,7 +53,6 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     borrowerOperations = coreContracts.borrowerOperations
 
     lqtyStaking = LQTYContracts.lqtyStaking
-    lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)

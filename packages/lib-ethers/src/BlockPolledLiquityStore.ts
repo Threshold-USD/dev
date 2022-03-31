@@ -105,7 +105,6 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
         ? {
             accountBalance: this._provider.getBalance(userAddress, blockTag).then(decimalify),
             lusdBalance: this._readable.getLUSDBalance(userAddress, { blockTag }),
-            lqtyBalance: this._readable.getLQTYBalance(userAddress, { blockTag }),
             collateralSurplusBalance: this._readable.getCollateralSurplusBalance(userAddress, {
               blockTag
             }),
@@ -117,7 +116,6 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
         : {
             accountBalance: Decimal.ZERO,
             lusdBalance: Decimal.ZERO,
-            lqtyBalance: Decimal.ZERO,
             collateralSurplusBalance: Decimal.ZERO,
             troveBeforeRedistribution: new TroveWithPendingRedistribution(
               AddressZero,

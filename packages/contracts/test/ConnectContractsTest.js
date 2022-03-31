@@ -15,7 +15,6 @@ contract('Deployment script - Sets correct contract addresses dependencies after
   let functionCaller
   let borrowerOperations
   let lqtyStaking
-  let lqtyToken
   let lockupContractFactory
 
   before(async () => {
@@ -33,7 +32,6 @@ contract('Deployment script - Sets correct contract addresses dependencies after
     borrowerOperations = coreContracts.borrowerOperations
 
     lqtyStaking = LQTYContracts.lqtyStaking
-    lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)

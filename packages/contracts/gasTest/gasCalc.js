@@ -61,7 +61,6 @@ contract('Gas cost tests', async accounts => {
     functionCaller = contracts.functionCaller
 
     lqtyStaking = LQTYContracts.lqtyStaking
-    lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)

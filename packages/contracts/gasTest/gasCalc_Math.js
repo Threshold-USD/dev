@@ -40,7 +40,6 @@ contract('Gas costs for math functions', async accounts => {
     hintHelpers = contracts.hintHelpers
 
     gtStaking = LQTYContracts.gtStaking
-    lqtyToken = LQTYContracts.lqtyToken
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)

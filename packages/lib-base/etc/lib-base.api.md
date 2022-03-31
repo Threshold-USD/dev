@@ -12,8 +12,6 @@ export class _CachedReadableLiquity<T extends unknown[]> implements _ReadableLiq
     // (undocumented)
     getFees(...extraParams: T): Promise<Fees>;
     // (undocumented)
-    getLQTYBalance(address?: string, ...extraParams: T): Promise<Decimal>;
-    // (undocumented)
     getLUSDBalance(address?: string, ...extraParams: T): Promise<Decimal>;
     // (undocumented)
     getLUSDInStabilityPool(...extraParams: T): Promise<Decimal>;
@@ -234,7 +232,6 @@ export interface LiquityStoreBaseState {
     collateralSurplusBalance: Decimal;
     // @internal (undocumented)
     _feesInNormalMode: Fees;
-    lqtyBalance: Decimal;
     lusdBalance: Decimal;
     lusdInStabilityPool: Decimal;
     numberOfTroves: number;
@@ -390,7 +387,6 @@ export interface PopulatableLiquity<R = unknown, S = unknown, P = unknown> exten
     openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveCreationDetails>>>>;
     redeemLUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<PopulatedRedemption<P, S, R>>;
     repayLUSD(amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
-    sendLQTY(toAddress: string, amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
     sendLUSD(toAddress: string, amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
     // @internal (undocumented)
     setPrice(price: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
@@ -418,7 +414,6 @@ export interface PopulatedRedemption<P = unknown, S = unknown, R = unknown> exte
 export interface ReadableLiquity {
     getCollateralSurplusBalance(address?: string): Promise<Decimal>;
     getFees(): Promise<Fees>;
-    getLQTYBalance(address?: string): Promise<Decimal>;
     getLUSDBalance(address?: string): Promise<Decimal>;
     getLUSDInStabilityPool(): Promise<Decimal>;
     getNumberOfTroves(): Promise<number>;
@@ -478,7 +473,6 @@ export interface SendableLiquity<R = unknown, S = unknown> extends _SendableFrom
     openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveCreationDetails>>>;
     redeemLUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, RedemptionDetails>>>;
     repayLUSD(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
-    sendLQTY(toAddress: string, amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
     sendLUSD(toAddress: string, amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
     // @internal (undocumented)
     setPrice(price: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
@@ -556,7 +550,6 @@ export interface TransactableLiquity {
     openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<TroveCreationDetails>;
     redeemLUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<RedemptionDetails>;
     repayLUSD(amount: Decimalish): Promise<TroveAdjustmentDetails>;
-    sendLQTY(toAddress: string, amount: Decimalish): Promise<void>;
     sendLUSD(toAddress: string, amount: Decimalish): Promise<void>;
     // @internal (undocumented)
     setPrice(price: Decimalish): Promise<void>;

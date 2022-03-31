@@ -367,17 +367,6 @@ export interface TransactableLiquity {
   sendLUSD(toAddress: string, amount: Decimalish): Promise<void>;
 
   /**
-   * Send LQTY tokens to an address.
-   *
-   * @param toAddress - Address of receipient.
-   * @param amount - Amount of LQTY to send.
-   *
-   * @throws
-   * Throws {@link TransactionFailedError} in case of transaction failure.
-   */
-  sendLQTY(toAddress: string, amount: Decimalish): Promise<void>;
-
-  /**
    * Redeem LUSD to native currency (e.g. Ether) at face value.
    *
    * @param amount - Amount of LUSD to be redeemed.

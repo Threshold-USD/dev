@@ -39,7 +39,6 @@ contract('LQTYStaking receives fees tests', async accounts => {
   let defaultPool
   let borrowerOperations
   let lqtyStaking
-  let lqtyToken
 
   let contracts
 
@@ -65,7 +64,6 @@ contract('LQTYStaking receives fees tests', async accounts => {
     borrowerOperations = contracts.borrowerOperations
     hintHelpers = contracts.hintHelpers
 
-    lqtyToken = LQTYContracts.lqtyToken
     lqtyStaking = LQTYContracts.lqtyStaking
   })
 

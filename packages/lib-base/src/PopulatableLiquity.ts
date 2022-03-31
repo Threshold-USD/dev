@@ -240,12 +240,6 @@ export interface PopulatableLiquity<R = unknown, S = unknown, P = unknown>
     amount: Decimalish
   ): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
 
-  /** {@inheritDoc TransactableLiquity.sendLQTY} */
-  sendLQTY(
-    toAddress: string,
-    amount: Decimalish
-  ): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
-
   /** {@inheritDoc TransactableLiquity.redeemLUSD} */
   redeemLUSD(
     amount: Decimalish,

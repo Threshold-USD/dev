@@ -22,7 +22,6 @@ Implemented by [EthersLiquity](./lib-ethers.ethersliquity.md)<!-- -->.
 |  --- | --- |
 |  [getCollateralSurplusBalance(address)](./lib-base.readableliquity.getcollateralsurplusbalance.md) | Get the amount of leftover collateral available for withdrawal by an address. |
 |  [getFees()](./lib-base.readableliquity.getfees.md) | Get a calculator for current fees. |
-|  [getLQTYBalance(address)](./lib-base.readableliquity.getlqtybalance.md) | Get the amount of LQTY held by an address. |
 |  [getLUSDBalance(address)](./lib-base.readableliquity.getlusdbalance.md) | Get the amount of LUSD held by an address. |
 |  [getLUSDInStabilityPool()](./lib-base.readableliquity.getlusdinstabilitypool.md) | Get the total amount of LUSD currently deposited in the Stability Pool. |
 |  [getNumberOfTroves()](./lib-base.readableliquity.getnumberoftroves.md) | Get number of Troves that are currently open. |

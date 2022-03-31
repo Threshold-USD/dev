@@ -52,7 +52,6 @@ type SystemState @entity {
 
   tokensInStabilityPool: BigDecimal!
   collSurplusPoolBalance: BigDecimal!
-  totalLQTYTokensStaked: BigDecimal!
 
   cause: Change @derivedFrom(field: "systemStateAfter")
 }
