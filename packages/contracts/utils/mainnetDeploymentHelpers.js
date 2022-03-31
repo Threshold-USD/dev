@@ -223,7 +223,6 @@ class MainnetDeploymentHelper {
         contracts.priceFeed.address,
         contracts.lusdToken.address,
         contracts.sortedTroves.address,
-        LQTYContracts.lqtyToken.address,
         LQTYContracts.lqtyStaking.address,
 	{gasPrice}
       ))

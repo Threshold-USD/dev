@@ -12,7 +12,7 @@
     "prepare:compile": "hardhat compile",
     "prepare:set-version": "node scripts/set-version.js",
     "test": "hardhat test",
-    "coverage": "hardhat coverage --testfiles \"test/LQTYStakingFeeRewardsTest.js\"",
+    "coverage": "hardhat coverage",
     "coveralls": "cat coverage/lcov.info | coveralls"
   },
   "keywords": [],

@@ -25,7 +25,6 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
     IStabilityPool immutable stabilityPool;
     IPriceFeed immutable priceFeed;
     IERC20 immutable lusdToken;
-    IERC20 immutable lqtyToken;
     ILQTYStaking immutable lqtyStaking;
 
     constructor(
@@ -52,10 +51,6 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         address lusdTokenCached = address(troveManagerCached.lusdToken());
         checkContract(lusdTokenCached);
         lusdToken = IERC20(lusdTokenCached);
-
-        address lqtyTokenCached = address(troveManagerCached.lqtyToken());
-        checkContract(lqtyTokenCached);
-        lqtyToken = IERC20(lqtyTokenCached);
 
         ILQTYStaking lqtyStakingCached = troveManagerCached.lqtyStaking();
         require(_lqtyStakingAddress == address(lqtyStakingCached), "BorrowerWrappersScript: Wrong LQTYStaking address");

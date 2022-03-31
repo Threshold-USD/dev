@@ -28,7 +28,6 @@ def setAddresses(contracts):
         contracts.priceFeedTestnet.address,
         contracts.lusdToken.address,
         contracts.sortedTroves.address,
-        contracts.lqtyToken.address,
         contracts.lqtyStaking.address,
         { 'from': accounts[0] }
     )

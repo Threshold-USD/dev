@@ -181,7 +181,6 @@ const connectContracts = async (
         priceFeed.address,
         lusdToken.address,
         sortedTroves.address,
-        lqtyToken.address,
         lqtyStaking.address,
         { ...overrides, nonce }
       ),
