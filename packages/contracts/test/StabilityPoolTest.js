@@ -24,8 +24,6 @@ contract('StabilityPool', async accounts => {
     frontEnd_1, frontEnd_2, frontEnd_3,
   ] = accounts;
 
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   let contracts
   let priceFeed
   let lusdToken
@@ -56,7 +54,7 @@ contract('StabilityPool', async accounts => {
         contracts.stabilityPool.address,
         contracts.borrowerOperations.address
       )
-      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
+      const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
       priceFeed = contracts.priceFeedTestnet
       lusdToken = contracts.lusdToken
@@ -651,7 +649,7 @@ contract('StabilityPool', async accounts => {
       // time passes
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      // B deposits. A,B,C,D earn LQTY
+      // B deposits.
       await stabilityPool.provideToSP(dec(5, 18), { from: B })
 
       // Price drops, defaulter is liquidated, A, B, C, D earn ETH
@@ -1351,7 +1349,7 @@ contract('StabilityPool', async accounts => {
 
       const A_ETHBalAfter = toBN(await web3.eth.getBalance(A))
 
-      // Check A's ETH and LQTY balances have increased correctly
+      // Check A's ETH balances have increased correctly
       assert.isTrue(A_ETHBalAfter.sub(A_ETHBalBefore).eq(A_pendingETHGain))
     })
 
@@ -1717,7 +1715,7 @@ contract('StabilityPool', async accounts => {
       await openTrove({ extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: E } })
       await stabilityPool.provideToSP(dec(10000, 18), { from: E })
 
-      // Fast-forward time and make a second deposit, to trigger LQTY reward and make G > 0
+      // Fast-forward time and make a second deposit
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
       await stabilityPool.provideToSP(dec(10000, 18), { from: E })
 
@@ -1796,9 +1794,9 @@ contract('StabilityPool', async accounts => {
 
       await openTrove({ ICR: toBN(dec(2, 18)), extraParams: { from: defaulter_1 } })
 
-      //  SETUP: Execute a series of operations to trigger LQTY and ETH rewards for depositor A
+      //  SETUP: Execute a series of operations to trigger ETH rewards for depositor A
 
-      // Fast-forward time and make a second deposit, to trigger LQTY reward and make G > 0
+      // Fast-forward time and make a second deposit
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
       await stabilityPool.provideToSP(dec(100, 18), { from: A })
 
@@ -2247,7 +2245,7 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(30, 18), { from: C })
       await stabilityPool.provideToSP(dec(40, 18), { from: D })
 
-      // fastforward time, and E makes a deposit, creating LQTY rewards for all
+      // fastforward time, and E makes a deposit
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
       await openTrove({ extraLUSDAmount: toBN(dec(3000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: E } })
       await stabilityPool.provideToSP(dec(3000, 18), { from: E })

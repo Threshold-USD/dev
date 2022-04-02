@@ -136,7 +136,7 @@ class MainnetDeploymentHelper {
     return coreContracts
   }
 
-  async deployLQTYContractsMainnet(bountyAddress, multisigAddress, deploymentState) {
+  async deployLQTYContractsMainnet(deploymentState) {
     const lqtyStakingFactory = await this.getFactory("LQTYStaking")
 
     const lqtyStaking = await this.loadOrDeploy(lqtyStakingFactory, 'lqtyStaking', deploymentState)

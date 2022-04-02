@@ -17,7 +17,6 @@ test/launchSequenceTest/DuringLockupPeriodTest.js */
 contract('Access Control: Liquity functions with the caller restricted to Liquity contract(s)', async accounts => {
 
   const [owner, alice, bob, carol] = accounts;
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
 
   let coreContracts
 
@@ -39,7 +38,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     coreContracts = await deploymentHelper.deployLiquityCore()
     coreContracts.troveManager = await TroveManagerTester.new()
     coreContracts = await deploymentHelper.deployLUSDTokenTester(coreContracts)
-    const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat(bountyAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat()
 
     priceFeed = coreContracts.priceFeed
     lusdToken = coreContracts.lusdToken

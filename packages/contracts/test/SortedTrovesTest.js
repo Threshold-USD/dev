@@ -49,8 +49,6 @@ contract('SortedTroves', async accounts => {
   let borrowerOperations
   let lusdToken
 
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   let contracts
 
   const getOpenTroveLUSDAmount = async (totalDebt) => th.getOpenTroveLUSDAmount(contracts, totalDebt)
@@ -65,7 +63,7 @@ contract('SortedTroves', async accounts => {
         contracts.stabilityPool.address,
         contracts.borrowerOperations.address
       )
-      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
+      const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
       priceFeed = contracts.priceFeedTestnet
       sortedTroves = contracts.sortedTroves

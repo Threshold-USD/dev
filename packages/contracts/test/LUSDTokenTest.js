@@ -47,8 +47,6 @@ const getPermitDigest = ( name, address, chainId, version,
 contract('LUSDToken', async accounts => {
   const [owner, alice, bob, carol, dennis] = accounts;
 
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   // the second account our hardhatenv creates (for Alice)
   // from https://github.com/liquity/dev/blob/main/packages/contracts/hardhatAccountsList2k.js#L3
   const alicePrivateKey = '0xeaa445c85f7b438dEd6e831d06a4eD0CEBDc2f8527f84Fcda6EBB5fCfAd4C0e9'
@@ -69,7 +67,7 @@ contract('LUSDToken', async accounts => {
       const contracts = await deploymentHelper.deployTesterContractsHardhat()
 
 
-      const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
+      const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)

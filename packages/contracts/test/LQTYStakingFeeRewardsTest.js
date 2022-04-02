@@ -26,8 +26,6 @@ const ZERO = th.toBN('0')
 
 contract('LQTYStaking receives fees tests', async accounts => {
 
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   const [owner, A, B, C, D, E, F, G, whale] = accounts;
 
   let priceFeed
@@ -48,7 +46,7 @@ contract('LQTYStaking receives fees tests', async accounts => {
     contracts = await deploymentHelper.deployLiquityCore()
     contracts.troveManager = await TroveManagerTester.new()
     contracts = await deploymentHelper.deployLUSDTokenTester(contracts)
-    const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat(bountyAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat()
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
     await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)

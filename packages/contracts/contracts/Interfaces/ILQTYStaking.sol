@@ -25,6 +25,6 @@ interface ILQTYStaking {
 
     function increaseF_ETH(uint _ETHFee) external;
 
-    function increaseF_LUSD(uint _LQTYFee) external;
+    function increaseF_LUSD(uint _LUSDFee) external;
 
 }

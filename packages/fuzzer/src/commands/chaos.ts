@@ -94,7 +94,6 @@ export const chaos = async ({
       }
 
       // await fixture.sweepLUSD(liquity);
-      await fixture.sweepLQTY(liquity);
 
       const listOfTroves = await getListOfTrovesBeforeRedistribution(deployerLiquity);
       const totalRedistributed = await deployerLiquity.getTotalRedistributed();

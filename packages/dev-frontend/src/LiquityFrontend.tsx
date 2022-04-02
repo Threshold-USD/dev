@@ -9,7 +9,6 @@ import { LiquityStoreProvider } from "@liquity/lib-react";
 import { useLiquity } from "./hooks/LiquityContext";
 import { TransactionMonitor } from "./components/Transaction";
 import { Nav } from "./components/Nav";
-import { UserAccount } from "./components/UserAccount";
 import { SideBar } from "./components/SideBar";
 // import { Social } from "./components/Social";
 import { HamburgerMenu } from "./components/HamburgerMenu";
@@ -44,8 +43,6 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
       <Router>
         <TroveViewProvider>
           <StabilityViewProvider>
-            <StakingViewProvider>
-              <FarmViewProvider>
                 <Flex variant="layout.wrapper">
                   <Header>
                     <HamburgerMenu />

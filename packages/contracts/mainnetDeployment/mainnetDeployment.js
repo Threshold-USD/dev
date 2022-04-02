@@ -48,8 +48,6 @@ async function mainnetDeploy(configParams) {
 
   // Deploy LQTY Contracts
   const LQTYContracts = await mdh.deployLQTYContractsMainnet(
-    configParams.liquityAddrs.GENERAL_SAFE, // bounty address
-    configParams.liquityAddrs.LQTY_SAFE, // multisig LQTY endowment address
     deploymentState,
   )
 

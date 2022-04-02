@@ -29,8 +29,6 @@ contract('TroveManager', async accounts => {
     defaulter_1, defaulter_2, defaulter_3, defaulter_4, whale,
     A, B, C, D, E] = accounts;
 
-    const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   let priceFeed
   let lusdToken
   let sortedTroves
@@ -59,7 +57,7 @@ contract('TroveManager', async accounts => {
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
     priceFeed = contracts.priceFeedTestnet
     lusdToken = contracts.lusdToken
@@ -3484,7 +3482,7 @@ contract('TroveManager', async accounts => {
   })
 
   it("redeemCollateral(): a redemption made when base rate is non-zero increases the base rate, for negligible time passed", async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
+    // time fast-forwards 1 year
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
     await openTrove({ ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
@@ -3580,7 +3578,7 @@ contract('TroveManager', async accounts => {
   })
 
   it("redeemCollateral(): a redemption made at zero base rate send a non-zero ETHFee to LQTY staking contract", async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
+    // time fast-forwards 1 year
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
     await openTrove({ ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
@@ -3613,8 +3611,8 @@ contract('TroveManager', async accounts => {
     assert.isTrue(lqtyStakingBalance_After.gt(toBN('0')))
   })
 
-  it("redeemCollateral(): a redemption made at zero base increases the ETH-fees-per-LQTY-staked in LQTY Staking contract", async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
+  it("redeemCollateral(): a redemption made at zero base increases the ETH-fees in LQTY Staking contract", async () => {
+    // time fast-forwards 1 year
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
     await openTrove({ ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
@@ -3626,7 +3624,7 @@ contract('TroveManager', async accounts => {
     // Check baseRate == 0
     assert.equal(await troveManager.baseRate(), '0')
 
-    // Check LQTY Staking ETH-fees-per-LQTY-staked before is zero
+    // Check LQTY Staking ETH-fees before is zero
     const F_ETH_Before = await lqtyStaking.F_ETH()
     assert.equal(F_ETH_Before, '0')
 
@@ -3642,13 +3640,13 @@ contract('TroveManager', async accounts => {
     const baseRate_1 = await troveManager.baseRate()
     assert.isTrue(baseRate_1.gt(toBN('0')))
 
-    // Check LQTY Staking ETH-fees-per-LQTY-staked after is non-zero
+    // Check LQTY Staking ETH-fees after is non-zero
     const F_ETH_After = await lqtyStaking.F_ETH()
     assert.isTrue(F_ETH_After.gt('0'))
   })
 
   it("redeemCollateral(): a redemption made at a non-zero base rate send a non-zero ETHFee to LQTY staking contract", async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
+    // time fast-forwards 1 year
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
     await openTrove({ ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
@@ -3687,7 +3685,7 @@ contract('TroveManager', async accounts => {
     assert.isTrue(lqtyStakingBalance_After.gt(lqtyStakingBalance_Before))
   })
 
-  it("redeemCollateral(): a redemption made at a non-zero base rate increases ETH-per-LQTY-staked in the staking contract", async () => {
+  it("redeemCollateral(): a redemption made at a non-zero base rate increases ETH in the staking contract", async () => {
     // time fast-forwards 1 year, and multisig stakes 1 LQTY
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
@@ -3713,7 +3711,7 @@ contract('TroveManager', async accounts => {
     const baseRate_1 = await troveManager.baseRate()
     assert.isTrue(baseRate_1.gt(toBN('0')))
 
-    // Check LQTY Staking ETH-fees-per-LQTY-staked before is zero
+    // Check LQTY Staking ETH-fees before is zero
     const F_ETH_Before = await lqtyStaking.F_ETH()
 
     // B redeems 10 LUSD
@@ -3729,7 +3727,7 @@ contract('TroveManager', async accounts => {
   })
 
   it("redeemCollateral(): a redemption sends the ETH remainder (ETHDrawn - ETHFee) to the redeemer", async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
+    // time fast-forwards 1 year
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
     const { totalDebt: W_totalDebt } = await openTrove({ ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
@@ -3779,7 +3777,7 @@ contract('TroveManager', async accounts => {
   })
 
   it("redeemCollateral(): a full redemption (leaving trove with 0 debt), closes the trove", async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
+    // time fast-forwards 1 year
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
     const { netDebt: W_netDebt } = await openTrove({ ICR: toBN(dec(20, 18)), extraLUSDAmount: dec(10000, 18), extraParams: { from: whale } })
@@ -3807,7 +3805,7 @@ contract('TroveManager', async accounts => {
   })
 
   const redeemCollateral3Full1Partial = async () => {
-    // time fast-forwards 1 year, and multisig stakes 1 LQTY
+    // time fast-forwards 1 year
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
     const { netDebt: W_netDebt } = await openTrove({ ICR: toBN(dec(20, 18)), extraLUSDAmount: dec(10000, 18), extraParams: { from: whale } })

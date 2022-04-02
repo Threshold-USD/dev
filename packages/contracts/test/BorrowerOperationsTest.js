@@ -33,10 +33,6 @@ contract('BorrowerOperations', async accounts => {
     // defaulter_1, defaulter_2,
     frontEnd_1, frontEnd_2, frontEnd_3] = accounts;
 
-    const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
-  // const frontEnds = [frontEnd_1, frontEnd_2, frontEnd_3]
-
   let priceFeed
   let lusdToken
   let sortedTroves
@@ -71,7 +67,7 @@ contract('BorrowerOperations', async accounts => {
       contracts.borrowerOperations = await BorrowerOperationsTester.new()
       contracts.troveManager = await TroveManagerTester.new()
       contracts = await deploymentHelper.deployLUSDTokenTester(contracts)
-      const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat(bountyAddress, multisig)
+      const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat()
 
       await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
       await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)

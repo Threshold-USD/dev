@@ -3,8 +3,6 @@ const deploymentHelper = require("../utils/deploymentHelpers.js")
 contract('Deployment script - Sets correct contract addresses dependencies after deployment', async accounts => {
   const [owner] = accounts;
 
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   let priceFeed
   let lusdToken
   let sortedTroves
@@ -19,7 +17,7 @@ contract('Deployment script - Sets correct contract addresses dependencies after
 
   before(async () => {
     const coreContracts = await deploymentHelper.deployLiquityCore()
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
     priceFeed = coreContracts.priceFeedTestnet
     lusdToken = coreContracts.lusdToken

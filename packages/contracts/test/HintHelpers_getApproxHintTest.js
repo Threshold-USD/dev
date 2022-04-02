@@ -14,8 +14,6 @@ contract('HintHelpers', async accounts => {
 
   const [owner] = accounts;
 
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   let sortedTroves
   let troveManager
   let borrowerOperations
@@ -79,7 +77,7 @@ contract('HintHelpers', async accounts => {
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
     sortedTroves = contracts.sortedTroves
     troveManager = contracts.troveManager

@@ -10,11 +10,7 @@ async function main() {
 
   const coreContracts = await dh.deployLiquityCoreHardhat()
   const ARBITRARY_ADDRESS = "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"
-  const LQTYContracts = await dh.deployLQTYContractsHardhat(
-      ARBITRARY_ADDRESS,
-      ARBITRARY_ADDRESS,
-      ARBITRARY_ADDRESS
-    )
+  const LQTYContracts = await dh.deployLQTYContractsHardhat()
 
  const { troveManager, borrowerOperations, hintHelpers, sortedTroves, priceFeedTestnet } = coreContracts
 

@@ -23,8 +23,6 @@ contract('TroveManager', async accounts => {
   const ZERO_ADDRESS = th.ZERO_ADDRESS
   const [owner, A, B, C, D, E, F] = accounts.slice(0, 7);
 
-  const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   let priceFeed
   let lusdToken
   let sortedTroves
@@ -56,7 +54,7 @@ contract('TroveManager', async accounts => {
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
     priceFeed = contracts.priceFeedTestnet
     lusdToken = contracts.lusdToken

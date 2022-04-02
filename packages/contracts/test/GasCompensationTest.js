@@ -16,8 +16,6 @@ contract('Gas compensation tests', async accounts => {
     alice, bob, carol, dennis, erin, flyn, graham, harriet, ida,
     defaulter_1, defaulter_2, defaulter_3, defaulter_4, whale] = accounts;
 
-    const [bountyAddress, multisig] = accounts.slice(998, 1000)
-
   let priceFeed
   let lusdToken
   let sortedTroves
@@ -56,7 +54,7 @@ contract('Gas compensation tests', async accounts => {
       contracts.stabilityPool.address,
       contracts.borrowerOperations.address
     )
-    const LQTYContracts = await deploymentHelper.deployLQTYContracts(bountyAddress, multisig)
+    const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
     priceFeed = contracts.priceFeedTestnet
     lusdToken = contracts.lusdToken

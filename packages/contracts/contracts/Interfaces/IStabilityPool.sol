@@ -21,12 +21,6 @@ pragma solidity 0.6.11;
  * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / ETH gain derivations:
  * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
  *
- * --- LQTY ISSUANCE TO STABILITY POOL DEPOSITORS ---
- *
- * An LQTY issuance event occurs at every deposit operation, and every liquidation.
- *
- * Please see the system Readme for an overview:
- * https://github.com/liquity/dev/blob/main/README.md#lqty-issuance-to-stability-providers
  */
 interface IStabilityPool {
 

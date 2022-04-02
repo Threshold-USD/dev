@@ -39,14 +39,9 @@ const {
   LQTYStakingProxy
 } = require('../utils/proxyHelpers.js')
 
-/* "Liquity core" consists of all contracts in the core Liquity system.
-
-LQTY contracts consist of only those contracts related to the LQTY Token:
-
--the LQTY token
--the Lockup factory and lockup contracts
--the LQTYStaking contract
-*/
+/*
+ * "Liquity core" consists of all contracts in the core Liquity system.
+ */
 
 const ZERO_ADDRESS = '0x' + '0'.repeat(40)
 const maxBytes32 = '0x' + 'f'.repeat(64)
@@ -65,15 +60,15 @@ class DeploymentHelper {
     }
   }
 
-  static async deployLQTYContracts(bountyAddress, multisigAddress) {
+  static async deployLQTYContracts() {
     const cmdLineArgs = process.argv
     const frameworkPath = cmdLineArgs[1]
     // console.log(`Framework used:  ${frameworkPath}`)
 
     if (frameworkPath.includes("hardhat")) {
-      return this.deployLQTYContractsHardhat(bountyAddress, multisigAddress)
+      return this.deployLQTYContractsHardhat()
     } else if (frameworkPath.includes("truffle")) {
-      return this.deployLQTYContractsTruffle(bountyAddress, multisigAddress)
+      return this.deployLQTYContractsTruffle()
     }
   }
 
@@ -149,7 +144,7 @@ class DeploymentHelper {
     return testerContracts
   }
 
-  static async deployLQTYContractsHardhat(bountyAddress, multisigAddress) {
+  static async deployLQTYContractsHardhat() {
     const lqtyStaking = await LQTYStaking.new()
 
     LQTYStaking.setAsDeployed(lqtyStaking)
@@ -160,7 +155,7 @@ class DeploymentHelper {
     return LQTYContracts
   }
 
-  static async deployLQTYTesterContractsHardhat(bountyAddress, multisigAddress) {
+  static async deployLQTYTesterContractsHardhat() {
     const lqtyStaking = await LQTYStaking.new()
 
     LQTYStaking.setAsDeployed(lqtyStaking)
@@ -205,7 +200,7 @@ class DeploymentHelper {
     return coreContracts
   }
 
-  static async deployLQTYContractsTruffle(bountyAddress, multisigAddress) {
+  static async deployLQTYContractsTruffle() {
     const lqtyStaking = await lqtyStaking.new()
 
     const LQTYContracts = {
