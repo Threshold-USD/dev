@@ -23,14 +23,6 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
     uint public F_ETH;  // Running sum of ETH fees
     uint public F_LUSD; // Running sum of LUSD fees
 
-    // User snapshots of F_ETH and F_LUSD, taken at the point at which their latest deposit was made
-    mapping (address => Snapshot) public snapshots;
-
-    struct Snapshot {
-        uint F_ETH_Snapshot;
-        uint F_LUSD_Snapshot;
-    }
-
     ILUSDToken public lusdToken;
 
     address public troveManagerAddress;

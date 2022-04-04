@@ -92,7 +92,6 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     event TroveCreated(address indexed _borrower, uint arrayIndex);
     event TroveUpdated(address indexed _borrower, uint _debt, uint _coll, uint stake, BorrowerOperation operation);
     event LUSDBorrowingFeePaid(address indexed _borrower, uint _LUSDFee);
-    event F_LUSDUpdated(uint _LUSDFee);
     // --- Dependency setters ---
 
     function setAddresses(
@@ -369,7 +368,6 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         // Send fee to LQTY staking contract
         lqtyStaking.increaseF_LUSD(LUSDFee);
         _lusdToken.mint(lqtyStakingAddress, LUSDFee);
-        //emit F_LUSDUpdated(LUSDFee);
         return LUSDFee;
     }
 
