@@ -26,6 +26,10 @@ const alchemyUrlRinkeby = () => {
     return `https://eth-rinkeby.alchemyapi.io/v2/${getSecret('alchemyAPIKeyRinkeby')}`
 }
 
+const alchemyUrlRopsten = () => {
+    return `https://eth-ropsten.alchemyapi.io/v2/${getSecret('alchemyAPIKeyRopsten')}`
+}
+
 module.exports = {
     paths: {
         // contracts: "./contracts",
@@ -93,6 +97,11 @@ module.exports = {
             gas: 10000000,  // tx gas limit
             accounts: [getSecret('RINKEBY_DEPLOYER_PRIVATEKEY', '0x60ddfe7f579ab6867cbe7a2dc03853dc141d7a4ab6dbefc0dae2d2b1bd4e487f')]
         },
+        ropsten: {
+            url: alchemyUrlRopsten(),
+            gas: 120000000,  // tx gas limit
+            accounts: [getSecret('RINKEBY_DEPLOYER_PRIVATEKEY', '0x60ddfe7f579ab6867cbe7a2dc03853dc141d7a4ab6dbefc0dae2d2b1bd4e487f')]
+        }
     },
     etherscan: {
         apiKey: getSecret("ETHERSCAN_API_KEY")

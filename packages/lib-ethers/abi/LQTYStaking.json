@@ -275,30 +275,6 @@
         "type": "address"
       }
     ],
-    "name": "snapshots",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "F_ETH_Snapshot",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "F_LUSD_Snapshot",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
     "name": "stakes",
     "outputs": [
       {
