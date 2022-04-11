@@ -33,7 +33,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         address _pcvAddress
     )
         BorrowerOperationsScript(IBorrowerOperations(_borrowerOperationsAddress))
-        PCVScript(_pcvAddress)
+        PCVScript(_pcvAddress)        
     {
         checkContract(_troveManagerAddress);
         ITroveManager troveManagerCached = ITroveManager(_troveManagerAddress);
