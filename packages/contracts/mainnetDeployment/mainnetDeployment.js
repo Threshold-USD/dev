@@ -328,10 +328,10 @@ async function mainnetDeploy(configParams) {
   th.logBN("Current scale", currentScale)
   th.logBN("Sum S, at current epoch and scale", S)
 
-  // LQTYStaking
-  console.log("LQTYStaking state variables:")
-  const F_LUSD = await LQTYContracts.lqtyStaking.F_LUSD()
-  const F_ETH = await LQTYContracts.lqtyStaking.F_ETH()
+  // PCV
+  console.log("PCV state variables:")
+  const F_LUSD = await LQTYContracts.pcv.F_LUSD()
+  const F_ETH = await LQTYContracts.pcv.F_ETH()
   th.logBN("F_LUSD", F_LUSD)
   th.logBN("F_ETH", F_ETH)
 

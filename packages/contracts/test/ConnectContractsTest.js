@@ -12,7 +12,7 @@ contract('Deployment script - Sets correct contract addresses dependencies after
   let defaultPool
   let functionCaller
   let borrowerOperations
-  let lqtyStaking
+  let pcv
   let lockupContractFactory
 
   before(async () => {
@@ -29,7 +29,7 @@ contract('Deployment script - Sets correct contract addresses dependencies after
     functionCaller = coreContracts.functionCaller
     borrowerOperations = coreContracts.borrowerOperations
 
-    lqtyStaking = LQTYContracts.lqtyStaking
+    pcv = LQTYContracts.pcv
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)
@@ -96,11 +96,11 @@ contract('Deployment script - Sets correct contract addresses dependencies after
   })
 
   // LQTY Staking in TroveM
-  it('Sets the correct LQTYStaking address in TroveManager', async () => {
-    const lqtyStakingAddress = lqtyStaking.address
+  it('Sets the correct PCV address in TroveManager', async () => {
+    const pcvAddress = pcv.address
 
-    const recordedLQTYStakingAddress = await troveManager.lqtyStaking()
-    assert.equal(lqtyStakingAddress, recordedLQTYStakingAddress)
+    const recordedPCVAddress = await troveManager.pcv()
+    assert.equal(pcvAddress, recordedPCVAddress)
   })
 
   // Active Pool
@@ -241,45 +241,45 @@ contract('Deployment script - Sets correct contract addresses dependencies after
   })
 
   // LQTY Staking in BO
-  it('Sets the correct LQTYStaking address in BorrowerOperations', async () => {
-    const lqtyStakingAddress = lqtyStaking.address
+  it('Sets the correct PCV address in BorrowerOperations', async () => {
+    const pcvAddress = pcv.address
 
-    const recordedLQTYStakingAddress = await borrowerOperations.lqtyStakingAddress()
-    assert.equal(lqtyStakingAddress, recordedLQTYStakingAddress)
+    const recordedPCVAddress = await borrowerOperations.pcvAddress()
+    assert.equal(pcvAddress, recordedPCVAddress)
   })
 
 
   // --- LQTY Staking ---
 
-  // Sets ActivePool in LQTYStaking
-  it('Sets the correct ActivePool address in LQTYStaking', async () => {
+  // Sets ActivePool in PCV
+  it('Sets the correct ActivePool address in PCV', async () => {
     const activePoolAddress = activePool.address
 
-    const recordedActivePoolAddress = await lqtyStaking.activePoolAddress()
+    const recordedActivePoolAddress = await pcv.activePoolAddress()
     assert.equal(activePoolAddress, recordedActivePoolAddress)
   })
 
-  // Sets LUSDToken in LQTYStaking
-  it('Sets the correct ActivePool address in LQTYStaking', async () => {
+  // Sets LUSDToken in PCV
+  it('Sets the correct ActivePool address in PCV', async () => {
     const lusdTokenAddress = lusdToken.address
 
-    const recordedLUSDTokenAddress = await lqtyStaking.lusdToken()
+    const recordedLUSDTokenAddress = await pcv.lusdToken()
     assert.equal(lusdTokenAddress, recordedLUSDTokenAddress)
   })
 
-  // Sets TroveManager in LQTYStaking
-  it('Sets the correct ActivePool address in LQTYStaking', async () => {
+  // Sets TroveManager in PCV
+  it('Sets the correct ActivePool address in PCV', async () => {
     const troveManagerAddress = troveManager.address
 
-    const recordedTroveManagerAddress = await lqtyStaking.troveManagerAddress()
+    const recordedTroveManagerAddress = await pcv.troveManagerAddress()
     assert.equal(troveManagerAddress, recordedTroveManagerAddress)
   })
 
-  // Sets BorrowerOperations in LQTYStaking
-  it('Sets the correct BorrowerOperations address in LQTYStaking', async () => {
+  // Sets BorrowerOperations in PCV
+  it('Sets the correct BorrowerOperations address in PCV', async () => {
     const borrowerOperationsAddress = borrowerOperations.address
 
-    const recordedBorrowerOperationsAddress = await lqtyStaking.borrowerOperationsAddress()
+    const recordedBorrowerOperationsAddress = await pcv.borrowerOperationsAddress()
     assert.equal(borrowerOperationsAddress, recordedBorrowerOperationsAddress)
   })
 

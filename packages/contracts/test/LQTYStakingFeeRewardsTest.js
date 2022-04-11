@@ -3,7 +3,7 @@ const deploymentHelper = require("../utils/deploymentHelpers.js")
 const { BNConverter } = require("../utils/BNConverter.js")
 const testHelpers = require("../utils/testHelpers.js")
 
-const LQTYStakingTester = artifacts.require('LQTYStakingTester')
+const PCVTester = artifacts.require('PCVTester')
 const TroveManagerTester = artifacts.require("TroveManagerTester")
 const NonPayable = artifacts.require("./NonPayable.sol")
 
@@ -24,7 +24,7 @@ const ZERO = th.toBN('0')
  *
  */
 
-contract('LQTYStaking receives fees tests', async accounts => {
+contract('PCV receives fees tests', async accounts => {
 
   const [owner, A, B, C, D, E, F, G, whale] = accounts;
 
@@ -36,7 +36,7 @@ contract('LQTYStaking receives fees tests', async accounts => {
   let stabilityPool
   let defaultPool
   let borrowerOperations
-  let lqtyStaking
+  let pcv
 
   let contracts
 
@@ -62,16 +62,16 @@ contract('LQTYStaking receives fees tests', async accounts => {
     borrowerOperations = contracts.borrowerOperations
     hintHelpers = contracts.hintHelpers
 
-    lqtyStaking = LQTYContracts.lqtyStaking
+    pcv = LQTYContracts.pcv
   })
 
   it("LQTY Staking: PCV start at zero", async () => {
     // Check LUSD fees are initialised as zero
-    const LUSD_Fees = await lqtyStaking.F_LUSD()
+    const LUSD_Fees = await pcv.F_LUSD()
     assert.equal(LUSD_Fees, '0')
 
     // Check ETH fees are initialised as zero
-    const ETH_Fees = await lqtyStaking.F_ETH()
+    const ETH_Fees = await pcv.F_ETH()
     assert.equal(ETH_Fees, '0')
 
   })
@@ -81,36 +81,36 @@ contract('LQTYStaking receives fees tests', async accounts => {
 
     let troveWhale = await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
     let issuanceFeeWhale = troveWhale.netDebt - troveWhale.lusdAmount
-    let pcvBalance = await lusdToken.balanceOf(lqtyStaking.address)
+    let pcvBalance = await lusdToken.balanceOf(pcv.address)
     let fees = issuanceFeeWhale
     assert.isAtMost(Math.abs(fees - pcvBalance), error)
 
     let troveA = await openTrove({ extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: A } })
     let issuanceFeeA = troveA.netDebt - troveA.lusdAmount
-    pcvBalance = await lusdToken.balanceOf(lqtyStaking.address)
+    pcvBalance = await lusdToken.balanceOf(pcv.address)
     fees += issuanceFeeA
     assert.isAtMost(Math.abs(fees - pcvBalance), error)
 
     let troveB = await openTrove({ extraLUSDAmount: toBN(dec(30000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
     let issuanceFeeB = troveB.netDebt - troveB.lusdAmount
-    pcvBalance = await lusdToken.balanceOf(lqtyStaking.address)
+    pcvBalance = await lusdToken.balanceOf(pcv.address)
     fees += issuanceFeeB
     assert.isAtMost(Math.abs(fees - pcvBalance), error)
 
     let troveC = await openTrove({ extraLUSDAmount: toBN(dec(40000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
     let issuanceFeeC = troveC.netDebt - troveC.lusdAmount
-    pcvBalance = await lusdToken.balanceOf(lqtyStaking.address)
+    pcvBalance = await lusdToken.balanceOf(pcv.address)
     fees += issuanceFeeC
     assert.isAtMost(Math.abs(fees - pcvBalance), error)
 
     let troveD = await openTrove({ extraLUSDAmount: toBN(dec(50000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: D } })
     let issuanceFeeD = troveD.netDebt - troveD.lusdAmount
-    pcvBalance = await lusdToken.balanceOf(lqtyStaking.address)
+    pcvBalance = await lusdToken.balanceOf(pcv.address)
     fees += issuanceFeeD
     assert.isAtMost(Math.abs(fees - pcvBalance), error)
 
     // Check LUSD fees is initialised as zero
-    const LUSD_Fees = await lqtyStaking.F_LUSD()
+    const LUSD_Fees = await pcv.F_LUSD()
     th.assertIsApproximatelyEqual(LUSD_Fees, pcvBalance)
   })
 
@@ -124,7 +124,7 @@ contract('LQTYStaking receives fees tests', async accounts => {
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_YEAR, web3.currentProvider)
 
     // Check ETH fee per unit staked is zero
-    const F_ETH_Before = await lqtyStaking.F_ETH()
+    const F_ETH_Before = await pcv.F_ETH()
     assert.equal(F_ETH_Before, '0')
 
     const B_BalBeforeREdemption = await lusdToken.balanceOf(B)
@@ -139,7 +139,7 @@ contract('LQTYStaking receives fees tests', async accounts => {
     assert.isTrue(emittedETHFee.gt(toBN('0')))
 
     // Check ETH fee per unit staked has increased by correct amount
-    const F_ETH_After = await lqtyStaking.F_ETH()
+    const F_ETH_After = await pcv.F_ETH()
     assert.isTrue(emittedETHFee.eq(F_ETH_After))
   })
 
@@ -150,13 +150,13 @@ contract('LQTYStaking receives fees tests', async accounts => {
     await openTrove({ extraLUSDAmount: toBN(dec(30000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: B } })
     await openTrove({ extraLUSDAmount: toBN(dec(40000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: C } })
     let troveD = await openTrove({ extraLUSDAmount: toBN(dec(50000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: D } })
-    PCV_LUSD_Fees = await lusdToken.balanceOf(lqtyStaking.address)
+    PCV_LUSD_Fees = await lusdToken.balanceOf(pcv.address)
 
-    const LUSD_Fees = await lqtyStaking.F_LUSD()
+    const LUSD_Fees = await pcv.F_LUSD()
     assert.isTrue(LUSD_Fees.eq(PCV_LUSD_Fees))
 
     // Check ETH fees is initialised as zero
-    const ETH_Fees = await lqtyStaking.F_ETH()
+    const ETH_Fees = await pcv.F_ETH()
     assert.equal(ETH_Fees, '0')
 
     // D draws debt
@@ -167,21 +167,21 @@ contract('LQTYStaking receives fees tests', async accounts => {
     assert.isTrue(emittedLUSDFee_1.gt(toBN('0')))
 
     // Check LUSD fee of $0.50 for the $100 debt draw is collected in PCV
-    const LUSD_Fees_After = await lqtyStaking.F_LUSD()
+    const LUSD_Fees_After = await pcv.F_LUSD()
     assert.isTrue(LUSD_Fees_After.gt(LUSD_Fees))
 
   })
 
   it("receive(): reverts when it receives ETH from an address that is not the Active Pool",  async () => {
-    const ethSendTxPromise1 = web3.eth.sendTransaction({to: lqtyStaking.address, from: A, value: dec(1, 'ether')})
-    const ethSendTxPromise2 = web3.eth.sendTransaction({to: lqtyStaking.address, from: owner, value: dec(1, 'ether')})
+    const ethSendTxPromise1 = web3.eth.sendTransaction({to: pcv.address, from: A, value: dec(1, 'ether')})
+    const ethSendTxPromise2 = web3.eth.sendTransaction({to: pcv.address, from: owner, value: dec(1, 'ether')})
 
     await assertRevert(ethSendTxPromise1)
     await assertRevert(ethSendTxPromise2)
   })
 
   it('Test requireCallerIsTroveManager', async () => {
-    const lqtyStakingTester = await LQTYStakingTester.new()
-    await assertRevert(lqtyStakingTester.requireCallerIsTroveManager(), 'LQTYStaking: caller is not TroveM')
+    const pcvTester = await PCVTester.new()
+    await assertRevert(pcvTester.requireCallerIsTroveManager(), 'PCV: caller is not TroveM')
   })
 })

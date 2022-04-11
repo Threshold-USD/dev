@@ -67,7 +67,7 @@ contract('TroveManager', async accounts => {
     borrowerOperations = contracts.borrowerOperations
     hintHelpers = contracts.hintHelpers
 
-    lqtyStaking = LQTYContracts.lqtyStaking
+    pcv = LQTYContracts.pcv
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)

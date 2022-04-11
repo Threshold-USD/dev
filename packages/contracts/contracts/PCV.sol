@@ -2,21 +2,21 @@
 
 pragma solidity 0.6.11;
 
-import "../Dependencies/BaseMath.sol";
-import "../Dependencies/SafeMath.sol";
-import "../Dependencies/Ownable.sol";
-import "../Dependencies/CheckContract.sol";
-import "../Dependencies/console.sol";
-import "../Interfaces/ILQTYStaking.sol";
-import "../Dependencies/LiquityMath.sol";
-import "../Interfaces/ILUSDToken.sol";
-import "../Dependencies/IERC20.sol";
+import "./Dependencies/BaseMath.sol";
+import "./Dependencies/SafeMath.sol";
+import "./Dependencies/Ownable.sol";
+import "./Dependencies/CheckContract.sol";
+import "./Dependencies/console.sol";
+import "./Interfaces/IPCV.sol";
+import "./Dependencies/LiquityMath.sol";
+import "./Interfaces/ILUSDToken.sol";
+import "./Dependencies/IERC20.sol";
 
-contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
+contract PCV is IPCV, Ownable, CheckContract, BaseMath {
     using SafeMath for uint;
 
     // --- Data ---
-    string constant public NAME = "LQTYStaking";
+    string constant public NAME = "PCV";
 
     mapping( address => uint) public stakes;
 
@@ -89,15 +89,15 @@ contract LQTYStaking is ILQTYStaking, Ownable, CheckContract, BaseMath {
     // --- 'require' functions ---
 
     function _requireCallerIsTroveManager() internal view {
-        require(msg.sender == troveManagerAddress, "LQTYStaking: caller is not TroveM");
+        require(msg.sender == troveManagerAddress, "PCV: caller is not TroveM");
     }
 
     function _requireCallerIsBorrowerOperations() internal view {
-        require(msg.sender == borrowerOperationsAddress, "LQTYStaking: caller is not BorrowerOps");
+        require(msg.sender == borrowerOperationsAddress, "PCV: caller is not BorrowerOps");
     }
 
      function _requireCallerIsActivePool() internal view {
-        require(msg.sender == activePoolAddress, "LQTYStaking: caller is not ActivePool");
+        require(msg.sender == activePoolAddress, "PCV: caller is not ActivePool");
     }
 
     receive() external payable {

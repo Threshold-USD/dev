@@ -11,7 +11,7 @@ import GasPool from "../../contracts/artifacts/contracts/GasPool.sol/GasPool.jso
 import HintHelpers from "../../contracts/artifacts/contracts/HintHelpers.sol/HintHelpers.json";
 import IERC20 from "../../contracts/artifacts/contracts/Dependencies/IERC20.sol/IERC20.json";
 import LUSDToken from "../../contracts/artifacts/contracts/LUSDToken.sol/LUSDToken.json";
-import LQTYStaking from "../../contracts/artifacts/contracts/LQTY/LQTYStaking.sol/LQTYStaking.json";
+import PCV from "../../contracts/artifacts/contracts/PCV.sol/PCV.json";
 import MultiTroveGetter from "../../contracts/artifacts/contracts/MultiTroveGetter.sol/MultiTroveGetter.json";
 import PriceFeed from "../../contracts/artifacts/contracts/PriceFeed.sol/PriceFeed.json";
 import PriceFeedTestnet from "../../contracts/artifacts/contracts/TestContracts/PriceFeedTestnet.sol/PriceFeedTestnet.json";
@@ -146,7 +146,7 @@ const contractArtifacts = [
   HintHelpers,
   IERC20,
   LUSDToken,
-  LQTYStaking,
+  PCV,
   MultiTroveGetter,
   PriceFeed,
   PriceFeedTestnet,

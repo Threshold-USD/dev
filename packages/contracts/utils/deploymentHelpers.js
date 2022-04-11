@@ -11,7 +11,7 @@ const FunctionCaller = artifacts.require("./TestContracts/FunctionCaller.sol")
 const BorrowerOperations = artifacts.require("./BorrowerOperations.sol")
 const HintHelpers = artifacts.require("./HintHelpers.sol")
 
-const LQTYStaking = artifacts.require("./LQTYStaking.sol")
+const PCV = artifacts.require("./PCV.sol")
 
 const StabilityPoolTester = artifacts.require("./StabilityPoolTester.sol")
 const ActivePoolTester = artifacts.require("./ActivePoolTester.sol")
@@ -27,7 +27,7 @@ const BorrowerWrappersScript = artifacts.require('BorrowerWrappersScript')
 const TroveManagerScript = artifacts.require('TroveManagerScript')
 const StabilityPoolScript = artifacts.require('StabilityPoolScript')
 const TokenScript = artifacts.require('TokenScript')
-const LQTYStakingScript = artifacts.require('LQTYStakingScript')
+const PCVScript = artifacts.require('PCVScript')
 const {
   buildUserProxies,
   BorrowerOperationsProxy,
@@ -36,7 +36,7 @@ const {
   StabilityPoolProxy,
   SortedTrovesProxy,
   TokenProxy,
-  LQTYStakingProxy
+  PCVProxy
 } = require('../utils/proxyHelpers.js')
 
 /*
@@ -145,23 +145,23 @@ class DeploymentHelper {
   }
 
   static async deployLQTYContractsHardhat() {
-    const lqtyStaking = await LQTYStaking.new()
+    const pcv = await PCV.new()
 
-    LQTYStaking.setAsDeployed(lqtyStaking)
+    PCV.setAsDeployed(pcv)
 
     const LQTYContracts = {
-      lqtyStaking
+      pcv
     }
     return LQTYContracts
   }
 
   static async deployLQTYTesterContractsHardhat() {
-    const lqtyStaking = await LQTYStaking.new()
+    const pcv = await PCV.new()
 
-    LQTYStaking.setAsDeployed(lqtyStaking)
+    PCV.setAsDeployed(pcv)
 
     const LQTYContracts = {
-      lqtyStaking
+      pcv
     }
     return LQTYContracts
   }
@@ -201,10 +201,10 @@ class DeploymentHelper {
   }
 
   static async deployLQTYContractsTruffle() {
-    const lqtyStaking = await lqtyStaking.new()
+    const pcv = await pcv.new()
 
     const LQTYContracts = {
-      lqtyStaking
+      pcv
     }
     return LQTYContracts
   }
@@ -233,7 +233,7 @@ class DeploymentHelper {
     const borrowerWrappersScript = await BorrowerWrappersScript.new(
       contracts.borrowerOperations.address,
       contracts.troveManager.address,
-      LQTYContracts.lqtyStaking.address
+      LQTYContracts.pcv.address
     )
     contracts.borrowerWrappers = new BorrowerWrappersProxy(owner, proxies, borrowerWrappersScript.address)
 
@@ -251,8 +251,8 @@ class DeploymentHelper {
     const lusdTokenScript = await TokenScript.new(contracts.lusdToken.address)
     contracts.lusdToken = new TokenProxy(owner, proxies, lusdTokenScript.address, contracts.lusdToken)
 
-    const lqtyStakingScript = await LQTYStakingScript.new(LQTYContracts.lqtyStaking.address)
-    LQTYContracts.lqtyStaking = new LQTYStakingProxy(owner, proxies, lqtyStakingScript.address, LQTYContracts.lqtyStaking)
+    const pcvScript = await PCVScript.new(LQTYContracts.pcv.address)
+    LQTYContracts.pcv = new PCVProxy(owner, proxies, pcvScript.address, LQTYContracts.pcv)
   }
 
   // Connect contracts to their dependencies
@@ -280,7 +280,7 @@ class DeploymentHelper {
       contracts.priceFeedTestnet.address,
       contracts.lusdToken.address,
       contracts.sortedTroves.address,
-      LQTYContracts.lqtyStaking.address
+      LQTYContracts.pcv.address
     )
 
     // set contracts in BorrowerOperations
@@ -294,7 +294,7 @@ class DeploymentHelper {
       contracts.priceFeedTestnet.address,
       contracts.sortedTroves.address,
       contracts.lusdToken.address,
-      LQTYContracts.lqtyStaking.address
+      LQTYContracts.pcv.address
     )
 
     // set contracts in the Pools
@@ -333,7 +333,7 @@ class DeploymentHelper {
   }
 
   static async connectLQTYContractsToCore(LQTYContracts, coreContracts) {
-    await LQTYContracts.lqtyStaking.setAddresses(
+    await LQTYContracts.pcv.setAddresses(
       coreContracts.lusdToken.address,
       coreContracts.troveManager.address,
       coreContracts.borrowerOperations.address,

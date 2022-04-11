@@ -9,7 +9,7 @@ const StabilityPool = artifacts.require("./StabilityPool.sol")
 const FunctionCaller = artifacts.require("./FunctionCaller.sol")
 const BorrowerOperations = artifacts.require("./BorrowerOperations.sol")
 
-const LQTYStaking = artifacts.require("./LQTY/LQTYStaking.sol")
+const PCV = artifacts.require("./PCV.sol")
 const HintHelpers = artifacts.require("./HintHelpers.sol")
 
 const ActivePoolTester = artifacts.require("./ActivePoolTester.sol")
@@ -38,7 +38,7 @@ const coreContractABIs = [
 ]
 
 const LQTYContractABIs = [
-  LQTYStaking
+  PCV
 ]
 
 const TesterContractABIs  = [

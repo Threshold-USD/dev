@@ -55,19 +55,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_lqtyStakingAddress",
-        "type": "address"
-      }
-    ],
-    "name": "LQTYStakingAddressChanged",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": true,
         "internalType": "address",
         "name": "_borrower",
@@ -113,6 +100,19 @@
       }
     ],
     "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_pcvAddress",
+        "type": "address"
+      }
+    ],
+    "name": "PCVAddressChanged",
     "type": "event"
   },
   {
@@ -496,32 +496,6 @@
   },
   {
     "inputs": [],
-    "name": "lqtyStaking",
-    "outputs": [
-      {
-        "internalType": "contract ILQTYStaking",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "lqtyStakingAddress",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
     "name": "lusdToken",
     "outputs": [
       {
@@ -587,6 +561,32 @@
   {
     "inputs": [],
     "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pcv",
+    "outputs": [
+      {
+        "internalType": "contract IPCV",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pcvAddress",
     "outputs": [
       {
         "internalType": "address",
@@ -682,7 +682,7 @@
       },
       {
         "internalType": "address",
-        "name": "_lqtyStakingAddress",
+        "name": "_pcvAddress",
         "type": "address"
       }
     ],

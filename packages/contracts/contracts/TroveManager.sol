@@ -7,7 +7,7 @@ import "./Interfaces/IStabilityPool.sol";
 import "./Interfaces/ICollSurplusPool.sol";
 import "./Interfaces/ILUSDToken.sol";
 import "./Interfaces/ISortedTroves.sol";
-import "./Interfaces/ILQTYStaking.sol";
+import "./Interfaces/IPCV.sol";
 import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
@@ -28,7 +28,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
 
     ILUSDToken public override lusdToken;
 
-    ILQTYStaking public override lqtyStaking;
+    IPCV public override pcv;
 
     // A doubly linked list of Troves, sorted by their sorted by their collateral ratios
     ISortedTroves public sortedTroves;
@@ -168,7 +168,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
         IActivePool activePool;
         IDefaultPool defaultPool;
         ILUSDToken lusdToken;
-        ILQTYStaking lqtyStaking;
+        IPCV pcv;
         ISortedTroves sortedTroves;
         ICollSurplusPool collSurplusPool;
         address gasPoolAddress;
@@ -203,7 +203,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
     event GasPoolAddressChanged(address _gasPoolAddress);
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
+    event PCVAddressChanged(address _pcvAddress);
 
     event Liquidation(uint _liquidatedDebt, uint _liquidatedColl, uint _collGasCompensation, uint _LUSDGasCompensation);
     event Redemption(uint _attemptedLUSDAmount, uint _actualLUSDAmount, uint _ETHSent, uint _ETHFee);
@@ -237,7 +237,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
         address _priceFeedAddress,
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
-        address _lqtyStakingAddress
+        address _pcvAddress
     )
         external
         override
@@ -252,7 +252,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
         checkContract(_priceFeedAddress);
         checkContract(_lusdTokenAddress);
         checkContract(_sortedTrovesAddress);
-        checkContract(_lqtyStakingAddress);
+        checkContract(_pcvAddress);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         activePool = IActivePool(_activePoolAddress);
@@ -263,7 +263,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
         priceFeed = IPriceFeed(_priceFeedAddress);
         lusdToken = ILUSDToken(_lusdTokenAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
-        lqtyStaking = ILQTYStaking(_lqtyStakingAddress);
+        pcv = IPCV(_pcvAddress);
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit ActivePoolAddressChanged(_activePoolAddress);
@@ -274,7 +274,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
         emit PriceFeedAddressChanged(_priceFeedAddress);
         emit LUSDTokenAddressChanged(_lusdTokenAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
-        emit LQTYStakingAddressChanged(_lqtyStakingAddress);
+        emit PCVAddressChanged(_pcvAddress);
 
         _renounceOwnership();
     }
@@ -489,7 +489,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
             activePool,
             defaultPool,
             ILUSDToken(address(0)),
-            ILQTYStaking(address(0)),
+            IPCV(address(0)),
             sortedTroves,
             ICollSurplusPool(address(0)),
             address(0)
@@ -930,7 +930,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
             activePool,
             defaultPool,
             lusdToken,
-            lqtyStaking,
+            pcv,
             sortedTroves,
             collSurplusPool,
             gasPoolAddress
@@ -999,8 +999,8 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
         _requireUserAcceptsFee(totals.ETHFee, totals.totalETHDrawn, _maxFeePercentage);
 
         // Send the ETH fee to the LQTY staking contract
-        contractsCache.activePool.sendETH(address(contractsCache.lqtyStaking), totals.ETHFee);
-        contractsCache.lqtyStaking.increaseF_ETH(totals.ETHFee);
+        contractsCache.activePool.sendETH(address(contractsCache.pcv), totals.ETHFee);
+        contractsCache.pcv.increaseF_ETH(totals.ETHFee);
 
         totals.ETHToSendToRedeemer = totals.totalETHDrawn.sub(totals.ETHFee);
 

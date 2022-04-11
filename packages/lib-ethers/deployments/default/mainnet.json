@@ -18,7 +18,7 @@
     "defaultPool": "0x896a3F03176f05CFbb4f006BfCd8723F2B0D741C",
     "hintHelpers": "0xE84251b93D9524E0d2e621Ba7dc7cb3579F997C0",
     "lockupContractFactory": "0x2eBeF24dA09489218Ba2BECb01867F6DaAeDcD4B",
-    "lqtyStaking": "0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d",
+    "pcv": "0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d",
     "priceFeed": "0x4c517D4e2C851CA76d7eC94B805269Df0f2201De",
     "sortedTroves": "0x8FdD3fbFEb32b28fb73555518f8b361bCeA741A6",
     "stabilityPool": "0x66017D22b0f8556afDd19FC67041899Eb65a21bb",

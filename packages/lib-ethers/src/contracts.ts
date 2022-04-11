@@ -19,7 +19,7 @@ import lusdTokenAbi from "../abi/LUSDToken.json";
 import collSurplusPoolAbi from "../abi/CollSurplusPool.json";
 import defaultPoolAbi from "../abi/DefaultPool.json";
 import hintHelpersAbi from "../abi/HintHelpers.json";
-import lqtyStakingAbi from "../abi/LQTYStaking.json";
+import pcvAbi from "../abi/PCV.json";
 import multiTroveGetterAbi from "../abi/MultiTroveGetter.json";
 import priceFeedAbi from "../abi/PriceFeed.json";
 import priceFeedTestnetAbi from "../abi/PriceFeedTestnet.json";
@@ -35,7 +35,7 @@ import {
   CollSurplusPool,
   DefaultPool,
   HintHelpers,
-  LQTYStaking,
+  PCV,
   MultiTroveGetter,
   PriceFeed,
   PriceFeedTestnet,
@@ -160,7 +160,7 @@ export interface _LiquityContracts {
   collSurplusPool: CollSurplusPool;
   defaultPool: DefaultPool;
   hintHelpers: HintHelpers;
-  lqtyStaking: LQTYStaking;
+  pcv: PCV;
   multiTroveGetter: MultiTroveGetter;
   priceFeed: PriceFeed | PriceFeedTestnet;
   sortedTroves: SortedTroves;
@@ -188,7 +188,7 @@ const getAbi = (priceFeedIsTestnet: boolean): LiquityContractAbis => ({
   lusdToken: lusdTokenAbi,
   defaultPool: defaultPoolAbi,
   hintHelpers: hintHelpersAbi,
-  lqtyStaking: lqtyStakingAbi,
+  pcv: pcvAbi,
   multiTroveGetter: multiTroveGetterAbi,
   priceFeed: priceFeedIsTestnet ? priceFeedTestnetAbi : priceFeedAbi,
   sortedTroves: sortedTrovesAbi,

@@ -9,14 +9,14 @@ import "../Interfaces/IBorrowerOperations.sol";
 import "../Interfaces/ITroveManager.sol";
 import "../Interfaces/IStabilityPool.sol";
 import "../Interfaces/IPriceFeed.sol";
-import "../Interfaces/ILQTYStaking.sol";
+import "../Interfaces/IPCV.sol";
 import "./BorrowerOperationsScript.sol";
 import "./ETHTransferScript.sol";
-import "./LQTYStakingScript.sol";
+import "./PCVScript.sol";
 import "../Dependencies/console.sol";
 
 
-contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, LQTYStakingScript {
+contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, PCVScript {
     using SafeMath for uint;
 
     string constant public NAME = "BorrowerWrappersScript";
@@ -25,15 +25,15 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
     IStabilityPool immutable stabilityPool;
     IPriceFeed immutable priceFeed;
     IERC20 immutable lusdToken;
-    ILQTYStaking immutable lqtyStaking;
+    IPCV immutable pcv;
 
     constructor(
         address _borrowerOperationsAddress,
         address _troveManagerAddress,
-        address _lqtyStakingAddress
+        address _pcvAddress
     )
         BorrowerOperationsScript(IBorrowerOperations(_borrowerOperationsAddress))
-        LQTYStakingScript(_lqtyStakingAddress)
+        PCVScript(_pcvAddress)
         public
     {
         checkContract(_troveManagerAddress);
@@ -52,9 +52,9 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         checkContract(lusdTokenCached);
         lusdToken = IERC20(lusdTokenCached);
 
-        ILQTYStaking lqtyStakingCached = troveManagerCached.lqtyStaking();
-        require(_lqtyStakingAddress == address(lqtyStakingCached), "BorrowerWrappersScript: Wrong LQTYStaking address");
-        lqtyStaking = lqtyStakingCached;
+        IPCV pcvCached = troveManagerCached.pcv();
+        require(_pcvAddress == address(pcvCached), "BorrowerWrappersScript: Wrong PCV address");
+        pcv = pcvCached;
     }
 
     function claimCollateralAndOpenTrove(uint _maxFee, uint _LUSDAmount, address _upperHint, address _lowerHint) external payable {

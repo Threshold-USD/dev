@@ -70,7 +70,7 @@ contract('TroveManager', async accounts => {
     borrowerOperations = contracts.borrowerOperations
     hintHelpers = contracts.hintHelpers
 
-    lqtyStaking = LQTYContracts.lqtyStaking
+    pcv = LQTYContracts.pcv
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
@@ -3591,8 +3591,8 @@ contract('TroveManager', async accounts => {
     assert.equal(await troveManager.baseRate(), '0')
 
     // Check LQTY Staking contract balance before is zero
-    const lqtyStakingBalance_Before = await web3.eth.getBalance(lqtyStaking.address)
-    assert.equal(lqtyStakingBalance_Before, '0')
+    const pcvBalance_Before = await web3.eth.getBalance(pcv.address)
+    assert.equal(pcvBalance_Before, '0')
 
     const A_balanceBefore = await lusdToken.balanceOf(A)
 
@@ -3607,8 +3607,8 @@ contract('TroveManager', async accounts => {
     assert.isTrue(baseRate_1.gt(toBN('0')))
 
     // Check LQTY Staking contract balance after is non-zero
-    const lqtyStakingBalance_After = toBN(await web3.eth.getBalance(lqtyStaking.address))
-    assert.isTrue(lqtyStakingBalance_After.gt(toBN('0')))
+    const pcvBalance_After = toBN(await web3.eth.getBalance(pcv.address))
+    assert.isTrue(pcvBalance_After.gt(toBN('0')))
   })
 
   it("redeemCollateral(): a redemption made at zero base increases the ETH-fees in LQTY Staking contract", async () => {
@@ -3625,7 +3625,7 @@ contract('TroveManager', async accounts => {
     assert.equal(await troveManager.baseRate(), '0')
 
     // Check LQTY Staking ETH-fees before is zero
-    const F_ETH_Before = await lqtyStaking.F_ETH()
+    const F_ETH_Before = await pcv.F_ETH()
     assert.equal(F_ETH_Before, '0')
 
     const A_balanceBefore = await lusdToken.balanceOf(A)
@@ -3641,7 +3641,7 @@ contract('TroveManager', async accounts => {
     assert.isTrue(baseRate_1.gt(toBN('0')))
 
     // Check LQTY Staking ETH-fees after is non-zero
-    const F_ETH_After = await lqtyStaking.F_ETH()
+    const F_ETH_After = await pcv.F_ETH()
     assert.isTrue(F_ETH_After.gt('0'))
   })
 
@@ -3671,7 +3671,7 @@ contract('TroveManager', async accounts => {
     const baseRate_1 = await troveManager.baseRate()
     assert.isTrue(baseRate_1.gt(toBN('0')))
 
-    const lqtyStakingBalance_Before = toBN(await web3.eth.getBalance(lqtyStaking.address))
+    const pcvBalance_Before = toBN(await web3.eth.getBalance(pcv.address))
 
     // B redeems 10 LUSD
     await th.redeemCollateral(B, contracts, dec(10, 18))
@@ -3679,10 +3679,10 @@ contract('TroveManager', async accounts => {
     // Check B's balance has decreased by 10 LUSD
     assert.equal(await lusdToken.balanceOf(B), B_balanceBefore.sub(toBN(dec(10, 18))).toString())
 
-    const lqtyStakingBalance_After = toBN(await web3.eth.getBalance(lqtyStaking.address))
+    const pcvBalance_After = toBN(await web3.eth.getBalance(pcv.address))
 
     // check LQTY Staking balance has increased
-    assert.isTrue(lqtyStakingBalance_After.gt(lqtyStakingBalance_Before))
+    assert.isTrue(pcvBalance_After.gt(pcvBalance_Before))
   })
 
   it("redeemCollateral(): a redemption made at a non-zero base rate increases ETH in the staking contract", async () => {
@@ -3712,7 +3712,7 @@ contract('TroveManager', async accounts => {
     assert.isTrue(baseRate_1.gt(toBN('0')))
 
     // Check LQTY Staking ETH-fees before is zero
-    const F_ETH_Before = await lqtyStaking.F_ETH()
+    const F_ETH_Before = await pcv.F_ETH()
 
     // B redeems 10 LUSD
     await th.redeemCollateral(B, contracts, dec(10, 18))
@@ -3720,7 +3720,7 @@ contract('TroveManager', async accounts => {
     // Check B's balance has decreased by 10 LUSD
     assert.equal(await lusdToken.balanceOf(B), B_balanceBefore.sub(toBN(dec(10, 18))).toString())
 
-    const F_ETH_After = await lqtyStaking.F_ETH()
+    const F_ETH_After = await pcv.F_ETH()
 
     // check LQTY Staking balance has increased
     assert.isTrue(F_ETH_After.gt(F_ETH_Before))

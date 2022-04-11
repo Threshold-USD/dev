@@ -2,7 +2,7 @@
 
 pragma solidity 0.6.11;
 
-interface ILQTYStaking {
+interface IPCV {
 
     // --- Events --
     event LUSDTokenAddressSet(address _lusdTokenAddress);

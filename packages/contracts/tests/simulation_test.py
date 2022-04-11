@@ -28,7 +28,7 @@ def setAddresses(contracts):
         contracts.priceFeedTestnet.address,
         contracts.lusdToken.address,
         contracts.sortedTroves.address,
-        contracts.lqtyStaking.address,
+        contracts.pcv.address,
         { 'from': accounts[0] }
     )
 
@@ -42,7 +42,7 @@ def setAddresses(contracts):
         contracts.priceFeedTestnet.address,
         contracts.sortedTroves.address,
         contracts.lusdToken.address,
-        contracts.lqtyStaking.address,
+        contracts.pcv.address,
         { 'from': accounts[0] }
     )
 
@@ -84,7 +84,7 @@ def setAddresses(contracts):
     )
 
     # LQTY
-    contracts.lqtyStaking.setAddresses(
+    contracts.pcv.setAddresses(
         contracts.lusdToken.address,
         contracts.troveManager.address,
         contracts.borrowerOperations.address,
@@ -119,7 +119,7 @@ def contracts():
         { 'from': accounts[0] }
     )
     # LQTY
-    contracts.lqtyStaking = LQTYStaking.deploy({ 'from': accounts[0] })
+    contracts.pcv = pcv.deploy({ 'from': accounts[0] })
 
     setAddresses(contracts)
 

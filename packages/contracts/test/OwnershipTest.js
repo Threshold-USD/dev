@@ -17,7 +17,7 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
   let defaultPool
   let borrowerOperations
 
-  let lqtyStaking
+  let pcv
   let lockupContractFactory
 
   before(async () => {
@@ -34,7 +34,7 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
     defaultPool = contracts.defaultPool
     borrowerOperations = contracts.borrowerOperations
 
-    lqtyStaking = LQTYContracts.lqtyStaking
+    pcv = LQTYContracts.pcv
     lockupContractFactory = LQTYContracts.lockupContractFactory
   })
 
@@ -123,9 +123,9 @@ contract('All Liquity functions with onlyOwner modifier', async accounts => {
     })
   })
 
-  describe('LQTYStaking', async accounts => {
+  describe('PCV', async accounts => {
     it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
-      await testSetAddresses(lqtyStaking, 4)
+      await testSetAddresses(pcv, 4)
     })
   })
 })

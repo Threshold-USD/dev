@@ -21,7 +21,7 @@ const {
   StabilityPoolProxy,
   SortedTrovesProxy,
   TokenProxy,
-  LQTYStakingProxy
+  PCVProxy
 } = require('../utils/proxyHelpers.js')
 
 contract('BorrowerWrappers', async accounts => {
@@ -44,7 +44,7 @@ contract('BorrowerWrappers', async accounts => {
   let collSurplusPool
   let borrowerOperations
   let borrowerWrappers
-  let lqtyStaking
+  let pcv
 
   let contracts
 
@@ -79,7 +79,7 @@ contract('BorrowerWrappers', async accounts => {
     collSurplusPool = contracts.collSurplusPool
     borrowerOperations = contracts.borrowerOperations
     borrowerWrappers = contracts.borrowerWrappers
-    lqtyStaking = LQTYContracts.lqtyStaking
+    pcv = LQTYContracts.pcv
 
     LUSD_GAS_COMPENSATION = await borrowerOperations.LUSD_GAS_COMPENSATION()
   })
@@ -286,7 +286,7 @@ contract('BorrowerWrappers', async accounts => {
     const troveDebtBefore = await troveManager.getTroveDebt(alice)
     const ICRBefore = await troveManager.getCurrentICR(alice, price)
     const depositBefore = (await stabilityPool.deposits(alice))
-    const stakeBefore = await lqtyStaking.stakes(alice)
+    const stakeBefore = await pcv.stakes(alice)
 
     const proportionalLUSD = expectedETHGain_A.mul(price).div(ICRBefore)
     const borrowingRate = await troveManagerOriginal.getBorrowingRateWithDecay()

@@ -31,7 +31,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   let functionCaller
   let borrowerOperations
 
-  let lqtyStaking
+  let pcv
   let lockupContractFactory
 
   before(async () => {
@@ -51,7 +51,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     functionCaller = coreContracts.functionCaller
     borrowerOperations = coreContracts.borrowerOperations
 
-    lqtyStaking = LQTYContracts.lqtyStaking
+    pcv = LQTYContracts.pcv
     lockupContractFactory = LQTYContracts.lockupContractFactory
 
     await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)
@@ -426,10 +426,10 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     })
   })
 
-  describe('LQTYStaking', async accounts => {
+  describe('PCV', async accounts => {
     it("increaseF_LUSD(): reverts when caller is not TroveManager", async () => {
       try {
-        const txAlice = await lqtyStaking.increaseF_LUSD(dec(1, 18), { from: alice })
+        const txAlice = await pcv.increaseF_LUSD(dec(1, 18), { from: alice })
 
       } catch (err) {
         assert.include(err.message, "revert")

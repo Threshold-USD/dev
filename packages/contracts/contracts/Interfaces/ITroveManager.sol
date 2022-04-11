@@ -5,7 +5,7 @@ pragma solidity 0.6.11;
 import "./ILiquityBase.sol";
 import "./IStabilityPool.sol";
 import "./ILUSDToken.sol";
-import "./ILQTYStaking.sol";
+import "./IPCV.sol";
 
 
 // Common interface for the Trove Manager.
@@ -22,7 +22,7 @@ interface ITroveManager is ILiquityBase {
     event GasPoolAddressChanged(address _gasPoolAddress);
     event CollSurplusPoolAddressChanged(address _collSurplusPoolAddress);
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
-    event LQTYStakingAddressChanged(address _lqtyStakingAddress);
+    event PCVAddressChanged(address _pcvAddress);
 
     event Liquidation(uint _liquidatedDebt, uint _liquidatedColl, uint _collGasCompensation, uint _LUSDGasCompensation);
     event Redemption(uint _attemptedLUSDAmount, uint _actualLUSDAmount, uint _ETHSent, uint _ETHFee);
@@ -48,12 +48,12 @@ interface ITroveManager is ILiquityBase {
         address _priceFeedAddress,
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
-        address _lqtyStakingAddress
+        address _pcvAddress
     ) external;
 
     function stabilityPool() external view returns (IStabilityPool);
     function lusdToken() external view returns (ILUSDToken);
-    function lqtyStaking() external view returns (ILQTYStaking);
+    function pcv() external view returns (IPCV);
 
     function getTroveOwnersCount() external view returns (uint);
 

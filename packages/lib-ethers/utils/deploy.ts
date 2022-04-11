@@ -76,7 +76,7 @@ const deployContracts = async (
     }),
     defaultPool: await deployContract(deployer, getContractFactory, "DefaultPool", { ...overrides }),
     hintHelpers: await deployContract(deployer, getContractFactory, "HintHelpers", { ...overrides }),
-    lqtyStaking: await deployContract(deployer, getContractFactory, "LQTYStaking", { ...overrides }),
+    pcv: await deployContract(deployer, getContractFactory, "PCV", { ...overrides }),
     priceFeed: await deployContract(
       deployer,
       getContractFactory,
@@ -138,7 +138,7 @@ const connectContracts = async (
     collSurplusPool,
     defaultPool,
     hintHelpers,
-    lqtyStaking,
+    pcv,
     priceFeed,
     sortedTroves,
     stabilityPool,
@@ -171,7 +171,7 @@ const connectContracts = async (
         priceFeed.address,
         lusdToken.address,
         sortedTroves.address,
-        lqtyStaking.address,
+        pcv.address,
         { ...overrides, nonce }
       ),
 
@@ -186,7 +186,7 @@ const connectContracts = async (
         priceFeed.address,
         sortedTroves.address,
         lusdToken.address,
-        lqtyStaking.address,
+        pcv.address,
         { ...overrides, nonce }
       ),
 
@@ -231,7 +231,7 @@ const connectContracts = async (
       }),
 
     nonce =>
-      lqtyStaking.setAddresses(
+      pcv.setAddresses(
         lusdToken.address,
         troveManager.address,
         borrowerOperations.address,

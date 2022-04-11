@@ -137,18 +137,18 @@ class MainnetDeploymentHelper {
   }
 
   async deployLQTYContractsMainnet(deploymentState) {
-    const lqtyStakingFactory = await this.getFactory("LQTYStaking")
+    const pcvFactory = await this.getFactory("PCV")
 
-    const lqtyStaking = await this.loadOrDeploy(lqtyStakingFactory, 'lqtyStaking', deploymentState)
+    const pcv = await this.loadOrDeploy(pcvFactory, 'pcv', deploymentState)
 
     if (!this.configParams.ETHERSCAN_BASE_URL) {
       console.log('No Etherscan Url defined, skipping verification')
     } else {
-      await this.verifyContract('lqtyStaking', deploymentState)
+      await this.verifyContract('pcv', deploymentState)
     }
 
     const LQTYContracts = {
-      lqtyStaking
+      pcv
     }
     return LQTYContracts
   }
@@ -208,7 +208,7 @@ class MainnetDeploymentHelper {
         contracts.priceFeed.address,
         contracts.lusdToken.address,
         contracts.sortedTroves.address,
-        LQTYContracts.lqtyStaking.address,
+        LQTYContracts.pcv.address,
 	{gasPrice}
       ))
 
@@ -224,7 +224,7 @@ class MainnetDeploymentHelper {
         contracts.priceFeed.address,
         contracts.sortedTroves.address,
         contracts.lusdToken.address,
-        LQTYContracts.lqtyStaking.address,
+        LQTYContracts.pcv.address,
 	{gasPrice}
       ))
 
@@ -275,8 +275,8 @@ class MainnetDeploymentHelper {
 
   async connectLQTYContractsToCoreMainnet(LQTYContracts, coreContracts) {
     const gasPrice = this.configParams.GAS_PRICE
-    await this.isOwnershipRenounced(LQTYContracts.lqtyStaking) ||
-      await this.sendAndWaitForTransaction(LQTYContracts.lqtyStaking.setAddresses(
+    await this.isOwnershipRenounced(LQTYContracts.pcv) ||
+      await this.sendAndWaitForTransaction(LQTYContracts.pcv.setAddresses(
         coreContracts.lusdToken.address,
         coreContracts.troveManager.address,
         coreContracts.borrowerOperations.address,
