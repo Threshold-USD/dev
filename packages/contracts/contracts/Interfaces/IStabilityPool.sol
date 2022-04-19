@@ -26,7 +26,7 @@ interface IStabilityPool {
 
     // --- Events ---
 
-    event StabilityPoolETHBalanceUpdated(uint _newBalance);
+    event StabilityPoolCollateralBalanceUpdated(uint _newBalance);
     event StabilityPoolLUSDBalanceUpdated(uint _newBalance);
 
     event BorrowerOperationsAddressChanged(address _newBorrowerOperationsAddress);
@@ -45,8 +45,8 @@ interface IStabilityPool {
     event DepositSnapshotUpdated(address indexed _depositor, uint _P, uint _S);
     event UserDepositChanged(address indexed _depositor, uint _newDeposit);
 
-    event ETHGainWithdrawn(address indexed _depositor, uint _ETH, uint _LUSDLoss);
-    event EtherSent(address _to, uint _amount);
+    event CollateralGainWithdrawn(address indexed _depositor, uint _collateral, uint _LUSDLoss);
+    event CollateralSent(address _to, uint _amount);
 
     // --- Functions ---
 
@@ -67,7 +67,7 @@ interface IStabilityPool {
      * Initial checks:
      * - _amount is not zero
      * ---
-     * - Sends depositor's accumulated gains (ETH) to depositor
+     * - Sends depositor's accumulated gains (collateral) to depositor
      */
     function provideToSP(uint _amount) external;
 
@@ -76,7 +76,7 @@ interface IStabilityPool {
      * - _amount is zero or there are no under collateralized troves left in the system
      * - User has a non zero deposit
      * ---
-     * - Sends all depositor's accumulated gains (ETH) to depositor
+     * - Sends all depositor's accumulated gains (collateral) to depositor
      * - Decreases deposit stake, and takes new snapshot.
      *
      * If _amount > userDeposit, the user withdraws all of their compounded deposit.
@@ -87,29 +87,29 @@ interface IStabilityPool {
      * Initial checks:
      * - User has a non zero deposit
      * - User has an open trove
-     * - User has some ETH gain
+     * - User has some collateral gain
      * ---
-     * - Transfers the depositor's entire ETH gain from the Stability Pool to the caller's trove
+     * - Transfers the depositor's entire collateral gain from the Stability Pool to the caller's trove
      * - Leaves their compounded deposit in the Stability Pool
      * - Updates snapshots for deposit
      */
-    function withdrawETHGainToTrove(address _upperHint, address _lowerHint) external;
+    function withdrawCollateralGainToTrove(address _upperHint, address _lowerHint) external;
 
     /*
      * Initial checks:
      * - Caller is TroveManager
      * ---
      * Cancels out the specified debt against the LUSD contained in the Stability Pool (as far as possible)
-     * and transfers the Trove's ETH collateral from ActivePool to StabilityPool.
+     * and transfers the Trove's collateral from ActivePool to StabilityPool.
      * Only called by liquidation functions in the TroveManager.
      */
     function offset(uint _debt, uint _coll) external;
 
     /*
-     * Returns the total amount of ETH held by the pool, accounted in an internal variable instead of `balance`,
-     * to exclude edge cases like ETH received from a self-destruct.
+     * Returns the total amount of collateral held by the pool, accounted in an internal variable instead of `balance`,
+     * to exclude edge cases like collateral received from a self-destruct.
      */
-    function getETH() external view returns (uint);
+    function getCollateralBalance() external view returns (uint);
 
     /*
      * Returns LUSD held in the pool. Changes when users deposit/withdraw, and when Trove debt is offset.
@@ -117,9 +117,9 @@ interface IStabilityPool {
     function getTotalLUSDDeposits() external view returns (uint);
 
     /*
-     * Calculates the ETH gain earned by the deposit since its last snapshots were taken.
+     * Calculates the collateral gain earned by the deposit since its last snapshots were taken.
      */
-    function getDepositorETHGain(address _depositor) external view returns (uint);
+    function getDepositorCollateralGain(address _depositor) external view returns (uint);
 
     /*
      * Return the user's compounded deposit.

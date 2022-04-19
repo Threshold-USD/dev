@@ -2,6 +2,8 @@
 
 pragma solidity 0.8.10;
 
+import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20.sol";
+
 import './Interfaces/IBorrowerOperations.sol';
 import './Interfaces/IStabilityPool.sol';
 import './Interfaces/IBorrowerOperations.sol';
@@ -22,7 +24,7 @@ import "./Dependencies/console.sol";
  * LUSD in the Stability Pool:  that is, the offset debt evaporates, and an equal amount of LUSD tokens in the Stability Pool is burned.
  *
  * Thus, a liquidation causes each depositor to receive a LUSD loss, in proportion to their deposit as a share of total deposits.
- * They also receive an ETH gain, as the ETH collateral of the liquidated trove is distributed among Stability depositors,
+ * They also receive a collateral gain, as the collateral of the liquidated trove is distributed among Stability depositors,
  * in the same proportion.
  *
  * When a liquidation occurs, it depletes every deposit by the same fraction: for example, a liquidation that depletes 40%
@@ -34,25 +36,25 @@ import "./Dependencies/console.sol";
  *
  * --- IMPLEMENTATION ---
  *
- * We use a highly scalable method of tracking deposits and ETH gains that has O(1) complexity.
+ * We use a highly scalable method of tracking deposits and collateral gains that has O(1) complexity.
  *
- * When a liquidation occurs, rather than updating each depositor's deposit and ETH gain, we simply update two state variables:
+ * When a liquidation occurs, rather than updating each depositor's deposit and collateral gain, we simply update two state variables:
  * a product P, and a sum S.
  *
  * A mathematical manipulation allows us to factor out the initial deposit, and accurately track all depositors' compounded deposits
- * and accumulated ETH gains over time, as liquidations occur, using just these two variables P and S. When depositors join the
+ * and accumulated collateral gains over time, as liquidations occur, using just these two variables P and S. When depositors join the
  * Stability Pool, they get a snapshot of the latest P and S: P_t and S_t, respectively.
  *
- * The formula for a depositor's accumulated ETH gain is derived here:
+ * The formula for a depositor's accumulated collateral gain is derived here:
  * https://github.com/liquity/dev/blob/main/packages/contracts/mathProofs/Scalable%20Compounding%20Stability%20Pool%20Deposits.pdf
  *
  * For a given deposit d_t, the ratio P/P_t tells us the factor by which a deposit has decreased since it joined the Stability Pool,
- * and the term d_t * (S - S_t)/P_t gives us the deposit's total accumulated ETH gain.
+ * and the term d_t * (S - S_t)/P_t gives us the deposit's total accumulated collateral gain.
  *
- * Each liquidation updates the product P and sum S. After a series of liquidations, a compounded deposit and corresponding ETH gain
+ * Each liquidation updates the product P and sum S. After a series of liquidations, a compounded deposit and corresponding collateral gain
  * can be calculated using the initial deposit, the depositor’s snapshots of P and S, and the latest values of P and S.
  *
- * Any time a depositor updates their deposit (withdrawal, top-up) their accumulated ETH gain is paid out, their new deposit is recorded
+ * Any time a depositor updates their deposit (withdrawal, top-up) their accumulated collateral gain is paid out, their new deposit is recorded
  * (based on their latest compounded deposit and modified by the withdrawal/top-up), and they receive new snapshots of the latest P and S.
  * Essentially, they make a fresh deposit that overwrites the old one.
  *
@@ -91,13 +93,13 @@ import "./Dependencies/console.sol";
  * as 0, since it is now less than 1e-9'th of its initial value (e.g. a deposit of 1 billion LUSD has depleted to < 1 LUSD).
  *
  *
- *  --- TRACKING DEPOSITOR'S ETH GAIN OVER SCALE CHANGES AND EPOCHS ---
+ *  --- TRACKING DEPOSITOR'S collateral GAIN OVER SCALE CHANGES AND EPOCHS ---
  *
  * In the current epoch, the latest value of S is stored upon each scale change, and the mapping (scale -> S) is stored for each epoch.
  *
- * This allows us to calculate a deposit's accumulated ETH gain, during the epoch in which the deposit was non-zero and earned ETH.
+ * This allows us to calculate a deposit's accumulated collateral gain, during the epoch in which the deposit was non-zero and earned collateral.
  *
- * We calculate the depositor's accumulated ETH gain for the scale at which they made the deposit, using the ETH gain formula:
+ * We calculate the depositor's accumulated collateral gain for the scale at which they made the deposit, using the collateral gain formula:
  * e_1 = d_t * (S - S_t) / P_t
  *
  * and also for scale after, taking care to divide the latter by a factor of 1e9:
@@ -117,14 +119,14 @@ import "./Dependencies/console.sol";
  *  |---+---------|-------------|-----...
  *         i            i+1
  *
- * The sum of (e_1 + e_2) captures the depositor's total accumulated ETH gain, handling the case where their
+ * The sum of (e_1 + e_2) captures the depositor's total accumulated collateral gain, handling the case where their
  * deposit spanned one scale change. We only care about gains across one scale change, since the compounded
  * deposit is defined as being 0 once it has spanned more than one scale change.
  *
  *
  * --- UPDATING P WHEN A LIQUIDATION OCCURS ---
  *
- * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / ETH gain derivations:
+ * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / collateral gain derivations:
  * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
  *
  */
@@ -133,6 +135,8 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     using LiquitySafeMath128 for uint128;
 
     string constant public NAME = "StabilityPool";
+
+    address public collateralAddress;
 
     IBorrowerOperations public borrowerOperations;
 
@@ -143,7 +147,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     // Needed to check if there are pending liquidations
     ISortedTroves public sortedTroves;
 
-    uint256 internal ETH;  // deposited ether tracker
+    uint256 internal collateral;  // deposited collateral tracker
 
     // Tracker for LUSD held in the pool. Changes when users deposit/withdraw, and when Trove debt is offset.
     uint256 internal totalLUSDDeposits;
@@ -180,7 +184,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     // With each offset that fully empties the Pool, the epoch is incremented by 1
     uint128 public currentEpoch;
 
-    /* ETH Gain sum 'S': During its lifetime, each deposit d_t earns an ETH gain of ( d_t * [S - S_t] )/P_t, where S_t
+    /* collateral Gain sum 'S': During its lifetime, each deposit d_t earns an collateral gain of ( d_t * [S - S_t] )/P_t, where S_t
     * is the depositor's snapshot of S taken at the time t when the deposit was made.
     *
     * The 'S' sums are stored in a nested mapping (epoch => scale => sum):
@@ -191,7 +195,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     mapping (uint128 => mapping(uint128 => uint)) public epochToScaleToSum;
 
     // Error trackers for the error correction in the offset calculation
-    uint public lastETHError_Offset;
+    uint public lastCollateralError_Offset;
     uint public lastLUSDLossError_Offset;
 
     // --- Contract setters ---
@@ -202,7 +206,8 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         address _activePoolAddress,
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
-        address _priceFeedAddress
+        address _priceFeedAddress,
+        address _collateralAddress
     )
         external
         override
@@ -214,6 +219,9 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         checkContract(_lusdTokenAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_priceFeedAddress);
+        if (_collateralAddress !== address(0)) {
+          checkContract(_collateralAddress);
+        }
 
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
         troveManager = ITroveManager(_troveManagerAddress);
@@ -221,6 +229,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         lusdToken = ILUSDToken(_lusdTokenAddress);
         sortedTroves = ISortedTroves(_sortedTrovesAddress);
         priceFeed = IPriceFeed(_priceFeedAddress);
+        collateralAddress = _collateralAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
@@ -228,14 +237,15 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         emit LUSDTokenAddressChanged(_lusdTokenAddress);
         emit SortedTrovesAddressChanged(_sortedTrovesAddress);
         emit PriceFeedAddressChanged(_priceFeedAddress);
+        emit CollateralAddressChanged(_collateralAddress);
 
         _renounceOwnership();
     }
 
     // --- Getters for public variables. Required by IPool interface ---
 
-    function getETH() external view override returns (uint) {
-        return ETH;
+    function getCollateralBalance() external view override returns (uint) {
+        return collateral;
     }
 
     function getTotalLUSDDeposits() external view override returns (uint) {
@@ -246,14 +256,14 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     /*  provideToSP():
     *
-    * - Sends depositor's accumulated gains (ETH) to depositor
+    * - Sends depositor's accumulated gains (collateral) to depositor
     */
     function provideToSP(uint _amount) external override {
         _requireNonZeroAmount(_amount);
 
         uint initialDeposit = deposits[msg.sender].initialValue;
 
-        uint depositorETHGain = getDepositorETHGain(msg.sender);
+        uint depositorCollateralGain = getDepositorCollateralGain(msg.sender);
         uint compoundedLUSDDeposit = getCompoundedLUSDDeposit(msg.sender);
         uint LUSDLoss = initialDeposit.sub(compoundedLUSDDeposit); // Needed only for event log
 
@@ -263,14 +273,14 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
-        emit ETHGainWithdrawn(msg.sender, depositorETHGain, LUSDLoss); // LUSD Loss required for event log
+        emit CollateralGainWithdrawn(msg.sender, depositorCollateralGain, LUSDLoss); // LUSD Loss required for event log
 
-        _sendETHGainToDepositor(depositorETHGain);
+        _sendCollateralGainToDepositor(depositorCollateralGain);
      }
 
     /*  withdrawFromSP():
     *
-    * - Sends all depositor's accumulated gains (ETH) to depositor
+    * - Sends all depositor's accumulated gains (collateral) to depositor
     *
     * If _amount > userDeposit, the user withdraws all of their compounded deposit.
     */
@@ -279,7 +289,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint initialDeposit = deposits[msg.sender].initialValue;
         _requireUserHasDeposit(initialDeposit);
 
-        uint depositorETHGain = getDepositorETHGain(msg.sender);
+        uint depositorCollateralGain = getDepositorCollateralGain(msg.sender);
 
         uint compoundedLUSDDeposit = getCompoundedLUSDDeposit(msg.sender);
         uint LUSDtoWithdraw = LiquityMath._min(_amount, compoundedLUSDDeposit);
@@ -292,46 +302,46 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         _updateDepositAndSnapshots(msg.sender, newDeposit);
         emit UserDepositChanged(msg.sender, newDeposit);
 
-        emit ETHGainWithdrawn(msg.sender, depositorETHGain, LUSDLoss);  // LUSD Loss required for event log
+        emit CollateralGainWithdrawn(msg.sender, depositorCollateralGain, LUSDLoss);  // LUSD Loss required for event log
 
-        _sendETHGainToDepositor(depositorETHGain);
+        _sendCollateralGainToDepositor(depositorCollateralGain);
     }
 
-    /* withdrawETHGainToTrove:
-    * - Transfers the depositor's entire ETH gain from the Stability Pool to the caller's trove
+    /* withdrawCollateralGainToTrove:
+    * - Transfers the depositor's entire collateral gain from the Stability Pool to the caller's trove
     * - Leaves their compounded deposit in the Stability Pool
     * - Updates snapshots for deposit */
-    function withdrawETHGainToTrove(address _upperHint, address _lowerHint) external override {
+    function withdrawCollateralGainToTrove(address _upperHint, address _lowerHint) external override {
         uint initialDeposit = deposits[msg.sender].initialValue;
         _requireUserHasDeposit(initialDeposit);
         _requireUserHasTrove(msg.sender);
-        _requireUserHasETHGain(msg.sender);
+        _requireUserHasCollateralGain(msg.sender);
 
-        uint depositorETHGain = getDepositorETHGain(msg.sender);
+        uint depositorCollateralGain = getDepositorCollateralGain(msg.sender);
 
         uint compoundedLUSDDeposit = getCompoundedLUSDDeposit(msg.sender);
         uint LUSDLoss = initialDeposit.sub(compoundedLUSDDeposit); // Needed only for event log
 
         _updateDepositAndSnapshots(msg.sender, compoundedLUSDDeposit);
 
-        /* Emit events before transferring ETH gain to Trove.
-         This lets the event log make more sense (i.e. so it appears that first the ETH gain is withdrawn
+        /* Emit events before transferring collateral gain to Trove.
+         This lets the event log make more sense (i.e. so it appears that first the collateral gain is withdrawn
         and then it is deposited into the Trove, not the other way around). */
-        emit ETHGainWithdrawn(msg.sender, depositorETHGain, LUSDLoss);
+        emit CollateralGainWithdrawn(msg.sender, depositorCollateralGain, LUSDLoss);
         emit UserDepositChanged(msg.sender, compoundedLUSDDeposit);
 
-        ETH = ETH.sub(depositorETHGain);
-        emit StabilityPoolETHBalanceUpdated(ETH);
-        emit EtherSent(msg.sender, depositorETHGain);
+        collateral = collateral.sub(depositorCollateralGain);
+        emit StabilityPoolCollateralBalanceUpdated(collateral);
+        emit CollateralSent(msg.sender, depositorCollateralGain);
 
-        borrowerOperations.moveETHGainToTrove{ value: depositorETHGain }(msg.sender, _upperHint, _lowerHint);
+        borrowerOperations.moveCollateralGainToTrove{ value: depositorCollateralGain }(msg.sender, _upperHint, _lowerHint);
     }
 
     // --- Liquidation functions ---
 
     /*
     * Cancels out the specified debt against the LUSD contained in the Stability Pool (as far as possible)
-    * and transfers the Trove's ETH collateral from ActivePool to StabilityPool.
+    * and transfers the Trove's collateral from ActivePool to StabilityPool.
     * Only called by liquidation functions in the TroveManager.
     */
     function offset(uint _debtToOffset, uint _collToAdd) external override {
@@ -339,10 +349,10 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint totalLUSD = totalLUSDDeposits; // cached to save an SLOAD
         if (totalLUSD == 0 || _debtToOffset == 0) { return; }
 
-        (uint ETHGainPerUnitStaked,
+        (uint collateralGainPerUnitStaked,
             uint LUSDLossPerUnitStaked) = _computeRewardsPerUnitStaked(_collToAdd, _debtToOffset, totalLUSD);
 
-        _updateRewardSumAndProduct(ETHGainPerUnitStaked, LUSDLossPerUnitStaked);  // updates S and P
+        _updateRewardSumAndProduct(collateralGainPerUnitStaked, LUSDLossPerUnitStaked);  // updates S and P
 
         _moveOffsetCollAndDebt(_collToAdd, _debtToOffset);
     }
@@ -355,10 +365,10 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint _totalLUSDDeposits
     )
         internal
-        returns (uint ETHGainPerUnitStaked, uint LUSDLossPerUnitStaked)
+        returns (uint collateralGainPerUnitStaked, uint LUSDLossPerUnitStaked)
     {
         /*
-        * Compute the LUSD and ETH rewards. Uses a "feedback" error correction, to keep
+        * Compute the LUSD and collateral rewards. Uses a "feedback" error correction, to keep
         * the cumulative error in the P and S state variables low:
         *
         * 1) Form numerators which compensate for the floor division errors that occurred the last time this
@@ -368,7 +378,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         * 4) Store these errors for use in the next correction when this function is called.
         * 5) Note: static analysis tools complain about this "division before multiplication", however, it is intended.
         */
-        uint ETHNumerator = _collToAdd.mul(DECIMAL_PRECISION).add(lastETHError_Offset);
+        uint collateralNumerator = _collToAdd.mul(DECIMAL_PRECISION).add(lastCollateralError_Offset);
 
         assert(_debtToOffset <= _totalLUSDDeposits);
         if (_debtToOffset == _totalLUSDDeposits) {
@@ -384,14 +394,14 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
             lastLUSDLossError_Offset = (LUSDLossPerUnitStaked.mul(_totalLUSDDeposits)).sub(LUSDLossNumerator);
         }
 
-        ETHGainPerUnitStaked = ETHNumerator.div(_totalLUSDDeposits);
-        lastETHError_Offset = ETHNumerator.sub(ETHGainPerUnitStaked.mul(_totalLUSDDeposits));
+        collateralGainPerUnitStaked = collateralNumerator.div(_totalLUSDDeposits);
+        lastCollateralError_Offset = collateralNumerator.sub(collateralGainPerUnitStaked.mul(_totalLUSDDeposits));
 
-        return (ETHGainPerUnitStaked, LUSDLossPerUnitStaked);
+        return (collateralGainPerUnitStaked, LUSDLossPerUnitStaked);
     }
 
     // Update the Stability Pool reward sum S and product P
-    function _updateRewardSumAndProduct(uint _ETHGainPerUnitStaked, uint _LUSDLossPerUnitStaked) internal {
+    function _updateRewardSumAndProduct(uint _collateralGainPerUnitStaked, uint _LUSDLossPerUnitStaked) internal {
         uint currentP = P;
         uint newP;
 
@@ -408,13 +418,13 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
         /*
         * Calculate the new S first, before we update P.
-        * The ETH gain for any given depositor from a liquidation depends on the value of their deposit
+        * The collateral gain for any given depositor from a liquidation depends on the value of their deposit
         * (and the value of totalDeposits) prior to the Stability being depleted by the debt in the liquidation.
         *
-        * Since S corresponds to ETH gain, and P to deposit loss, we update S first.
+        * Since S corresponds to collateral gain, and P to deposit loss, we update S first.
         */
-        uint marginalETHGain = _ETHGainPerUnitStaked.mul(currentP);
-        uint newS = currentS.add(marginalETHGain);
+        uint marginalCollateralGain = _collateralGainPerUnitStaked.mul(currentP);
+        uint newS = currentS.add(marginalCollateralGain);
         epochToScaleToSum[currentEpochCached][currentScaleCached] = newS;
         emit S_Updated(newS, currentEpochCached, currentScaleCached);
 
@@ -451,7 +461,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         // Burn the debt that was successfully offset
         lusdToken.burn(address(this), _debtToOffset);
 
-        activePoolCached.sendETH(address(this), _collToAdd);
+        activePoolCached.sendCollateral(address(this), _collToAdd);
     }
 
     function _decreaseLUSD(uint _amount) internal {
@@ -462,26 +472,26 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
 
     // --- Reward calculator functions for depositor ---
 
-    /* Calculates the ETH gain earned by the deposit since its last snapshots were taken.
+    /* Calculates the collateral gain earned by the deposit since its last snapshots were taken.
     * Given by the formula:  E = d0 * (S - S(0))/P(0)
     * where S(0) and P(0) are the depositor's snapshots of the sum S and product P, respectively.
     * d0 is the last recorded deposit value.
     */
-    function getDepositorETHGain(address _depositor) public view override returns (uint) {
+    function getDepositorCollateralGain(address _depositor) public view override returns (uint) {
         uint initialDeposit = deposits[_depositor].initialValue;
 
         if (initialDeposit == 0) { return 0; }
 
         Snapshots memory snapshots = depositSnapshots[_depositor];
 
-        uint ETHGain = _getETHGainFromSnapshots(initialDeposit, snapshots);
-        return ETHGain;
+        uint collateralGain = _getCollateralGainFromSnapshots(initialDeposit, snapshots);
+        return collateralGain;
     }
 
-    function _getETHGainFromSnapshots(uint initialDeposit, Snapshots memory snapshots) internal view returns (uint) {
+    function _getCollateralGainFromSnapshots(uint initialDeposit, Snapshots memory snapshots) internal view returns (uint) {
         /*
-        * Grab the sum 'S' from the epoch at which the stake was made. The ETH gain may span up to one scale change.
-        * If it does, the second portion of the ETH gain is scaled by 1e9.
+        * Grab the sum 'S' from the epoch at which the stake was made. The collateral gain may span up to one scale change.
+        * If it does, the second portion of the collateral gain is scaled by 1e9.
         * If the gain spans no scale change, the second portion will be 0.
         */
         uint128 epochSnapshot = snapshots.epoch;
@@ -492,9 +502,9 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint firstPortion = epochToScaleToSum[epochSnapshot][scaleSnapshot].sub(S_Snapshot);
         uint secondPortion = epochToScaleToSum[epochSnapshot][scaleSnapshot.add(1)].div(SCALE_FACTOR);
 
-        uint ETHGain = initialDeposit.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(DECIMAL_PRECISION);
+        uint collateralGain = initialDeposit.mul(firstPortion.add(secondPortion)).div(P_Snapshot).div(DECIMAL_PRECISION);
 
-        return ETHGain;
+        return collateralGain;
     }
 
     // --- Compounded deposit ---
@@ -558,7 +568,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         return compoundedStake;
     }
 
-    // --- Sender functions for LUSD deposit, ETH gains ---
+    // --- Sender functions for LUSD deposit, collateral gains ---
 
     // Transfer the LUSD tokens from the user to the Stability Pool's address, and update its recorded LUSD
     function _sendLUSDtoStabilityPool(address _address, uint _amount) internal {
@@ -568,15 +578,19 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         emit StabilityPoolLUSDBalanceUpdated(newTotalLUSDDeposits);
     }
 
-    function _sendETHGainToDepositor(uint _amount) internal {
+    function _sendCollateralGainToDepositor(uint _amount) internal {
         if (_amount == 0) {return;}
-        uint newETH = ETH.sub(_amount);
-        ETH = newETH;
-        emit StabilityPoolETHBalanceUpdated(newETH);
-        emit EtherSent(msg.sender, _amount);
+        uint newCollateral = collateral.sub(_amount);
+        collateral = newCollateral;
+        emit StabilityPoolCollateralBalanceUpdated(newCollateral);
+        emit CollateralSent(msg.sender, _amount);
 
-        (bool success, ) = msg.sender.call{ value: _amount }("");
-        require(success, "StabilityPool: sending ETH failed");
+        if (collateralAddress === address(0)) {
+          (bool success, ) = msg.sender.call{ value: _amount }("");
+        } else {
+          (bool success, ) = IERC20(collateralAddress).safeTransfer(msg.sender, _amount);
+        }
+        require(success, "StabilityPool: sending collateral failed");
     }
 
     // Send LUSD to user and decrease LUSD in Pool
@@ -634,33 +648,24 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         require(_initialDeposit > 0, 'StabilityPool: User must have a non-zero deposit');
     }
 
-     function _requireUserHasNoDeposit(address _address) internal view {
-        uint initialDeposit = deposits[_address].initialValue;
-        require(initialDeposit == 0, 'StabilityPool: User must have no deposit');
-    }
-
     function _requireNonZeroAmount(uint _amount) internal pure {
         require(_amount > 0, 'StabilityPool: Amount must be non-zero');
     }
 
     function _requireUserHasTrove(address _depositor) internal view {
-        require(troveManager.getTroveStatus(_depositor) == 1, "StabilityPool: caller must have an active trove to withdraw ETHGain to");
+        require(troveManager.getTroveStatus(_depositor) == 1, "StabilityPool: caller must have an active trove to withdraw colalteralGain to");
     }
 
-    function _requireUserHasETHGain(address _depositor) internal view {
-        uint ETHGain = getDepositorETHGain(_depositor);
-        require(ETHGain > 0, "StabilityPool: caller must have non-zero ETH Gain");
-    }
-
-    function  _requireValidKickbackRate(uint _kickbackRate) internal pure {
-        require (_kickbackRate <= DECIMAL_PRECISION, "StabilityPool: Kickback rate must be in range [0,1]");
+    function _requireUserHasCollateralGain(address _depositor) internal view {
+        uint collateralGain = getDepositorCollateralGain(_depositor);
+        require(collateralGain > 0, "StabilityPool: caller must have non-zero collateral Gain");
     }
 
     // --- Fallback function ---
 
     receive() external payable {
         _requireCallerIsActivePool();
-        ETH = ETH.add(msg.value);
-        emit StabilityPoolETHBalanceUpdated(ETH);
+        collateral = collateral.add(msg.value);
+        StabilityPoolCollateralBalanceUpdated(collateral);
     }
 }
