@@ -18,7 +18,7 @@ contract EchidnaProxy {
         BorrowerOperations _borrowerOperations,
         StabilityPool _stabilityPool,
         LUSDToken _lusdToken
-    ) public {
+    ) {
         troveManager = _troveManager;
         borrowerOperations = _borrowerOperations;
         stabilityPool = _stabilityPool;

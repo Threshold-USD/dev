@@ -11,7 +11,7 @@ contract TroveManagerScript is CheckContract {
 
     ITroveManager immutable troveManager;
 
-    constructor(ITroveManager _troveManager) public {
+    constructor(ITroveManager _troveManager) {
         checkContract(address(_troveManager));
         troveManager = _troveManager;
     }
@@ -24,7 +24,7 @@ contract TroveManagerScript is CheckContract {
         uint _partialRedemptionHintNICR,
         uint _maxIterations,
         uint _maxFee
-    ) external returns (uint) {
+    ) external {
         troveManager.redeemCollateral(
             _LUSDAmount,
             _firstRedemptionHint,

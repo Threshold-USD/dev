@@ -9,7 +9,7 @@ import "../Interfaces/IPCV.sol";
 contract PCVScript is CheckContract {
     IPCV immutable PCV;
 
-    constructor(address _pcvAddress) public {
+    constructor(address _pcvAddress) {
         checkContract(_pcvAddress);
         PCV = IPCV(_pcvAddress);
     }

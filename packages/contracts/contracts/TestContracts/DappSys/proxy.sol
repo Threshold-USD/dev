@@ -37,7 +37,7 @@ contract DSAuth is DSAuthEvents {
     DSAuthority  public  authority;
     address      public  owner;
 
-    constructor() public {
+    constructor() {
         owner = msg.sender;
         emit LogSetOwner(msg.sender);
     }
@@ -154,7 +154,7 @@ contract DSProxy is DSAuth, DSNote {
     //set new cache
     function setCache(address _cacheAddr)
         public
-        auth        
+        auth
         returns (bool)
     {
         require(_cacheAddr != address(0));        // invalid cache address

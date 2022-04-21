@@ -300,7 +300,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         }
 
         // --- CASE 5: Using Chainlink, Tellor is untrusted ---
-         if (status == Status.usingChainlinkTellorUntrusted) {
+        if (status == Status.usingChainlinkTellorUntrusted) {
             // If Chainlink breaks, now both oracles are untrusted
             if (_chainlinkIsBroken(chainlinkResponse, prevChainlinkResponse)) {
                 _changeStatus(Status.bothOraclesUntrusted);
@@ -329,6 +329,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
             // return Chainlink price (no status change)
             return _storeChainlinkPrice(chainlinkResponse);
         }
+        return lastGoodPrice;
     }
 
     // --- Helper functions ---
