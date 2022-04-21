@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
+import "./Dependencies/IERC20.sol";
 import './Interfaces/IBorrowerOperations.sol';
 import './Interfaces/IStabilityPool.sol';
 import './Interfaces/IBorrowerOperations.sol';
@@ -217,9 +218,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         checkContract(_lusdTokenAddress);
         checkContract(_sortedTrovesAddress);
         checkContract(_priceFeedAddress);
-        if (_collateralAddress !== address(0)) {
-          checkContract(_collateralAddress);
-        }
+        checkContract(_collateralAddress);
 
         borrowerOperations = IBorrowerOperations(_borrowerOperationsAddress);
         troveManager = ITroveManager(_troveManagerAddress);
@@ -579,14 +578,15 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     function _sendCollateralGainToDepositor(uint _amount) internal {
         if (_amount == 0) {return;}
         uint newCollateral = collateral.sub(_amount);
+        bool success = false;
         collateral = newCollateral;
         emit StabilityPoolCollateralBalanceUpdated(newCollateral);
         emit CollateralSent(msg.sender, _amount);
 
-        if (collateralAddress === address(0)) {
-          (bool success, ) = msg.sender.call{ value: _amount }("");
+        if (collateralAddress == address(0)) {
+          (success, ) = msg.sender.call{ value: _amount }("");
         } else {
-          (bool success, ) = IERC20(collateralAddress).safeTransfer(msg.sender, _amount);
+          success = IERC20(collateralAddress).transfer(msg.sender, _amount);
         }
         require(success, "StabilityPool: sending collateral failed");
     }
@@ -658,6 +658,13 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         uint collateralGain = getDepositorCollateralGain(_depositor);
         require(collateralGain > 0, "StabilityPool: caller must have non-zero collateral Gain");
     }
+
+    // When ERC20 token collateral is received this function needs to be called
+    function updateCollateralBalance(uint256 _amount) external override {
+        _requireCallerIsActivePool();
+		    collateral = collateral.add(_amount);
+        emit StabilityPoolCollateralBalanceUpdated(collateral);
+  	}
 
     // --- Fallback function ---
 

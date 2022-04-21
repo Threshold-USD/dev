@@ -56,7 +56,7 @@ contract('BorrowerWrappers', async accounts => {
   const openTrove = async (params) => th.openTrove(contracts, params)
 
   beforeEach(async () => {
-    contracts = await deploymentHelper.deployLiquityCore()
+    contracts = await deploymentHelper.deployLiquityCore(accounts)
     contracts.troveManager = await TroveManagerTester.new()
     contracts = await deploymentHelper.deployLUSDToken(contracts)
     const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat()
@@ -90,13 +90,13 @@ contract('BorrowerWrappers', async accounts => {
 
     // send some ETH to proxy
     await web3.eth.sendTransaction({ from: owner, to: proxyAddress, value: amount })
-    assert.equal(await web3.eth.getBalance(proxyAddress), amount.toString())
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
 
-    const balanceBefore = toBN(await web3.eth.getBalance(alice))
+    const balanceBefore = toBN(await contracts.erc20.balanceOf(alice))
 
     // recover ETH
     await borrowerWrappers.transferETH(alice, amount, { from: alice, gasPrice: 0 })
-    const balanceAfter = toBN(await web3.eth.getBalance(alice))
+    const balanceAfter = toBN(await contracts.erc20.balanceOf(alice))
 
     assert.equal(balanceAfter.sub(balanceBefore), amount.toString())
   })
@@ -107,9 +107,9 @@ contract('BorrowerWrappers', async accounts => {
 
     // send some ETH to proxy
     await web3.eth.sendTransaction({ from: owner, to: proxyAddress, value: amount })
-    assert.equal(await web3.eth.getBalance(proxyAddress), amount.toString())
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
 
-    const balanceBefore = toBN(await web3.eth.getBalance(alice))
+    const balanceBefore = toBN(await contracts.erc20.balanceOf(alice))
 
     // try to recover ETH
     const proxy = borrowerWrappers.getProxyFromUser(alice)
@@ -117,9 +117,9 @@ contract('BorrowerWrappers', async accounts => {
     const calldata = th.getTransactionData(signature, [alice, amount])
     await assertRevert(proxy.methods["execute(address,bytes)"](borrowerWrappers.scriptAddress, calldata, { from: bob }), 'ds-auth-unauthorized')
 
-    assert.equal(await web3.eth.getBalance(proxyAddress), amount.toString())
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
 
-    const balanceAfter = toBN(await web3.eth.getBalance(alice))
+    const balanceAfter = toBN(await contracts.erc20.balanceOf(alice))
     assert.equal(balanceAfter, balanceBefore.toString())
   })
 
@@ -133,7 +133,7 @@ contract('BorrowerWrappers', async accounts => {
     const { lusdAmount, collateral } = await openTrove({ ICR: toBN(dec(15, 17)), extraParams: { from: alice } })
 
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
-    assert.equal(await web3.eth.getBalance(proxyAddress), '0')
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
 
     // skip bootstrapping phase
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_WEEK * 2, web3.currentProvider)
@@ -145,7 +145,7 @@ contract('BorrowerWrappers', async accounts => {
     )
 
     // check everything remain the same
-    assert.equal(await web3.eth.getBalance(proxyAddress), '0')
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(proxyAddress), '0')
     th.assertIsApproximatelyEqual(await lusdToken.balanceOf(proxyAddress), lusdAmount)
     assert.equal(await troveManager.getTroveStatus(proxyAddress), 1)
@@ -159,14 +159,14 @@ contract('BorrowerWrappers', async accounts => {
     await openTrove({ extraLUSDAmount: redeemAmount, ICR: toBN(dec(5, 18)), extraParams: { from: whale } })
 
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
-    assert.equal(await web3.eth.getBalance(proxyAddress), '0')
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
 
     // skip bootstrapping phase
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_WEEK * 2, web3.currentProvider)
 
     // whale redeems 150 LUSD
     await th.redeemCollateral(whale, contracts, redeemAmount)
-    assert.equal(await web3.eth.getBalance(proxyAddress), '0')
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
 
     // surplus: 5 - 150/200
     const price = await priceFeed.getPrice();
@@ -177,7 +177,7 @@ contract('BorrowerWrappers', async accounts => {
     // alice claims collateral and re-opens the trove
     await borrowerWrappers.claimCollateralAndOpenTrove(th._100pct, lusdAmount, alice, alice, { from: alice })
 
-    assert.equal(await web3.eth.getBalance(proxyAddress), '0')
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(proxyAddress), '0')
     th.assertIsApproximatelyEqual(await lusdToken.balanceOf(proxyAddress), lusdAmount.mul(toBN(2)))
     assert.equal(await troveManager.getTroveStatus(proxyAddress), 1)
@@ -191,14 +191,14 @@ contract('BorrowerWrappers', async accounts => {
     await openTrove({ extraLUSDAmount: redeemAmount, ICR: toBN(dec(2, 18)), extraParams: { from: whale } })
 
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
-    assert.equal(await web3.eth.getBalance(proxyAddress), '0')
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
 
     // skip bootstrapping phase
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_WEEK * 2, web3.currentProvider)
 
     // whale redeems 150 LUSD
     await th.redeemCollateral(whale, contracts, redeemAmount)
-    assert.equal(await web3.eth.getBalance(proxyAddress), '0')
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
 
     // surplus: 5 - 150/200
     const price = await priceFeed.getPrice();
@@ -209,7 +209,7 @@ contract('BorrowerWrappers', async accounts => {
     // alice claims collateral and re-opens the trove
     await borrowerWrappers.claimCollateralAndOpenTrove(th._100pct, lusdAmount, alice, alice, { from: alice, value: collateral })
 
-    assert.equal(await web3.eth.getBalance(proxyAddress), '0')
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
     th.assertIsApproximatelyEqual(await collSurplusPool.getCollateral(proxyAddress), '0')
     th.assertIsApproximatelyEqual(await lusdToken.balanceOf(proxyAddress), lusdAmount.mul(toBN(2)))
     assert.equal(await troveManager.getTroveStatus(proxyAddress), 1)
@@ -280,7 +280,7 @@ contract('BorrowerWrappers', async accounts => {
 
     assert.isAtMost(th.getDifference(expectedCompoundedLUSDDeposit_A, compoundedLUSDDeposit_A), 1000)
 
-    const ethBalanceBefore = await web3.eth.getBalance(borrowerOperations.getProxyAddressFromUser(alice))
+    const ethBalanceBefore = await contracts.erc20.balanceOf(borrowerOperations.getProxyAddressFromUser(alice))
     const troveCollBefore = await troveManager.getTroveColl(alice)
     const lusdBalanceBefore = await lusdToken.balanceOf(alice)
     const troveDebtBefore = await troveManager.getTroveDebt(alice)
@@ -298,7 +298,7 @@ contract('BorrowerWrappers', async accounts => {
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
     await borrowerWrappers.claimSPRewardsAndRecycle(th._100pct, alice, alice, { from: alice })
 
-    const ethBalanceAfter = await web3.eth.getBalance(borrowerOperations.getProxyAddressFromUser(alice))
+    const ethBalanceAfter = await contracts.erc20.balanceOf(borrowerOperations.getProxyAddressFromUser(alice))
     const troveCollAfter = await troveManager.getTroveColl(alice)
     const lusdBalanceAfter = await lusdToken.balanceOf(alice)
     const troveDebtAfter = await troveManager.getTroveDebt(alice)
@@ -318,7 +318,7 @@ contract('BorrowerWrappers', async accounts => {
     th.assertIsApproximatelyEqual(depositAfter, depositBefore.sub(expectedLUSDLoss_A).add(netDebtChange))
 
     // Expect Alice has withdrawn all ETH gain
-    const alice_pendingETHGain = await stabilityPool.getDepositorETHGain(alice)
+    const alice_pendingETHGain = await stabilityPool.getDepositorCollateralGain(alice)
     assert.equal(alice_pendingETHGain, 0)
   })
 

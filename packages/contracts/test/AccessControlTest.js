@@ -18,7 +18,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
 
   const [owner, alice, bob, carol] = accounts;
 
-  let coreContracts
+  let contracts
 
   let priceFeed
   let lusdToken
@@ -32,42 +32,40 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   let borrowerOperations
 
   let pcv
-  let lockupContractFactory
 
   before(async () => {
-    coreContracts = await deploymentHelper.deployLiquityCore()
-    coreContracts.troveManager = await TroveManagerTester.new()
-    coreContracts = await deploymentHelper.deployLUSDTokenTester(coreContracts)
+    contracts = await deploymentHelper.deployLiquityCore(accounts)
+    contracts.troveManager = await TroveManagerTester.new()
+    contracts = await deploymentHelper.deployLUSDTokenTester(contracts)
     const LQTYContracts = await deploymentHelper.deployLQTYTesterContractsHardhat()
 
-    priceFeed = coreContracts.priceFeed
-    lusdToken = coreContracts.lusdToken
-    sortedTroves = coreContracts.sortedTroves
-    troveManager = coreContracts.troveManager
-    nameRegistry = coreContracts.nameRegistry
-    activePool = coreContracts.activePool
-    stabilityPool = coreContracts.stabilityPool
-    defaultPool = coreContracts.defaultPool
-    functionCaller = coreContracts.functionCaller
-    borrowerOperations = coreContracts.borrowerOperations
+    priceFeed = contracts.priceFeed
+    lusdToken = contracts.lusdToken
+    sortedTroves = contracts.sortedTroves
+    troveManager = contracts.troveManager
+    nameRegistry = contracts.nameRegistry
+    activePool = contracts.activePool
+    stabilityPool = contracts.stabilityPool
+    defaultPool = contracts.defaultPool
+    functionCaller = contracts.functionCaller
+    borrowerOperations = contracts.borrowerOperations
 
     pcv = LQTYContracts.pcv
-    lockupContractFactory = LQTYContracts.lockupContractFactory
 
-    await deploymentHelper.connectCoreContracts(coreContracts, LQTYContracts)
-    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, coreContracts)
+    await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
+    await deploymentHelper.connectLQTYContractsToCore(LQTYContracts, contracts)
 
     for (account of accounts.slice(0, 10)) {
-      await th.openTrove(coreContracts, { extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: account } })
+      await th.openTrove(contracts, { extraLUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: account } })
     }
 
   })
 
   describe('BorrowerOperations', async accounts => {
-    it("moveETHGainToTrove(): reverts when called by an account that is not StabilityPool", async () => {
+    it("moveCollateralGainToTrove(): reverts when called by an account that is not StabilityPool", async () => {
       // Attempt call from alice
       try {
-        const tx1= await borrowerOperations.moveETHGainToTrove(bob, bob, bob, { from: bob })
+        const tx1= await borrowerOperations.moveCollateralGainToTrove(bob, bob, bob, { from: bob })
       } catch (err) {
          assert.include(err.message, "revert")
         // assert.include(err.message, "BorrowerOps: Caller is not Stability Pool")
@@ -210,11 +208,11 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   })
 
   describe('ActivePool', async accounts => {
-    // sendETH
-    it("sendETH(): reverts when called by an account that is not BO nor TroveM nor SP", async () => {
+    // sendCollateral
+    it("sendCollateral(): reverts when called by an account that is not BO nor TroveM nor SP", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await activePool.sendETH(alice, 100, { from: alice })
+        const txAlice = await activePool.sendCollateral(alice, 100, { from: alice })
 
       } catch (err) {
         assert.include(err.message, "revert")
@@ -260,11 +258,11 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   })
 
   describe('DefaultPool', async accounts => {
-    // sendETHToActivePool
-    it("sendETHToActivePool(): reverts when called by an account that is not TroveManager", async () => {
+    // sendCollateralToActivePool
+    it("sendCollateralToActivePool(): reverts when called by an account that is not TroveManager", async () => {
       // Attempt call from alice
       try {
-        const txAlice = await defaultPool.sendETHToActivePool(100, { from: alice })
+        const txAlice = await defaultPool.sendCollateralToActivePool(100, { from: alice })
 
       } catch (err) {
         assert.include(err.message, "revert")

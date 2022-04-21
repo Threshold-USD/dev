@@ -91,6 +91,9 @@ const deployContracts = async (
     }),
     gasPool: await deployContract(deployer, getContractFactory, "GasPool", {
       ...overrides
+    }),
+    erc20: await deployContract(deployer, getContractFactory, "ERC20Test", {
+      ...overrides
     })
   };
 
@@ -142,7 +145,8 @@ const connectContracts = async (
     priceFeed,
     sortedTroves,
     stabilityPool,
-    gasPool
+    gasPool,
+    erc20
   }: _LiquityContracts,
   deployer: Signer,
   overrides?: Overrides
@@ -187,6 +191,7 @@ const connectContracts = async (
         sortedTroves.address,
         lusdToken.address,
         pcv.address,
+        erc20.address,
         { ...overrides, nonce }
       ),
 
@@ -198,6 +203,7 @@ const connectContracts = async (
         lusdToken.address,
         sortedTroves.address,
         priceFeed.address,
+        erc20.address,
         { ...overrides, nonce }
       ),
 
@@ -207,11 +213,13 @@ const connectContracts = async (
         troveManager.address,
         stabilityPool.address,
         defaultPool.address,
+        collSurplusPool.address,
+        erc20.address,
         { ...overrides, nonce }
       ),
 
     nonce =>
-      defaultPool.setAddresses(troveManager.address, activePool.address, {
+      defaultPool.setAddresses(troveManager.address, activePool.address, erc20.address, {
         ...overrides,
         nonce
       }),
@@ -221,6 +229,7 @@ const connectContracts = async (
         borrowerOperations.address,
         troveManager.address,
         activePool.address,
+        erc20.address,
         { ...overrides, nonce }
       ),
 

@@ -172,14 +172,14 @@ contract("PoolManager - random liquidations/deposits, then check all depositors 
     for (depositor of currentDepositors) {
       const initialDeposit = (await stabilityPool.deposits(depositor))[0]
       const finalDeposit = await stabilityPool.getCompoundedLUSDDeposit(depositor)
-      const ETHGain = await stabilityPool.getDepositorETHGain(depositor)
-      const ETHinSP = (await stabilityPool.getETH()).toString()
+      const ETHGain = await stabilityPool.getDepositorCollateralGain(depositor)
+      const ETHinSP = (await stabilityPool.getCollateralBalance()).toString()
       const LUSDinSP = (await stabilityPool.getTotalLUSDDeposits()).toString()
 
       // Attempt to withdraw
       const withdrawalTx = await stabilityPool.withdrawFromSP(dec(1, 36), { from: depositor })
 
-      const ETHinSPAfter = (await stabilityPool.getETH()).toString()
+      const ETHinSPAfter = (await stabilityPool.getCollateralBalance()).toString()
       const LUSDinSPAfter = (await stabilityPool.getTotalLUSDDeposits()).toString()
       const LUSDBalanceSPAfter = (await lusdToken.balanceOf(stabilityPool.address))
       const depositAfter = await stabilityPool.getCompoundedLUSDDeposit(depositor)
@@ -212,7 +212,7 @@ contract("PoolManager - random liquidations/deposits, then check all depositors 
     })
 
     beforeEach(async () => {
-      contracts = await deploymentHelper.deployLiquityCore()
+      contracts = await deploymentHelper.deployLiquityCore(accounts)
       const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
       stabilityPool = contracts.stabilityPool
@@ -292,12 +292,12 @@ contract("PoolManager - random liquidations/deposits, then check all depositors 
       await skyrocketPriceAndCheckAllTrovesSafe()
 
       const totalLUSDDepositsBeforeWithdrawals = await stabilityPool.getTotalLUSDDeposits()
-      const totalETHRewardsBeforeWithdrawals = await stabilityPool.getETH()
+      const totalETHRewardsBeforeWithdrawals = await stabilityPool.getCollateralBalance()
 
       await attemptWithdrawAllDeposits(currentDepositors)
 
       const totalLUSDDepositsAfterWithdrawals = await stabilityPool.getTotalLUSDDeposits()
-      const totalETHRewardsAfterWithdrawals = await stabilityPool.getETH()
+      const totalETHRewardsAfterWithdrawals = await stabilityPool.getCollateralBalance()
 
       console.log(`Total LUSD deposits before any withdrawals: ${totalLUSDDepositsBeforeWithdrawals}`)
       console.log(`Total ETH rewards before any withdrawals: ${totalETHRewardsBeforeWithdrawals}`)
@@ -364,12 +364,12 @@ contract("PoolManager - random liquidations/deposits, then check all depositors 
       await skyrocketPriceAndCheckAllTrovesSafe()
 
       const totalLUSDDepositsBeforeWithdrawals = await stabilityPool.getTotalLUSDDeposits()
-      const totalETHRewardsBeforeWithdrawals = await stabilityPool.getETH()
+      const totalETHRewardsBeforeWithdrawals = await stabilityPool.getCollateralBalance()
 
       await attemptWithdrawAllDeposits(currentDepositors)
 
       const totalLUSDDepositsAfterWithdrawals = await stabilityPool.getTotalLUSDDeposits()
-      const totalETHRewardsAfterWithdrawals = await stabilityPool.getETH()
+      const totalETHRewardsAfterWithdrawals = await stabilityPool.getCollateralBalance()
 
       console.log(`Total LUSD deposits before any withdrawals: ${totalLUSDDepositsBeforeWithdrawals}`)
       console.log(`Total ETH rewards before any withdrawals: ${totalETHRewardsBeforeWithdrawals}`)
@@ -436,12 +436,12 @@ contract("PoolManager - random liquidations/deposits, then check all depositors 
       await skyrocketPriceAndCheckAllTrovesSafe()
 
       const totalLUSDDepositsBeforeWithdrawals = await stabilityPool.getTotalLUSDDeposits()
-      const totalETHRewardsBeforeWithdrawals = await stabilityPool.getETH()
+      const totalETHRewardsBeforeWithdrawals = await stabilityPool.getCollateralBalance()
 
       await attemptWithdrawAllDeposits(currentDepositors)
 
       const totalLUSDDepositsAfterWithdrawals = await stabilityPool.getTotalLUSDDeposits()
-      const totalETHRewardsAfterWithdrawals = await stabilityPool.getETH()
+      const totalETHRewardsAfterWithdrawals = await stabilityPool.getCollateralBalance()
 
       console.log(`Total LUSD deposits before any withdrawals: ${totalLUSDDepositsBeforeWithdrawals}`)
       console.log(`Total ETH rewards before any withdrawals: ${totalETHRewardsBeforeWithdrawals}`)
@@ -509,12 +509,12 @@ contract("PoolManager - random liquidations/deposits, then check all depositors 
       await skyrocketPriceAndCheckAllTrovesSafe()
 
       const totalLUSDDepositsBeforeWithdrawals = await stabilityPool.getTotalLUSDDeposits()
-      const totalETHRewardsBeforeWithdrawals = await stabilityPool.getETH()
+      const totalETHRewardsBeforeWithdrawals = await stabilityPool.getCollateralBalance()
 
       await attemptWithdrawAllDeposits(currentDepositors)
 
       const totalLUSDDepositsAfterWithdrawals = await stabilityPool.getTotalLUSDDeposits()
-      const totalETHRewardsAfterWithdrawals = await stabilityPool.getETH()
+      const totalETHRewardsAfterWithdrawals = await stabilityPool.getCollateralBalance()
 
       console.log(`Total LUSD deposits before any withdrawals: ${totalLUSDDepositsBeforeWithdrawals}`)
       console.log(`Total ETH rewards before any withdrawals: ${totalETHRewardsBeforeWithdrawals}`)

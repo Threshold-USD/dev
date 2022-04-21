@@ -1,8 +1,10 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
+import "./Dependencies/IERC20.sol";
 import './Interfaces/IDefaultPool.sol';
+import './Interfaces/IActivePool.sol';
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
@@ -38,9 +40,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     {
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
-        if (_collateralAddress !== address(0)) {
-          checkContract(_collateralAddress);
-        }
+        checkContract(_collateralAddress);
 
         troveManagerAddress = _troveManagerAddress;
         activePoolAddress = _activePoolAddress;
@@ -77,13 +77,15 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         emit DefaultPoolCollateralBalanceUpdated(collateral);
         emit CollateralSent(activePool, _amount);
 
-        if (collateralAddress === address(0)) {
-          (bool success, ) = activePool.call{ value: _amount }("");
+        if (collateralAddress == address(0)) {
+            (bool success, ) = activePool.call{ value: _amount }("");
+            require(success, "DefaultPool: sending collateral failed");
         } else {
-          (bool success, ) = IERC20(collateralAddress).safeTransfer(activePool, _amount);
-          // TODO add call to trigger the update in activePool
+            bool success = IERC20(collateralAddress).transfer(activePool, _amount);
+            // TODO add call to trigger the update in activePool
+            require(success, "DefaultPool: sending collateral failed");
+            IActivePool(activePool).updateCollateralBalance(_amount);
         }
-        require(success, "DefaultPool: sending collateral failed");
     }
 
     function increaseLUSDDebt(uint _amount) external override {
@@ -107,6 +109,13 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     function _requireCallerIsTroveManager() internal view {
         require(msg.sender == troveManagerAddress, "DefaultPool: Caller is not the TroveManager");
     }
+
+    // When ERC20 token collateral is received this function needs to be called
+    function updateCollateralBalance(uint256 _amount) external override {
+        _requireCallerIsActivePool();
+		    collateral = collateral.add(_amount);
+        emit DefaultPoolCollateralBalanceUpdated(collateral);
+  	}
 
     // --- Fallback function ---
 

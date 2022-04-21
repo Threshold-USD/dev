@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 /*
  * The Stability Pool holds LUSD tokens deposited by Stability Pool depositors.
@@ -36,6 +36,7 @@ interface IStabilityPool {
     event LUSDTokenAddressChanged(address _newLUSDTokenAddress);
     event SortedTrovesAddressChanged(address _newSortedTrovesAddress);
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
+    event CollateralAddressChanged(address _newCollateralAddress);
 
     event P_Updated(uint _P);
     event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
@@ -60,7 +61,8 @@ interface IStabilityPool {
         address _activePoolAddress,
         address _lusdTokenAddress,
         address _sortedTrovesAddress,
-        address _priceFeedAddress
+        address _priceFeedAddress,
+        address _collateralAddress
     ) external;
 
     /*
@@ -126,6 +128,10 @@ interface IStabilityPool {
      */
     function getCompoundedLUSDDeposit(address _depositor) external view returns (uint);
 
+    /*
+     * Only callable by Active Pool, updates ERC20 tokens recieved
+     */
+    function updateCollateralBalance(uint256 _amount) external;
     /*
      * Fallback function
      * Only callable by Active Pool, it just accounts for ETH received

@@ -69,6 +69,7 @@ class MainnetDeploymentHelper {
     const troveManagerFactory = await this.getFactory("TroveManager")
     const activePoolFactory = await this.getFactory("ActivePool")
     const stabilityPoolFactory = await this.getFactory("StabilityPool")
+    const erc20TestFactory = await this.getFactory("ERC20Test")
     const gasPoolFactory = await this.getFactory("GasPool")
     const defaultPoolFactory = await this.getFactory("DefaultPool")
     const collSurplusPoolFactory = await this.getFactory("CollSurplusPool")
@@ -83,6 +84,7 @@ class MainnetDeploymentHelper {
     const troveManager = await this.loadOrDeploy(troveManagerFactory, 'troveManager', deploymentState)
     const activePool = await this.loadOrDeploy(activePoolFactory, 'activePool', deploymentState)
     const stabilityPool = await this.loadOrDeploy(stabilityPoolFactory, 'stabilityPool', deploymentState)
+    const erc20 = await this.loadOrDeploy(erc20TestFactory, 'erc20', deploymentState)
     const gasPool = await this.loadOrDeploy(gasPoolFactory, 'gasPool', deploymentState)
     const defaultPool = await this.loadOrDeploy(defaultPoolFactory, 'defaultPool', deploymentState)
     const collSurplusPool = await this.loadOrDeploy(collSurplusPoolFactory, 'collSurplusPool', deploymentState)
@@ -110,6 +112,7 @@ class MainnetDeploymentHelper {
       await this.verifyContract('troveManager', deploymentState)
       await this.verifyContract('activePool', deploymentState)
       await this.verifyContract('stabilityPool', deploymentState)
+      await this.verifyContract('erc20', deploymentState)
       await this.verifyContract('gasPool', deploymentState)
       await this.verifyContract('defaultPool', deploymentState)
       await this.verifyContract('collSurplusPool', deploymentState)
@@ -126,6 +129,7 @@ class MainnetDeploymentHelper {
       troveManager,
       activePool,
       stabilityPool,
+      erc20,
       gasPool,
       defaultPool,
       collSurplusPool,
@@ -225,6 +229,7 @@ class MainnetDeploymentHelper {
         contracts.sortedTroves.address,
         contracts.lusdToken.address,
         LQTYContracts.pcv.address,
+        contracts.erc20.address,
 	{gasPrice}
       ))
 
@@ -237,6 +242,7 @@ class MainnetDeploymentHelper {
         contracts.lusdToken.address,
         contracts.sortedTroves.address,
         contracts.priceFeed.address,
+        contracts.erc20.address,
 	{gasPrice}
       ))
 
@@ -246,6 +252,8 @@ class MainnetDeploymentHelper {
         contracts.troveManager.address,
         contracts.stabilityPool.address,
         contracts.defaultPool.address,
+        contracts.collSurplusPool.address,
+        contracts.erc20.address,
 	{gasPrice}
       ))
 
@@ -253,6 +261,7 @@ class MainnetDeploymentHelper {
       await this.sendAndWaitForTransaction(contracts.defaultPool.setAddresses(
         contracts.troveManager.address,
         contracts.activePool.address,
+        contracts.erc20.address,
 	{gasPrice}
       ))
 
@@ -261,6 +270,7 @@ class MainnetDeploymentHelper {
         contracts.borrowerOperations.address,
         contracts.troveManager.address,
         contracts.activePool.address,
+        contracts.erc20.address,
 	{gasPrice}
       ))
 

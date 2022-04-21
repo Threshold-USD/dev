@@ -47,7 +47,7 @@ contract('StabilityPool', async accounts => {
     })
 
     beforeEach(async () => {
-      contracts = await deploymentHelper.deployLiquityCore()
+      contracts = await deploymentHelper.deployLiquityCore(accounts)
       contracts.troveManager = await TroveManagerTester.new()
       contracts.lusdToken = await LUSDToken.new(
         contracts.troveManager.address,
@@ -319,7 +319,7 @@ contract('StabilityPool', async accounts => {
       const txData1 = th.getTransactionData('provideToSP(uint256)', [web3.utils.toHex(dec(150, 18))])
       const tx1 = await nonPayable.forward(stabilityPool.address, txData1)
 
-      const gain_0 = await stabilityPool.getDepositorETHGain(nonPayable.address)
+      const gain_0 = await stabilityPool.getDepositorCollateralGain(nonPayable.address)
       assert.isTrue(gain_0.eq(toBN(0)), 'NonPayable should not have accumulated gains')
 
       // price drops: defaulters' Troves fall below MCR, nonPayable and whale Trove remain active
@@ -329,7 +329,7 @@ contract('StabilityPool', async accounts => {
       await troveManager.liquidate(defaulter_1, { from: owner })
       await troveManager.liquidate(defaulter_2, { from: owner })
 
-      const gain_1 = await stabilityPool.getDepositorETHGain(nonPayable.address)
+      const gain_1 = await stabilityPool.getDepositorCollateralGain(nonPayable.address)
       assert.isTrue(gain_1.gt(toBN(0)), 'NonPayable should have some accumulated gains')
 
       // NonPayable tries to make deposit #2: 100LUSD (which also attempts to withdraw ETH gain)
@@ -369,13 +369,13 @@ contract('StabilityPool', async accounts => {
       const bob_LUSDDeposit_Before = (await stabilityPool.getCompoundedLUSDDeposit(bob)).toString()
       const carol_LUSDDeposit_Before = (await stabilityPool.getCompoundedLUSDDeposit(carol)).toString()
 
-      const alice_ETHGain_Before = (await stabilityPool.getDepositorETHGain(alice)).toString()
-      const bob_ETHGain_Before = (await stabilityPool.getDepositorETHGain(bob)).toString()
-      const carol_ETHGain_Before = (await stabilityPool.getDepositorETHGain(carol)).toString()
+      const alice_ETHGain_Before = (await stabilityPool.getDepositorCollateralGain(alice)).toString()
+      const bob_ETHGain_Before = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
+      const carol_ETHGain_Before = (await stabilityPool.getDepositorCollateralGain(carol)).toString()
 
       //check non-zero LUSD and ETHGain in the Stability Pool
       const LUSDinSP = await stabilityPool.getTotalLUSDDeposits()
-      const ETHinSP = await stabilityPool.getETH()
+      const ETHinSP = await stabilityPool.getCollateralBalance()
       assert.isTrue(LUSDinSP.gt(mv._zeroBN))
       assert.isTrue(ETHinSP.gt(mv._zeroBN))
 
@@ -387,9 +387,9 @@ contract('StabilityPool', async accounts => {
       const bob_LUSDDeposit_After = (await stabilityPool.getCompoundedLUSDDeposit(bob)).toString()
       const carol_LUSDDeposit_After = (await stabilityPool.getCompoundedLUSDDeposit(carol)).toString()
 
-      const alice_ETHGain_After = (await stabilityPool.getDepositorETHGain(alice)).toString()
-      const bob_ETHGain_After = (await stabilityPool.getDepositorETHGain(bob)).toString()
-      const carol_ETHGain_After = (await stabilityPool.getDepositorETHGain(carol)).toString()
+      const alice_ETHGain_After = (await stabilityPool.getDepositorCollateralGain(alice)).toString()
+      const bob_ETHGain_After = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
+      const carol_ETHGain_After = (await stabilityPool.getDepositorCollateralGain(carol)).toString()
 
       // Check compounded deposits and ETH gains for A, B and C have not changed
       assert.equal(alice_LUSDDeposit_Before, alice_LUSDDeposit_After)
@@ -431,8 +431,8 @@ contract('StabilityPool', async accounts => {
 
       const activeDebt_Before = (await activePool.getLUSDDebt()).toString()
       const defaultedDebt_Before = (await defaultPool.getLUSDDebt()).toString()
-      const activeColl_Before = (await activePool.getETH()).toString()
-      const defaultedColl_Before = (await defaultPool.getETH()).toString()
+      const activeColl_Before = (await activePool.getCollateralBalance()).toString()
+      const defaultedColl_Before = (await defaultPool.getCollateralBalance()).toString()
       const TCR_Before = (await th.getTCR(contracts)).toString()
 
       // D makes an SP deposit
@@ -441,8 +441,8 @@ contract('StabilityPool', async accounts => {
 
       const activeDebt_After = (await activePool.getLUSDDebt()).toString()
       const defaultedDebt_After = (await defaultPool.getLUSDDebt()).toString()
-      const activeColl_After = (await activePool.getETH()).toString()
-      const defaultedColl_After = (await defaultPool.getETH()).toString()
+      const activeColl_After = (await activePool.getCollateralBalance()).toString()
+      const defaultedColl_After = (await defaultPool.getCollateralBalance()).toString()
       const TCR_After = (await th.getTCR(contracts)).toString()
 
       // Check total system debt, collateral and TCR have not changed after a Stability deposit is made
@@ -602,10 +602,10 @@ contract('StabilityPool', async accounts => {
       // --- TEST ---
 
       // get current ETH balances
-      const A_ETHBalance_Before = await web3.eth.getBalance(A)
-      const B_ETHBalance_Before = await web3.eth.getBalance(B)
-      const C_ETHBalance_Before = await web3.eth.getBalance(C)
-      const D_ETHBalance_Before = await web3.eth.getBalance(D)
+      const A_ETHBalance_Before = await contracts.erc20.balanceOf(A)
+      const B_ETHBalance_Before = await contracts.erc20.balanceOf(B)
+      const C_ETHBalance_Before = await contracts.erc20.balanceOf(C)
+      const D_ETHBalance_Before = await contracts.erc20.balanceOf(D)
 
       // A, B, C, D provide to SP
       await stabilityPool.provideToSP(dec(100, 18), { from: A, gasPrice: 0 })
@@ -614,10 +614,10 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(400, 18), { from: D, gasPrice: 0 })
 
       // Get  ETH balances after
-      const A_ETHBalance_After = await web3.eth.getBalance(A)
-      const B_ETHBalance_After = await web3.eth.getBalance(B)
-      const C_ETHBalance_After = await web3.eth.getBalance(C)
-      const D_ETHBalance_After = await web3.eth.getBalance(D)
+      const A_ETHBalance_After = await contracts.erc20.balanceOf(A)
+      const B_ETHBalance_After = await contracts.erc20.balanceOf(B)
+      const C_ETHBalance_After = await contracts.erc20.balanceOf(C)
+      const D_ETHBalance_After = await contracts.erc20.balanceOf(D)
 
       // Check ETH balances have not changed
       assert.equal(A_ETHBalance_After, A_ETHBalance_Before)
@@ -670,10 +670,10 @@ contract('StabilityPool', async accounts => {
       // --- TEST ---
 
       // get current ETH balances
-      const A_ETHBalance_Before = await web3.eth.getBalance(A)
-      const B_ETHBalance_Before = await web3.eth.getBalance(B)
-      const C_ETHBalance_Before = await web3.eth.getBalance(C)
-      const D_ETHBalance_Before = await web3.eth.getBalance(D)
+      const A_ETHBalance_Before = await contracts.erc20.balanceOf(A)
+      const B_ETHBalance_Before = await contracts.erc20.balanceOf(B)
+      const C_ETHBalance_Before = await contracts.erc20.balanceOf(C)
+      const D_ETHBalance_Before = await contracts.erc20.balanceOf(D)
 
       // A, B, C, D provide to SP
       await stabilityPool.provideToSP(dec(100, 18), { from: A, gasPrice: 0 })
@@ -682,10 +682,10 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(400, 18), { from: D, gasPrice: 0 })
 
       // Get  ETH balances after
-      const A_ETHBalance_After = await web3.eth.getBalance(A)
-      const B_ETHBalance_After = await web3.eth.getBalance(B)
-      const C_ETHBalance_After = await web3.eth.getBalance(C)
-      const D_ETHBalance_After = await web3.eth.getBalance(D)
+      const A_ETHBalance_After = await contracts.erc20.balanceOf(A)
+      const B_ETHBalance_After = await contracts.erc20.balanceOf(B)
+      const C_ETHBalance_After = await contracts.erc20.balanceOf(C)
+      const D_ETHBalance_After = await contracts.erc20.balanceOf(D)
 
       // Check ETH balances have not changed
       assert.equal(A_ETHBalance_After, A_ETHBalance_Before)
@@ -806,7 +806,7 @@ contract('StabilityPool', async accounts => {
       assert.isAtMost(th.getDifference(newDeposit, expectedNewDeposit_A), 100000)
 
       // Expect Alice has withdrawn all ETH gain
-      const alice_pendingETHGain = await stabilityPool.getDepositorETHGain(alice)
+      const alice_pendingETHGain = await stabilityPool.getDepositorCollateralGain(alice)
       assert.equal(alice_pendingETHGain, 0)
     })
 
@@ -927,28 +927,28 @@ contract('StabilityPool', async accounts => {
 
       // Alice retrieves all of her entitled LUSD:
       await stabilityPool.withdrawFromSP(dec(15000, 18), { from: alice })
-      assert.equal(await stabilityPool.getDepositorETHGain(alice), 0)
+      assert.equal(await stabilityPool.getDepositorCollateralGain(alice), 0)
 
       // Alice makes second deposit
       await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
-      assert.equal(await stabilityPool.getDepositorETHGain(alice), 0)
+      assert.equal(await stabilityPool.getDepositorCollateralGain(alice), 0)
 
-      const ETHinSP_Before = (await stabilityPool.getETH()).toString()
+      const ETHinSP_Before = (await stabilityPool.getCollateralBalance()).toString()
 
       // Alice attempts second withdrawal
       await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice })
-      assert.equal(await stabilityPool.getDepositorETHGain(alice), 0)
+      assert.equal(await stabilityPool.getDepositorCollateralGain(alice), 0)
 
       // Check ETH in pool does not change
-      const ETHinSP_1 = (await stabilityPool.getETH()).toString()
+      const ETHinSP_1 = (await stabilityPool.getCollateralBalance()).toString()
       assert.equal(ETHinSP_Before, ETHinSP_1)
 
       // Third deposit
       await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
-      assert.equal(await stabilityPool.getDepositorETHGain(alice), 0)
+      assert.equal(await stabilityPool.getDepositorCollateralGain(alice), 0)
 
       // Alice attempts third withdrawal (this time, frm SP to Trove)
-      const txPromise_A = stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
+      const txPromise_A = stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
       await th.assertRevert(txPromise_A)
     })
 
@@ -1018,19 +1018,19 @@ contract('StabilityPool', async accounts => {
       const [, liquidatedColl,] = th.getEmittedLiquidationValues(liquidationTx_1)
 
       //Get ActivePool and StabilityPool Ether before retrieval:
-      const active_ETH_Before = await activePool.getETH()
-      const stability_ETH_Before = await stabilityPool.getETH()
+      const active_ETH_Before = await activePool.getCollateralBalance()
+      const stability_ETH_Before = await stabilityPool.getCollateralBalance()
 
       // Expect alice to be entitled to 15000/200000 of the liquidated coll
       const aliceExpectedETHGain = liquidatedColl.mul(toBN(dec(15000, 18))).div(toBN(dec(200000, 18)))
-      const aliceETHGain = await stabilityPool.getDepositorETHGain(alice)
+      const aliceETHGain = await stabilityPool.getDepositorCollateralGain(alice)
       assert.isTrue(aliceExpectedETHGain.eq(aliceETHGain))
 
       // Alice retrieves all of her deposit
       await stabilityPool.withdrawFromSP(dec(15000, 18), { from: alice })
 
-      const active_ETH_After = await activePool.getETH()
-      const stability_ETH_After = await stabilityPool.getETH()
+      const active_ETH_After = await activePool.getCollateralBalance()
+      const stability_ETH_After = await stabilityPool.getCollateralBalance()
 
       const active_ETH_Difference = (active_ETH_Before.sub(active_ETH_After))
       const stability_ETH_Difference = (stability_ETH_Before.sub(stability_ETH_After))
@@ -1153,12 +1153,12 @@ contract('StabilityPool', async accounts => {
       const alice_LUSDDeposit_Before = (await stabilityPool.getCompoundedLUSDDeposit(alice)).toString()
       const bob_LUSDDeposit_Before = (await stabilityPool.getCompoundedLUSDDeposit(bob)).toString()
 
-      const alice_ETHGain_Before = (await stabilityPool.getDepositorETHGain(alice)).toString()
-      const bob_ETHGain_Before = (await stabilityPool.getDepositorETHGain(bob)).toString()
+      const alice_ETHGain_Before = (await stabilityPool.getDepositorCollateralGain(alice)).toString()
+      const bob_ETHGain_Before = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
 
       //check non-zero LUSD and ETHGain in the Stability Pool
       const LUSDinSP = await stabilityPool.getTotalLUSDDeposits()
-      const ETHinSP = await stabilityPool.getETH()
+      const ETHinSP = await stabilityPool.getCollateralBalance()
       assert.isTrue(LUSDinSP.gt(mv._zeroBN))
       assert.isTrue(ETHinSP.gt(mv._zeroBN))
 
@@ -1173,8 +1173,8 @@ contract('StabilityPool', async accounts => {
       const alice_LUSDDeposit_After = (await stabilityPool.getCompoundedLUSDDeposit(alice)).toString()
       const bob_LUSDDeposit_After = (await stabilityPool.getCompoundedLUSDDeposit(bob)).toString()
 
-      const alice_ETHGain_After = (await stabilityPool.getDepositorETHGain(alice)).toString()
-      const bob_ETHGain_After = (await stabilityPool.getDepositorETHGain(bob)).toString()
+      const alice_ETHGain_After = (await stabilityPool.getDepositorCollateralGain(alice)).toString()
+      const bob_ETHGain_After = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
 
       // Check compounded deposits and ETH gains for A and B have not changed
       assert.equal(alice_LUSDDeposit_Before, alice_LUSDDeposit_After)
@@ -1214,8 +1214,8 @@ contract('StabilityPool', async accounts => {
 
       const activeDebt_Before = (await activePool.getLUSDDebt()).toString()
       const defaultedDebt_Before = (await defaultPool.getLUSDDebt()).toString()
-      const activeColl_Before = (await activePool.getETH()).toString()
-      const defaultedColl_Before = (await defaultPool.getETH()).toString()
+      const activeColl_Before = (await activePool.getCollateralBalance()).toString()
+      const defaultedColl_Before = (await defaultPool.getCollateralBalance()).toString()
       const TCR_Before = (await th.getTCR(contracts)).toString()
 
       // Carol withdraws her Stability deposit
@@ -1225,8 +1225,8 @@ contract('StabilityPool', async accounts => {
 
       const activeDebt_After = (await activePool.getLUSDDebt()).toString()
       const defaultedDebt_After = (await defaultPool.getLUSDDebt()).toString()
-      const activeColl_After = (await activePool.getETH()).toString()
-      const defaultedColl_After = (await defaultPool.getETH()).toString()
+      const activeColl_After = (await activePool.getCollateralBalance()).toString()
+      const defaultedColl_After = (await defaultPool.getCollateralBalance()).toString()
       const TCR_After = (await th.getTCR(contracts)).toString()
 
       // Check total system debt, collateral and TCR have not changed after a Stability deposit is made
@@ -1337,17 +1337,17 @@ contract('StabilityPool', async accounts => {
       assert.isTrue(await th.ICRbetween100and110(defaulter_2, troveManager, price))
       assert.isTrue(await sortedTroves.contains(defaulter_2))
 
-      const A_ETHBalBefore = toBN(await web3.eth.getBalance(A))
+      const A_ETHBalBefore = toBN(await contracts.erc20.balanceOf(A))
 
       // Check Alice has gains to withdraw
-      const A_pendingETHGain = await stabilityPool.getDepositorETHGain(A)
+      const A_pendingETHGain = await stabilityPool.getDepositorCollateralGain(A)
       assert.isTrue(A_pendingETHGain.gt(toBN('0')))
 
       // Check withdrawal of 0 succeeds
       const tx = await stabilityPool.withdrawFromSP(0, { from: A, gasPrice: 0 })
       assert.isTrue(tx.receipt.status)
 
-      const A_ETHBalAfter = toBN(await web3.eth.getBalance(A))
+      const A_ETHBalAfter = toBN(await contracts.erc20.balanceOf(A))
 
       // Check A's ETH balances have increased correctly
       assert.isTrue(A_ETHBalAfter.sub(A_ETHBalBefore).eq(A_pendingETHGain))
@@ -1407,12 +1407,12 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(100, 18), { from: dennis })
 
       // Check Dennis has 0 ETHGain
-      const dennis_ETHGain = (await stabilityPool.getDepositorETHGain(dennis)).toString()
+      const dennis_ETHGain = (await stabilityPool.getDepositorCollateralGain(dennis)).toString()
       assert.equal(dennis_ETHGain, '0')
 
-      const dennis_ETHBalance_Before = (web3.eth.getBalance(dennis)).toString()
+      const dennis_ETHBalance_Before = (contracts.erc20.balanceOf(dennis)).toString()
       const dennis_Collateral_Before = ((await troveManager.Troves(dennis))[1]).toString()
-      const ETHinSP_Before = (await stabilityPool.getETH()).toString()
+      const ETHinSP_Before = (await stabilityPool.getCollateralBalance()).toString()
 
       await priceFeed.setPrice(dec(200, 18))
 
@@ -1420,9 +1420,9 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.withdrawFromSP(dec(100, 18), { from: dennis, gasPrice: 0 })
 
       // Check withdrawal does not alter Dennis' ETH balance or his trove's collateral
-      const dennis_ETHBalance_After = (web3.eth.getBalance(dennis)).toString()
+      const dennis_ETHBalance_After = (contracts.erc20.balanceOf(dennis)).toString()
       const dennis_Collateral_After = ((await troveManager.Troves(dennis))[1]).toString()
-      const ETHinSP_After = (await stabilityPool.getETH()).toString()
+      const ETHinSP_After = (await stabilityPool.getCollateralBalance()).toString()
 
       assert.equal(dennis_ETHBalance_Before, dennis_ETHBalance_After)
       assert.equal(dennis_Collateral_Before, dennis_Collateral_After)
@@ -1573,17 +1573,17 @@ contract('StabilityPool', async accounts => {
       const bob_LUSD_Balance_Before = await lusdToken.balanceOf(bob)
       const carol_LUSD_Balance_Before = await lusdToken.balanceOf(carol)
 
-      const alice_ETH_Balance_Before = web3.utils.toBN(await web3.eth.getBalance(alice))
-      const bob_ETH_Balance_Before = web3.utils.toBN(await web3.eth.getBalance(bob))
-      const carol_ETH_Balance_Before = web3.utils.toBN(await web3.eth.getBalance(carol))
+      const alice_ETH_Balance_Before = web3.utils.toBN(await contracts.erc20.balanceOf(alice))
+      const bob_ETH_Balance_Before = web3.utils.toBN(await contracts.erc20.balanceOf(bob))
+      const carol_ETH_Balance_Before = web3.utils.toBN(await contracts.erc20.balanceOf(carol))
 
       const alice_Deposit_Before = await stabilityPool.getCompoundedLUSDDeposit(alice)
       const bob_Deposit_Before = await stabilityPool.getCompoundedLUSDDeposit(bob)
       const carol_Deposit_Before = await stabilityPool.getCompoundedLUSDDeposit(carol)
 
-      const alice_ETHGain_Before = await stabilityPool.getDepositorETHGain(alice)
-      const bob_ETHGain_Before = await stabilityPool.getDepositorETHGain(bob)
-      const carol_ETHGain_Before = await stabilityPool.getDepositorETHGain(carol)
+      const alice_ETHGain_Before = await stabilityPool.getDepositorCollateralGain(alice)
+      const bob_ETHGain_Before = await stabilityPool.getDepositorCollateralGain(bob)
+      const carol_ETHGain_Before = await stabilityPool.getDepositorCollateralGain(carol)
 
       const LUSDinSP_Before = await stabilityPool.getTotalLUSDDeposits()
 
@@ -1617,9 +1617,9 @@ contract('StabilityPool', async accounts => {
       const bob_expectedETHBalance = (bob_ETH_Balance_Before.add(bob_ETHGain_Before)).toString()
       const carol_expectedETHBalance = (carol_ETH_Balance_Before.add(carol_ETHGain_Before)).toString()
 
-      const alice_ETHBalance_After = (await web3.eth.getBalance(alice)).toString()
-      const bob_ETHBalance_After = (await web3.eth.getBalance(bob)).toString()
-      const carol_ETHBalance_After = (await web3.eth.getBalance(carol)).toString()
+      const alice_ETHBalance_After = (await contracts.erc20.balanceOf(alice)).toString()
+      const bob_ETHBalance_After = (await contracts.erc20.balanceOf(bob)).toString()
+      const carol_ETHBalance_After = (await contracts.erc20.balanceOf(carol)).toString()
 
       assert.equal(alice_expectedETHBalance, alice_ETHBalance_After)
       assert.equal(bob_expectedETHBalance, bob_ETHBalance_After)
@@ -1635,11 +1635,11 @@ contract('StabilityPool', async accounts => {
       assert.equal(LUSDinSP_After, expectedLUSDinSP)
 
       // Check ETH in SP has reduced to zero
-      const ETHinSP_After = (await stabilityPool.getETH()).toString()
+      const ETHinSP_After = (await stabilityPool.getCollateralBalance()).toString()
       assert.isAtMost(th.getDifference(ETHinSP_After, '0'), 100000)
     })
 
-    it("getDepositorETHGain(): depositor does not earn further ETH gains from liquidations while their compounded deposit == 0: ", async () => {
+    it("getDepositorCollateralGain(): depositor does not earn further ETH gains from liquidations while their compounded deposit == 0: ", async () => {
       await openTrove({ extraLUSDAmount: toBN(dec(1, 24)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves
@@ -1674,8 +1674,8 @@ contract('StabilityPool', async accounts => {
       assert.equal(bob_Deposit, '0')
 
       // Get ETH gain for A and B
-      const alice_ETHGain_1 = (await stabilityPool.getDepositorETHGain(alice)).toString()
-      const bob_ETHGain_1 = (await stabilityPool.getDepositorETHGain(bob)).toString()
+      const alice_ETHGain_1 = (await stabilityPool.getDepositorCollateralGain(alice)).toString()
+      const bob_ETHGain_1 = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
 
       // Whale deposits 10000 LUSD to Stability Pool
       await stabilityPool.provideToSP(dec(1, 24), { from: whale })
@@ -1685,8 +1685,8 @@ contract('StabilityPool', async accounts => {
       assert.isFalse(await sortedTroves.contains(defaulter_2))
 
       // Check Alice and Bob have not received ETH gain from liquidation 2 while their deposit was 0
-      const alice_ETHGain_2 = (await stabilityPool.getDepositorETHGain(alice)).toString()
-      const bob_ETHGain_2 = (await stabilityPool.getDepositorETHGain(bob)).toString()
+      const alice_ETHGain_2 = (await stabilityPool.getDepositorCollateralGain(alice)).toString()
+      const bob_ETHGain_2 = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
 
       assert.equal(alice_ETHGain_1, alice_ETHGain_2)
       assert.equal(bob_ETHGain_1, bob_ETHGain_2)
@@ -1696,8 +1696,8 @@ contract('StabilityPool', async accounts => {
       assert.isFalse(await sortedTroves.contains(defaulter_3))
 
       // Check Alice and Bob have not received ETH gain from liquidation 3 while their deposit was 0
-      const alice_ETHGain_3 = (await stabilityPool.getDepositorETHGain(alice)).toString()
-      const bob_ETHGain_3 = (await stabilityPool.getDepositorETHGain(bob)).toString()
+      const alice_ETHGain_3 = (await stabilityPool.getDepositorCollateralGain(alice)).toString()
+      const bob_ETHGain_3 = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
 
       assert.equal(alice_ETHGain_1, alice_ETHGain_3)
       assert.equal(bob_ETHGain_1, bob_ETHGain_3)
@@ -1828,9 +1828,9 @@ contract('StabilityPool', async accounts => {
       await th.assertRevert(withdrawalPromise_C, expectedRevertMessage)
     })
 
-    // --- withdrawETHGainToTrove ---
+    // --- withdrawCollateralGainToTrove ---
 
-    it("withdrawETHGainToTrove(): reverts when user has no active deposit", async () => {
+    it("withdrawCollateralGainToTrove(): reverts when user has no active deposit", async () => {
       await openTrove({ extraLUSDAmount: toBN(dec(100000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: alice } })
@@ -1851,14 +1851,14 @@ contract('StabilityPool', async accounts => {
       await troveManager.liquidate(defaulter_1)
       assert.isFalse(await sortedTroves.contains(defaulter_1))
 
-      const txAlice = await stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
+      const txAlice = await stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
       assert.isTrue(txAlice.receipt.status)
 
-      const txPromise_B = stabilityPool.withdrawETHGainToTrove(bob, bob, { from: bob })
+      const txPromise_B = stabilityPool.withdrawCollateralGainToTrove(bob, bob, { from: bob })
       await th.assertRevert(txPromise_B)
     })
 
-    it("withdrawETHGainToTrove(): Applies LUSDLoss to user's deposit, and redirects ETH reward to user's Trove", async () => {
+    it("withdrawCollateralGainToTrove(): Applies LUSDLoss to user's deposit, and redirects ETH reward to user's Trove", async () => {
       // --- SETUP ---
       // Whale deposits 185000 LUSD in StabilityPool
       await openTrove({ extraLUSDAmount: toBN(dec(1000000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
@@ -1885,7 +1885,7 @@ contract('StabilityPool', async accounts => {
       const liquidationTx_1 = await troveManager.liquidate(defaulter_1, { from: owner })
       const [liquidatedDebt, liquidatedColl, ,] = th.getEmittedLiquidationValues(liquidationTx_1)
 
-      const ETHGain_A = await stabilityPool.getDepositorETHGain(alice)
+      const ETHGain_A = await stabilityPool.getDepositorCollateralGain(alice)
       const compoundedDeposit_A = await stabilityPool.getCompoundedLUSDDeposit(alice)
 
       // Alice should receive rewards proportional to her deposit as share of total deposits
@@ -1896,7 +1896,7 @@ contract('StabilityPool', async accounts => {
       assert.isAtMost(th.getDifference(expectedCompoundedDeposit_A, compoundedDeposit_A), 100000)
 
       // Alice sends her ETH Gains to her Trove
-      await stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
+      await stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
 
       // check Alice's LUSDLoss has been applied to her deposit expectedCompoundedDeposit_A
       alice_deposit_afterDefault = await stabilityPool.deposits(alice)
@@ -1911,7 +1911,7 @@ contract('StabilityPool', async accounts => {
       assert.equal(Trove_ETH_Increase, ETHGain_A)
     })
 
-    it("withdrawETHGainToTrove(): reverts if it would leave trove with ICR < MCR", async () => {
+    it("withdrawCollateralGainToTrove(): reverts if it would leave trove with ICR < MCR", async () => {
       // --- SETUP ---
       // Whale deposits 1850 LUSD in StabilityPool
       await openTrove({ extraLUSDAmount: toBN(dec(1000000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
@@ -1938,11 +1938,11 @@ contract('StabilityPool', async accounts => {
       await troveManager.liquidate(defaulter_1, { from: owner })
 
       // Alice attempts to  her ETH Gains to her Trove
-      await assertRevert(stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice }),
+      await assertRevert(stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice }),
       "BorrowerOps: An operation that would result in ICR < MCR is not permitted")
     })
 
-    it("withdrawETHGainToTrove(): Subsequent deposit and withdrawal attempt from same account, with no intermediate liquidations, withdraws zero ETH", async () => {
+    it("withdrawCollateralGainToTrove(): Subsequent deposit and withdrawal attempt from same account, with no intermediate liquidations, withdraws zero ETH", async () => {
       // --- SETUP ---
       // Whale deposits 1850 LUSD in StabilityPool
       await openTrove({ extraLUSDAmount: toBN(dec(1000000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
@@ -1972,18 +1972,18 @@ contract('StabilityPool', async accounts => {
       await priceFeed.setPrice(dec(200, 18));
 
       // Alice sends her ETH Gains to her Trove
-      await stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
+      await stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
 
-      assert.equal(await stabilityPool.getDepositorETHGain(alice), 0)
+      assert.equal(await stabilityPool.getDepositorCollateralGain(alice), 0)
 
-      const ETHinSP_Before = (await stabilityPool.getETH()).toString()
+      const ETHinSP_Before = (await stabilityPool.getCollateralBalance()).toString()
 
       // Alice attempts second withdrawal from SP to Trove - reverts, due to 0 ETH Gain
-      const txPromise_A = stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
+      const txPromise_A = stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
       await th.assertRevert(txPromise_A)
 
       // Check ETH in pool does not change
-      const ETHinSP_1 = (await stabilityPool.getETH()).toString()
+      const ETHinSP_1 = (await stabilityPool.getCollateralBalance()).toString()
       assert.equal(ETHinSP_Before, ETHinSP_1)
 
       await priceFeed.setPrice(dec(200, 18));
@@ -1992,11 +1992,11 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.withdrawFromSP(dec(15000, 18), { from: alice })
 
       // Check ETH in pool does not change
-      const ETHinSP_2 = (await stabilityPool.getETH()).toString()
+      const ETHinSP_2 = (await stabilityPool.getCollateralBalance()).toString()
       assert.equal(ETHinSP_Before, ETHinSP_2)
     })
 
-    it("withdrawETHGainToTrove(): decreases StabilityPool ETH and increases activePool ETH", async () => {
+    it("withdrawCollateralGainToTrove(): decreases StabilityPool ETH and increases activePool ETH", async () => {
       // --- SETUP ---
       // Whale deposits 185000 LUSD in StabilityPool
       await openTrove({ extraLUSDAmount: toBN(dec(1000000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
@@ -2020,21 +2020,21 @@ contract('StabilityPool', async accounts => {
 
       // Expect alice to be entitled to 15000/200000 of the liquidated coll
       const aliceExpectedETHGain = liquidatedColl.mul(toBN(dec(15000, 18))).div(toBN(dec(200000, 18)))
-      const aliceETHGain = await stabilityPool.getDepositorETHGain(alice)
+      const aliceETHGain = await stabilityPool.getDepositorCollateralGain(alice)
       assert.isTrue(aliceExpectedETHGain.eq(aliceETHGain))
 
       // price bounces back
       await priceFeed.setPrice(dec(200, 18));
 
       //check activePool and StabilityPool Ether before retrieval:
-      const active_ETH_Before = await activePool.getETH()
-      const stability_ETH_Before = await stabilityPool.getETH()
+      const active_ETH_Before = await activePool.getCollateralBalance()
+      const stability_ETH_Before = await stabilityPool.getCollateralBalance()
 
       // Alice retrieves redirects ETH gain to her Trove
-      await stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
+      await stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
 
-      const active_ETH_After = await activePool.getETH()
-      const stability_ETH_After = await stabilityPool.getETH()
+      const active_ETH_After = await activePool.getCollateralBalance()
+      const stability_ETH_After = await stabilityPool.getCollateralBalance()
 
       const active_ETH_Difference = (active_ETH_After.sub(active_ETH_Before)) // AP ETH should increase
       const stability_ETH_Difference = (stability_ETH_Before.sub(stability_ETH_After)) // SP ETH should decrease
@@ -2044,7 +2044,7 @@ contract('StabilityPool', async accounts => {
       assert.isAtMost(th.getDifference(stability_ETH_Difference, aliceETHGain), 10000)
     })
 
-    it("withdrawETHGainToTrove(): All depositors are able to withdraw their ETH gain from the SP to their Trove", async () => {
+    it("withdrawCollateralGainToTrove(): All depositors are able to withdraw their ETH gain from the SP to their Trove", async () => {
       // Whale opens trove
       await openTrove({ extraLUSDAmount: toBN(dec(100000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
@@ -2065,21 +2065,21 @@ contract('StabilityPool', async accounts => {
       await priceFeed.setPrice(dec(200, 18));
 
       // All depositors attempt to withdraw
-      const tx1 = await stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
+      const tx1 = await stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
       assert.isTrue(tx1.receipt.status)
-      const tx2 = await stabilityPool.withdrawETHGainToTrove(bob, bob, { from: bob })
+      const tx2 = await stabilityPool.withdrawCollateralGainToTrove(bob, bob, { from: bob })
       assert.isTrue(tx1.receipt.status)
-      const tx3 = await stabilityPool.withdrawETHGainToTrove(carol, carol, { from: carol })
+      const tx3 = await stabilityPool.withdrawCollateralGainToTrove(carol, carol, { from: carol })
       assert.isTrue(tx1.receipt.status)
-      const tx4 = await stabilityPool.withdrawETHGainToTrove(dennis, dennis, { from: dennis })
+      const tx4 = await stabilityPool.withdrawCollateralGainToTrove(dennis, dennis, { from: dennis })
       assert.isTrue(tx1.receipt.status)
-      const tx5 = await stabilityPool.withdrawETHGainToTrove(erin, erin, { from: erin })
+      const tx5 = await stabilityPool.withdrawCollateralGainToTrove(erin, erin, { from: erin })
       assert.isTrue(tx1.receipt.status)
-      const tx6 = await stabilityPool.withdrawETHGainToTrove(flyn, flyn, { from: flyn })
+      const tx6 = await stabilityPool.withdrawCollateralGainToTrove(flyn, flyn, { from: flyn })
       assert.isTrue(tx1.receipt.status)
     })
 
-    it("withdrawETHGainToTrove(): All depositors withdraw, each withdraw their correct ETH gain", async () => {
+    it("withdrawCollateralGainToTrove(): All depositors withdraw, each withdraw their correct ETH gain", async () => {
       // Whale opens trove
       await openTrove({ extraLUSDAmount: toBN(dec(100000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
@@ -2110,32 +2110,32 @@ contract('StabilityPool', async accounts => {
 
       await priceFeed.setPrice(dec(200, 18))
 
-      await stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
+      await stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
       const aliceCollAfter = (await troveManager.Troves(alice))[1]
       assert.isAtMost(th.getDifference(aliceCollAfter.sub(collBefore), expectedCollGain), 10000)
 
-      await stabilityPool.withdrawETHGainToTrove(bob, bob, { from: bob })
+      await stabilityPool.withdrawCollateralGainToTrove(bob, bob, { from: bob })
       const bobCollAfter = (await troveManager.Troves(bob))[1]
       assert.isAtMost(th.getDifference(bobCollAfter.sub(collBefore), expectedCollGain), 10000)
 
-      await stabilityPool.withdrawETHGainToTrove(carol, carol, { from: carol })
+      await stabilityPool.withdrawCollateralGainToTrove(carol, carol, { from: carol })
       const carolCollAfter = (await troveManager.Troves(carol))[1]
       assert.isAtMost(th.getDifference(carolCollAfter.sub(collBefore), expectedCollGain), 10000)
 
-      await stabilityPool.withdrawETHGainToTrove(dennis, dennis, { from: dennis })
+      await stabilityPool.withdrawCollateralGainToTrove(dennis, dennis, { from: dennis })
       const dennisCollAfter = (await troveManager.Troves(dennis))[1]
       assert.isAtMost(th.getDifference(dennisCollAfter.sub(collBefore), expectedCollGain), 10000)
 
-      await stabilityPool.withdrawETHGainToTrove(erin, erin, { from: erin })
+      await stabilityPool.withdrawCollateralGainToTrove(erin, erin, { from: erin })
       const erinCollAfter = (await troveManager.Troves(erin))[1]
       assert.isAtMost(th.getDifference(erinCollAfter.sub(collBefore), expectedCollGain), 10000)
 
-      await stabilityPool.withdrawETHGainToTrove(flyn, flyn, { from: flyn })
+      await stabilityPool.withdrawCollateralGainToTrove(flyn, flyn, { from: flyn })
       const flynCollAfter = (await troveManager.Troves(flyn))[1]
       assert.isAtMost(th.getDifference(flynCollAfter.sub(collBefore), expectedCollGain), 10000)
     })
 
-    it("withdrawETHGainToTrove(): caller can withdraw full deposit and ETH gain to their trove during Recovery Mode", async () => {
+    it("withdrawCollateralGainToTrove(): caller can withdraw full deposit and ETH gain to their trove during Recovery Mode", async () => {
       // --- SETUP ---
 
      // Defaulter opens
@@ -2171,14 +2171,14 @@ contract('StabilityPool', async accounts => {
       await troveManager.liquidate(defaulter_1)
       assert.isFalse(await sortedTroves.contains(defaulter_1))
 
-      const alice_ETHGain_Before = await stabilityPool.getDepositorETHGain(alice)
-      const bob_ETHGain_Before = await stabilityPool.getDepositorETHGain(bob)
-      const carol_ETHGain_Before = await stabilityPool.getDepositorETHGain(carol)
+      const alice_ETHGain_Before = await stabilityPool.getDepositorCollateralGain(alice)
+      const bob_ETHGain_Before = await stabilityPool.getDepositorCollateralGain(bob)
+      const carol_ETHGain_Before = await stabilityPool.getDepositorCollateralGain(carol)
 
       // A, B, C withdraw their full ETH gain from the Stability Pool to their trove
-      await stabilityPool.withdrawETHGainToTrove(alice, alice, { from: alice })
-      await stabilityPool.withdrawETHGainToTrove(bob, bob, { from: bob })
-      await stabilityPool.withdrawETHGainToTrove(carol, carol, { from: carol })
+      await stabilityPool.withdrawCollateralGainToTrove(alice, alice, { from: alice })
+      await stabilityPool.withdrawCollateralGainToTrove(bob, bob, { from: bob })
+      await stabilityPool.withdrawCollateralGainToTrove(carol, carol, { from: carol })
 
       // Check collateral of troves A, B, C has increased by the value of their ETH gain from liquidations, respectively
       const alice_expectedCollateral = (alice_Collateral_Before.add(alice_ETHGain_Before)).toString()
@@ -2194,11 +2194,11 @@ contract('StabilityPool', async accounts => {
       assert.equal(carol_expectedCollateral, carol_Collateral_After)
 
       // Check ETH in SP has reduced to zero
-      const ETHinSP_After = (await stabilityPool.getETH()).toString()
+      const ETHinSP_After = (await stabilityPool.getCollateralBalance()).toString()
       assert.isAtMost(th.getDifference(ETHinSP_After, '0'), 100000)
     })
 
-    it("withdrawETHGainToTrove(): reverts if user has no trove", async () => {
+    it("withdrawCollateralGainToTrove(): reverts if user has no trove", async () => {
       await openTrove({ extraLUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C open troves
@@ -2225,10 +2225,10 @@ contract('StabilityPool', async accounts => {
       await priceFeed.setPrice(dec(200, 18))
 
       // D attempts to withdraw his ETH gain to Trove
-      await th.assertRevert(stabilityPool.withdrawETHGainToTrove(dennis, dennis, { from: dennis }), "caller must have an active trove to withdraw ETHGain to")
+      await th.assertRevert(stabilityPool.withdrawCollateralGainToTrove(dennis, dennis, { from: dennis }), "caller must have an active trove to withdraw ETHGain to")
     })
 
-    it("withdrawETHGainToTrove(): reverts when depositor has no ETH gain", async () => {
+    it("withdrawCollateralGainToTrove(): reverts when depositor has no ETH gain", async () => {
       await openTrove({ extraLUSDAmount: toBN(dec(100000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // Whale transfers LUSD to A, B
@@ -2251,15 +2251,15 @@ contract('StabilityPool', async accounts => {
       await stabilityPool.provideToSP(dec(3000, 18), { from: E })
 
       // Confirm A, B, C have zero ETH gain
-      assert.equal(await stabilityPool.getDepositorETHGain(A), '0')
-      assert.equal(await stabilityPool.getDepositorETHGain(B), '0')
-      assert.equal(await stabilityPool.getDepositorETHGain(C), '0')
+      assert.equal(await stabilityPool.getDepositorCollateralGain(A), '0')
+      assert.equal(await stabilityPool.getDepositorCollateralGain(B), '0')
+      assert.equal(await stabilityPool.getDepositorCollateralGain(C), '0')
 
-      // Check withdrawETHGainToTrove reverts for A, B, C
-      const txPromise_A = stabilityPool.withdrawETHGainToTrove(A, A, { from: A })
-      const txPromise_B = stabilityPool.withdrawETHGainToTrove(B, B, { from: B })
-      const txPromise_C = stabilityPool.withdrawETHGainToTrove(C, C, { from: C })
-      const txPromise_D = stabilityPool.withdrawETHGainToTrove(D, D, { from: D })
+      // Check withdrawCollateralGainToTrove reverts for A, B, C
+      const txPromise_A = stabilityPool.withdrawCollateralGainToTrove(A, A, { from: A })
+      const txPromise_B = stabilityPool.withdrawCollateralGainToTrove(B, B, { from: B })
+      const txPromise_C = stabilityPool.withdrawCollateralGainToTrove(C, C, { from: C })
+      const txPromise_D = stabilityPool.withdrawCollateralGainToTrove(D, D, { from: D })
 
       await th.assertRevert(txPromise_A)
       await th.assertRevert(txPromise_B)

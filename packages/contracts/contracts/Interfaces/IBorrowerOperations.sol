@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 // Common interface for the Trove Manager.
 interface IBorrowerOperations {
@@ -17,6 +17,7 @@ interface IBorrowerOperations {
     event SortedTrovesAddressChanged(address _sortedTrovesAddress);
     event LUSDTokenAddressChanged(address _lusdTokenAddress);
     event PCVAddressChanged(address _pcvAddress);
+    event CollateralAddressChanged(address _newCollateralAddress);
 
     event TroveCreated(address indexed _borrower, uint arrayIndex);
     event TroveUpdated(address indexed _borrower, uint _debt, uint _coll, uint stake, uint8 operation);
@@ -34,14 +35,16 @@ interface IBorrowerOperations {
         address _priceFeedAddress,
         address _sortedTrovesAddress,
         address _lusdTokenAddress,
-        address _pcvAddress
+        address _pcvAddress,
+        address _collateralAddress
+
     ) external;
 
     function openTrove(uint _maxFee, uint _LUSDAmount, address _upperHint, address _lowerHint) external payable;
 
     function addColl(address _upperHint, address _lowerHint) external payable;
 
-    function moveETHGainToTrove(address _user, address _upperHint, address _lowerHint) external payable;
+    function moveCollateralGainToTrove(address _user, address _upperHint, address _lowerHint) external payable;
 
     function withdrawColl(uint _amount, address _upperHint, address _lowerHint) external;
 

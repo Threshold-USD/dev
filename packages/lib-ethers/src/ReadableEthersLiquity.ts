@@ -212,7 +212,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
 
     const [activeCollateral, activeDebt] = await Promise.all(
       [
-        activePool.getETH({ ...overrides }),
+        activePool.getCollateralBalance({ ...overrides }),
         activePool.getLUSDDebt({ ...overrides })
       ].map(getBigNumber => getBigNumber.then(decimalify))
     );
@@ -226,7 +226,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
 
     const [liquidatedCollateral, closedDebt] = await Promise.all(
       [
-        defaultPool.getETH({ ...overrides }),
+        defaultPool.getCollateralBalance({ ...overrides }),
         defaultPool.getLUSDDebt({ ...overrides })
       ].map(getBigNumber => getBigNumber.then(decimalify))
     );
@@ -259,7 +259,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     ] = await Promise.all([
       stabilityPool.deposits(address, { ...overrides }),
       stabilityPool.getCompoundedLUSDDeposit(address, { ...overrides }),
-      stabilityPool.getDepositorETHGain(address, { ...overrides })
+      stabilityPool.getDepositorCollateralGain(address, { ...overrides })
     ]);
 
     return new StabilityDeposit(

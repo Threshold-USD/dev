@@ -20,6 +20,7 @@ const LiquityMathTester = artifacts.require("./LiquityMathTester.sol")
 const BorrowerOperationsTester = artifacts.require("./BorrowerOperationsTester.sol")
 const TroveManagerTester = artifacts.require("./TroveManagerTester.sol")
 const LUSDTokenTester = artifacts.require("./LUSDTokenTester.sol")
+const ERC20Test = artifacts.require("./ERC20Test.sol")
 
 // Proxy scripts
 const BorrowerOperationsScript = artifacts.require('BorrowerOperationsScript')
@@ -48,15 +49,15 @@ const maxBytes32 = '0x' + 'f'.repeat(64)
 
 class DeploymentHelper {
 
-  static async deployLiquityCore() {
+  static async deployLiquityCore(accounts) {
     const cmdLineArgs = process.argv
     const frameworkPath = cmdLineArgs[1]
     // console.log(`Framework used:  ${frameworkPath}`)
 
     if (frameworkPath.includes("hardhat")) {
-      return this.deployLiquityCoreHardhat()
+      return this.deployLiquityCoreHardhat(accounts)
     } else if (frameworkPath.includes("truffle")) {
-      return this.deployLiquityCoreTruffle()
+      return this.deployLiquityCoreTruffle(accounts)
     }
   }
 
@@ -72,12 +73,13 @@ class DeploymentHelper {
     }
   }
 
-  static async deployLiquityCoreHardhat() {
+  static async deployLiquityCoreHardhat(accounts) {
     const priceFeedTestnet = await PriceFeedTestnet.new()
     const sortedTroves = await SortedTroves.new()
     const troveManager = await TroveManager.new()
     const activePool = await ActivePool.new()
     const stabilityPool = await StabilityPool.new()
+    const erc20 = await ERC20Test.new()
     const gasPool = await GasPool.new()
     const defaultPool = await DefaultPool.new()
     const collSurplusPool = await CollSurplusPool.new()
@@ -89,6 +91,7 @@ class DeploymentHelper {
       stabilityPool.address,
       borrowerOperations.address
     )
+
     LUSDToken.setAsDeployed(lusdToken)
     DefaultPool.setAsDeployed(defaultPool)
     PriceFeedTestnet.setAsDeployed(priceFeedTestnet)
@@ -96,11 +99,21 @@ class DeploymentHelper {
     TroveManager.setAsDeployed(troveManager)
     ActivePool.setAsDeployed(activePool)
     StabilityPool.setAsDeployed(stabilityPool)
+    ERC20Test.setAsDeployed(erc20)
     GasPool.setAsDeployed(gasPool)
     CollSurplusPool.setAsDeployed(collSurplusPool)
     FunctionCaller.setAsDeployed(functionCaller)
     BorrowerOperations.setAsDeployed(borrowerOperations)
     HintHelpers.setAsDeployed(hintHelpers)
+
+    let index = 0;
+    for (const account of accounts) {
+      await erc20.mint(account, await web3.eth.getBalance(account))
+      index++;
+
+      if (index >= 50)
+        break;
+    }
 
     const coreContracts = {
       priceFeedTestnet,
@@ -109,20 +122,22 @@ class DeploymentHelper {
       troveManager,
       activePool,
       stabilityPool,
+      erc20,
       gasPool,
       defaultPool,
       collSurplusPool,
       functionCaller,
       borrowerOperations,
-      hintHelpers
+      hintHelpers,
     }
     return coreContracts
   }
 
-  static async deployTesterContractsHardhat() {
+  static async deployTesterContractsHardhat(accounts) {
     const testerContracts = {}
 
     // Contract without testers (yet)
+    testerContracts.erc20 = await ERC20Test.new()
     testerContracts.priceFeedTestnet = await PriceFeedTestnet.new()
     testerContracts.sortedTroves = await SortedTroves.new()
     // Actual tester contracts
@@ -172,6 +187,7 @@ class DeploymentHelper {
     const troveManager = await TroveManager.new()
     const activePool = await ActivePool.new()
     const stabilityPool = await StabilityPool.new()
+    const erc20 = ERC20Test.new()
     const gasPool = await GasPool.new()
     const defaultPool = await DefaultPool.new()
     const collSurplusPool = await CollSurplusPool.new()
@@ -183,6 +199,16 @@ class DeploymentHelper {
       stabilityPool.address,
       borrowerOperations.address
     )
+
+    let index = 0;
+    for (const account of accounts) {
+      await erc20.mint(account, await contracts.erc20.balanceOf(account))
+      index++;
+
+      if (index >= 50)
+        break;
+    }
+
     const coreContracts = {
       priceFeedTestnet,
       lusdToken,
@@ -190,6 +216,7 @@ class DeploymentHelper {
       troveManager,
       activePool,
       stabilityPool,
+      erc20,
       gasPool,
       defaultPool,
       collSurplusPool,
@@ -253,6 +280,7 @@ class DeploymentHelper {
 
     const pcvScript = await PCVScript.new(LQTYContracts.pcv.address)
     LQTYContracts.pcv = new PCVProxy(owner, proxies, pcvScript.address, LQTYContracts.pcv)
+
   }
 
   // Connect contracts to their dependencies
@@ -294,7 +322,8 @@ class DeploymentHelper {
       contracts.priceFeedTestnet.address,
       contracts.sortedTroves.address,
       contracts.lusdToken.address,
-      LQTYContracts.pcv.address
+      LQTYContracts.pcv.address,
+      contracts.erc20.address
     )
 
     // set contracts in the Pools
@@ -304,25 +333,30 @@ class DeploymentHelper {
       contracts.activePool.address,
       contracts.lusdToken.address,
       contracts.sortedTroves.address,
-      contracts.priceFeedTestnet.address
+      contracts.priceFeedTestnet.address,
+      contracts.erc20.address
     )
 
     await contracts.activePool.setAddresses(
       contracts.borrowerOperations.address,
       contracts.troveManager.address,
       contracts.stabilityPool.address,
-      contracts.defaultPool.address
+      contracts.defaultPool.address,
+      contracts.collSurplusPool.address,
+      contracts.erc20.address
     )
 
     await contracts.defaultPool.setAddresses(
       contracts.troveManager.address,
       contracts.activePool.address,
+      contracts.erc20.address
     )
 
     await contracts.collSurplusPool.setAddresses(
       contracts.borrowerOperations.address,
       contracts.troveManager.address,
       contracts.activePool.address,
+      contracts.erc20.address
     )
 
     // set contracts in HintHelpers

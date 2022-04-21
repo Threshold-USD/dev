@@ -22,7 +22,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
   const openTrove = async (params) => th.openTrove(contracts, params)
 
   beforeEach(async () => {
-    contracts = await deploymentHelper.deployLiquityCore()
+    contracts = await deploymentHelper.deployLiquityCore(accounts)
     contracts.troveManager = await TroveManagerTester.new()
     contracts.lusdToken = await LUSDToken.new(
       contracts.troveManager.address,
@@ -111,7 +111,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
         price,
       } = await setup()
 
-      const spEthBefore = await stabilityPool.getETH()
+      const spEthBefore = await stabilityPool.getCollateralBalance()
       const spLusdBefore = await stabilityPool.getTotalLUSDDeposits()
 
       const tx = await troveManager.batchLiquidateTroves([alice, carol])
@@ -124,7 +124,7 @@ contract('TroveManager - in Recovery Mode - back to normal mode in 1 tx', async 
       assert.equal((await troveManager.Troves(alice))[3], '3')
       assert.equal((await troveManager.Troves(carol))[3], '3')
 
-      const spEthAfter = await stabilityPool.getETH()
+      const spEthAfter = await stabilityPool.getCollateralBalance()
       const spLusdAfter = await stabilityPool.getTotalLUSDDeposits()
 
       // liquidate collaterals with the gas compensation fee subtracted

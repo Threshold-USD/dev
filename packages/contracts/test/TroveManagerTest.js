@@ -50,7 +50,7 @@ contract('TroveManager', async accounts => {
   const withdrawLUSD = async (params) => th.withdrawLUSD(contracts, params)
 
   beforeEach(async () => {
-    contracts = await deploymentHelper.deployLiquityCore()
+    contracts = await deploymentHelper.deployLiquityCore(accounts)
     contracts.troveManager = await TroveManagerTester.new()
     contracts.lusdToken = await LUSDTokenTester.new(
       contracts.troveManager.address,
@@ -121,8 +121,8 @@ contract('TroveManager', async accounts => {
     // --- TEST ---
 
     // check ActivePool ETH and LUSD debt before
-    const activePool_ETH_Before = (await activePool.getETH()).toString()
-    const activePool_RawEther_Before = (await web3.eth.getBalance(activePool.address)).toString()
+    const activePool_ETH_Before = (await activePool.getCollateralBalance()).toString()
+    const activePool_RawEther_Before = (await contracts.erc20.balanceOf(activePool.address)).toString()
     const activePool_LUSDDebt_Before = (await activePool.getLUSDDebt()).toString()
 
     assert.equal(activePool_ETH_Before, A_collateral.add(B_collateral))
@@ -140,8 +140,8 @@ contract('TroveManager', async accounts => {
     await troveManager.liquidate(bob, { from: owner });
 
     // check ActivePool ETH and LUSD debt
-    const activePool_ETH_After = (await activePool.getETH()).toString()
-    const activePool_RawEther_After = (await web3.eth.getBalance(activePool.address)).toString()
+    const activePool_ETH_After = (await activePool.getCollateralBalance()).toString()
+    const activePool_RawEther_After = (await contracts.erc20.balanceOf(activePool.address)).toString()
     const activePool_LUSDDebt_After = (await activePool.getLUSDDebt()).toString()
 
     assert.equal(activePool_ETH_After, A_collateral)
@@ -157,8 +157,8 @@ contract('TroveManager', async accounts => {
     // --- TEST ---
 
     // check DefaultPool ETH and LUSD debt before
-    const defaultPool_ETH_Before = (await defaultPool.getETH())
-    const defaultPool_RawEther_Before = (await web3.eth.getBalance(defaultPool.address)).toString()
+    const defaultPool_ETH_Before = (await defaultPool.getCollateralBalance())
+    const defaultPool_RawEther_Before = (await contracts.erc20.balanceOf(defaultPool.address)).toString()
     const defaultPool_LUSDDebt_Before = (await defaultPool.getLUSDDebt()).toString()
 
     assert.equal(defaultPool_ETH_Before, '0')
@@ -175,8 +175,8 @@ contract('TroveManager', async accounts => {
     await troveManager.liquidate(bob, { from: owner });
 
     // check after
-    const defaultPool_ETH_After = (await defaultPool.getETH()).toString()
-    const defaultPool_RawEther_After = (await web3.eth.getBalance(defaultPool.address)).toString()
+    const defaultPool_ETH_After = (await defaultPool.getCollateralBalance()).toString()
+    const defaultPool_RawEther_After = (await contracts.erc20.balanceOf(defaultPool.address)).toString()
     const defaultPool_LUSDDebt_After = (await defaultPool.getLUSDDebt()).toString()
 
     const defaultPool_ETH = th.applyLiquidationFee(B_collateral)
@@ -705,7 +705,7 @@ contract('TroveManager', async accounts => {
     assert.isFalse(await sortedTroves.contains(carol))
     // Check Dennis' SP deposit has absorbed Carol's debt, and he has received her liquidated ETH
     const dennis_Deposit_Before = (await stabilityPool.getCompoundedLUSDDeposit(dennis)).toString()
-    const dennis_ETHGain_Before = (await stabilityPool.getDepositorETHGain(dennis)).toString()
+    const dennis_ETHGain_Before = (await stabilityPool.getDepositorCollateralGain(dennis)).toString()
     assert.isAtMost(th.getDifference(dennis_Deposit_Before, spDeposit.sub(liquidatedDebt)), 1000000)
     assert.isAtMost(th.getDifference(dennis_ETHGain_Before, liquidatedColl), 1000)
 
@@ -723,7 +723,7 @@ contract('TroveManager', async accounts => {
 
     // Check Dennis' SP deposit does not change after liquidation attempt
     const dennis_Deposit_After = (await stabilityPool.getCompoundedLUSDDeposit(dennis)).toString()
-    const dennis_ETHGain_After = (await stabilityPool.getDepositorETHGain(dennis)).toString()
+    const dennis_ETHGain_After = (await stabilityPool.getDepositorCollateralGain(dennis)).toString()
     assert.equal(dennis_Deposit_Before, dennis_Deposit_After)
     assert.equal(dennis_ETHGain_Before, dennis_ETHGain_After)
   })
@@ -750,7 +750,7 @@ contract('TroveManager', async accounts => {
 
     // Check Bob' SP deposit has absorbed Carol's debt, and he has received her liquidated ETH
     const bob_Deposit_Before = (await stabilityPool.getCompoundedLUSDDeposit(bob)).toString()
-    const bob_ETHGain_Before = (await stabilityPool.getDepositorETHGain(bob)).toString()
+    const bob_ETHGain_Before = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
     assert.isAtMost(th.getDifference(bob_Deposit_Before, spDeposit.sub(liquidatedDebt)), 1000000)
     assert.isAtMost(th.getDifference(bob_ETHGain_Before, liquidatedColl), 1000)
 
@@ -765,7 +765,7 @@ contract('TroveManager', async accounts => {
 
     // Check Bob' SP deposit does not change after liquidation attempt
     const bob_Deposit_After = (await stabilityPool.getCompoundedLUSDDeposit(bob)).toString()
-    const bob_ETHGain_After = (await stabilityPool.getDepositorETHGain(bob)).toString()
+    const bob_ETHGain_After = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
     assert.equal(bob_Deposit_Before, bob_Deposit_After)
     assert.equal(bob_ETHGain_Before, bob_ETHGain_After)
   })
@@ -787,7 +787,7 @@ contract('TroveManager', async accounts => {
 
     // Check Bob' SP deposit has absorbed Carol's debt, and he has received her liquidated ETH
     const bob_Deposit_Before = await stabilityPool.getCompoundedLUSDDeposit(bob)
-    const bob_ETHGain_Before = await stabilityPool.getDepositorETHGain(bob)
+    const bob_ETHGain_Before = await stabilityPool.getDepositorCollateralGain(bob)
     assert.isAtMost(th.getDifference(bob_Deposit_Before, B_spDeposit.sub(C_debt)), 1000000)
     assert.isAtMost(th.getDifference(bob_ETHGain_Before, th.applyLiquidationFee(C_collateral)), 1000)
 
@@ -813,7 +813,7 @@ contract('TroveManager', async accounts => {
 
      Check Bob' SP deposit has been reduced to 50 LUSD, and his ETH gain has increased to 1.5 ETH. */
     const alice_Deposit_After = (await stabilityPool.getCompoundedLUSDDeposit(alice)).toString()
-    const alice_ETHGain_After = (await stabilityPool.getDepositorETHGain(alice)).toString()
+    const alice_ETHGain_After = (await stabilityPool.getDepositorCollateralGain(alice)).toString()
 
     const totalDeposits = bob_Deposit_Before.add(A_spDeposit)
 
@@ -821,7 +821,7 @@ contract('TroveManager', async accounts => {
     assert.isAtMost(th.getDifference(alice_ETHGain_After, th.applyLiquidationFee(B_collateral).mul(A_spDeposit).div(totalDeposits)), 1000000)
 
     const bob_Deposit_After = await stabilityPool.getCompoundedLUSDDeposit(bob)
-    const bob_ETHGain_After = await stabilityPool.getDepositorETHGain(bob)
+    const bob_ETHGain_After = await stabilityPool.getDepositorCollateralGain(bob)
 
     assert.isAtMost(th.getDifference(bob_Deposit_After, bob_Deposit_Before.sub(B_debt.mul(bob_Deposit_Before).div(totalDeposits))), 1000000)
     assert.isAtMost(th.getDifference(bob_ETHGain_After, bob_ETHGain_Before.add(th.applyLiquidationFee(B_collateral).mul(bob_Deposit_Before).div(totalDeposits))), 1000000)
@@ -1010,7 +1010,7 @@ contract('TroveManager', async accounts => {
     // Check C's pending coll and debt rewards are <= the coll and debt in the DefaultPool
     const pendingETH_C = await troveManager.getPendingETHReward(C)
     const pendingLUSDDebt_C = await troveManager.getPendingLUSDDebtReward(C)
-    const defaultPoolETH = await defaultPool.getETH()
+    const defaultPoolETH = await defaultPool.getCollateralBalance()
     const defaultPoolLUSDDebt = await defaultPool.getLUSDDebt()
     assert.isTrue(pendingETH_C.lte(defaultPoolETH))
     assert.isTrue(pendingLUSDDebt_C.lte(defaultPoolLUSDDebt))
@@ -1590,9 +1590,9 @@ contract('TroveManager', async accounts => {
     const alice_Deposit_After = await stabilityPool.getCompoundedLUSDDeposit(alice)
     const bob_Deposit_After = await stabilityPool.getCompoundedLUSDDeposit(bob)
 
-    const whale_ETHGain = await stabilityPool.getDepositorETHGain(whale)
-    const alice_ETHGain = await stabilityPool.getDepositorETHGain(alice)
-    const bob_ETHGain = await stabilityPool.getDepositorETHGain(bob)
+    const whale_ETHGain = await stabilityPool.getDepositorCollateralGain(whale)
+    const alice_ETHGain = await stabilityPool.getDepositorCollateralGain(alice)
+    const bob_ETHGain = await stabilityPool.getDepositorCollateralGain(bob)
 
     assert.isAtMost(th.getDifference(whale_Deposit_After, whaleDeposit.sub(liquidatedDebt.mul(whaleDeposit).div(totalDeposits))), 100000)
     assert.isAtMost(th.getDifference(alice_Deposit_After, A_deposit.sub(liquidatedDebt.mul(A_deposit).div(totalDeposits))), 100000)
@@ -1604,7 +1604,7 @@ contract('TroveManager', async accounts => {
 
     // Check total remaining deposits and ETH gain in Stability Pool
     const total_LUSDinSP = (await stabilityPool.getTotalLUSDDeposits()).toString()
-    const total_ETHinSP = (await stabilityPool.getETH()).toString()
+    const total_ETHinSP = (await stabilityPool.getCollateralBalance()).toString()
 
     assert.isAtMost(th.getDifference(total_LUSDinSP, totalDeposits.sub(liquidatedDebt)), 1000)
     assert.isAtMost(th.getDifference(total_ETHinSP, th.applyLiquidationFee(liquidatedColl)), 1000)
@@ -1668,7 +1668,7 @@ contract('TroveManager', async accounts => {
     // Check C's pending coll and debt rewards are <= the coll and debt in the DefaultPool
     const pendingETH_C = await troveManager.getPendingETHReward(C)
     const pendingLUSDDebt_C = await troveManager.getPendingLUSDDebtReward(C)
-    const defaultPoolETH = await defaultPool.getETH()
+    const defaultPoolETH = await defaultPool.getCollateralBalance()
     const defaultPoolLUSDDebt = await defaultPool.getLUSDDebt()
     assert.isTrue(pendingETH_C.lte(defaultPoolETH))
     assert.isTrue(pendingLUSDDebt_C.lte(defaultPoolLUSDDebt))
@@ -2088,7 +2088,7 @@ contract('TroveManager', async accounts => {
     // start Dennis with a high ICR
     await openTrove({ ICR: toBN(dec(100, 18)), extraLUSDAmount: redemptionAmount, extraParams: { from: dennis } })
 
-    const dennis_ETHBalance_Before = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_Before = toBN(await contracts.erc20.balanceOf(dennis))
 
     const dennis_LUSDBalance_Before = await lusdToken.balanceOf(dennis)
 
@@ -2146,7 +2146,7 @@ contract('TroveManager', async accounts => {
     assert.equal(bob_debt_After, '0')
     assert.equal(carol_debt_After, '0')
 
-    const dennis_ETHBalance_After = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_After = toBN(await contracts.erc20.balanceOf(dennis))
     const receivedETH = dennis_ETHBalance_After.sub(dennis_ETHBalance_Before)
 
     const expectedTotalETHDrawn = redemptionAmount.div(toBN(200)) // convert redemptionAmount LUSD to ETH, at ETH:USD price 200
@@ -2168,7 +2168,7 @@ contract('TroveManager', async accounts => {
     // start Dennis with a high ICR
     await openTrove({ ICR: toBN(dec(100, 18)), extraLUSDAmount: redemptionAmount, extraParams: { from: dennis } })
 
-    const dennis_ETHBalance_Before = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_Before = toBN(await contracts.erc20.balanceOf(dennis))
 
     const dennis_LUSDBalance_Before = await lusdToken.balanceOf(dennis)
 
@@ -2226,7 +2226,7 @@ contract('TroveManager', async accounts => {
     assert.equal(bob_debt_After, '0')
     assert.equal(carol_debt_After, '0')
 
-    const dennis_ETHBalance_After = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_After = toBN(await contracts.erc20.balanceOf(dennis))
     const receivedETH = dennis_ETHBalance_After.sub(dennis_ETHBalance_Before)
 
     const expectedTotalETHDrawn = redemptionAmount.div(toBN(200)) // convert redemptionAmount LUSD to ETH, at ETH:USD price 200
@@ -2248,7 +2248,7 @@ contract('TroveManager', async accounts => {
     // start Dennis with a high ICR
     await openTrove({ ICR: toBN(dec(100, 18)), extraLUSDAmount: redemptionAmount, extraParams: { from: dennis } })
 
-    const dennis_ETHBalance_Before = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_Before = toBN(await contracts.erc20.balanceOf(dennis))
 
     const dennis_LUSDBalance_Before = await lusdToken.balanceOf(dennis)
 
@@ -2306,7 +2306,7 @@ contract('TroveManager', async accounts => {
     assert.equal(bob_debt_After, '0')
     assert.equal(carol_debt_After, '0')
 
-    const dennis_ETHBalance_After = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_After = toBN(await contracts.erc20.balanceOf(dennis))
     const receivedETH = dennis_ETHBalance_After.sub(dennis_ETHBalance_Before)
 
     const expectedTotalETHDrawn = redemptionAmount.div(toBN(200)) // convert redemptionAmount LUSD to ETH, at ETH:USD price 200
@@ -2328,7 +2328,7 @@ contract('TroveManager', async accounts => {
     // start Dennis with a high ICR
     await openTrove({ ICR: toBN(dec(100, 18)), extraLUSDAmount: redemptionAmount, extraParams: { from: dennis } })
 
-    const dennis_ETHBalance_Before = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_Before = toBN(await contracts.erc20.balanceOf(dennis))
 
     const dennis_LUSDBalance_Before = await lusdToken.balanceOf(dennis)
 
@@ -2392,7 +2392,7 @@ contract('TroveManager', async accounts => {
     assert.equal(bob_debt_After, '0')
     assert.equal(carol_debt_After, '0')
 
-    const dennis_ETHBalance_After = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_After = toBN(await contracts.erc20.balanceOf(dennis))
     const receivedETH = dennis_ETHBalance_After.sub(dennis_ETHBalance_Before)
 
     const expectedTotalETHDrawn = redemptionAmount.div(toBN(200)) // convert redemptionAmount LUSD to ETH, at ETH:USD price 200
@@ -2575,7 +2575,7 @@ contract('TroveManager', async accounts => {
 
     await openTrove({ ICR: toBN(dec(100, 18)), extraLUSDAmount: redemptionAmount, extraParams: { from: dennis } })
 
-    const dennis_ETHBalance_Before = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_Before = toBN(await contracts.erc20.balanceOf(dennis))
 
     const dennis_LUSDBalance_Before = await lusdToken.balanceOf(dennis)
 
@@ -2649,7 +2649,7 @@ contract('TroveManager', async accounts => {
     // got in the way, he would have needed to redeem 3 LUSD to fully complete his redemption of 20 LUSD.
     // This would have required a different hint, therefore he ended up with a partial redemption.
 
-    const dennis_ETHBalance_After = toBN(await web3.eth.getBalance(dennis))
+    const dennis_ETHBalance_After = toBN(await contracts.erc20.balanceOf(dennis))
     const receivedETH = dennis_ETHBalance_After.sub(dennis_ETHBalance_Before)
 
     // Expect only 17 worth of ETH drawn
@@ -2680,7 +2680,7 @@ contract('TroveManager', async accounts => {
 
     // --- TEST ---
 
-    const carol_ETHBalance_Before = toBN(await web3.eth.getBalance(carol))
+    const carol_ETHBalance_Before = toBN(await contracts.erc20.balanceOf(carol))
 
     // skip bootstrapping phase
     await th.fastForwardTime(timeValues.SECONDS_IN_ONE_WEEK * 2, web3.currentProvider)
@@ -2701,7 +2701,7 @@ contract('TroveManager', async accounts => {
 
     const ETHFee = th.getEmittedRedemptionValues(redemptionTx)[3]
 
-    const carol_ETHBalance_After = toBN(await web3.eth.getBalance(carol))
+    const carol_ETHBalance_After = toBN(await contracts.erc20.balanceOf(carol))
 
     const expectedTotalETHDrawn = toBN(amount).div(toBN(100)) // convert 100 LUSD to ETH at ETH:USD price of 100
     const expectedReceivedETH = expectedTotalETHDrawn.sub(ETHFee)
@@ -2999,13 +2999,13 @@ contract('TroveManager', async accounts => {
     const carol_SPDeposit_before = (await stabilityPool.getCompoundedLUSDDeposit(carol)).toString()
     const dennis_SPDeposit_before = (await stabilityPool.getCompoundedLUSDDeposit(dennis)).toString()
 
-    const bob_ETHGain_before = (await stabilityPool.getDepositorETHGain(bob)).toString()
-    const carol_ETHGain_before = (await stabilityPool.getDepositorETHGain(carol)).toString()
-    const dennis_ETHGain_before = (await stabilityPool.getDepositorETHGain(dennis)).toString()
+    const bob_ETHGain_before = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
+    const carol_ETHGain_before = (await stabilityPool.getDepositorCollateralGain(carol)).toString()
+    const dennis_ETHGain_before = (await stabilityPool.getDepositorCollateralGain(dennis)).toString()
 
     // Check the remaining LUSD and ETH in Stability Pool after liquidation is non-zero
     const LUSDinSP = await stabilityPool.getTotalLUSDDeposits()
-    const ETHinSP = await stabilityPool.getETH()
+    const ETHinSP = await stabilityPool.getCollateralBalance()
     assert.isTrue(LUSDinSP.gte(mv._zeroBN))
     assert.isTrue(ETHinSP.gte(mv._zeroBN))
 
@@ -3029,9 +3029,9 @@ contract('TroveManager', async accounts => {
     const carol_SPDeposit_after = (await stabilityPool.getCompoundedLUSDDeposit(carol)).toString()
     const dennis_SPDeposit_after = (await stabilityPool.getCompoundedLUSDDeposit(dennis)).toString()
 
-    const bob_ETHGain_after = (await stabilityPool.getDepositorETHGain(bob)).toString()
-    const carol_ETHGain_after = (await stabilityPool.getDepositorETHGain(carol)).toString()
-    const dennis_ETHGain_after = (await stabilityPool.getDepositorETHGain(dennis)).toString()
+    const bob_ETHGain_after = (await stabilityPool.getDepositorCollateralGain(bob)).toString()
+    const carol_ETHGain_after = (await stabilityPool.getDepositorCollateralGain(carol)).toString()
+    const dennis_ETHGain_after = (await stabilityPool.getDepositorCollateralGain(dennis)).toString()
 
     // Check B, C, D Stability Pool deposits and ETH gain have not been affected by redemptions from their troves
     assert.equal(bob_SPDeposit_before, bob_SPDeposit_after)
@@ -3064,7 +3064,7 @@ contract('TroveManager', async accounts => {
 
     // Get active debt and coll before redemption
     const activePool_debt_before = await activePool.getLUSDDebt()
-    const activePool_coll_before = await activePool.getETH()
+    const activePool_coll_before = await activePool.getCollateralBalance()
 
     th.assertIsApproximatelyEqual(activePool_debt_before, totalDebt)
     assert.equal(activePool_coll_before.toString(), totalColl)
@@ -3102,7 +3102,7 @@ contract('TroveManager', async accounts => {
     /* Check ActivePool coll reduced by $400 worth of Ether: at ETH:USD price of $200, this should be 2 ETH.
 
     therefore remaining ActivePool ETH should be 198 */
-    const activePool_coll_after = await activePool.getETH()
+    const activePool_coll_after = await activePool.getCollateralBalance()
     // console.log(`activePool_coll_after: ${activePool_coll_after}`)
     assert.equal(activePool_coll_after.toString(), activePool_coll_before.sub(toBN(dec(2, 18))))
 
@@ -3132,7 +3132,7 @@ contract('TroveManager', async accounts => {
 
     // Get active debt and coll before redemption
     const activePool_debt_before = await activePool.getLUSDDebt()
-    const activePool_coll_before = (await activePool.getETH()).toString()
+    const activePool_coll_before = (await activePool.getCollateralBalance()).toString()
 
     th.assertIsApproximatelyEqual(activePool_debt_before, totalDebt)
     assert.equal(activePool_coll_before, totalColl)
@@ -3277,7 +3277,7 @@ contract('TroveManager', async accounts => {
     const _950_LUSD = '950000000000000000000'
 
     // Check Ether in activePool
-    const activeETH_0 = await activePool.getETH()
+    const activeETH_0 = await activePool.getCollateralBalance()
     assert.equal(activeETH_0, totalColl.toString());
 
     let firstRedemptionHint
@@ -3314,7 +3314,7 @@ contract('TroveManager', async accounts => {
     ETH removed = (120/200) = 0.6 ETH
     Total active ETH = 280 - 0.6 = 279.4 ETH */
 
-    const activeETH_1 = await activePool.getETH()
+    const activeETH_1 = await activePool.getCollateralBalance()
     assert.equal(activeETH_1.toString(), activeETH_0.sub(toBN(_120_LUSD).mul(mv._1e18BN).div(price)));
 
     // Flyn redeems 373 LUSD
@@ -3343,7 +3343,7 @@ contract('TroveManager', async accounts => {
     /* 373 LUSD redeemed.  Expect $373 worth of ETH removed. At ETH:USD price of $200,
     ETH removed = (373/200) = 1.865 ETH
     Total active ETH = 279.4 - 1.865 = 277.535 ETH */
-    const activeETH_2 = await activePool.getETH()
+    const activeETH_2 = await activePool.getCollateralBalance()
     assert.equal(activeETH_2.toString(), activeETH_1.sub(toBN(_373_LUSD).mul(mv._1e18BN).div(price)));
 
     // Graham redeems 950 LUSD
@@ -3372,7 +3372,7 @@ contract('TroveManager', async accounts => {
     /* 950 LUSD redeemed.  Expect $950 worth of ETH removed. At ETH:USD price of $200,
     ETH removed = (950/200) = 4.75 ETH
     Total active ETH = 277.535 - 4.75 = 272.785 ETH */
-    const activeETH_3 = (await activePool.getETH()).toString()
+    const activeETH_3 = (await activePool.getCollateralBalance()).toString()
     assert.equal(activeETH_3.toString(), activeETH_2.sub(toBN(_950_LUSD).mul(mv._1e18BN).div(price)));
   })
 
@@ -3591,7 +3591,7 @@ contract('TroveManager', async accounts => {
     assert.equal(await troveManager.baseRate(), '0')
 
     // Check LQTY Staking contract balance before is zero
-    const pcvBalance_Before = await web3.eth.getBalance(pcv.address)
+    const pcvBalance_Before = await contracts.erc20.balanceOf(pcv.address)
     assert.equal(pcvBalance_Before, '0')
 
     const A_balanceBefore = await lusdToken.balanceOf(A)
@@ -3607,7 +3607,7 @@ contract('TroveManager', async accounts => {
     assert.isTrue(baseRate_1.gt(toBN('0')))
 
     // Check LQTY Staking contract balance after is non-zero
-    const pcvBalance_After = toBN(await web3.eth.getBalance(pcv.address))
+    const pcvBalance_After = toBN(await contracts.erc20.balanceOf(pcv.address))
     assert.isTrue(pcvBalance_After.gt(toBN('0')))
   })
 
@@ -3671,7 +3671,7 @@ contract('TroveManager', async accounts => {
     const baseRate_1 = await troveManager.baseRate()
     assert.isTrue(baseRate_1.gt(toBN('0')))
 
-    const pcvBalance_Before = toBN(await web3.eth.getBalance(pcv.address))
+    const pcvBalance_Before = toBN(await contracts.erc20.balanceOf(pcv.address))
 
     // B redeems 10 LUSD
     await th.redeemCollateral(B, contracts, dec(10, 18))
@@ -3679,7 +3679,7 @@ contract('TroveManager', async accounts => {
     // Check B's balance has decreased by 10 LUSD
     assert.equal(await lusdToken.balanceOf(B), B_balanceBefore.sub(toBN(dec(10, 18))).toString())
 
-    const pcvBalance_After = toBN(await web3.eth.getBalance(pcv.address))
+    const pcvBalance_After = toBN(await contracts.erc20.balanceOf(pcv.address))
 
     // check LQTY Staking balance has increased
     assert.isTrue(pcvBalance_After.gt(pcvBalance_Before))
@@ -3737,7 +3737,7 @@ contract('TroveManager', async accounts => {
     const { totalDebt: C_totalDebt } = await openTrove({ ICR: toBN(dec(180, 16)), extraLUSDAmount: dec(100, 18), extraParams: { from: C } })
     const totalDebt = W_totalDebt.add(A_totalDebt).add(B_totalDebt).add(C_totalDebt)
 
-    const A_balanceBefore = toBN(await web3.eth.getBalance(A))
+    const A_balanceBefore = toBN(await contracts.erc20.balanceOf(A))
 
     // Confirm baseRate before redemption is 0
     const baseRate = await troveManager.baseRate()
@@ -3761,7 +3761,7 @@ contract('TroveManager', async accounts => {
     ETHRemainder = 0.045 - 0.001003... = 0.0439961538462
     */
 
-    const A_balanceAfter = toBN(await web3.eth.getBalance(A))
+    const A_balanceAfter = toBN(await contracts.erc20.balanceOf(A))
 
     // check A's ETH balance has increased by 0.045 ETH
     const price = await priceFeed.getPrice()
@@ -3788,9 +3788,9 @@ contract('TroveManager', async accounts => {
     const { netDebt: D_netDebt } = await openTrove({ ICR: toBN(dec(280, 16)), extraLUSDAmount: dec(100, 18), extraParams: { from: D } })
     const redemptionAmount = A_netDebt.add(B_netDebt).add(C_netDebt).add(toBN(dec(10, 18)))
 
-    const A_balanceBefore = toBN(await web3.eth.getBalance(A))
-    const B_balanceBefore = toBN(await web3.eth.getBalance(B))
-    const C_balanceBefore = toBN(await web3.eth.getBalance(C))
+    const A_balanceBefore = toBN(await contracts.erc20.balanceOf(A))
+    const B_balanceBefore = toBN(await contracts.erc20.balanceOf(B))
+    const C_balanceBefore = toBN(await contracts.erc20.balanceOf(C))
 
     // whale redeems 360 LUSD.  Expect this to fully redeem A, B, C, and partially redeem D.
     await th.redeemCollateral(whale, contracts, redemptionAmount)
@@ -3816,10 +3816,10 @@ contract('TroveManager', async accounts => {
     const { netDebt: D_netDebt } = await openTrove({ ICR: toBN(dec(280, 16)), extraLUSDAmount: dec(100, 18), extraParams: { from: D } })
     const redemptionAmount = A_netDebt.add(B_netDebt).add(C_netDebt).add(toBN(dec(10, 18)))
 
-    const A_balanceBefore = toBN(await web3.eth.getBalance(A))
-    const B_balanceBefore = toBN(await web3.eth.getBalance(B))
-    const C_balanceBefore = toBN(await web3.eth.getBalance(C))
-    const D_balanceBefore = toBN(await web3.eth.getBalance(D))
+    const A_balanceBefore = toBN(await contracts.erc20.balanceOf(A))
+    const B_balanceBefore = toBN(await contracts.erc20.balanceOf(B))
+    const C_balanceBefore = toBN(await contracts.erc20.balanceOf(C))
+    const D_balanceBefore = toBN(await contracts.erc20.balanceOf(D))
 
     const A_collBefore = await troveManager.getTroveColl(A)
     const B_collBefore = await troveManager.getTroveColl(B)
@@ -3849,10 +3849,10 @@ contract('TroveManager', async accounts => {
     ETHDrawn from C = 130/200 = 0.65 ETH --> Surplus = (2-0.65) = 1.35
     */
 
-    const A_balanceAfter = toBN(await web3.eth.getBalance(A))
-    const B_balanceAfter = toBN(await web3.eth.getBalance(B))
-    const C_balanceAfter = toBN(await web3.eth.getBalance(C))
-    const D_balanceAfter = toBN(await web3.eth.getBalance(D))
+    const A_balanceAfter = toBN(await contracts.erc20.balanceOf(A))
+    const B_balanceAfter = toBN(await contracts.erc20.balanceOf(B))
+    const C_balanceAfter = toBN(await contracts.erc20.balanceOf(C))
+    const D_balanceAfter = toBN(await contracts.erc20.balanceOf(D))
 
     // Check A, B, C’s trove collateral balance is zero (fully redeemed-from troves)
     const A_collAfter = await troveManager.getTroveColl(A)
@@ -3936,9 +3936,9 @@ contract('TroveManager', async accounts => {
       C_netDebt, C_coll,
     } = await redeemCollateral3Full1Partial()
 
-    const A_balanceBefore = toBN(await web3.eth.getBalance(A))
-    const B_balanceBefore = toBN(await web3.eth.getBalance(B))
-    const C_balanceBefore = toBN(await web3.eth.getBalance(C))
+    const A_balanceBefore = toBN(await contracts.erc20.balanceOf(A))
+    const B_balanceBefore = toBN(await contracts.erc20.balanceOf(B))
+    const C_balanceBefore = toBN(await contracts.erc20.balanceOf(C))
 
     // CollSurplusPool endpoint cannot be called directly
     await assertRevert(collSurplusPool.claimColl(A), 'CollSurplusPool: Caller is not Borrower Operations')
@@ -3947,9 +3947,9 @@ contract('TroveManager', async accounts => {
     await borrowerOperations.claimCollateral({ from: B, gasPrice: 0 })
     await borrowerOperations.claimCollateral({ from: C, gasPrice: 0 })
 
-    const A_balanceAfter = toBN(await web3.eth.getBalance(A))
-    const B_balanceAfter = toBN(await web3.eth.getBalance(B))
-    const C_balanceAfter = toBN(await web3.eth.getBalance(C))
+    const A_balanceAfter = toBN(await contracts.erc20.balanceOf(A))
+    const B_balanceAfter = toBN(await contracts.erc20.balanceOf(B))
+    const C_balanceAfter = toBN(await contracts.erc20.balanceOf(C))
 
     const price = await priceFeed.getPrice()
 
@@ -3982,17 +3982,17 @@ contract('TroveManager', async accounts => {
     assert.isTrue(B_collAfter.eq(B_coll))
     assert.isTrue(C_collAfter.eq(C_coll))
 
-    const A_balanceBefore = toBN(await web3.eth.getBalance(A))
-    const B_balanceBefore = toBN(await web3.eth.getBalance(B))
-    const C_balanceBefore = toBN(await web3.eth.getBalance(C))
+    const A_balanceBefore = toBN(await contracts.erc20.balanceOf(A))
+    const B_balanceBefore = toBN(await contracts.erc20.balanceOf(B))
+    const C_balanceBefore = toBN(await contracts.erc20.balanceOf(C))
 
     await borrowerOperations.claimCollateral({ from: A, gasPrice: 0 })
     await borrowerOperations.claimCollateral({ from: B, gasPrice: 0 })
     await borrowerOperations.claimCollateral({ from: C, gasPrice: 0 })
 
-    const A_balanceAfter = toBN(await web3.eth.getBalance(A))
-    const B_balanceAfter = toBN(await web3.eth.getBalance(B))
-    const C_balanceAfter = toBN(await web3.eth.getBalance(C))
+    const A_balanceAfter = toBN(await contracts.erc20.balanceOf(A))
+    const B_balanceAfter = toBN(await contracts.erc20.balanceOf(B))
+    const C_balanceAfter = toBN(await contracts.erc20.balanceOf(C))
 
     th.assertIsApproximatelyEqual(A_balanceAfter, A_balanceBefore.add(A_surplus))
     th.assertIsApproximatelyEqual(B_balanceAfter, B_balanceBefore.add(B_surplus))

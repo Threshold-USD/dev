@@ -674,7 +674,6 @@ class TestHelper {
     else if (typeof extraLUSDAmount == 'string') extraLUSDAmount = this.toBN(extraLUSDAmount)
     if (!upperHint) upperHint = this.ZERO_ADDRESS
     if (!lowerHint) lowerHint = this.ZERO_ADDRESS
-
     // minimum trove size
     const MIN_DEBT = (
       await this.getNetBorrowingAmount(contracts, await contracts.borrowerOperations.MIN_NET_DEBT())
@@ -692,7 +691,6 @@ class TestHelper {
       extraParams.value = ICR.mul(totalDebt).div(price)
     }
 
-    const tx = await contracts.borrowerOperations.openTrove(maxFeePercentage, lusdAmount, upperHint, lowerHint, extraParams)
     // console.log("maxFeePercentage", maxFeePercentage / 10000000000000000)
     // console.log("MIN_DEBT",               MIN_DEBT / 1000000000000000000)
     // console.log("extraLUSDAmount", extraLUSDAmount / 1000000000000000000)
@@ -701,6 +699,7 @@ class TestHelper {
     // console.log("total Debt: ", totalDebt / 1000000000000000000)
     // console.log("net Debt: ", netDebt / 1000000000000000000)
     // console.log('----------------------------------')
+    const tx = await contracts.borrowerOperations.openTrove(maxFeePercentage, lusdAmount, upperHint, lowerHint, extraParams)
 
     return {
       lusdAmount,
@@ -1061,18 +1060,18 @@ class TestHelper {
     return this.getGasMetrics(gasCostList)
   }
 
-  static async withdrawETHGainToTrove_allAccounts(accounts, contracts) {
+  static async withdrawCollateralGainToTrove_allAccounts(accounts, contracts) {
     const gasCostList = []
     for (const account of accounts) {
 
       let {entireColl, entireDebt } = await this.getEntireCollAndDebt(contracts, account)
       console.log(`entireColl: ${entireColl}`)
       console.log(`entireDebt: ${entireDebt}`)
-      const ETHGain = await contracts.stabilityPool.getDepositorETHGain(account)
+      const ETHGain = await contracts.stabilityPool.getDepositorCollateralGain(account)
       const newColl = entireColl.add(ETHGain)
       const {upperHint, lowerHint} = await this.getBorrowerOpsListHint(contracts, newColl, entireDebt)
 
-      const tx = await contracts.stabilityPool.withdrawETHGainToTrove(upperHint, lowerHint, { from: account })
+      const tx = await contracts.stabilityPool.withdrawCollateralGainToTrove(upperHint, lowerHint, { from: account })
       const gas = this.gasUsed(tx)
       gasCostList.push(gas)
     }
@@ -1122,6 +1121,33 @@ class TestHelper {
     return Number(days) * (60 * 60 * 24)
   }
 
+  static async checkLiquidation(contracts, stabilityPool, troveManager, wallet, liquidator) {
+    const stabilityPoolLUSD = await stabilityPool.getTotalLUSDDeposits()
+    const balance = await stabilityPool.getCollateralBalance()
+    const troveCollateral = (await troveManager.Troves(wallet))[1]
+    assert.isFalse(await this.checkRecoveryMode(contracts))
+    let collateral = {}
+
+    // Liquidate wallet (use 0 gas price to easily check the amount the compensation amount the liquidator receives)
+    collateral.before = await contracts.erc20.balanceOf(liquidator)
+    await troveManager.liquidate(wallet, { from: liquidator, gasPrice: 0 })
+    collateral.after = await contracts.erc20.balanceOf(liquidator)
+
+    // Check liquidator's balance increases by 0.5% of A's coll (1 ETH)
+    let compensation = (collateral.after.sub(collateral.before)).toString()
+    let expectedFees = troveCollateral.div(web3.utils.toBN('200'))
+    assert.equal(compensation, expectedFees)
+
+    // Check SP LUSD has decreased due to the liquidation
+    const LUSDinSP = await stabilityPool.getTotalLUSDDeposits()
+    assert.isTrue(LUSDinSP.lte(stabilityPoolLUSD))
+
+    // Check SP has received the troves liquidated collateral
+    const newBalance = await stabilityPool.getCollateralBalance()
+    assert.equal(newBalance.toString(), balance.add(troveCollateral).sub(expectedFees).toString()) // 1 ETH - 0.5%
+
+    return expectedFees;
+  }
   // --- Assert functions ---
 
   static async assertRevert(txPromise, message = undefined) {

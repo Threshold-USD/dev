@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import "../TroveManager.sol";
 import "../BorrowerOperations.sol";
@@ -71,19 +71,19 @@ contract EchidnaTester {
             address(activePool), address(defaultPool),
             address(stabilityPool), address(gasPool), address(collSurplusPool),
             address(priceFeedTestnet), address(sortedTroves),
-            address(lusdToken), address(0));
+            address(lusdToken), address(0), address(0));
 
         activePool.setAddresses(address(borrowerOperations),
-            address(troveManager), address(stabilityPool), address(defaultPool));
+            address(troveManager), address(stabilityPool), address(defaultPool), address(collSurplusPool), address(0));
 
-        defaultPool.setAddresses(address(troveManager), address(activePool));
+        defaultPool.setAddresses(address(troveManager), address(activePool), address(0));
 
         stabilityPool.setAddresses(address(borrowerOperations),
             address(troveManager), address(activePool), address(lusdToken),
-            address(sortedTroves), address(priceFeedTestnet));
+            address(sortedTroves), address(priceFeedTestnet), address(0));
 
         collSurplusPool.setAddresses(address(borrowerOperations),
-             address(troveManager), address(activePool));
+             address(troveManager), address(activePool), address(0));
 
         sortedTroves.setParams(1e18, address(troveManager), address(borrowerOperations));
 
@@ -361,15 +361,15 @@ contract EchidnaTester {
             return false;
         }
 
-        if (address(activePool).balance != activePool.getETH()) {
+        if (address(activePool).balance != activePool.getCollateralBalance()) {
             return false;
         }
 
-        if (address(defaultPool).balance != defaultPool.getETH()) {
+        if (address(defaultPool).balance != defaultPool.getCollateralBalance()) {
             return false;
         }
 
-        if (address(stabilityPool).balance != stabilityPool.getETH()) {
+        if (address(stabilityPool).balance != stabilityPool.getCollateralBalance()) {
             return false;
         }
 

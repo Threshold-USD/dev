@@ -129,8 +129,8 @@ dataSources:
       eventHandlers:
         - event: UserDepositChanged(indexed address,uint256)
           handler: handleUserDepositChanged
-        - event: ETHGainWithdrawn(indexed address,uint256,uint256)
-          handler: handleETHGainWithdrawn
+        - event: CollateralGainWithdrawn(indexed address,uint256,uint256)
+          handler: handleCollateralGainWithdrawn
   - name: CollSurplusPool
     kind: ethereum/contract
     network: mainnet

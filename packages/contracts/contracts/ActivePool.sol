@@ -1,8 +1,12 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
+import "./Dependencies/IERC20.sol";
 import './Interfaces/IActivePool.sol';
+import './Interfaces/ICollSurplusPool.sol';
+import './Interfaces/IDefaultPool.sol';
+import './Interfaces/IStabilityPool.sol';
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
@@ -23,6 +27,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     address public defaultPoolAddress;
     address public borrowerOperationsAddress;
     address public collateralAddress;
+    address public collSurplusPoolAddress;
     address public stabilityPoolAddress;
     address public troveManagerAddress;
     uint256 internal collateral;  // deposited collateral tracker
@@ -35,6 +40,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         address _troveManagerAddress,
         address _stabilityPoolAddress,
         address _defaultPoolAddress,
+        address _collSurplusPoolAddress,
         address _collateralAddress
     )
         external
@@ -44,21 +50,23 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         checkContract(_troveManagerAddress);
         checkContract(_stabilityPoolAddress);
         checkContract(_defaultPoolAddress);
-        if (_collateralAddress !== address(0)) {
-          checkContract(_collateralAddress);
-        }
+        checkContract(_collSurplusPoolAddress);
+        checkContract(_collateralAddress);
+
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
         stabilityPoolAddress = _stabilityPoolAddress;
         defaultPoolAddress = _defaultPoolAddress;
         collateralAddress = _collateralAddress;
+        collSurplusPoolAddress = _collSurplusPoolAddress;
 
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
         emit TroveManagerAddressChanged(_troveManagerAddress);
         emit StabilityPoolAddressChanged(_stabilityPoolAddress);
         emit DefaultPoolAddressChanged(_defaultPoolAddress);
         emit CollateralAddressChanged(_collateralAddress);
+        emit CollSurplusPoolAddressChanged(_collSurplusPoolAddress);
 
         _renounceOwnership();
     }
@@ -86,13 +94,23 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         emit ActivePoolCollateralBalanceUpdated(collateral);
         emit CollateralSent(_account, _amount);
 
-        if (collateralAddress === address(0)) {
-          (bool success, ) = _account.call{ value: _amount }("");
+        if (collateralAddress == address(0)) {
+            (bool success, ) = _account.call{ value: _amount }("");
+            require(success, "ActivePool: sending collateral failed");
         } else {
-          (bool success, ) = IERC20(collateralAddress).safeTransfer(_account, _amount);
-          // TODO add call to trigger the update
+            bool success = IERC20(collateralAddress).transfer(_account, _amount);
+            require(success, "ActivePool: sending collateral failed");
+
+            if (_account == defaultPoolAddress) {
+                IDefaultPool(_account).updateCollateralBalance(_amount);
+            }
+            if (_account == collSurplusPoolAddress) {
+                ICollSurplusPool(_account).updateCollateralBalance(_amount);
+            }
+            if (_account == stabilityPoolAddress) {
+                IStabilityPool(_account).updateCollateralBalance(_amount);
+            }
         }
-        require(success, "ActivePool: sending collateral failed");
     }
 
     function increaseLUSDDebt(uint _amount) external override {
@@ -131,8 +149,16 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
             "ActivePool: Caller is neither BorrowerOperations nor TroveManager");
     }
 
+    // When ERC20 token collateral is received this function needs to be called
+    function updateCollateralBalance(uint256 _amount) external override {
+        _requireCallerIsBorrowerOperationsOrDefaultPool();
+		    collateral = collateral.add(_amount);
+        emit ActivePoolCollateralBalanceUpdated(collateral);
+  	}
+
     // --- Fallback function ---
 
+    // This executes when the contract recieves ETH
     receive() external payable {
         _requireCallerIsBorrowerOperationsOrDefaultPool();
         collateral = collateral.add(msg.value);

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
 import "../DefaultPool.sol";
 
@@ -12,6 +12,6 @@ contract DefaultPoolTester is DefaultPool {
     }
 
     function unprotectedPayable() external payable {
-        ETH = ETH.add(msg.value);
+        collateral = collateral.add(msg.value);
     }
 }

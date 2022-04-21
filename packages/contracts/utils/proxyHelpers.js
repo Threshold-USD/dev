@@ -293,8 +293,8 @@ class StabilityPoolProxy extends Proxy {
     return this.proxyFunctionWithUser('deposits', user)
   }
 
-  async getDepositorETHGain(user) {
-    return this.proxyFunctionWithUser('getDepositorETHGain', user)
+  async getDepositorCollateralGain(user) {
+    return this.proxyFunctionWithUser('getDepositorCollateralGain', user)
   }
 }
 

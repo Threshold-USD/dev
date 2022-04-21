@@ -7,6 +7,7 @@ import ActivePool from "../../contracts/artifacts/contracts/ActivePool.sol/Activ
 import BorrowerOperations from "../../contracts/artifacts/contracts/BorrowerOperations.sol/BorrowerOperations.json";
 import CollSurplusPool from "../../contracts/artifacts/contracts/CollSurplusPool.sol/CollSurplusPool.json";
 import DefaultPool from "../../contracts/artifacts/contracts/DefaultPool.sol/DefaultPool.json";
+import ERC20Test from "../../contracts/artifacts/contracts/TestContracts/ERC20Test.sol/ERC20Test.json";
 import GasPool from "../../contracts/artifacts/contracts/GasPool.sol/GasPool.json";
 import HintHelpers from "../../contracts/artifacts/contracts/HintHelpers.sol/HintHelpers.json";
 import IERC20 from "../../contracts/artifacts/contracts/Dependencies/IERC20.sol/IERC20.json";
@@ -142,6 +143,7 @@ const contractArtifacts = [
   BorrowerOperations,
   CollSurplusPool,
   DefaultPool,
+  ERC20Test,
   GasPool,
   HintHelpers,
   IERC20,

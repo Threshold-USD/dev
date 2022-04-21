@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.8.10;
+pragma solidity ^0.8.10;
 
+import "./Dependencies/IERC20.sol";
 import "./Interfaces/ICollSurplusPool.sol";
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
@@ -39,9 +40,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         checkContract(_borrowerOperationsAddress);
         checkContract(_troveManagerAddress);
         checkContract(_activePoolAddress);
-        if (_collateralAddress !== address(0)) {
-          checkContract(_collateralAddress);
-        }
+        checkContract(_collateralAddress);
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;
@@ -88,13 +87,13 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         collateral = collateral.sub(claimableColl);
         emit CollateralSent(_account, claimableColl);
 
-        if (collateralAddress === address(0)) {
-          (bool success, ) = _account.call{ value: claimableColl }("");
+        if (collateralAddress == address(0)) {
+            (bool success, ) = _account.call{ value: claimableColl }("");
+            require(success, "CollSurplusPool: sending collateral failed");
         } else {
-          (bool success, ) = IERC20(collateralAddress).safeTransfer(_account, claimableColl);
+            bool success = IERC20(collateralAddress).transfer(_account, claimableColl);
+            require(success, "CollSurplusPool: sending collateral failed");
         }
-
-        require(success, "CollSurplusPool: sending collateral failed");
     }
 
     // --- 'require' functions ---
@@ -116,6 +115,12 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
             msg.sender == activePoolAddress,
             "CollSurplusPool: Caller is not Active Pool");
     }
+
+    // When ERC20 token collateral is received this function needs to be called
+    function updateCollateralBalance(uint256 _amount) external override {
+        _requireCallerIsActivePool();
+		    collateral = collateral.add(_amount);
+  	}
 
     // --- Fallback function ---
 

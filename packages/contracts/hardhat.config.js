@@ -80,8 +80,8 @@ module.exports = {
         apiKey: getSecret("ETHERSCAN_API_KEY")
     },
     mocha: {
-      timeout: 12000000,
-      parallel: true
+        timeout: 12000000,
+        parallel: true
     },
     rpc: {
         host: "localhost",

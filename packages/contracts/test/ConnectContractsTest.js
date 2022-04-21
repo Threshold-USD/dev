@@ -16,7 +16,7 @@ contract('Deployment script - Sets correct contract addresses dependencies after
   let lockupContractFactory
 
   before(async () => {
-    const coreContracts = await deploymentHelper.deployLiquityCore()
+    const coreContracts = await deploymentHelper.deployLiquityCore(accounts)
     const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
     priceFeed = coreContracts.priceFeedTestnet

@@ -337,7 +337,7 @@ contract('Fee arithmetic tests', async accounts => {
   })
 
   beforeEach(async () => {
-    contracts = await deploymentHelper.deployLiquityCore()
+    contracts = await deploymentHelper.deployLiquityCore(accounts)
     const LQTYContracts = await deploymentHelper.deployLQTYContracts()
 
     await deploymentHelper.connectCoreContracts(contracts, LQTYContracts)
