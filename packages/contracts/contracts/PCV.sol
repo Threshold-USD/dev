@@ -29,16 +29,6 @@ contract PCV is IPCV, Ownable, CheckContract, BaseMath {
     address public borrowerOperationsAddress;
     address public activePoolAddress;
 
-    // --- Events ---
-
-    event LUSDTokenAddressSet(address _lusdTokenAddress);
-    event TroveManagerAddressSet(address _troveManager);
-    event BorrowerOperationsAddressSet(address _borrowerOperationsAddress);
-    event ActivePoolAddressSet(address _activePoolAddress);
-
-    event F_ETHUpdated(uint _F_ETH);
-    event F_LUSDUpdated(uint _F_LUSD);
-
     // --- Functions ---
 
     function setAddresses

@@ -9,6 +9,8 @@ import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 
 contract HintHelpers is LiquityBase, Ownable, CheckContract {
+    using SafeMath for uint256;
+
     string constant public NAME = "HintHelpers";
 
     ISortedTroves public sortedTroves;
@@ -60,7 +62,7 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
      */
 
     function getRedemptionHints(
-        uint _LUSDamount, 
+        uint _LUSDamount,
         uint _price,
         uint _maxIterations
     )
@@ -84,7 +86,7 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         firstRedemptionHint = currentTroveuser;
 
         if (_maxIterations == 0) {
-            _maxIterations = uint(-1);
+            _maxIterations = type(uint256).max;
         }
 
         while (currentTroveuser != address(0) && remainingLUSD > 0 && _maxIterations-- > 0) {
@@ -117,13 +119,13 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
         truncatedLUSDamount = _LUSDamount.sub(remainingLUSD);
     }
 
-    /* getApproxHint() - return address of a Trove that is, on average, (length / numTrials) positions away in the 
-    sortedTroves list from the correct insert position of the Trove to be inserted. 
-    
-    Note: The output address is worst-case O(n) positions away from the correct insert position, however, the function 
+    /* getApproxHint() - return address of a Trove that is, on average, (length / numTrials) positions away in the
+    sortedTroves list from the correct insert position of the Trove to be inserted.
+
+    Note: The output address is worst-case O(n) positions away from the correct insert position, however, the function
     is probabilistic. Input can be tuned to guarantee results to a high degree of confidence, e.g:
 
-    Submitting numTrials = k * sqrt(length), with k = 15 makes it very, very likely that the ouput address will 
+    Submitting numTrials = k * sqrt(length), with k = 15 makes it very, very likely that the ouput address will
     be <= sqrt(length) positions away from the correct insert position.
     */
     function getApproxHint(uint _CR, uint _numTrials, uint _inputRandomSeed)

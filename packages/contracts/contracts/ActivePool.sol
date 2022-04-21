@@ -27,13 +27,6 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     uint256 internal ETH;  // deposited ether tracker
     uint256 internal LUSDDebt;
 
-    // --- Events ---
-
-    event BorrowerOperationsAddressChanged(address _newBorrowerOperationsAddress);
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolLUSDDebtUpdated(uint _LUSDDebt);
-    event ActivePoolETHBalanceUpdated(uint _ETH);
-
     // --- Contract setters ---
 
     function setAddresses(
@@ -93,13 +86,13 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     function increaseLUSDDebt(uint _amount) external override {
         _requireCallerIsBOorTroveM();
         LUSDDebt  = LUSDDebt.add(_amount);
-        ActivePoolLUSDDebtUpdated(LUSDDebt);
+        emit ActivePoolLUSDDebtUpdated(LUSDDebt);
     }
 
     function decreaseLUSDDebt(uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
         LUSDDebt = LUSDDebt.sub(_amount);
-        ActivePoolLUSDDebtUpdated(LUSDDebt);
+        emit ActivePoolLUSDDebtUpdated(LUSDDebt);
     }
 
     // --- 'require' functions ---

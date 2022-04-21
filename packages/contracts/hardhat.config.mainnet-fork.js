@@ -25,39 +25,21 @@ module.exports = {
     solidity: {
         compilers: [
             {
-                version: "0.4.23",
+                version: "0.8.10",
                 settings: {
                     optimizer: {
                         enabled: true,
                         runs: 100
                     }
                 }
-            },
-            {
-                version: "0.5.17",
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100
-                    }
-                }
-            },
-            {
-                version: "0.6.11",
-                settings: {
-                    optimizer: {
-                        enabled: true,
-                        runs: 100
-                    }
-                }
-            },
+            }
         ]
     },
     networks: {
         hardhat: {
             accounts: accountsList,
             gas: 10000000,  // tx gas limit
-            blockGasLimit: 12500000, 
+            blockGasLimit: 12500000,
             gasPrice: process.env.GAS_PRICE ? parseInt(process.env.GAS_PRICE) : 20000000000,
             forking: {
                 url: alchemyUrl(),

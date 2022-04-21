@@ -68,7 +68,7 @@ import "./Dependencies/console.sol";
  * So, to track P accurately, we use a scale factor: if a liquidation would cause P to decrease to <1e-9 (and be rounded to 0 by Solidity),
  * we first multiply P by 1e9, and increment a currentScale factor by 1.
  *
- * The added benefit of using 1e9 for the scale factor (rather than 1e18) is that it ensures negligible precision loss close to the 
+ * The added benefit of using 1e9 for the scale factor (rather than 1e18) is that it ensures negligible precision loss close to the
  * scale boundary: when P is at its minimum value of 1e9, the relative precision loss in P due to floor division is only on the
  * order of 1e-9.
  *
@@ -129,6 +129,7 @@ import "./Dependencies/console.sol";
  *
  */
 contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
+    using SafeMath for uint256;
     using LiquitySafeMath128 for uint128;
 
     string constant public NAME = "StabilityPool";
@@ -192,30 +193,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     // Error trackers for the error correction in the offset calculation
     uint public lastETHError_Offset;
     uint public lastLUSDLossError_Offset;
-
-    // --- Events ---
-
-    event StabilityPoolETHBalanceUpdated(uint _newBalance);
-    event StabilityPoolLUSDBalanceUpdated(uint _newBalance);
-
-    event BorrowerOperationsAddressChanged(address _newBorrowerOperationsAddress);
-    event TroveManagerAddressChanged(address _newTroveManagerAddress);
-    event ActivePoolAddressChanged(address _newActivePoolAddress);
-    event DefaultPoolAddressChanged(address _newDefaultPoolAddress);
-    event LUSDTokenAddressChanged(address _newLUSDTokenAddress);
-    event SortedTrovesAddressChanged(address _newSortedTrovesAddress);
-    event PriceFeedAddressChanged(address _newPriceFeedAddress);
-
-    event P_Updated(uint _P);
-    event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
-    event EpochUpdated(uint128 _currentEpoch);
-    event ScaleUpdated(uint128 _currentScale);
-
-    event DepositSnapshotUpdated(address indexed _depositor, uint _P, uint _S);
-    event UserDepositChanged(address indexed _depositor, uint _newDeposit);
-
-    event ETHGainWithdrawn(address indexed _depositor, uint _ETH, uint _LUSDLoss);
-    event EtherSent(address _to, uint _amount);
 
     // --- Contract setters ---
 
@@ -684,6 +661,6 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     receive() external payable {
         _requireCallerIsActivePool();
         ETH = ETH.add(msg.value);
-        StabilityPoolETHBalanceUpdated(ETH);
+        emit StabilityPoolETHBalanceUpdated(ETH);
     }
 }
