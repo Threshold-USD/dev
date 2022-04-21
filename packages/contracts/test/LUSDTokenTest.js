@@ -155,12 +155,12 @@ contract('LUSDToken', async accounts => {
     if (!withProxy) {
       it("approve(): reverts when spender param is address(0)", async () => {
         const txPromise = lusdTokenTester.approve(ZERO_ADDRESS, 100, {from: bob})
-        await assertAssert(txPromise)
+        await assertRevert(txPromise)
       })
 
       it("approve(): reverts when owner param is address(0)", async () => {
         const txPromise = lusdTokenTester.callInternalApprove(ZERO_ADDRESS, alice, dec(1000, 18), {from: bob})
-        await assertAssert(txPromise)
+        await assertRevert(txPromise)
       })
     }
 
@@ -371,7 +371,7 @@ contract('LUSDToken', async accounts => {
           deadline, v, r, s), 'LUSD: invalid signature')
 
         // Check that the zero address fails
-        await assertAssert(lusdTokenTester.permit('0x0000000000000000000000000000000000000000',
+        await assertRevert(lusdTokenTester.permit('0x0000000000000000000000000000000000000000',
                                                   approve.spender, approve.value, deadline, '0x99', r, s))
       })
 
