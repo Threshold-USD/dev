@@ -31,6 +31,19 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "_newCollateralAddress",
+        "type": "address"
+      }
+    ],
+    "name": "CollateralAddressChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "_defaultPoolAddress",
         "type": "address"
       }
@@ -425,10 +438,36 @@
   },
   {
     "inputs": [],
+    "name": "collateralAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "defaultPool",
     "outputs": [
       {
         "internalType": "contract IDefaultPool",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "gasPoolAddress",
+    "outputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }
@@ -525,7 +564,7 @@
         "type": "address"
       }
     ],
-    "name": "moveETHGainToTrove",
+    "name": "moveCollateralGainToTrove",
     "outputs": [],
     "stateMutability": "payable",
     "type": "function"
@@ -684,6 +723,11 @@
         "internalType": "address",
         "name": "_pcvAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_collateralAddress",
+        "type": "address"
       }
     ],
     "name": "setAddresses",
@@ -697,6 +741,19 @@
     "outputs": [
       {
         "internalType": "contract ISortedTroves",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "stabilityPoolAddress",
+    "outputs": [
+      {
+        "internalType": "address",
         "name": "",
         "type": "address"
       }

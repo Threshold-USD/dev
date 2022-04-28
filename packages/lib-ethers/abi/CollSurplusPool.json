@@ -50,6 +50,19 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "_newCollateralAddress",
+        "type": "address"
+      }
+    ],
+    "name": "CollateralAddressChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "_to",
         "type": "address"
       },
@@ -60,7 +73,7 @@
         "type": "uint256"
       }
     ],
-    "name": "EtherSent",
+    "name": "CollateralSent",
     "type": "event"
   },
   {
@@ -166,6 +179,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "collateralAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -186,7 +212,7 @@
   },
   {
     "inputs": [],
-    "name": "getETH",
+    "name": "getCollateralBalance",
     "outputs": [
       {
         "internalType": "uint256",
@@ -239,6 +265,11 @@
         "internalType": "address",
         "name": "_activePoolAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_collateralAddress",
+        "type": "address"
       }
     ],
     "name": "setAddresses",
@@ -257,6 +288,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateCollateralBalance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

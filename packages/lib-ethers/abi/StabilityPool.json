@@ -31,6 +31,63 @@
       {
         "indexed": false,
         "internalType": "address",
+        "name": "_newCollateralAddress",
+        "type": "address"
+      }
+    ],
+    "name": "CollateralAddressChanged",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "_depositor",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_collateral",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_LUSDLoss",
+        "type": "uint256"
+      }
+    ],
+    "name": "CollateralGainWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_to",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "CollateralSent",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
         "name": "_newDefaultPoolAddress",
         "type": "address"
       }
@@ -67,31 +124,6 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": true,
-        "internalType": "address",
-        "name": "_depositor",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_ETH",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_LUSDLoss",
-        "type": "uint256"
-      }
-    ],
-    "name": "ETHGainWithdrawn",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
         "indexed": false,
         "internalType": "uint128",
         "name": "_currentEpoch",
@@ -99,25 +131,6 @@
       }
     ],
     "name": "EpochUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "internalType": "address",
-        "name": "_to",
-        "type": "address"
-      },
-      {
-        "indexed": false,
-        "internalType": "uint256",
-        "name": "_amount",
-        "type": "uint256"
-      }
-    ],
-    "name": "EtherSent",
     "type": "event"
   },
   {
@@ -239,7 +252,7 @@
         "type": "uint256"
       }
     ],
-    "name": "StabilityPoolETHBalanceUpdated",
+    "name": "StabilityPoolCollateralBalanceUpdated",
     "type": "event"
   },
   {
@@ -458,6 +471,19 @@
   },
   {
     "inputs": [],
+    "name": "collateralAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
     "name": "currentEpoch",
     "outputs": [
       {
@@ -573,6 +599,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "getCollateralBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -599,20 +638,7 @@
         "type": "address"
       }
     ],
-    "name": "getDepositorETHGain",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "getETH",
+    "name": "getDepositorCollateralGain",
     "outputs": [
       {
         "internalType": "uint256",
@@ -677,7 +703,7 @@
   },
   {
     "inputs": [],
-    "name": "lastETHError_Offset",
+    "name": "lastCollateralError_Offset",
     "outputs": [
       {
         "internalType": "uint256",
@@ -802,6 +828,11 @@
         "internalType": "address",
         "name": "_priceFeedAddress",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_collateralAddress",
+        "type": "address"
       }
     ],
     "name": "setAddresses",
@@ -838,6 +869,19 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateCollateralBalance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_upperHint",
         "type": "address"
@@ -848,7 +892,7 @@
         "type": "address"
       }
     ],
-    "name": "withdrawETHGainToTrove",
+    "name": "withdrawCollateralGainToTrove",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
