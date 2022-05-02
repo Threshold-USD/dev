@@ -252,9 +252,9 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     // --- External Depositor Functions ---
 
     /*  provideToSP():
-    *
-    * - Sends depositor's accumulated gains (collateral) to depositor
-    */
+     *
+     * - Sends depositor's accumulated gains (collateral) to depositor
+     */
     function provideToSP(uint _amount) external override {
         _requireNonZeroAmount(_amount);
 
@@ -331,7 +331,11 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
         emit StabilityPoolCollateralBalanceUpdated(collateral);
         emit CollateralSent(msg.sender, depositorCollateralGain);
 
-        borrowerOperations.moveCollateralGainToTrove{ value: depositorCollateralGain }(msg.sender, _upperHint, _lowerHint);
+        if (collateralAddress == address(0)) {
+          borrowerOperations.moveCollateralGainToTrove{ value: depositorCollateralGain }(msg.sender, 0, _upperHint, _lowerHint);
+        } else {
+          borrowerOperations.moveCollateralGainToTrove{ value: 0 }(msg.sender, depositorCollateralGain, _upperHint, _lowerHint);
+        }
     }
 
     // --- Liquidation functions ---

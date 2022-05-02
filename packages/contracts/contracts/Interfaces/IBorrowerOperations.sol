@@ -40,11 +40,11 @@ interface IBorrowerOperations {
 
     ) external;
 
-    function openTrove(uint _maxFee, uint _LUSDAmount, address _upperHint, address _lowerHint) external payable;
+    function openTrove(uint _maxFee, uint _LUSDAmount, uint _assetAmount, address _upperHint, address _lowerHint) external payable;
 
-    function addColl(address _upperHint, address _lowerHint) external payable;
+    function addColl(uint _assetAmount, address _upperHint, address _lowerHint) external payable;
 
-    function moveCollateralGainToTrove(address _user, address _upperHint, address _lowerHint) external payable;
+    function moveCollateralGainToTrove(address _user, uint _assetAmount, address _upperHint, address _lowerHint) external payable;
 
     function withdrawColl(uint _amount, address _upperHint, address _lowerHint) external;
 
@@ -54,7 +54,7 @@ interface IBorrowerOperations {
 
     function closeTrove() external;
 
-    function adjustTrove(uint _maxFee, uint _collWithdrawal, uint _debtChange, bool isDebtIncrease, address _upperHint, address _lowerHint) external payable;
+    function adjustTrove(uint _maxFee, uint _collWithdrawal, uint _debtChange, bool isDebtIncrease, uint _assetAmount, address _upperHint, address _lowerHint) external payable;
 
     function claimCollateral() external;
 

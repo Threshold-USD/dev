@@ -8,39 +8,22 @@ const th = testHelpers.TestHelper
 const dec = th.dec
 const toBN = th.toBN
 const mv = testHelpers.MoneyValues
-const timeValues = testHelpers.TimeValues
 
-const ZERO_ADDRESS = th.ZERO_ADDRESS
 const assertRevert = th.assertRevert
-
-const {
-  buildUserProxies,
-  BorrowerOperationsProxy,
-  BorrowerWrappersProxy,
-  TroveManagerProxy,
-  StabilityPoolProxy,
-  SortedTrovesProxy,
-  TokenProxy,
-  PCVProxy
-} = require('../utils/proxyHelpers.js')
+const GAS_PRICE = 10000000
 
 contract('BorrowerWrappers', async accounts => {
 
   const [
     owner, alice, bob, carol, dennis, whale,
     A, B, C, D, E,
-    defaulter_1, defaulter_2,
-    // frontEnd_1, frontEnd_2, frontEnd_3
-  ] = accounts;
+    defaulter_1, defaulter_2] = accounts;
 
   let priceFeed
   let lusdToken
-  let sortedTroves
   let troveManagerOriginal
   let troveManager
-  let activePool
   let stabilityPool
-  let defaultPool
   let collSurplusPool
   let borrowerOperations
   let borrowerWrappers
@@ -71,33 +54,41 @@ contract('BorrowerWrappers', async accounts => {
 
     priceFeed = contracts.priceFeedTestnet
     lusdToken = contracts.lusdToken
-    sortedTroves = contracts.sortedTroves
     troveManager = contracts.troveManager
-    activePool = contracts.activePool
     stabilityPool = contracts.stabilityPool
-    defaultPool = contracts.defaultPool
     collSurplusPool = contracts.collSurplusPool
     borrowerOperations = contracts.borrowerOperations
     borrowerWrappers = contracts.borrowerWrappers
     pcv = LQTYContracts.pcv
+    erc20 = contracts.erc20
 
     LUSD_GAS_COMPENSATION = await borrowerOperations.LUSD_GAS_COMPENSATION()
   })
 
-  it('proxy owner can recover ETH', async () => {
+  it('proxy owner can recover ETH and tokens', async () => {
     const amount = toBN(dec(1, 18))
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
 
-    // send some ETH to proxy
-    await web3.eth.sendTransaction({ from: owner, to: proxyAddress, value: amount })
+    assert.notEqual(alice, proxyAddress)
+
+    await web3.eth.sendTransaction({ from: owner, to: proxyAddress, value: amount, gasPrice: GAS_PRICE })
+    assert.equal(await web3.eth.getBalance(proxyAddress), amount.toString())
+
+    let balanceBefore = toBN(await web3.eth.getBalance(alice))
+    // recover ETH
+    const gas_Used = th.gasUsed(await borrowerWrappers.transferETH(alice, amount, { from: alice, gasPrice: GAS_PRICE }))
+    let balanceAfter = toBN(await web3.eth.getBalance(alice))
+    const expectedBalance = toBN(balanceBefore.sub(toBN(gas_Used * GAS_PRICE)))
+    assert.equal(balanceAfter.sub(expectedBalance), amount.toString())
+
+    // mint tokens for the proxy
+    await erc20.mint(proxyAddress, amount)
     assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
 
-    const balanceBefore = toBN(await contracts.erc20.balanceOf(alice))
-
-    // recover ETH
-    await borrowerWrappers.transferETH(alice, amount, { from: alice, gasPrice: 0 })
-    const balanceAfter = toBN(await contracts.erc20.balanceOf(alice))
-
+    balanceBefore = toBN(await contracts.erc20.balanceOf(alice))
+    // recover tokens
+    await borrowerWrappers.transferTokens(erc20.address, alice, amount, { from: alice, gasPrice: 0 })
+    balanceAfter = toBN(await contracts.erc20.balanceOf(alice))
     assert.equal(balanceAfter.sub(balanceBefore), amount.toString())
   })
 
@@ -106,20 +97,21 @@ contract('BorrowerWrappers', async accounts => {
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
 
     // send some ETH to proxy
-    await web3.eth.sendTransaction({ from: owner, to: proxyAddress, value: amount })
-    assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
+    await erc20.mint(proxyAddress, amount)
+    //await web3.eth.sendTransaction({ from: owner, to: proxyAddress, value: amount })
+    assert.equal(await erc20.balanceOf(proxyAddress), amount.toString())
 
-    const balanceBefore = toBN(await contracts.erc20.balanceOf(alice))
+    const balanceBefore = toBN(await erc20.balanceOf(alice))
 
     // try to recover ETH
     const proxy = borrowerWrappers.getProxyFromUser(alice)
-    const signature = 'transferETH(address,uint256)'
-    const calldata = th.getTransactionData(signature, [alice, amount])
+    const signature = 'transferTokens(address,address,uint256)'
+    const calldata = th.getTransactionData(signature, [erc20.address, alice, amount])
     await assertRevert(proxy.methods["execute(address,bytes)"](borrowerWrappers.scriptAddress, calldata, { from: bob }), 'ds-auth-unauthorized')
 
-    assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
+    assert.equal(await erc20.balanceOf(proxyAddress), amount.toString())
 
-    const balanceAfter = toBN(await contracts.erc20.balanceOf(alice))
+    const balanceAfter = toBN(await web3.eth.getBalance(alice))
     assert.equal(balanceAfter, balanceBefore.toString())
   })
 
@@ -134,9 +126,6 @@ contract('BorrowerWrappers', async accounts => {
 
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
     assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
-
-    // skip bootstrapping phase
-    await th.fastForwardTime(timeValues.SECONDS_IN_ONE_WEEK * 2, web3.currentProvider)
 
     // alice claims collateral and re-opens the trove
     await assertRevert(
@@ -160,9 +149,6 @@ contract('BorrowerWrappers', async accounts => {
 
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
     assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
-
-    // skip bootstrapping phase
-    await th.fastForwardTime(timeValues.SECONDS_IN_ONE_WEEK * 2, web3.currentProvider)
 
     // whale redeems 150 LUSD
     await th.redeemCollateral(whale, contracts, redeemAmount)
@@ -192,9 +178,6 @@ contract('BorrowerWrappers', async accounts => {
 
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
     assert.equal(await contracts.erc20.balanceOf(proxyAddress), '0')
-
-    // skip bootstrapping phase
-    await th.fastForwardTime(timeValues.SECONDS_IN_ONE_WEEK * 2, web3.currentProvider)
 
     // whale redeems 150 LUSD
     await th.redeemCollateral(whale, contracts, redeemAmount)

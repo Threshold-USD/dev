@@ -369,6 +369,11 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_assetAmount",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
         "name": "_upperHint",
         "type": "address"
@@ -405,6 +410,11 @@
         "internalType": "bool",
         "name": "_isDebtIncrease",
         "type": "bool"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_assetAmount",
+        "type": "uint256"
       },
       {
         "internalType": "address",
@@ -554,6 +564,11 @@
         "type": "address"
       },
       {
+        "internalType": "uint256",
+        "name": "_assetAmount",
+        "type": "uint256"
+      },
+      {
         "internalType": "address",
         "name": "_upperHint",
         "type": "address"
@@ -579,6 +594,11 @@
       {
         "internalType": "uint256",
         "name": "_LUSDAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_assetAmount",
         "type": "uint256"
       },
       {

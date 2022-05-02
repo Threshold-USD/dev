@@ -12,11 +12,11 @@ import "../Interfaces/IPriceFeed.sol";
 import "../Interfaces/IPCV.sol";
 import "./BorrowerOperationsScript.sol";
 import "./ETHTransferScript.sol";
+import "./ERC20TransferScript.sol";
 import "./PCVScript.sol";
 import "../Dependencies/console.sol";
 
-
-contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, PCVScript {
+contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, ERC20TransferScript, PCVScript {
     using SafeMath for uint;
 
     string constant public NAME = "BorrowerWrappersScript";
@@ -70,7 +70,11 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         uint totalCollateral = balanceAfter.sub(balanceBefore).add(msg.value);
 
         // Open trove with obtained collateral, plus collateral sent by user
-        borrowerOperations.openTrove{ value: totalCollateral }(_maxFee, _LUSDAmount, _upperHint, _lowerHint);
+        // if (borrowerOperations.collateralAddress() == address(0)) {
+        //   borrowerOperations.openTrove{ value: totalCollateral }(_maxFee, _LUSDAmount, 0, _upperHint, _lowerHint);
+        // } else {
+          borrowerOperations.openTrove{ value: 0 }(_maxFee, _LUSDAmount, totalCollateral, _upperHint, _lowerHint);
+        // }
     }
 
     function claimSPRewardsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
@@ -86,7 +90,11 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         if (claimedCollateral > 0) {
             _requireUserHasTrove(address(this));
             uint LUSDAmount = _getNetLUSDAmount(claimedCollateral);
-            borrowerOperations.adjustTrove{ value: claimedCollateral }(_maxFee, 0, LUSDAmount, true, _upperHint, _lowerHint);
+            // if (borrowerOperations.collateralAddress() == address(0)) {
+            //   borrowerOperations.adjustTrove{ value: claimedCollateral }(_maxFee, 0, LUSDAmount, true, 0, _upperHint, _lowerHint);
+            // } else {
+              borrowerOperations.adjustTrove{ value: 0 }(_maxFee, 0, LUSDAmount, true, claimedCollateral, _upperHint, _lowerHint);
+            // }
             // Provide withdrawn LUSD to Stability Pool
             if (LUSDAmount > 0) {
                 stabilityPool.provideToSP(LUSDAmount);
@@ -106,7 +114,11 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         if (gainedCollateral > 0) {
             _requireUserHasTrove(address(this));
             netLUSDAmount = _getNetLUSDAmount(gainedCollateral);
-            borrowerOperations.adjustTrove{ value: gainedCollateral }(_maxFee, 0, netLUSDAmount, true, _upperHint, _lowerHint);
+            // if (borrowerOperations.collateralAddress() == address(0)) {
+            //   borrowerOperations.adjustTrove{ value: gainedCollateral }(_maxFee, 0, netLUSDAmount, true, 0, _upperHint, _lowerHint);
+            // } else {
+              borrowerOperations.adjustTrove{ value: 0 }(_maxFee, 0, netLUSDAmount, true, gainedCollateral, _upperHint, _lowerHint);
+            // }
         }
 
         uint totalLUSD = gainedLUSD.add(netLUSDAmount);

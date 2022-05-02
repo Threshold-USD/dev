@@ -71,6 +71,7 @@ class Proxy {
     const calldata = th.getTransactionData(signature, this.getSlicedParams(params))
     // console.log('proxy: ', proxy.address)
     // console.log(this.scriptAddress, calldata, optionalParams)
+
     return proxy.methods["execute(address,bytes)"](this.scriptAddress, calldata, optionalParams)
   }
 
@@ -92,11 +93,11 @@ class BorrowerOperationsProxy extends Proxy {
   }
 
   async openTrove(...params) {
-    return this.forwardFunction(params, 'openTrove(uint256,uint256,address,address)')
+    return this.forwardFunction(params, 'openTrove(uint256,uint256,uint256,address,address)')
   }
 
   async addColl(...params) {
-    return this.forwardFunction(params, 'addColl(address,address)')
+    return this.forwardFunction(params, 'addColl(uint,address,address)')
   }
 
   async withdrawColl(...params) {
@@ -116,7 +117,7 @@ class BorrowerOperationsProxy extends Proxy {
   }
 
   async adjustTrove(...params) {
-    return this.forwardFunction(params, 'adjustTrove(uint256,uint256,uint256,bool,address,address)')
+    return this.forwardFunction(params, 'adjustTrove(uint256,uint256,uint256,bool,uint,address,address)')
   }
 
   async claimRedeemedCollateral(...params) {
@@ -167,6 +168,10 @@ class BorrowerWrappersProxy extends Proxy {
 
   async transferETH(...params) {
     return this.forwardFunction(params, 'transferETH(address,uint256)')
+  }
+
+  async transferTokens(...params) {
+    return this.forwardFunction(params, 'transferTokens(address,address,uint256)')
   }
 }
 

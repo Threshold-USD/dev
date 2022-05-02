@@ -57,11 +57,19 @@ contract EchidnaProxy {
 
     // Borrower Operations
     function openTrovePrx(uint _ETH, uint _LUSDAmount, address _upperHint, address _lowerHint, uint _maxFee) external payable {
-        borrowerOperations.openTrove{value: _ETH}(_maxFee, _LUSDAmount, _upperHint, _lowerHint);
+        if (borrowerOperations.collateralAddress() == address(0)) {
+          borrowerOperations.openTrove{value: _ETH}(_maxFee, _LUSDAmount, 0, _upperHint, _lowerHint);
+        } else {
+          borrowerOperations.openTrove{value: 0}(_maxFee, _LUSDAmount, _ETH, _upperHint, _lowerHint);
+        }
     }
 
     function addCollPrx(uint _ETH, address _upperHint, address _lowerHint) external payable {
-        borrowerOperations.addColl{value: _ETH}(_upperHint, _lowerHint);
+        if (borrowerOperations.collateralAddress() == address(0)) {
+            borrowerOperations.addColl{value: _ETH}(0, _upperHint, _lowerHint);
+        } else {
+            borrowerOperations.addColl{value: 0}(_ETH, _upperHint, _lowerHint);
+        }
     }
 
     function withdrawCollPrx(uint _amount, address _upperHint, address _lowerHint) external {
@@ -81,7 +89,11 @@ contract EchidnaProxy {
     }
 
     function adjustTrovePrx(uint _ETH, uint _collWithdrawal, uint _debtChange, bool _isDebtIncrease, address _upperHint, address _lowerHint, uint _maxFee) external payable {
-        borrowerOperations.adjustTrove{value: _ETH}(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, _upperHint, _lowerHint);
+        if (borrowerOperations.collateralAddress() == address(0)) {
+          borrowerOperations.adjustTrove{value: _ETH}(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, 0, _upperHint, _lowerHint);
+        } else {
+          borrowerOperations.adjustTrove{value: 0}(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, _ETH, _upperHint, _lowerHint);
+        }
     }
 
     // Pool Manager

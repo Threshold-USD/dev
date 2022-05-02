@@ -372,7 +372,7 @@ contract('TroveManager', async accounts => {
   })
 
   it("liquidate(): Liquidates undercollateralized trove if there are two troves in the system", async () => {
-    await openTrove({ ICR: toBN(dec(200, 18)), extraParams: { from: bob, value: dec(100, 'ether') } })
+    await openTrove({ ICR: toBN(dec(200, 18)), extraParams: { from: bob } })
 
     // Alice creates a single trove with 0.7 ETH and a debt of 70 LUSD, and provides 10 LUSD to SP
     const { collateral: A_collateral, totalDebt: A_totalDebt } = await openTrove({ ICR: toBN(dec(2, 18)), extraParams: { from: alice } })
@@ -2507,9 +2507,9 @@ contract('TroveManager', async accounts => {
   })
 
   it("redeemCollateral(): performs partial redemption if resultant debt is > minimum net debt", async () => {
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(10000, 18)), A, A, { from: A, value: dec(1000, 'ether') })
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(20000, 18)), B, B, { from: B, value: dec(1000, 'ether') })
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(30000, 18)), C, C, { from: C, value: dec(1000, 'ether') })
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(10000, 18)), dec(1000, 'ether'), A, A, { from: A })
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(20000, 18)), dec(1000, 'ether'), B, B, { from: B })
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(30000, 18)), dec(1000, 'ether'), C, C, { from: C })
 
     // A and C send all their tokens to B
     await lusdToken.transfer(B, await lusdToken.balanceOf(A), {from: A})
@@ -2535,9 +2535,9 @@ contract('TroveManager', async accounts => {
   })
 
   it("redeemCollateral(): doesn't perform partial redemption if resultant debt would be < minimum net debt", async () => {
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(6000, 18)), A, A, { from: A, value: dec(1000, 'ether') })
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(20000, 18)), B, B, { from: B, value: dec(1000, 'ether') })
-    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(30000, 18)), C, C, { from: C, value: dec(1000, 'ether') })
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(6000, 18)), dec(1000, 'ether'), A, A, { from: A })
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(20000, 18)), dec(1000, 'ether'), B, B, { from: B })
+    await borrowerOperations.openTrove(th._100pct, await getOpenTroveLUSDAmount(dec(30000, 18)), dec(1000, 'ether'), C, C, { from: C })
 
     // A and C send all their tokens to B
     await lusdToken.transfer(B, await lusdToken.balanceOf(A), {from: A})
@@ -3873,7 +3873,7 @@ contract('TroveManager', async accounts => {
     assert.isTrue(D_balanceAfter.eq(D_balanceBefore))
 
     // D is not closed, so cannot open trove
-    await assertRevert(borrowerOperations.openTrove(th._100pct, 0, ZERO_ADDRESS, ZERO_ADDRESS, { from: D, value: dec(10, 18) }), 'BorrowerOps: Trove is active')
+    await assertRevert(borrowerOperations.openTrove(th._100pct, 0, dec(10, 18), ZERO_ADDRESS, ZERO_ADDRESS, { from: D }), 'BorrowerOps: Trove is active')
 
     return {
       A_netDebt, A_coll,
@@ -4035,7 +4035,7 @@ contract('TroveManager', async accounts => {
       )
 
       await openTrove({ ICR: toBN(dec(150, 16)), extraParams: { from: bob } })
-      await borrowerOperations.adjustTrove(th._100pct, 0, lusdAmount, true, alice, alice, { from: alice, value: lusdAmount.mul(mv._1e18BN).div(price) })
+      await borrowerOperations.adjustTrove(th._100pct, 0, lusdAmount, true, lusdAmount.mul(mv._1e18BN).div(price), alice, alice, { from: alice })
     }
 
     const {
