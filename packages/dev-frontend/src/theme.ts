@@ -25,7 +25,7 @@ const colors = {
   invalid: "pink",
 
   menu: "#939393",
-  text: "#293147",
+  text: "#191d28",
   heading: "#6A7793",
   background: "white",
   muted: "#eaebed"
@@ -94,6 +94,7 @@ const cardGapY = [3, 3, 4];
 const card: ThemeUIStyleObject = {
   position: "relative",
   mt: cardGapY,
+  borderRadius: "12px",
   boxShadow: [1, null, 1]
 };
 
@@ -145,7 +146,7 @@ const modalOverlay: ThemeUIStyleObject = {
 const columns: ThemeUIStyleObject = {
   display: "flex",
   flexWrap: "wrap",
-  justifyItems: "center"
+  justifyItems: "center",
 };
 
 const theme: Theme = {
@@ -447,16 +448,19 @@ const theme: Theme = {
       ...columns
     },
 
-    pageColumns: {
+    pageRow: {
       ...columns,
-      maxWidth: "1100px",
-      mt: 4    
+
+      flexDirection: "row",
+      mt: 1
+    },
+
+    singlePage: {
+      maxWidth: "980px"
     },
 
     mainRow: {
-      display: "flex",
-      flexWrap: "wrap",
-      justifyItems: "center",
+      ...columns,
 
       flexDirection: ["column-reverse", "row"]
     },
@@ -477,7 +481,7 @@ const theme: Theme = {
     },
 
     firstHalf: {
-      pr: cardGapX,
+      pr: [0, "1em", "2.5em"],
       width: ["100%", "100%", "50%"]
     },
 
@@ -588,7 +592,7 @@ const theme: Theme = {
       px: 2,
       py: 1,
       pl: "3em",
-      fontWeight: "semibold",
+      fontWeight: "medium",
       fontSize: ".9rem",
       textTransform: "capitalize",
       mt: [3],
@@ -617,6 +621,11 @@ const theme: Theme = {
       ":hover, :enabled": {
         color: "primary",
       },
+    },
+    infoLink: {
+      textDecoration: "none",
+      color: "primary",
+      fontWeight: "medium",
     },
     logo: {
       display: "flex",
