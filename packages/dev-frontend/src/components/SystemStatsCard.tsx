@@ -1,9 +1,9 @@
 import React from "react";
 import { Box, Card, Flex } from "theme-ui";
-import { LiquityStoreState } from "@liquity/lib-base";
+import { Decimal, Percent, LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
+import { useLocation } from 'react-router-dom';
 
-import { InfoIcon } from "../InfoIcon";
 import { SystemStat } from "./SystemStat";
 
 type SystemStatsCardProps = {
@@ -27,12 +27,18 @@ const select = ({
 });
 
 export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "info" }) => {
+  
+  const location = useLocation();
 
   const {
+    numberOfTroves,
     price,
     total,
+    borrowingRate,
     lusdInStabilityPool
   } = useLiquitySelector(select);
+
+  const borrowingFeePct = new Percent(borrowingRate);
 
   return (
     <Card {...{ variant }}>
@@ -45,7 +51,6 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
           borderColor: "border"
         }}>
           Network Stats
-          <InfoIcon size="sm" tooltip={<Card variant="tooltip">Lorem Ipsum</Card>} />
         </Flex>
         <Flex sx={{
           width: "100%",
@@ -55,6 +60,22 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
           pt: "2em",
           gap: "1em"
         }}>
+          {location.pathname !== '/' && (
+            <>
+              <SystemStat 
+                info="Borrowing Fee" 
+                tooltip="The Borrowing Fee is a one-off fee charged as a percentage of the borrowed amount, and is part of a Vault's debt." 
+              >
+                {borrowingFeePct.toString(2)}
+              </SystemStat>
+              <SystemStat 
+                info="Vaults" 
+                tooltip="The total number of active Vaults in the system." 
+              >
+                 {Decimal.from(numberOfTroves).prettify(0)}
+              </SystemStat>
+            </>
+          )}
           <SystemStat 
             info="TVL" 
             tooltip="The Total Value Locked (TVL) is the total value of Ether locked as collateral in the system, given in ETH and USD." 

@@ -12,7 +12,6 @@ export const NoTrove: React.FC = props => {
 
   return (
     <Card>
-      <Heading>Trove</Heading>
       <Box sx={{ p: [2, 3] }}>
         <InfoMessage title="You haven't borrowed any LUSD yet.">
           You can borrow LUSD by opening a Trove.

@@ -1,6 +1,6 @@
 import React from "react";
 import { Card, Flex } from "theme-ui";
-import { InfoIcon } from "../InfoIcon";
+import { InfoIcon } from "./InfoIcon";
 
 type SystemStatProps = {
   info?: React.ReactNode;

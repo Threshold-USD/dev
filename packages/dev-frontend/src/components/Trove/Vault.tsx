@@ -9,7 +9,7 @@ import { useTroveView } from "./context/TroveViewContext";
 import { LiquidatedTrove } from "./LiquidatedTrove";
 import { Decimal } from "@liquity/lib-base";
 
-export const Trove: React.FC = props => {
+export const Vault: React.FC = props => {
   const { view } = useTroveView();
 
   switch (view) {
