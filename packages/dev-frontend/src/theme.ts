@@ -3,7 +3,7 @@ import { Theme, ThemeUIStyleObject } from "theme-ui";
 const baseColors = {
   blue: "#1542cd",
   purple: "#7C08F9",
-  cyan: "#2eb6ea",
+  cyan: "#E2F2FF",
   green: "#28c081",
   yellow: "#fd9d28",
   red: "#dc2c10",
@@ -103,7 +103,8 @@ const infoCard: ThemeUIStyleObject = {
 
   color: "heading",
   fontWeight: "medium",
-  p: "1.5em",
+  px: "2.5em",
+  py: "1.5em",
   borderRadius: "12px",
   background: ["white", "#F3F8FC"],
 };
@@ -287,7 +288,8 @@ const theme: Theme = {
       color: "heading",
       fontWeight: "medium",
       fontSize: "0.9em",
-      p: "1.5em",
+      px: "2em",
+      py: "1.5em",
       backgroundColor: "background",
       borderRadius: "12px"
     },

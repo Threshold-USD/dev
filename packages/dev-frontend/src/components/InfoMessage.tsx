@@ -6,14 +6,13 @@ type InfoMessageProps = {
 };
 
 export const InfoMessage: React.FC<InfoMessageProps> = ({ title, children, icon }) => (
-  <Box sx={{ mx: 1, fontSize: "0.9em" }}>
+  <Box sx={{ mx: 2, fontSize: "0.85em" }}>
     <Flex sx={{ alignItems: "center" }}>
       {icon && (
         <Box sx={{ mr: "12px" }}>{icon}</Box>
       )}
       <Text sx={{ mb: 2,  fontWeight: "bold" }}>{title}</Text>
     </Flex>
-
     <Text sx={{ color: "grey" }}>{children}</Text>
   </Box>
 );
