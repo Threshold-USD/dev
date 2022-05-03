@@ -5,11 +5,11 @@ import { OpenedVaults } from "../components/Dashboard/OpenedVaults";
 import { ColRatio } from "../components/Dashboard/ColRatio";
 import { OpenVaultCard } from "../components/Dashboard/OpenVaultCard";
 import { StabilityPoolCard } from "../components/Dashboard/StabilityPoolCard";
-import { SystemStatsCard } from "../components/Dashboard/SystemStatsCard";
+import { SystemStatsCard } from "../components/SystemStatsCard";
 
 export const Dashboard: React.FC = () => (
   <Container>
-    <Heading as="h2" sx={{ mt: 5, fontWeight: "semibold" }}>
+    <Heading as="h2" sx={{ mt: "2.5em", fontWeight: "semibold" }}>
       Dashboard
     </Heading>
     <Container variant="mainRow">

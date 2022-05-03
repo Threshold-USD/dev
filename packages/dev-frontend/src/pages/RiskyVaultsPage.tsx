@@ -6,7 +6,7 @@ import { RiskyVaults } from "../components/RiskyVaults";
 import { InfoMessage } from "../components/InfoMessage";
 
 export const RiskyVaultsPage: React.FC = () => (
-  <Container variant="pageColumns">
+  <Container variant="pageRow">
     <Container variant="firstHalf">
       <Card>
         <Box sx={{ p: [2, 3] }}>

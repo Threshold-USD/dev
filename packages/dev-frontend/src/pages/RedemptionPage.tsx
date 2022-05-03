@@ -17,7 +17,7 @@ export const RedemptionPage: React.FC = () => {
   } = useLiquity();
 
   return (
-    <Container variant="pageColumns">
+    <Container variant="pageRow">
       <Container variant="firstHalf">
         <Card>
           <Box sx={{ p: [2, 3] }}>
