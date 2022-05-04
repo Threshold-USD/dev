@@ -12,7 +12,6 @@ import {
   TroveClosureParams,
   TroveCreationParams
 } from "@liquity/lib-base";
-import { Flex } from "theme-ui";
 
 import { COIN } from "../../../strings";
 

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Button, Box, Card, Flex, Link, Spinner } from "theme-ui";
+import { Button, Card, Flex, Link, Spinner } from "theme-ui";
 import {
   LiquityStoreState,
   Decimal,

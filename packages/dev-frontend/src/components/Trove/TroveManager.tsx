@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { Flex, Button } from "theme-ui";
+import { Button, Flex, Link } from "theme-ui";
 
 import { LiquityStoreState, Decimal, Trove, Decimalish, LUSD_MINIMUM_DEBT } from "@liquity/lib-base";
 
@@ -225,11 +225,7 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
           </ActionDescription>
         ))}
 
-      <Flex variant="layout.actions">
-        <Button variant="cancel" onClick={handleCancel}>
-          Cancel
-        </Button>
-
+      <Flex variant="layout.actions" sx={{ flexDirection: "column" }}>
         {validChange ? (
           <TroveAction
             transactionId={`${transactionIdPrefix}${validChange.type}`}
@@ -242,6 +238,18 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
         ) : (
           <Button disabled>Confirm</Button>
         )}
+        <Button variant="cancel" onClick={handleCancel} sx={{ borderRadius: "12px", mt: 3 }}>
+          Cancel
+        </Button>
+      </Flex>
+      <Flex sx={{ 
+        justifyContent: "center",
+        fontSize: 11,
+        fontWeight: "body",
+        mt: "1.5em"
+      }}>
+        <Link variant="cardLinks" href="https://github.com/Threshold-USD/dev#readme" target="_blank">Read about</Link>
+        in the documentation
       </Flex>
     </TroveEditor>
   );

@@ -141,10 +141,11 @@ const editableStyle: ThemeUICSSProperties = {
   backgroundColor: "terciary",
 
   px: "1.1em",
-  py: "0.5em",
+  py: "0.45em",
   border: 1,
   borderColor: "border",
   borderRadius: 12,
+  width: "100%",
 
   flexGrow: 1,
 

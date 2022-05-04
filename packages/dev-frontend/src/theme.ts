@@ -212,14 +212,12 @@ const theme: Theme = {
 
     outline: {
       ...button,
-      ...buttonOutline("primary", "secondary")
+      ...buttonOutline("primary", "primary")
     },
 
     cancel: {
       ...button,
-      ...buttonOutline("text", "text"),
-
-      opacity: 0.8
+      ...buttonOutline("primary", "primary"),
     },
 
     danger: {

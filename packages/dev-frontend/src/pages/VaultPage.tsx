@@ -10,7 +10,7 @@ export const VaultPage: React.FC = () => {
       <Heading as="h2" sx={{ ml: "1em", mt: "2.5em", fontWeight: "semibold" }}>
         Open a Vault
       </Heading>
-      <Card sx={{ mr: "2em" }}>
+      <Card sx={{ mr: [0, "2em"] }}>
         <Box sx={{ px: "2.5em", py: "1.5em" }}>
           <InfoMessage title="About this functionality">
             <Paragraph sx={{ mb: "0.5em" }}>
