@@ -294,7 +294,6 @@ const theme: Theme = {
       py: "1.5em",
       backgroundColor: "background",
       borderRadius: "12px",
-      mb: 6
     },
 
     infoPopup: {
@@ -444,7 +443,7 @@ const theme: Theme = {
       maxWidth: ["728px","1640px"],
       mx: ["auto"],
       mt: ["100px", "100px", "80px"],
-      mb: ["40px", "40px"],
+      mb: ["40px", "100px"],
       pl: [0, "17.5em", "22em"],
       px: ["1.5em",]
     },
