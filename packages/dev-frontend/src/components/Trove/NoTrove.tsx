@@ -5,6 +5,7 @@ import { useTroveView } from "./context/TroveViewContext";
 import { LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 
+import { COIN } from "../../strings";
 import { ActionDescription } from "../ActionDescription";
 import { GenericIcon } from "../GenericIcon";
 import { InfoIcon } from "../InfoIcon";
@@ -33,17 +34,16 @@ export const NoTrove: React.FC = props => {
           borderColor: "border"
         }}>
           Open a Vault
-          <InfoIcon size="sm" tooltip={<Card variant="tooltip">To mint and borrow LUSD you must open a vault and deposit a certain amount of collateral (ETH) to it.</Card>} />
+          <InfoIcon size="sm" tooltip={<Card variant="tooltip">To mint and borrow { COIN } you must open a vault and deposit a certain amount of collateral (ETH) to it.</Card>} />
         </Flex>
         <Flex sx={{
           width: "100%",
           flexDirection: "column",
-          pt: "1.5em",
           px: ["1em", 0, "1.6em"],
           gap: "1em"
         }}>
-          <ActionDescription title="You haven't borrowed LUSD any yet">
-            You can borrow LUSD by opening a vault.
+          <ActionDescription title={`You haven't borrowed ${COIN} any yet`}>
+            You can borrow { COIN } by opening a vault.
           </ActionDescription>
           ETH available 
           <Flex variant="layout.balanceRow">

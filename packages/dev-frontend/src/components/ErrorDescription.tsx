@@ -8,9 +8,9 @@ export const ErrorDescription: React.FC = ({ children }) => (
       display: "flex",
       flexDirection: "column",
       justifyContent: "space-around",
-
-      mb: [2, 3],
-      p: 3,
+      mt: "1.5em", 
+      mb: "0.9em", 
+      p: "0.9em",
 
       border: 1,
       borderRadius: "8px",
@@ -19,7 +19,7 @@ export const ErrorDescription: React.FC = ({ children }) => (
       bg: "rgba(220, 44, 16, 0.05)"
     }}
   >
-    <Flex sx={{ alignItems: "center" }}>
+    <Flex sx={{ alignItems: "center", fontSize: "0.9em" }}>
       <Icon name="exclamation-triangle" size="lg" />
       <Text sx={{ ml: 2 }}>{children}</Text>
     </Flex>

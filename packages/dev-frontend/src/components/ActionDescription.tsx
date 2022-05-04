@@ -12,9 +12,9 @@ export const ActionDescription: React.FC<ActionDescriptionProps> = ({ title, chi
       display: "flex",
       flexDirection: "column",
       justifyContent: "space-around",
-
-      mb: 2,
-      p: 3,
+      mt: "1.5em", 
+      mb: "0.9em", 
+      p: "0.9em",
 
       border: 1,
       borderRadius: "8px",

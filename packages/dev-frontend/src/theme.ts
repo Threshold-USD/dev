@@ -8,12 +8,14 @@ const baseColors = {
   yellow: "#fd9d28",
   red: "#dc2c10",
   lightRed: "#ff755f",
-  grey: "#e8eef3"
+  grey: "#e8eef3",
+  lightBlue: "#F6F7FA",
 };
 
 const colors = {
   primary: baseColors.purple,
   secondary: baseColors.blue,
+  terciary: baseColors.lightBlue,
   accent: baseColors.cyan,
 
   success: baseColors.green,
@@ -291,7 +293,8 @@ const theme: Theme = {
       px: "2em",
       py: "1.5em",
       backgroundColor: "background",
-      borderRadius: "12px"
+      borderRadius: "12px",
+      mb: 6
     },
 
     infoPopup: {
@@ -371,7 +374,7 @@ const theme: Theme = {
       color: "text",
       justifyContent: "start",
       alignItems: "center",
-      backgroundColor: "#F6F7FA",
+      backgroundColor: "terciary",
       gap: "0.9em",
 
       px: "1.1em",
@@ -493,8 +496,9 @@ const theme: Theme = {
     },
 
     actions: {
-      justifyContent: "flex-end",
-      mt: 2,
+      width: "100%",
+      justifyContent: "center",
+      mt: "1.5em",
 
       button: {
         ml: 2
@@ -590,11 +594,11 @@ const theme: Theme = {
     nav: {
       display: "flex",
       alignItems: "center", 
-      mb: 2,
+      mb: 3,
       px: 2,
       py: 1,
       pl: "3em",
-      fontWeight: "medium",
+      fontWeight: "semibold",
       fontSize: ".9rem",
       textTransform: "capitalize",
       mt: [3],
