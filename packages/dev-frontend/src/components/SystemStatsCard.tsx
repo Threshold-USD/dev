@@ -1,13 +1,28 @@
-import React from "react";
-import { Box, Card, Flex } from "theme-ui";
+import React, { useState, useEffect } from "react";
+import { Box, Button, Card, Flex, Input, ThemeUICSSProperties } from "theme-ui";
 import { Decimal, Percent, LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
 import { useLocation } from 'react-router-dom';
 
+import { useLiquity } from "../hooks/LiquityContext";
+
 import { SystemStat } from "./SystemStat";
+import { Transaction } from "./Transaction";
 
 type SystemStatsCardProps = {
   variant?: string;
+};
+
+const editableStyle: ThemeUICSSProperties = {
+  bg: "white",
+  px: "1.1em",
+  py: "0.3em",
+  border: 1,
+  borderColor: "border",
+  borderRadius: 8,
+  flexGrow: 1,
+  pl: 3,
+  boxShadow: 0
 };
 
 const select = ({
@@ -27,6 +42,13 @@ const select = ({
 });
 
 export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "info" }) => {
+
+  const {
+    liquity: {
+      send: liquity,
+      connection: { _priceFeedIsTestnet: canSetPrice }
+    }
+  } = useLiquity();
   
   const location = useLocation();
 
@@ -38,7 +60,12 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
     lusdInStabilityPool
   } = useLiquitySelector(select);
 
+  const [editedPrice, setEditedPrice] = useState(price.toString(2));
   const borrowingFeePct = new Percent(borrowingRate);
+
+  useEffect(() => {
+    setEditedPrice(price.toString(2));
+  }, [price]);
 
   return (
     <Card {...{ variant }}>
@@ -118,7 +145,43 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
           pb: 3
         }}>
           <SystemStat>
-            ${price.toString(2)}
+            {canSetPrice ? (
+              <Flex sx={{ mb:1, alignItems: "center", height: "1.2em", }}>
+                <Input
+                  variant="layout.balanceRow"
+                  sx={{
+                  ...editableStyle,
+                  }}
+                  type="number"
+                  step="any"
+                  value={editedPrice}
+                  onChange={e => setEditedPrice(e.target.value)}
+                />
+                <Transaction
+                  id="set-price"
+                  tooltip="Set"
+                  tooltipPlacement="bottom"
+                  send={overrides => {
+                    if (!editedPrice) {
+                      throw new Error("Invalid price");
+                    }
+                    return liquity.setPrice(Decimal.from(editedPrice), overrides);
+                  }}
+                >
+                  <Button sx={{ 
+                    ml: 3, 
+                    width: "1rem",
+                    height: "1rem",
+                    borderRadius: 6,
+                    top: 0 
+                  }}>
+                    Set
+                  </Button>
+                </Transaction>
+              </Flex>
+            ) : (
+              price.toString(2)
+            )}
           </SystemStat>
         </Flex>
       </Card>
