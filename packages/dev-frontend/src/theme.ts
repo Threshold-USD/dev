@@ -636,6 +636,9 @@ const theme: Theme = {
     logo: {
       display: "flex",
       alignItems: "center",
+      fontSize: "0.87rem", 
+      fontWeight: "extrabold",
+      letterSpacing: -0.7,
       color: "black",
       ":visited": {
         color: "black",
