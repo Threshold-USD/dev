@@ -4,7 +4,7 @@ import { Link } from "./Link";
 import { GenericIcon } from "./GenericIcon";
 import { UserAccount } from "./UserAccount";
 
-const logoHeight: string = "34px";
+const logoHeight: string = "32px";
 
 export const Header: React.FC = ({ children }) => {
 
