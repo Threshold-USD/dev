@@ -43,6 +43,7 @@ def setAddresses(contracts):
         contracts.sortedTroves.address,
         contracts.lusdToken.address,
         contracts.pcv.address,
+        contracts.collateral.address,
         { 'from': accounts[0] }
     )
 
@@ -53,6 +54,7 @@ def setAddresses(contracts):
         contracts.lusdToken.address,
         contracts.sortedTroves.address,
         contracts.priceFeedTestnet.address,
+        contracts.collateral.address,
         { 'from': accounts[0] }
     )
 
@@ -61,12 +63,15 @@ def setAddresses(contracts):
         contracts.troveManager.address,
         contracts.stabilityPool.address,
         contracts.defaultPool.address,
+        contracts.collSurplusPool.address,
+        contracts.collateral.address,
         { 'from': accounts[0] }
     )
 
     contracts.defaultPool.setAddresses(
         contracts.troveManager.address,
         contracts.activePool.address,
+        contracts.collateral.address,
         { 'from': accounts[0] }
     )
 
@@ -74,6 +79,7 @@ def setAddresses(contracts):
         contracts.borrowerOperations.address,
         contracts.troveManager.address,
         contracts.activePool.address,
+        contracts.collateral.address,
         { 'from': accounts[0] }
     )
 
@@ -118,8 +124,13 @@ def contracts():
         contracts.borrowerOperations.address,
         { 'from': accounts[0] }
     )
+    contracts.collateral = ERC20Test.deploy({ 'from': accounts[0] })
+    for account in accounts:
+        contracts.collateral.mint(account, floatToWei(30000000.0))
+    # contracts.collateral.mint(accounts[1], floatToWei(30000.0))
+
     # LQTY
-    contracts.pcv = pcv.deploy({ 'from': accounts[0] })
+    contracts.pcv = PCV.deploy({ 'from': accounts[0] })
 
     setAddresses(contracts)
 
@@ -142,8 +153,8 @@ def print_expectations():
 
 def _test_test(contracts):
     print(len(accounts))
-    contracts.borrowerOperations.openTrove(Wei(1e18), Wei(2000e18), ZERO_ADDRESS, ZERO_ADDRESS,
-                                           { 'from': accounts[1], 'value': Wei("100 ether") })
+    contracts.borrowerOperations.openTrove(Wei(1e18), Wei(2000e18), Wei("100 ether"), ZERO_ADDRESS, ZERO_ADDRESS,
+                                           { 'from': accounts[1] })
 
     #assert False
 
@@ -175,8 +186,8 @@ def test_run_simulation(add_accounts, contracts, print_expectations):
     contracts.priceFeedTestnet.setPrice(floatToWei(price_ether[0]), { 'from': accounts[0] })
     # whale
     whale_coll = 30000.0
-    contracts.borrowerOperations.openTrove(MAX_FEE, Wei(10e24), ZERO_ADDRESS, ZERO_ADDRESS,
-                                           { 'from': accounts[0], 'value': floatToWei(whale_coll) })
+    contracts.borrowerOperations.openTrove(MAX_FEE, Wei(10e24), floatToWei(whale_coll), ZERO_ADDRESS, ZERO_ADDRESS,
+                                           { 'from': accounts[0] })
     contracts.stabilityPool.provideToSP(floatToWei(stability_initial), { 'from': accounts[0] })
 
     active_accounts = []
@@ -201,7 +212,7 @@ def test_run_simulation(add_accounts, contracts, print_expectations):
 
         #Simulation Process
         for index in range(1, n_sim):
-            print('\n  --> Iteration', index)
+            print('\n  --> Iteration', index, ' of ', n_sim)
             print('  -------------------\n')
             #exogenous ether price input
             price_ether_current = price_ether[index]

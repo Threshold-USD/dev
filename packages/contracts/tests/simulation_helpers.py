@@ -22,7 +22,7 @@ LUSD_GAS_COMPENSATION = 200.0
 MIN_NET_DEBT = 1800.0
 MAX_FEE = Wei(1e18)
 
-"""# Ether price (exogenous)
+r"""# Ether price (exogenous)
 
 Ether is the collateral for LUSD. The ether price $P_t^e$ follows
 > $P_t^e = P_{t-1}^e (1+\zeta_t^e)(1+\sigma_t^e)$,
@@ -51,7 +51,7 @@ drift_ether3 = 0.0013
 period4 = period
 drift_ether4 = -0.0002
 
-"""# LQTY price
+r"""# LQTY price
 In the first month, the price of LQTY follows
 
 > $P_t^q = P_{t-1}^q (1+\zeta_t^q)(1+\sigma_t^q)$.
@@ -70,7 +70,7 @@ drift_LQTY = 0.0035
 supply_LQTY=[0]
 LQTY_total_supply=100000000
 
-"""**LQTY Endogenous Price**
+r"""**LQTY Endogenous Price**
 
 The staked LQTY pool earning consists of the issuance fee revenue and redemption fee revenue
 > $R_t^q = R_t^i + R_t^r.$
@@ -111,7 +111,7 @@ Interpretation: The denominator implies that with more LQTY tokens issued, LQTY 
 PE_ratio = 50
 
 
-"""# Liquidity Pool
+r"""# Liquidity Pool
 
 The demand of tokens from liquidity pool is defined by
 > $$D_t^l = D_{t-1}^l (1+\zeta_t^l) (1+\sigma_t^l) (\frac{P_t^l}{P_{t-1}^l})^\delta, \\
@@ -126,7 +126,7 @@ sd_liquidity=0.001
 drift_liquidity=1
 delta = -20
 
-"""# Stability Pool
+r"""# Stability Pool
 
 The demand of tokens from stability pool is defined by
 >$$D_t^s = D_{t-1}^s (1+\zeta_t^s) (1+R_{t-1}^s-R_{t}^n)^\theta, \\
@@ -161,7 +161,7 @@ natural_rate_initial = 0.2
 natural_rate = [natural_rate_initial]
 sd_natural_rate = 0.002
 
-"""# Trove pool
+r"""# Trove pool
 
 Each trove is defined by five numbers
 > (collateral in ether, debt in LUSD, collateral ratio target, rational inattention, collateral ratio)
@@ -247,7 +247,7 @@ rational_inattention_gamma_theta = 0.08
 #sensitivity to LUSD price & issuance fee
 alpha = 0.3
 
-"""**Close Troves**
+r"""**Close Troves**
 
 The amount of troves closed in period t is denoted as $N_t^c$, which follows
 > $$N_t^c = \begin{cases}
@@ -265,7 +265,7 @@ sd_closetroves=0.5
 #sensitivity to LUSD price
 beta = 0.2
 
-"""**Trove Liquidation**
+r"""**Trove Liquidation**
 
 At the beginning of each period,
 right after the feed of ether price,
@@ -409,7 +409,7 @@ def liquidate_troves(accounts, contracts, active_accounts, inactive_accounts, pr
         return [0, 0]
 
     stability_pool_previous = contracts.stabilityPool.getTotalLUSDDeposits() / 1e18
-    stability_pool_eth_previous = contracts.stabilityPool.getETH() / 1e18
+    stability_pool_eth_previous = contracts.stabilityPool.getCollateralBalance() / 1e18
 
     while pending_liquidations(contracts, price_ether_current):
         try:
@@ -431,7 +431,7 @@ def liquidate_troves(accounts, contracts, active_accounts, inactive_accounts, pr
                 ICR = contracts.troveManager.getCurrentICR(trove, Wei(price_ether_current * 1e18))
                 print(f"ICR: {ICR}")
     stability_pool_current = contracts.stabilityPool.getTotalLUSDDeposits() / 1e18
-    stability_pool_eth_current = contracts.stabilityPool.getETH() / 1e18
+    stability_pool_eth_current = contracts.stabilityPool.getCollateralBalance() / 1e18
 
     debt_liquidated = stability_pool_current - stability_pool_previous
     ether_liquidated = stability_pool_eth_current - stability_pool_eth_previous
@@ -527,7 +527,7 @@ def get_lusd_to_repay(accounts, contracts, active_accounts, inactive_accounts, a
     if debt > lusdBalance:
         pending = debt - lusdBalance
         # first try to withdraw from SP
-        initial_deposit = contracts.stabilityPool.deposits(account)[0]
+        initial_deposit = contracts.stabilityPool.deposits(account)
         if initial_deposit > 0:
             contracts.stabilityPool.withdrawFromSP(pending, { 'from': account, 'gas_limit': 8000000, 'allow_revert': True })
             # it can only withdraw up to the deposit, so we check the balance again
@@ -633,7 +633,7 @@ def adjust_troves(accounts, contracts, active_accounts, inactive_accounts, price
                 # add coll
                 coll_added_float = coll_new - coll
                 coll_added = floatToWei(coll_added_float)
-                contracts.borrowerOperations.addColl(hints[0], hints[1], { 'from': account, 'value': coll_added })
+                contracts.borrowerOperations.addColl(coll_added, hints[0], hints[1], { 'from': account })
             elif check > 2 and not is_recovery_mode(contracts, price_ether_current):
                 # withdraw ETH
                 coll_withdrawn = floatToWei(coll - coll_new)
@@ -656,8 +656,8 @@ def open_trove(accounts, contracts, active_accounts, inactive_accounts, supply_t
     debtChange = floatToWei(supply_trove) + LUSD_GAS_COMPENSATION
     lusd = get_lusd_amount_from_net_debt(contracts, floatToWei(supply_trove))
     if isNewTCRAboveCCR(contracts, coll, True, debtChange, True, floatToWei(price_ether_current)):
-        contracts.borrowerOperations.openTrove(MAX_FEE, lusd, hints[0], hints[1],
-                                               { 'from': accounts[inactive_accounts[0]], 'value': coll })
+        contracts.borrowerOperations.openTrove(MAX_FEE, lusd, coll, hints[0], hints[1],
+                                               { 'from': accounts[inactive_accounts[0]] })
         new_account = {"index": inactive_accounts[0], "CR_initial": CR_ratio, "Rational_inattention": rational_inattention}
         active_accounts.insert(hints[2], new_account)
         inactive_accounts.pop(0)
@@ -745,7 +745,7 @@ def stability_update(accounts, contracts, active_accounts, return_stability, ind
             contracts.stabilityPool.withdrawFromSP(new_withdraw, { 'from': accounts[0] })
 
 
-"""LUSD Price, liquidity pool, and redemption
+r"""LUSD Price, liquidity pool, and redemption
 
 **Price Determination**
 
@@ -766,7 +766,7 @@ def calculate_price(price_LUSD, liquidity_pool, liquidity_pool_next):
 
   return price_LUSD_current
 
-""" **Stabilizers**
+r""" **Stabilizers**
 
 There are two stabilizers to attenuate LUSD price deviation from its target range.
 No action if $P_t^l \in [1-f_t^r, 1.1+f_t^i]$, where $f_t^r$ represents the redemption fee, and $f_t^i$ represents the issuance fee.

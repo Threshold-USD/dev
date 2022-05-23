@@ -520,17 +520,14 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
       const dennis_collateralWithdrawn = th.getEventArgByName(txD, 'CollateralGainWithdrawn', '_collateral').toString()
 
-      console.log()
       assert.isAtMost(th.getDifference((await stabilityPool.getCompoundedLUSDDeposit(alice)).toString(), '1666666666666666666666'), 100000)
       assert.isAtMost(th.getDifference((await stabilityPool.getCompoundedLUSDDeposit(bob)).toString(), '1666666666666666666666'), 100000)
       assert.isAtMost(th.getDifference((await stabilityPool.getCompoundedLUSDDeposit(carol)).toString(), '1666666666666666666666'), 100000)
-
       assert.isAtMost(th.getDifference((await stabilityPool.getCompoundedLUSDDeposit(dennis)).toString(), '5000000000000000000000'), 100000)
 
       assert.isAtMost(th.getDifference(alice_collateralWithdrawn, '82916666666666666667'), 100000)
       assert.isAtMost(th.getDifference(bob_collateralWithdrawn, '82916666666666666667'), 100000)
       assert.isAtMost(th.getDifference(carol_collateralWithdrawn, '82916666666666666667'), 100000)
-
       assert.isAtMost(th.getDifference(dennis_collateralWithdrawn, '49750000000000000000'), 100000)
     })
 
