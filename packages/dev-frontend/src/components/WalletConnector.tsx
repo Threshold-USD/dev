@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { AbstractConnector } from "@web3-react/abstract-connector";
-import { Button, Card, Flex, Spinner, Box, Heading, Paragraph } from "theme-ui";
+import { Button, Flex, Spinner, Box, Heading, Paragraph } from "theme-ui";
 
 import { injectedConnector } from "../connectors/injectedConnector";
 import { useAuthorizedConnection } from "../hooks/useAuthorizedConnection";

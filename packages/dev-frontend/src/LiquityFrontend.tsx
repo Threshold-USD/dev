@@ -1,10 +1,11 @@
 import React from "react";
-import { Flex, Container } from "theme-ui";
+import { Flex, Container, Heading, Paragraph } from "theme-ui";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
 
 import { Nav } from "./components/Nav";
 import { SideBar } from "./components/SideBar";
 import { HamburgerMenu } from "./components/HamburgerMenu";
+import { Icon } from "./components/Icon";
 import { Header } from "./components/Header";
 import { WalletConnector } from "./components/WalletConnector";
 import { TransactionProvider } from "./components/Transaction";
@@ -32,13 +33,13 @@ const UnsupportedMainnetFallback: React.FC = () => (
       textAlign: "center"
     }}
   >
-    
-      This app is for testing purposes only.
-  
+    <Heading sx={{ mb: 3 }}>
+      <Icon name="exclamation-triangle" /> This app is for testing purposes only.
+    </Heading>
 
-
+    <Paragraph sx={{ mb: 3 }}>
       Please change your network to Ropsten.
-  
+    </Paragraph>
   </Flex>
 );
 
@@ -53,11 +54,11 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
         textAlign: "center"
       }}
     >
-      
-        hreshold USD is not yet deployed to{" "}
+      <Heading sx={{ mb: 3 }}>
+        <Icon name="exclamation-triangle" /> Threshold USD is not yet deployed to{" "}
         {chainId === 1 ? "mainnet" : "this network"}.
-
-      Please switch to Ropsten.
+      </Heading>
+      Please switch to Rinkeby.
     </Flex>
   );
 
