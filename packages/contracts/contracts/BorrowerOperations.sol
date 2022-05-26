@@ -479,7 +479,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     // --- 'Require' wrapper functions ---
 
-    function _requireSingularCollChange(uint _collWithdrawal, uint _assetAmount) internal view {
+    function _requireSingularCollChange(uint _collWithdrawal, uint _assetAmount) internal pure {
         require(_assetAmount == 0 || _collWithdrawal == 0, "BorrowerOperations: Cannot withdraw and add coll");
     }
 
@@ -487,7 +487,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         require(msg.sender == _borrower, "BorrowerOps: Caller must be the borrower for a withdrawal");
     }
 
-    function _requireNonZeroAdjustment(uint _collWithdrawal, uint _LUSDChange, uint _assetAmount) internal view {
+    function _requireNonZeroAdjustment(uint _collWithdrawal, uint _LUSDChange, uint _assetAmount) internal pure {
         require(_assetAmount != 0 || _collWithdrawal != 0 || _LUSDChange != 0, "BorrowerOps: There must be either a collateral change or a debt change");
     }
 

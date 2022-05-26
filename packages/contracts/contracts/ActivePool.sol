@@ -10,7 +10,7 @@ import './Interfaces/IStabilityPool.sol';
 import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
-import "./Dependencies/console.sol";
+// import "./Dependencies/console.sol";
 
 /*
  * The Active Pool holds the collateral and LUSD debt (but not LUSD tokens) for all active troves.
@@ -52,7 +52,6 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         checkContract(_defaultPoolAddress);
         checkContract(_collSurplusPoolAddress);
         checkContract(_collateralAddress);
-
 
         borrowerOperationsAddress = _borrowerOperationsAddress;
         troveManagerAddress = _troveManagerAddress;

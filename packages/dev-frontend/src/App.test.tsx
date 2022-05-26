@@ -16,7 +16,7 @@ console.log(`${trove}`);
 test("there's no smoke", async () => {
   const { getByText, getByLabelText, findByText } = render(<App />);
 
-  expect(await findByText(/you can borrow lusd by opening a trove/i)).toBeInTheDocument();
+  expect(await findByText(/Dashboard/i)).toBeInTheDocument();
 
   fireEvent.click(getByText(/open trove/i));
   fireEvent.click(getByLabelText(/collateral/i));
