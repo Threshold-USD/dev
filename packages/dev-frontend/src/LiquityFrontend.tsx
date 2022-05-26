@@ -1,17 +1,14 @@
 import React from "react";
 import { Flex, Container } from "theme-ui";
 import { HashRouter as Router, Switch, Route } from "react-router-dom";
-import { Wallet } from "@ethersproject/wallet";
 
-import { Decimal, Difference, Trove } from "@liquity/lib-base";
-import { LiquityStoreProvider } from "@liquity/lib-react";
-
-import { useLiquity } from "./hooks/LiquityContext";
-import { TransactionMonitor } from "./components/Transaction";
 import { Nav } from "./components/Nav";
 import { SideBar } from "./components/SideBar";
 import { HamburgerMenu } from "./components/HamburgerMenu";
 import { Header } from "./components/Header";
+import { WalletConnector } from "./components/WalletConnector";
+import { TransactionProvider } from "./components/Transaction";
+import { FunctionalPanel } from "./components/FunctionalPanel";
 
 import { PageSwitcher } from "./pages/PageSwitcher";
 import { RedemptionPage } from "./pages/RedemptionPage";
@@ -19,66 +16,101 @@ import { RiskyVaultsPage } from "./pages/RiskyVaultsPage";
 import { StabilityPoolPage } from "./pages/StabilityPoolPage";
 import { VaultPage } from "./pages/VaultPage";
 
-import { TroveViewProvider } from "./components/Trove/context/TroveViewProvider";
+import { LiquityProvider } from "./hooks/LiquityContext";
 
 type LiquityFrontendProps = {
   loader?: React.ReactNode;
 };
-export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
-  const { account, provider, liquity } = useLiquity();
 
-  // For console tinkering ;-)
-  Object.assign(window, {
-    account,
-    provider,
-    liquity,
-    Trove,
-    Decimal,
-    Difference,
-    Wallet
-  });
+const UnsupportedMainnetFallback: React.FC = () => (
+  <Flex
+    sx={{
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100vh",
+      textAlign: "center"
+    }}
+  >
+    
+      This app is for testing purposes only.
+  
+
+
+      Please change your network to Ropsten.
+  
+  </Flex>
+);
+
+export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
+  const unsupportedNetworkFallback = (chainId: number) => (
+    <Flex
+      sx={{
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        height: "100vh",
+        textAlign: "center"
+      }}
+    >
+      
+        hreshold USD is not yet deployed to{" "}
+        {chainId === 1 ? "mainnet" : "this network"}.
+
+      Please switch to Ropsten.
+    </Flex>
+  );
 
   return (
-    <LiquityStoreProvider {...{ loader }} store={liquity.store}>
+    <>
       <Router>
-        <TroveViewProvider>
-            <Flex variant="layout.wrapper">
-              <Header>
-                <HamburgerMenu />
-              </Header>
-              <SideBar>
-                <Nav />
-              </SideBar>
-              <Container
-                variant="main"
-                sx={{
-                  flexGrow: 1,
-                  flexDirection: "column",
-                  alignItems: "center",
-                }}
+        <Flex variant="layout.wrapper">
+          <Header>
+            <HamburgerMenu />
+          </Header>
+          <SideBar>
+            <Nav />
+          </SideBar>
+          <Container
+            variant="main"
+            sx={{
+              flexGrow: 1,
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <WalletConnector loader={loader}>
+              <LiquityProvider
+                loader={loader}
+                unsupportedNetworkFallback={unsupportedNetworkFallback}
+                unsupportedMainnetFallback={<UnsupportedMainnetFallback />}
               >
-                <Switch>
-                  <Route path="/" exact>
-                    <PageSwitcher />
-                  </Route>
-                  <Route path="/borrow" exact>
-                    <VaultPage />
-                  </Route>
-                  <Route path="/earn" exact>
-                    <StabilityPoolPage />
-                  </Route>
-                  <Route path="/redemption">
-                    <RedemptionPage />
-                  </Route>
-                  <Route path="/risky-vaults">
-                    <RiskyVaultsPage />
-                  </Route>
-                </Switch>
-              </Container>
-            </Flex>
-        </TroveViewProvider>
+                <TransactionProvider>
+                  <FunctionalPanel loader={loader}>
+                    <Switch>
+                      <Route path="/" exact>
+                        <PageSwitcher />
+                      </Route>
+                      <Route path="/borrow" exact>
+                        <VaultPage />
+                      </Route>
+                      <Route path="/earn" exact>
+                        <StabilityPoolPage />
+                      </Route>
+                      <Route path="/redemption">
+                        <RedemptionPage />
+                      </Route>
+                      <Route path="/risky-vaults">
+                        <RiskyVaultsPage />
+                      </Route>
+                    </Switch>
+                  </FunctionalPanel>
+                </TransactionProvider>
+              </LiquityProvider>
+            </WalletConnector>
+          </Container>
+        </Flex>
       </Router>
-      <TransactionMonitor />
-    </LiquityStoreProvider>
+    </>            
   );
 };

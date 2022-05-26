@@ -9,7 +9,7 @@ const baseColors = {
   red: "#dc2c10",
   lightRed: "#ff755f",
   lightgrey: "#e8eef3",
-  grey: "#959EB1",
+  grey: "#6A7793",
   lightBlue: "#F6F7FA",
 };
 
@@ -513,8 +513,6 @@ const theme: Theme = {
 
     modalOverlay: {
       ...modalOverlay,
-
-      bg: "white",
 
       display: "flex",
       justifyContent: "center",

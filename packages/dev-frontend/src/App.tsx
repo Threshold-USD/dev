@@ -1,12 +1,9 @@
 import React from "react";
 import { Web3ReactProvider } from "@web3-react/core";
-import { Flex, Spinner, Heading, ThemeProvider, Paragraph } from "theme-ui";
+import { Flex, Spinner, Heading, ThemeProvider} from "theme-ui";
 
 import { BatchedWebSocketAugmentedWeb3Provider } from "@liquity/providers";
-import { LiquityProvider } from "./hooks/LiquityContext";
-import { WalletConnector } from "./components/WalletConnector";
-import { TransactionProvider } from "./components/Transaction";
-import { Icon } from "./components/Icon";
+
 import { getConfig } from "./config";
 import theme from "./theme";
 
@@ -42,26 +39,6 @@ const EthersWeb3ReactProvider: React.FC = ({ children }) => {
   );
 };
 
-const UnsupportedMainnetFallback: React.FC = () => (
-  <Flex
-    sx={{
-      flexDirection: "column",
-      alignItems: "center",
-      justifyContent: "center",
-      height: "100vh",
-      textAlign: "center"
-    }}
-  >
-    <Heading sx={{ mb: 3 }}>
-      <Icon name="exclamation-triangle" /> This app is for testing purposes only.
-    </Heading>
-
-    <Paragraph sx={{ mb: 3 }}>
-      Please change your network to Ropsten.
-    </Paragraph>
-  </Flex>
-);
-
 const App = () => {
   const loader = (
     <Flex sx={{ alignItems: "center", justifyContent: "center", height: "100vh", width: "100vw" }}>
@@ -69,39 +46,10 @@ const App = () => {
       <Heading>Loading...</Heading>
     </Flex>
   );
-
-  const unsupportedNetworkFallback = (chainId: number) => (
-    <Flex
-      sx={{
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        height: "100vh",
-        textAlign: "center"
-      }}
-    >
-      <Heading sx={{ mb: 3 }}>
-        <Icon name="exclamation-triangle" /> Threshold USD is not yet deployed to{" "}
-        {chainId === 1 ? "mainnet" : "this network"}.
-      </Heading>
-      Please switch to Ropsten.
-    </Flex>
-  );
-
   return (
     <EthersWeb3ReactProvider>
       <ThemeProvider theme={theme}>
-        <WalletConnector loader={loader}>
-          <LiquityProvider
-            loader={loader}
-            unsupportedNetworkFallback={unsupportedNetworkFallback}
-            unsupportedMainnetFallback={<UnsupportedMainnetFallback />}
-          >
-            <TransactionProvider>
-              <LiquityFrontend loader={loader} />
-            </TransactionProvider>
-          </LiquityProvider>
-        </WalletConnector>
+        <LiquityFrontend loader={loader} />
       </ThemeProvider>
     </EthersWeb3ReactProvider>
   );
