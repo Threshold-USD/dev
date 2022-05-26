@@ -97,22 +97,22 @@ contract('BorrowerWrappers', async accounts => {
     const proxyAddress = borrowerWrappers.getProxyAddressFromUser(alice)
 
     // send some ETH to proxy
-    await erc20.mint(proxyAddress, amount)
+    await contracts.erc20.mint(proxyAddress, amount)
     //await web3.eth.sendTransaction({ from: owner, to: proxyAddress, value: amount })
-    assert.equal(await erc20.balanceOf(proxyAddress), amount.toString())
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
 
-    const balanceBefore = toBN(await erc20.balanceOf(alice))
+    const balanceBefore = toBN(await contracts.erc20.balanceOf(alice))
 
-    // try to recover ETH
+    // try to recover tokens
     const proxy = borrowerWrappers.getProxyFromUser(alice)
     const signature = 'transferTokens(address,address,uint256)'
-    const calldata = th.getTransactionData(signature, [erc20.address, alice, amount])
+    const calldata = th.getTransactionData(signature, [contracts.erc20.address, alice, amount])
     await assertRevert(proxy.methods["execute(address,bytes)"](borrowerWrappers.scriptAddress, calldata, { from: bob }), 'ds-auth-unauthorized')
 
-    assert.equal(await erc20.balanceOf(proxyAddress), amount.toString())
+    assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
 
-    const balanceAfter = toBN(await web3.eth.getBalance(alice))
-    th.assertIsApproximatelyEqual(balanceAfter, balanceBefore, 1000000) // account for gas
+    let balanceAfter = toBN(await contracts.erc20.balanceOf(alice))
+    assert.equal(balanceAfter.toString(), balanceBefore.toString()) // account for gas
   })
 
   // // --- claimCollateralAndOpenTrove ---
