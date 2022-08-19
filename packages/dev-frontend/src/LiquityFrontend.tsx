@@ -9,6 +9,7 @@ import { Icon } from "./components/Icon";
 import { Header } from "./components/Header";
 import { WalletConnector } from "./components/WalletConnector";
 import { TransactionProvider } from "./components/Transaction";
+import { ChartProvider } from "./components/Dashboard/Chart/context/ChartProvider";
 import { FunctionalPanel } from "./components/FunctionalPanel";
 
 import { PageSwitcher } from "./pages/PageSwitcher";
@@ -86,27 +87,29 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                 unsupportedNetworkFallback={unsupportedNetworkFallback}
                 unsupportedMainnetFallback={<UnsupportedMainnetFallback />}
               >
-                <TransactionProvider>
-                  <FunctionalPanel loader={loader}>
-                    <Switch>
-                      <Route path="/" exact>
-                        <PageSwitcher />
-                      </Route>
-                      <Route path="/borrow" exact>
-                        <VaultPage />
-                      </Route>
-                      {/*<Route path="/earn" exact>
-                        <StabilityPoolPage />
-                      </Route>*/}
-                      <Route path="/redemption">
-                        <RedemptionPage />
-                      </Route>
-                      <Route path="/risky-vaults">
-                        <RiskyVaultsPage />
-                      </Route>
-                    </Switch>
-                  </FunctionalPanel>
-                </TransactionProvider>
+                <ChartProvider>
+                  <TransactionProvider>
+                    <FunctionalPanel loader={loader}>
+                      <Switch>
+                        <Route path="/" exact>
+                          <PageSwitcher />
+                        </Route>
+                        <Route path="/borrow" exact>
+                          <VaultPage />
+                        </Route>
+                        {/*<Route path="/earn" exact>
+                          <StabilityPoolPage />
+                        </Route>*/}
+                        <Route path="/redemption">
+                          <RedemptionPage />
+                        </Route>
+                        <Route path="/risky-vaults">
+                          <RiskyVaultsPage />
+                        </Route>
+                      </Switch>
+                    </FunctionalPanel>
+                  </TransactionProvider>
+                </ChartProvider>
               </LiquityProvider>
             </WalletConnector>
           </Container>
