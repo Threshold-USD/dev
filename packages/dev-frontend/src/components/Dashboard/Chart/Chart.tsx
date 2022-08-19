@@ -50,7 +50,7 @@ export const Chart: React.FC = () => {
     datasets: [
       {
         label: 'Dataset 1',
-        data: tvl.map((tvl) => tvl),
+        data: tvl,
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
       },

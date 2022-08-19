@@ -48,7 +48,7 @@ const fetchTvlByBlock = (blockNumber: number) => {
 };
 
 export const createListOfTimestamps = (): Array<number> => {
-  const currentDate = Math.floor((Date.now() / 1000) - 60) // Get a date object for the current time;
+  const currentDate = Math.floor((Date.now() / 1000) - 120) // Get a date object for the current time;
   
   const deltaPerPeriod = 86400; // Every 24 hours (in secs)
   const numberOfPeriods = 14; // For 14 days
