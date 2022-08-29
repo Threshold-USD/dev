@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { Box, Button, Card, Flex, Input, ThemeUICSSProperties } from "theme-ui";
 import { Decimal, Percent, LiquityStoreState } from "@liquity/lib-base";
 import { useLiquitySelector } from "@liquity/lib-react";
-import { useLocation } from 'react-router-dom';
 import { COIN, FIRST_ERC20_COLLATERAL } from '../strings';
 import { useLiquity } from "../hooks/LiquityContext";
 
@@ -52,8 +51,6 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
     }
   } = useLiquity();
 
-  const location = useLocation();
-
   const {
     numberOfTroves,
     price,
@@ -90,22 +87,18 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
           pt: "2em",
           gap: "1em"
         }}>
-          {location.pathname !== '/' && (
-            <>
-              <SystemStat
-                info="Borrowing Fee"
-                tooltip="The Borrowing Fee is a one-off fee charged as a percentage of the borrowed amount, and is part of a Vault's debt."
-              >
-                {borrowingFeePct.toString(2)}
-              </SystemStat>
-              <SystemStat
-                info="Vaults"
-                tooltip="The total number of active Vaults in the system."
-              >
-                 {Decimal.from(numberOfTroves).prettify(0)}
-              </SystemStat>
-            </>
-          )}
+          <SystemStat
+            info="Borrowing Fee"
+            tooltip="The Borrowing Fee is a one-off fee charged as a percentage of the borrowed amount, and is part of a Vault's debt."
+          >
+            {borrowingFeePct.toString(2)}
+          </SystemStat>
+          <SystemStat
+            info="Vaults"
+            tooltip="The total number of active Vaults in the system."
+          >
+              {Decimal.from(numberOfTroves).prettify(0)}
+          </SystemStat>
           <SystemStat
             info="TVL"
             tooltip={`The Total Value Locked (TVL) is the total value of Ether locked as collateral in the system, given in ${ FIRST_ERC20_COLLATERAL } and USD.`}

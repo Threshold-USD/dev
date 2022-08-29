@@ -3,7 +3,7 @@ import { Container, Heading } from "theme-ui";
 import { BorrowingFee } from "../components/Dashboard/BorrowingFee";
 import { OpenedVaults } from "../components/Dashboard/OpenedVaults";
 import { ColRatio } from "../components/Dashboard/ColRatio";
-import { Chart } from "../components/Dashboard/Chart/Chart";
+import { LineChart } from "../components/Dashboard/Chart/LineChart";
 import { VaultCard } from "../components/Dashboard/VaultCard";
 import { StabilityPoolCard } from "../components/Dashboard/StabilityPoolCard";
 import { SystemStatsCard } from "../components/SystemStatsCard";
@@ -20,7 +20,7 @@ export const Dashboard: React.FC = () => (
       </Container>
       <Container variant="middle">
         <OpenedVaults />
-        <Chart />
+        <LineChart />
         <StabilityPoolCard />
       </Container>
       <Container variant="right">

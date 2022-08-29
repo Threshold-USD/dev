@@ -1,8 +1,9 @@
 import { createContext, useContext } from "react";
+import { tvlData } from "./ChartProvider"
 
 type ChartContextType = {
-  tvl: number[];
-  timestamps: Array<number|string>;
+  tvl: Array<tvlData>;
+  timestamps: Array<number>;
 };
 
 export const ChartContext = createContext<ChartContextType | null>(null);
