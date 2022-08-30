@@ -13,6 +13,10 @@ export type tvlData = {
   blockNumber: number
 }
 
+type FunctionalPanelProps = {
+  loader?: React.ReactNode;
+};
+
 const BLOCKS_API_URL = "https://api.thegraph.com/subgraphs/name/blocklytics/goerli-blocks";
 const THRESHOLD_USD_API_URL = "https://api.thegraph.com/subgraphs/name/evandrosaturnino/thresholdusd"
 
@@ -56,8 +60,8 @@ export const createListOfTimestamps = (): Array<number> => {
   const currentDate = Math.floor((Date.now() / 1000) - 120) // Get a date object for the current time;
   
   const deltaPerPeriod = 86400; // Every 24 hours (in secs)
-  const numberOfPeriods = 30; // For 14 days
-  const startingTimestamp = currentDate - (deltaPerPeriod * numberOfPeriods); // Set it 14 days ago (in secs)
+  const numberOfPeriods = 30; // For 30 days
+  const startingTimestamp = currentDate - (deltaPerPeriod * numberOfPeriods); // Set it 30 days ago (in secs)
 
   const timestamps: Array<number> = [];
 
@@ -81,29 +85,33 @@ export const queryBlocksByTimestamps = async (timestamps: Array<number>): Promis
 };
 
 export const queryTvlByBlocks = async (blocks: Array<BlockObject>): Promise<Array<tvlData>> => {
-  const tvl: Array<tvlData> = [];
-
-  for (const block of blocks) {
+  
+  const tvlData = blocks.map(async (block) => {
     const blockNumber: number = Number(block.number);
-    const tvlData = await fetchTvlByBlock(blockNumber);
-    const tvlValue: tvlData = tvlData.data ? {
-      totalCollateral: Number(tvlData.data.systemStates[0].totalCollateral), 
-      blockNumber: blockNumber
-    } : {
+    
+    return fetchTvlByBlock(blockNumber).then((result) => {
+      const tvlValue: tvlData = result.data ? {
+        totalCollateral: Number(result.data.systemStates[0].totalCollateral), 
+        blockNumber: blockNumber
+      } : {
         totalCollateral: 0, 
         blockNumber: blockNumber
       };
-    tvl.push(tvlValue);
-  }; // iterating the blocks array to query the tvl of each day
+      return tvlValue;
+    });
+  });
 
-  return tvl;
+  return Promise.all(tvlData)
 };
 
 export const queryTVL = async ():  Promise<Array<tvlData>> => {
   const timestamps: Array<number> = createListOfTimestamps();
-  const blocks: Array<BlockObject> = await queryBlocksByTimestamps(timestamps);
-  const tvl: Array<tvlData> = await queryTvlByBlocks(blocks);
-  return tvl;
+  return await queryBlocksByTimestamps(timestamps).then(
+    async (blocks) => {
+      const tvl = await queryTvlByBlocks(blocks);
+      return tvl
+    }
+  );
 }
 
 async function fetchData(API_URL: string, query: string) {
@@ -115,10 +123,9 @@ async function fetchData(API_URL: string, query: string) {
   return response;
 }
 
-export const ChartProvider: React.FC = props => {
-  const { children } = props;
+export const ChartProvider: React.FC<FunctionalPanelProps> = ({ children, loader })  => {
   const timestamps: Array<number> = createListOfTimestamps();
-  const [tvl, setTvl] = useState<Array<tvlData>>([]);
+  const [tvl, setTvl] = useState<Array<tvlData>>();
   const [isMounted, setIsMounted] = useState<boolean>(true);
 
   useEffect(() => {
@@ -126,14 +133,21 @@ export const ChartProvider: React.FC = props => {
       queryTVL().then(
         (result) => {
           if (!isMounted) return null
-          return setTvl(result);
+
+          setTvl(result);
+          return tvl
         }
       );
     }
     return () => { 
       setIsMounted(false);
     };
-  }, [isMounted, tvl]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMounted]);
+
+  if (!timestamps || !tvl) {
+    return <>{loader}</>
+  }
 
   const provider = {
     tvl,

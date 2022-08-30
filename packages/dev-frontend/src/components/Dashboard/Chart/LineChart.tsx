@@ -53,18 +53,25 @@ export const LineChart: React.FC = () => {
 
   const [activeData, setActiveData] = useState<number | string>('-');
   const [activeLabel, setActiveLabel] = useState<string>();
-  const { tvl, timestamps } = useTvl();
+  const [chartData, setChartData] = useState<any>();
+  const [chartLabels, setChartLabels] = useState<any>();
+
+  useTvl().then((result) => {
+    const { tvl , timestamps } = result;
+    setChartData(tvl)
+    setChartLabels(timestamps)
+  });
 
   const labels: Array<{[date: string]: string}> = [];
 
-  timestamps.map((label: number) => {
+  chartLabels?.map((label: number) => {
     const date = new Date(label * 1000) // convert timestamp to date;
     const day = date.getUTCDate();
     const month = date.toLocaleString('default', { month: 'long' })
     const year = date.getUTCFullYear();
 
     return labels.push({[day]: `${month} ${day}, ${year}`})
-  });
+  });  
 
   const options = {
     responsive: true,
@@ -112,7 +119,6 @@ export const LineChart: React.FC = () => {
       const labelIndex = labels[index];
       const activeLabel = labelIndex && Object.values(labelIndex)[0];
       setActiveData(activeData ? activeData : '-');
-      console.log('labelIndex: ', labelIndex);
       setActiveLabel(activeLabel && activeLabel)
     }
   };
@@ -126,9 +132,7 @@ export const LineChart: React.FC = () => {
         fill: "start",
         lineTension: 0.4,
         label: 'TVL',
-        data: tvl.map((tvl) => {
-          return tvl.totalCollateral
-        }),
+        data: chartData?.map((tvl: any) => tvl?.totalCollateral),
         borderColor: '#20cb9d',
         pointBackgroundColor: '#20cb9d',
         backgroundColor: (context: ScriptableContext<"line">) => {

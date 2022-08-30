@@ -87,7 +87,7 @@ export const LiquityFrontend: React.FC<LiquityFrontendProps> = ({ loader }) => {
                 unsupportedNetworkFallback={unsupportedNetworkFallback}
                 unsupportedMainnetFallback={<UnsupportedMainnetFallback />}
               >
-                <ChartProvider>
+                <ChartProvider loader={loader}>
                   <TransactionProvider>
                     <FunctionalPanel loader={loader}>
                       <Switch>

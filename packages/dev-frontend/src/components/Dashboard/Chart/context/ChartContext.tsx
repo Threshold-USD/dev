@@ -8,7 +8,7 @@ type ChartContextType = {
 
 export const ChartContext = createContext<ChartContextType | null>(null);
 
-export const useTvl = (): ChartContextType => {
+export const useTvl = async (): Promise<ChartContextType> => {
   const context: ChartContextType | null = useContext(ChartContext);
 
   if (context === null) {
