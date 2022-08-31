@@ -464,25 +464,25 @@ const theme: Theme = {
       maxWidth: "980px"
     },
 
-    mainRow: {
+    dashboardGrid: {
       ...columns,
 
       flexDirection: ["column-reverse", "row"]
     },
 
-    left: {
-      pr: cardGapX,
-      width: ["100%", "50%", "33%"]
-    },
-
-    middle: {
-      pr: cardGapX,
-      width: ["100%", "50%", "33%"]
-    },
-
-    right: {
+    oneThird: {
       pr: cardGapX,
       width: ["100%", "100%", "33%"]
+    },
+
+    half: {
+      pr: cardGapX,
+      width: ["100%", "50%", "50%"]
+    },
+
+    twoThirds: {
+      pr: cardGapX,
+      width: ["100%", "100%", "67%"]
     },
 
     firstHalf: {

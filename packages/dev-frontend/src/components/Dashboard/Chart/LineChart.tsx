@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { Box } from "theme-ui";
+import { Box, Card, Flex } from "theme-ui";
+
+import { FIRST_ERC20_COLLATERAL } from '../../../strings';
 
 import { useTvl } from "./context/ChartContext";
+import { tvlData } from "./context/ChartProvider";
 
 import {
   Chart as ChartJS,
@@ -53,8 +56,8 @@ export const LineChart: React.FC = () => {
 
   const [activeData, setActiveData] = useState<number | string>('-');
   const [activeLabel, setActiveLabel] = useState<string>();
-  const [chartData, setChartData] = useState<any>();
-  const [chartLabels, setChartLabels] = useState<any>();
+  const [chartData, setChartData] = useState<Array<tvlData>>();
+  const [chartLabels, setChartLabels] = useState<Array<number>>();
 
   useTvl().then((result) => {
     const { tvl , timestamps } = result;
@@ -74,7 +77,9 @@ export const LineChart: React.FC = () => {
   });  
 
   const options = {
+    borderWidth: 2,
     responsive: true,
+    maintainAspectRatio: false,
     elements: {
       point:{
           radius: 0,
@@ -88,6 +93,12 @@ export const LineChart: React.FC = () => {
       x: {
         ticks: {
           padding: 15,
+          autoSkip: true,
+          maxTicksLimit: 20,
+          font: {
+            size: 11,
+            weight: 'bold'
+          }
         },
         grid: {
           display: false,
@@ -132,7 +143,7 @@ export const LineChart: React.FC = () => {
         fill: "start",
         lineTension: 0.4,
         label: 'TVL',
-        data: chartData?.map((tvl: any) => tvl?.totalCollateral),
+        data: chartData?.map((tvl: tvlData) => tvl?.totalCollateral),
         borderColor: '#20cb9d',
         pointBackgroundColor: '#20cb9d',
         backgroundColor: (context: ScriptableContext<"line">) => {
@@ -146,16 +157,52 @@ export const LineChart: React.FC = () => {
     ],
   };
   return (
-    <Box>
-      <Box>{activeData} {activeData > 0 && ' WETH'}</Box>
-      <Box style={{ position: "absolute" }}>{activeLabel}</Box>
-      <Line options={{
-        ...options,
-        interaction: {
-          mode: 'index',
-          intersect: false,
-        }
-      }}  data={data} />
-    </Box>
+    <Card variant="layout.columns" style={{ height: "25em" }}>
+      <Flex sx={{
+        width: "100%",
+        gap: 1,
+        pb: 3,
+        borderBottom: 1, 
+        borderColor: "border"
+      }}>
+        TVL Chart
+      </Flex>
+      <Flex sx={{
+        width: "100%",
+        flexDirection: "column",
+        pt: "1em",
+        pl: ["1em", 0, 0, "1em"],
+        gap: "1em",
+      }}>
+        <Box style={{
+          height: "18.5em",
+          marginTop: "2.5em",
+          marginBottom: "3em"
+        }}>
+          <Flex sx={{ 
+            position: "absolute", 
+            marginTop: "-1.6em",
+            fontSize: "1.6em", 
+            fontWeight: "bold", 
+            color: "text"
+          }}>
+            {activeData} {activeData > 0 && ` ${ FIRST_ERC20_COLLATERAL }` }
+          </Flex>
+          <Flex sx={{ 
+            position: "absolute",
+            fontSize: ".9em",
+          }}>
+            {activeLabel}
+          </Flex>
+          <Line options={{
+            ...options,
+            interaction: {
+              mode: 'index',
+              intersect: false,
+            }
+          }}  data={data} />
+        </Box>
+      </Flex>
+    </Card>
   );
 };
