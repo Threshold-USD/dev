@@ -4,7 +4,9 @@ echo_config() {
   echo '{'
   [ -n "$TESTNET_ONLY" ] && echo '  "testnetOnly": '$TESTNET_ONLY','
   echo '  "frontendTag": "'$FRONTEND_TAG'",'
-  echo '  "infuraApiKey": "'$INFURA_API_KEY'"'
+  echo '  "infuraApiKey": "'$INFURA_API_KEY'",'
+  echo '  "BlocksApiUrl": "'$BLOCKS_API_URL'",'
+  echo '  "ThresholdUsdApiUrl": "'$THRESHOLD_USD_API_URL'"'
   echo '}'
 }
 
