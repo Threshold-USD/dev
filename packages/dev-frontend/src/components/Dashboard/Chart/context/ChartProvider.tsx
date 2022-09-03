@@ -134,9 +134,6 @@ export const ChartProvider: React.FC<FunctionalPanelProps> = ({ children, loader
         const BlocksUrlByNetwork = `https://${BlocksApiUrl}/${networkName}-blocks`;
         const ThresholdUrlByNetwork = `https://${ThresholdUsdApiUrl}/${networkName}-thresholdusd`;
 
-        console.log('ThresholdUrlByNetwork: ', ThresholdUrlByNetwork)
-        console.log('BlocksUrlByNetwork: ', BlocksUrlByNetwork)
-
         queryTVL(BlocksUrlByNetwork, ThresholdUrlByNetwork).then(
         (result) => {
           if (!isMounted) return null;
