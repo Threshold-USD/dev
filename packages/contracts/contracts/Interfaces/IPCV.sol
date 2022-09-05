@@ -10,8 +10,8 @@ interface IPCV {
     event BorrowerOperationsAddressSet(address _borrowerOperationsAddress);
     event ActivePoolAddressSet(address _activePoolAddress);
 
-    event F_ETHUpdated(uint _F_ETH);
-    event F_THUSDUpdated(uint _F_THUSD);
+    event F_ETHUpdated(uint256 _F_ETH);
+    event F_THUSDUpdated(uint256 _F_THUSD);
 
     // --- Functions ---
 
@@ -23,8 +23,8 @@ interface IPCV {
         address _activePoolAddress
     )  external;
 
-    function increaseF_ETH(uint _ETHFee) external;
+    function increaseF_ETH(uint256 _ETHFee) external;
 
-    function increaseF_THUSD(uint _THUSDFee) external;
+    function increaseF_THUSD(uint256 _THUSDFee) external;
 
 }

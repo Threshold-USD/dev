@@ -30,26 +30,26 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     address borrowerOperationsAddress;
     address troveManagerAddress;
 
-    uint constant public ETHUSD_TELLOR_REQ_ID = 1;
+    uint256 constant public ETHUSD_TELLOR_REQ_ID = 1;
 
     // Use to convert a price answer to an 18-digit precision uint
-    uint constant public TARGET_DIGITS = 18;
-    uint constant public TELLOR_DIGITS = 6;
+    uint256 constant public TARGET_DIGITS = 18;
+    uint256 constant public TELLOR_DIGITS = 6;
 
     // Maximum time period allowed since Chainlink's latest round data timestamp, beyond which Chainlink is considered frozen.
-    uint constant public TIMEOUT = 14400;  // 4 hours: 60 * 60 * 4
+    uint256 constant public TIMEOUT = 14400;  // 4 hours: 60 * 60 * 4
 
     // Maximum deviation allowed between two consecutive Chainlink oracle prices. 18-digit precision.
-    uint constant public MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND =  5e17; // 50%
+    uint256 constant public MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND =  5e17; // 50%
 
     /*
     * The maximum relative price difference between two oracle responses allowed in order for the PriceFeed
     * to return to using the Chainlink oracle. 18-digit precision.
     */
-    uint constant public MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES = 5e16; // 5%
+    uint256 constant public MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES = 5e16; // 5%
 
     // The last good price seen from an oracle by Liquity
-    uint public lastGoodPrice;
+    uint256 public lastGoodPrice;
 
     struct ChainlinkResponse {
         uint80 roundId;
@@ -362,18 +362,18 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
 
     function _chainlinkPriceChangeAboveMax(ChainlinkResponse memory _currentResponse, ChainlinkResponse memory _prevResponse) internal pure returns (bool) {
-        uint currentScaledPrice = _scaleChainlinkPriceByDigits(uint256(_currentResponse.answer), _currentResponse.decimals);
-        uint prevScaledPrice = _scaleChainlinkPriceByDigits(uint256(_prevResponse.answer), _prevResponse.decimals);
+        uint256 currentScaledPrice = _scaleChainlinkPriceByDigits(uint256(_currentResponse.answer), _currentResponse.decimals);
+        uint256 prevScaledPrice = _scaleChainlinkPriceByDigits(uint256(_prevResponse.answer), _prevResponse.decimals);
 
-        uint minPrice = LiquityMath._min(currentScaledPrice, prevScaledPrice);
-        uint maxPrice = LiquityMath._max(currentScaledPrice, prevScaledPrice);
+        uint256 minPrice = LiquityMath._min(currentScaledPrice, prevScaledPrice);
+        uint256 maxPrice = LiquityMath._max(currentScaledPrice, prevScaledPrice);
 
         /*
         * Use the larger price as the denominator:
         * - If price decreased, the percentage deviation is in relation to the the previous price.
         * - If price increased, the percentage deviation is in relation to the current price.
         */
-        uint percentDeviation = (maxPrice - minPrice) * DECIMAL_PRECISION / maxPrice;
+        uint256 percentDeviation = (maxPrice - minPrice) * DECIMAL_PRECISION / maxPrice;
 
         // Return true if price has more than doubled, or more than halved.
         return percentDeviation > MAX_PRICE_DEVIATION_FROM_PREVIOUS_ROUND;
@@ -420,13 +420,13 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     }
 
     function _bothOraclesSimilarPrice( ChainlinkResponse memory _chainlinkResponse, TellorResponse memory _tellorResponse) internal pure returns (bool) {
-        uint scaledChainlinkPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.answer), _chainlinkResponse.decimals);
-        uint scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
+        uint256 scaledChainlinkPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.answer), _chainlinkResponse.decimals);
+        uint256 scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
 
         // Get the relative price difference between the oracles. Use the lower price as the denominator, i.e. the reference for the calculation.
-        uint minPrice = LiquityMath._min(scaledTellorPrice, scaledChainlinkPrice);
-        uint maxPrice = LiquityMath._max(scaledTellorPrice, scaledChainlinkPrice);
-        uint percentPriceDifference = (maxPrice - minPrice) * DECIMAL_PRECISION / minPrice;
+        uint256 minPrice = LiquityMath._min(scaledTellorPrice, scaledChainlinkPrice);
+        uint256 maxPrice = LiquityMath._max(scaledTellorPrice, scaledChainlinkPrice);
+        uint256 percentPriceDifference = (maxPrice - minPrice) * DECIMAL_PRECISION / minPrice;
 
         /*
         * Return true if the relative price difference is <= 3%: if so, we assume both oracles are probably reporting
@@ -435,14 +435,14 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         return percentPriceDifference <= MAX_PRICE_DIFFERENCE_BETWEEN_ORACLES;
     }
 
-    function _scaleChainlinkPriceByDigits(uint _price, uint _answerDigits) internal pure returns (uint) {
+    function _scaleChainlinkPriceByDigits(uint256 _price, uint256 _answerDigits) internal pure returns (uint) {
         /*
         * Convert the price returned by the Chainlink oracle to an 18-digit decimal for use by Liquity.
         * At date of Liquity launch, Chainlink uses an 8-digit price, but we also handle the possibility of
         * future changes.
         *
         */
-        uint price;
+        uint256 price;
         if (_answerDigits >= TARGET_DIGITS) {
             // Scale the returned price value down to Liquity's target precision
             price = _price / (10 ** (_answerDigits - TARGET_DIGITS));
@@ -454,7 +454,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         return price;
     }
 
-    function _scaleTellorPriceByDigits(uint _price) internal pure returns (uint) {
+    function _scaleTellorPriceByDigits(uint256 _price) internal pure returns (uint) {
         return _price * (10**(TARGET_DIGITS - TELLOR_DIGITS));
     }
 
@@ -463,20 +463,20 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
         emit PriceFeedStatusChanged(_status);
     }
 
-    function _storePrice(uint _currentPrice) internal {
+    function _storePrice(uint256 _currentPrice) internal {
         lastGoodPrice = _currentPrice;
         emit LastGoodPriceUpdated(_currentPrice);
     }
 
      function _storeTellorPrice(TellorResponse memory _tellorResponse) internal returns (uint) {
-        uint scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
+        uint256 scaledTellorPrice = _scaleTellorPriceByDigits(_tellorResponse.value);
         _storePrice(scaledTellorPrice);
 
         return scaledTellorPrice;
     }
 
     function _storeChainlinkPrice(ChainlinkResponse memory _chainlinkResponse) internal returns (uint) {
-        uint scaledChainlinkPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.answer), _chainlinkResponse.decimals);
+        uint256 scaledChainlinkPrice = _scaleChainlinkPriceByDigits(uint256(_chainlinkResponse.answer), _chainlinkResponse.decimals);
         _storePrice(scaledChainlinkPrice);
 
         return scaledChainlinkPrice;

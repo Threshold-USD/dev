@@ -18,8 +18,8 @@ contract PCV is IPCV, Ownable, CheckContract, BaseMath {
 
     mapping( address => uint) public stakes;
 
-    uint public F_ETH;  // Running sum of ETH fees
-    uint public F_THUSD; // Running sum of THUSD fees
+    uint256 public F_ETH;  // Running sum of ETH fees
+    uint256 public F_THUSD; // Running sum of THUSD fees
 
     ITHUSDToken public thusdToken;
 
@@ -60,14 +60,14 @@ contract PCV is IPCV, Ownable, CheckContract, BaseMath {
 
     // --- Reward-per-unit-staked increase functions. Called by Liquity core contracts ---
 
-    function increaseF_ETH(uint _ETHFee) external override {
+    function increaseF_ETH(uint256 _ETHFee) external override {
         _requireCallerIsTroveManager();
 
         F_ETH += _ETHFee;
         emit F_ETHUpdated(F_ETH);
     }
 
-    function increaseF_THUSD(uint _THUSDFee) external override {
+    function increaseF_THUSD(uint256 _THUSDFee) external override {
         _requireCallerIsBorrowerOperations();
 
         F_THUSD += _THUSDFee;

@@ -11,11 +11,11 @@ contract THUSDTokenCaller {
         THUSD = _THUSD;
     }
 
-    function thusdMint(address _account, uint _amount) external {
+    function thusdMint(address _account, uint256 _amount) external {
         THUSD.mint(_account, _amount);
     }
 
-    function thusdBurn(address _account, uint _amount) external {
+    function thusdBurn(address _account, uint256 _amount) external {
         THUSD.burn(_account, _amount);
     }
 

@@ -14,23 +14,23 @@ contract BorrowerOperationsScript is CheckContract {
         borrowerOperations = _borrowerOperations;
     }
 
-    function openTrove(uint _maxFee, uint _THUSDAmount, uint _assetAmount, address _upperHint, address _lowerHint) external payable {
+    function openTrove(uint256 _maxFee, uint256 _THUSDAmount, uint256 _assetAmount, address _upperHint, address _lowerHint) external payable {
         borrowerOperations.openTrove(_maxFee, _THUSDAmount, _assetAmount, _upperHint, _lowerHint);
     }
 
-    function addColl(uint _assetAmount, address _upperHint, address _lowerHint) external payable {
+    function addColl(uint256 _assetAmount, address _upperHint, address _lowerHint) external payable {
         borrowerOperations.addColl(_assetAmount, _upperHint, _lowerHint);
     }
 
-    function withdrawColl(uint _amount, address _upperHint, address _lowerHint) external {
+    function withdrawColl(uint256 _amount, address _upperHint, address _lowerHint) external {
         borrowerOperations.withdrawColl(_amount, _upperHint, _lowerHint);
     }
 
-    function withdrawTHUSD(uint _maxFee, uint _amount, address _upperHint, address _lowerHint) external {
+    function withdrawTHUSD(uint256 _maxFee, uint256 _amount, address _upperHint, address _lowerHint) external {
         borrowerOperations.withdrawTHUSD(_maxFee, _amount, _upperHint, _lowerHint);
     }
 
-    function repayTHUSD(uint _amount, address _upperHint, address _lowerHint) external {
+    function repayTHUSD(uint256 _amount, address _upperHint, address _lowerHint) external {
         borrowerOperations.repayTHUSD(_amount, _upperHint, _lowerHint);
     }
 
@@ -38,7 +38,7 @@ contract BorrowerOperationsScript is CheckContract {
         borrowerOperations.closeTrove();
     }
 
-    function adjustTrove(uint _maxFee, uint _collWithdrawal, uint _debtChange, bool isDebtIncrease, uint _assetAmount, address _upperHint, address _lowerHint) external payable {
+    function adjustTrove(uint256 _maxFee, uint256 _collWithdrawal, uint256 _debtChange, bool isDebtIncrease, uint256 _assetAmount, address _upperHint, address _lowerHint) external payable {
         borrowerOperations.adjustTrove(_maxFee, _collWithdrawal, _debtChange, isDebtIncrease, _assetAmount, _upperHint, _lowerHint);
     }
 

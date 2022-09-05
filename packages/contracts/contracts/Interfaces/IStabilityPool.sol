@@ -26,8 +26,8 @@ interface IStabilityPool {
 
     // --- Events ---
 
-    event StabilityPoolCollateralBalanceUpdated(uint _newBalance);
-    event StabilityPoolTHUSDBalanceUpdated(uint _newBalance);
+    event StabilityPoolCollateralBalanceUpdated(uint256 _newBalance);
+    event StabilityPoolTHUSDBalanceUpdated(uint256 _newBalance);
 
     event BorrowerOperationsAddressChanged(address _newBorrowerOperationsAddress);
     event TroveManagerAddressChanged(address _newTroveManagerAddress);
@@ -38,16 +38,16 @@ interface IStabilityPool {
     event PriceFeedAddressChanged(address _newPriceFeedAddress);
     event CollateralAddressChanged(address _newCollateralAddress);
 
-    event P_Updated(uint _P);
-    event S_Updated(uint _S, uint128 _epoch, uint128 _scale);
+    event P_Updated(uint256 _P);
+    event S_Updated(uint256 _S, uint128 _epoch, uint128 _scale);
     event EpochUpdated(uint128 _currentEpoch);
     event ScaleUpdated(uint128 _currentScale);
 
-    event DepositSnapshotUpdated(address indexed _depositor, uint _P, uint _S);
-    event UserDepositChanged(address indexed _depositor, uint _newDeposit);
+    event DepositSnapshotUpdated(address indexed _depositor, uint256 _P, uint256 _S);
+    event UserDepositChanged(address indexed _depositor, uint256 _newDeposit);
 
-    event CollateralGainWithdrawn(address indexed _depositor, uint _collateral, uint _THUSDLoss);
-    event CollateralSent(address _to, uint _amount);
+    event CollateralGainWithdrawn(address indexed _depositor, uint256 _collateral, uint256 _THUSDLoss);
+    event CollateralSent(address _to, uint256 _amount);
 
     // --- Functions ---
 
@@ -71,7 +71,7 @@ interface IStabilityPool {
      * ---
      * - Sends depositor's accumulated gains (collateral) to depositor
      */
-    function provideToSP(uint _amount) external;
+    function provideToSP(uint256 _amount) external;
 
     /*
      * Initial checks:
@@ -83,7 +83,7 @@ interface IStabilityPool {
      *
      * If _amount > userDeposit, the user withdraws all of their compounded deposit.
      */
-    function withdrawFromSP(uint _amount) external;
+    function withdrawFromSP(uint256 _amount) external;
 
     /*
      * Initial checks:
@@ -105,7 +105,7 @@ interface IStabilityPool {
      * and transfers the Trove's collateral from ActivePool to StabilityPool.
      * Only called by liquidation functions in the TroveManager.
      */
-    function offset(uint _debt, uint _coll) external;
+    function offset(uint256 _debt, uint256 _coll) external;
 
     /*
      * Returns the total amount of collateral held by the pool, accounted in an internal variable instead of `balance`,

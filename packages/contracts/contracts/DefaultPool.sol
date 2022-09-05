@@ -68,7 +68,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     // --- Pool functionality ---
 
-    function sendCollateralToActivePool(uint _amount) external override {
+    function sendCollateralToActivePool(uint256 _amount) external override {
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
         collateral -= _amount;
@@ -86,13 +86,13 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         }
     }
 
-    function increaseTHUSDDebt(uint _amount) external override {
+    function increaseTHUSDDebt(uint256 _amount) external override {
         _requireCallerIsTroveManager();
         THUSDDebt += _amount;
         emit DefaultPoolTHUSDDebtUpdated(THUSDDebt);
     }
 
-    function decreaseTHUSDDebt(uint _amount) external override {
+    function decreaseTHUSDDebt(uint256 _amount) external override {
         _requireCallerIsTroveManager();
         THUSDDebt -= _amount;
         emit DefaultPoolTHUSDDebtUpdated(THUSDDebt);

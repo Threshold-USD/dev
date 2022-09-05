@@ -85,7 +85,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
 
     // --- Pool functionality ---
 
-    function sendCollateral(address _account, uint _amount) external override {
+    function sendCollateral(address _account, uint256 _amount) external override {
         _requireCallerIsBOorTroveMorSP();
         collateral -= _amount;
         emit ActivePoolCollateralBalanceUpdated(collateral);
@@ -110,13 +110,13 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         }
     }
 
-    function increaseTHUSDDebt(uint _amount) external override {
+    function increaseTHUSDDebt(uint256 _amount) external override {
         _requireCallerIsBOorTroveM();
         THUSDDebt += _amount;
         emit ActivePoolTHUSDDebtUpdated(THUSDDebt);
     }
 
-    function decreaseTHUSDDebt(uint _amount) external override {
+    function decreaseTHUSDDebt(uint256 _amount) external override {
         _requireCallerIsBOorTroveMorSP();
         THUSDDebt -= _amount;
         emit ActivePoolTHUSDDebtUpdated(THUSDDebt);

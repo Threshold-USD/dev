@@ -54,18 +54,18 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         pcv = pcvCached;
     }
 
-    function claimCollateralAndOpenTrove(uint _maxFee, uint _THUSDAmount, address _upperHint, address _lowerHint) external payable {
-        uint balanceBefore = address(this).balance;
+    function claimCollateralAndOpenTrove(uint256 _maxFee, uint256 _THUSDAmount, address _upperHint, address _lowerHint) external payable {
+        uint256 balanceBefore = address(this).balance;
 
         // Claim collateral
         borrowerOperations.claimCollateral();
 
-        uint balanceAfter = address(this).balance;
+        uint256 balanceAfter = address(this).balance;
 
         // already checked in CollSurplusPool
         assert(balanceAfter > balanceBefore);
 
-        uint totalCollateral = balanceAfter - balanceBefore + msg.value;
+        uint256 totalCollateral = balanceAfter - balanceBefore + msg.value;
 
         // Open trove with obtained collateral, plus collateral sent by user
         // if (borrowerOperations.collateralAddress() == address(0)) {
@@ -75,19 +75,19 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         // }
     }
 
-    function claimSPRewardsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
-        uint collBalanceBefore = address(this).balance;
+    function claimSPRewardsAndRecycle(uint256 _maxFee, address _upperHint, address _lowerHint) external {
+        uint256 collBalanceBefore = address(this).balance;
 
         // Claim rewards
         stabilityPool.withdrawFromSP(0);
 
-        uint collBalanceAfter = address(this).balance;
-        uint claimedCollateral = collBalanceAfter - collBalanceBefore;
+        uint256 collBalanceAfter = address(this).balance;
+        uint256 claimedCollateral = collBalanceAfter - collBalanceBefore;
 
         // Add claimed ETH to trove, get more THUSD and stake it into the Stability Pool
         if (claimedCollateral > 0) {
             _requireUserHasTrove(address(this));
-            uint THUSDAmount = _getNetTHUSDAmount(claimedCollateral);
+            uint256 THUSDAmount = _getNetTHUSDAmount(claimedCollateral);
             // if (borrowerOperations.collateralAddress() == address(0)) {
             //   borrowerOperations.adjustTrove{ value: claimedCollateral }(_maxFee, 0, THUSDAmount, true, 0, _upperHint, _lowerHint);
             // } else {
@@ -100,14 +100,14 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         }
     }
 
-    function claimStakingGainsAndRecycle(uint _maxFee, address _upperHint, address _lowerHint) external {
-        uint collBalanceBefore = address(this).balance;
-        uint thusdBalanceBefore = thusdToken.balanceOf(address(this));
+    function claimStakingGainsAndRecycle(uint256 _maxFee, address _upperHint, address _lowerHint) external {
+        uint256 collBalanceBefore = address(this).balance;
+        uint256 thusdBalanceBefore = thusdToken.balanceOf(address(this));
 
-        uint gainedCollateral = address(this).balance - collBalanceBefore; // stack too deep issues :'(
-        uint gainedTHUSD = thusdToken.balanceOf(address(this)) - thusdBalanceBefore;
+        uint256 gainedCollateral = address(this).balance - collBalanceBefore; // stack too deep issues :'(
+        uint256 gainedTHUSD = thusdToken.balanceOf(address(this)) - thusdBalanceBefore;
 
-        uint netTHUSDAmount;
+        uint256 netTHUSDAmount;
         // Top up trove and get more THUSD, keeping ICR constant
         if (gainedCollateral > 0) {
             _requireUserHasTrove(address(this));
@@ -119,20 +119,20 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
             // }
         }
 
-        uint totalTHUSD = gainedTHUSD + netTHUSDAmount;
+        uint256 totalTHUSD = gainedTHUSD + netTHUSDAmount;
         if (totalTHUSD > 0) {
             stabilityPool.provideToSP(totalTHUSD);
         }
 
     }
 
-    function _getNetTHUSDAmount(uint _collateral) internal returns (uint) {
-        uint price = priceFeed.fetchPrice();
-        uint ICR = troveManager.getCurrentICR(address(this), price);
+    function _getNetTHUSDAmount(uint256 _collateral) internal returns (uint) {
+        uint256 price = priceFeed.fetchPrice();
+        uint256 ICR = troveManager.getCurrentICR(address(this), price);
 
-        uint THUSDAmount = _collateral * price / ICR;
-        uint borrowingRate = troveManager.getBorrowingRateWithDecay();
-        uint netDebt = THUSDAmount * LiquityMath.DECIMAL_PRECISION / (LiquityMath.DECIMAL_PRECISION + borrowingRate);
+        uint256 THUSDAmount = _collateral * price / ICR;
+        uint256 borrowingRate = troveManager.getBorrowingRateWithDecay();
+        uint256 netDebt = THUSDAmount * LiquityMath.DECIMAL_PRECISION / (LiquityMath.DECIMAL_PRECISION + borrowingRate);
 
         return netDebt;
     }

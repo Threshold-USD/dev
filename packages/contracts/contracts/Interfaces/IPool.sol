@@ -7,12 +7,12 @@ interface IPool {
 
     // --- Events ---
 
-    event CollateralBalanceUpdated(uint _newBalance);
-    event THUSDBalanceUpdated(uint _newBalance);
+    event CollateralBalanceUpdated(uint256 _newBalance);
+    event THUSDBalanceUpdated(uint256 _newBalance);
     event ActivePoolAddressChanged(address _newActivePoolAddress);
     event DefaultPoolAddressChanged(address _newDefaultPoolAddress);
     event StabilityPoolAddressChanged(address _newStabilityPoolAddress);
-    event CollateralSent(address _to, uint _amount);
+    event CollateralSent(address _to, uint256 _amount);
 
     // --- Functions ---
 
@@ -20,7 +20,7 @@ interface IPool {
 
     function getTHUSDDebt() external view returns (uint);
 
-    function increaseTHUSDDebt(uint _amount) external;
+    function increaseTHUSDDebt(uint256 _amount) external;
 
-    function decreaseTHUSDDebt(uint _amount) external;
+    function decreaseTHUSDDebt(uint256 _amount) external;
 }
