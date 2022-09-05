@@ -10,7 +10,6 @@ import './Interfaces/ITroveManager.sol';
 import './Interfaces/ITHUSDToken.sol';
 import './Interfaces/ISortedTroves.sol';
 import "./Dependencies/LiquityBase.sol";
-import "./Dependencies/LiquitySafeMath128.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
@@ -129,7 +128,6 @@ import "./Dependencies/console.sol";
  *
  */
 contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
-    using LiquitySafeMath128 for uint128;
 
     string constant public NAME = "StabilityPool";
 
