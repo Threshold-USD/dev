@@ -64,7 +64,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     address public pendingStabilityPool;
     address public pendingBorrowerOperations;
     address public pendingRevokedMintAddress;
-    uint256 constant governanceTimeDelay = 90 days;
+    uint256 internal constant GOVERNANCE_TIME_DELAY = 90 days;
     uint256 private revokeMintListInitiated;
     uint256 private addContractsInitiated;
 
@@ -113,7 +113,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         onlyOwner
         onlyAfterGovernanceDelay(
             revokeMintListInitiated,
-            governanceTimeDelay
+            GOVERNANCE_TIME_DELAY
         )
     {
         require(pendingRevokedMintAddress == _account, "Incorrect address to finalize");
@@ -144,7 +144,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         onlyOwner
         onlyAfterGovernanceDelay(
             addContractsInitiated,
-            governanceTimeDelay
+            GOVERNANCE_TIME_DELAY
         )
     {
         // check contracts are the same
