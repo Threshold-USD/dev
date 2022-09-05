@@ -20,7 +20,6 @@ import "./EchidnaProxy.sol";
 // ~/.local/bin/echidna-test contracts/TestContracts/EchidnaTester.sol --contract EchidnaTester --config fuzzTests/echidna_config.yaml
 
 contract EchidnaTester {
-    using SafeMath for uint;
 
     uint constant private NUMBER_OF_ACTORS = 100;
     uint constant private INITIAL_BALANCE = 1e24;
@@ -137,7 +136,7 @@ contract EchidnaTester {
     function getAdjustedETH(uint actorBalance, uint _ETH, uint ratio) internal view returns (uint) {
         uint price = priceFeedTestnet.getPrice();
         require(price > 0);
-        uint minETH = ratio.mul(THUSD_GAS_COMPENSATION).div(price);
+        uint minETH = ratio * THUSD_GAS_COMPENSATION / price;
         require(actorBalance > minETH);
         uint ETH = minETH + _ETH % (actorBalance - minETH);
         return ETH;
@@ -146,11 +145,11 @@ contract EchidnaTester {
     function getAdjustedTHUSD(uint ETH, uint _THUSDAmount, uint ratio) internal view returns (uint) {
         uint price = priceFeedTestnet.getPrice();
         uint THUSDAmount = _THUSDAmount;
-        uint compositeDebt = THUSDAmount.add(THUSD_GAS_COMPENSATION);
+        uint compositeDebt = THUSDAmount + THUSD_GAS_COMPENSATION;
         uint ICR = LiquityMath._computeCR(ETH, compositeDebt, price);
         if (ICR < ratio) {
-            compositeDebt = ETH.mul(price).div(ratio);
-            THUSDAmount = compositeDebt.sub(THUSD_GAS_COMPENSATION);
+            compositeDebt = ETH * price / ratio;
+            THUSDAmount = compositeDebt - THUSD_GAS_COMPENSATION;
         }
         return THUSDAmount;
     }

@@ -14,8 +14,7 @@ import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
 
 contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOperations {
-    using SafeMath for uint256;
-
+    
     string constant public NAME = "BorrowerOperations";
 
     // --- Connected contract declarations ---
@@ -160,7 +159,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
         if (!isRecoveryMode) {
             vars.THUSDFee = _triggerBorrowingFee(contractsCache.troveManager, contractsCache.thusdToken, _THUSDAmount, _maxFeePercentage);
-            vars.netDebt = vars.netDebt.add(vars.THUSDFee);
+            vars.netDebt += vars.THUSDFee;
         }
         _requireAtLeastMinNetDebt(vars.netDebt);
 
@@ -282,7 +281,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         // If the adjustment incorporates a debt increase and system is in Normal Mode, then trigger a borrowing fee
         if (_isDebtIncrease && !isRecoveryMode) {
             vars.THUSDFee = _triggerBorrowingFee(contractsCache.troveManager, contractsCache.thusdToken, _THUSDChange, _maxFeePercentage);
-            vars.netDebtChange = vars.netDebtChange.add(vars.THUSDFee); // The raw debt change includes the fee
+            vars.netDebtChange += vars.THUSDFee; // The raw debt change includes the fee
         }
 
         vars.debt = contractsCache.troveManager.getTroveDebt(_borrower);
@@ -298,7 +297,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
         // When the adjustment is a debt repayment, check it's a valid amount and that the caller has enough THUSD
         if (!_isDebtIncrease && _THUSDChange > 0) {
-            _requireAtLeastMinNetDebt(_getNetDebt(vars.debt).sub(vars.netDebtChange));
+            _requireAtLeastMinNetDebt(_getNetDebt(vars.debt) - vars.netDebtChange);
             _requireValidTHUSDRepayment(vars.debt, vars.netDebtChange);
             _requireSufficientTHUSDBalance(contractsCache.thusdToken, _borrower, vars.netDebtChange);
         }
@@ -340,7 +339,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         uint coll = troveManagerCached.getTroveColl(msg.sender);
         uint debt = troveManagerCached.getTroveDebt(msg.sender);
 
-        _requireSufficientTHUSDBalance(thusdTokenCached, msg.sender, debt.sub(THUSD_GAS_COMPENSATION));
+        _requireSufficientTHUSDBalance(thusdTokenCached, msg.sender, debt - THUSD_GAS_COMPENSATION);
 
         uint newTCR = _getNewTCRFromTroveChange(coll, false, debt, false, price);
         _requireNewTCRisAboveCCR(newTCR);
@@ -351,7 +350,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         emit TroveUpdated(msg.sender, 0, 0, 0, BorrowerOperation.closeTrove);
 
         // Burn the repaid THUSD from the user's balance and the gas compensation from the Gas Pool
-        _repayTHUSD(activePoolCached, thusdTokenCached, msg.sender, debt.sub(THUSD_GAS_COMPENSATION));
+        _repayTHUSD(activePoolCached, thusdTokenCached, msg.sender, debt - THUSD_GAS_COMPENSATION);
         _repayTHUSD(activePoolCached, thusdTokenCached, gasPoolAddress, THUSD_GAS_COMPENSATION);
 
         // Send the collateral back to the user
@@ -381,7 +380,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     }
 
     function _getUSDValue(uint _coll, uint _price) internal pure returns (uint) {
-        uint usdValue = _price.mul(_coll).div(DECIMAL_PRECISION);
+        uint usdValue = _price * _coll / DECIMAL_PRECISION;
 
         return usdValue;
     }
@@ -570,7 +569,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     }
 
     function _requireValidTHUSDRepayment(uint _currentDebt, uint _debtRepayment) internal pure {
-        require(_debtRepayment <= _currentDebt.sub(THUSD_GAS_COMPENSATION), "BorrowerOps: Amount repaid must not be larger than the Trove's debt");
+        require(_debtRepayment <= _currentDebt - THUSD_GAS_COMPENSATION, "BorrowerOps: Amount repaid must not be larger than the Trove's debt");
     }
 
     function _requireCallerIsStabilityPool() internal view {
@@ -649,8 +648,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         uint newColl = _coll;
         uint newDebt = _debt;
 
-        newColl = _isCollIncrease ? _coll.add(_collChange) :  _coll.sub(_collChange);
-        newDebt = _isDebtIncrease ? _debt.add(_debtChange) : _debt.sub(_debtChange);
+        newColl = _isCollIncrease ? _coll + _collChange :  _coll - _collChange;
+        newDebt = _isDebtIncrease ? _debt + _debtChange : _debt - _debtChange;
 
         return (newColl, newDebt);
     }
@@ -670,8 +669,8 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         uint totalColl = getEntireSystemColl();
         uint totalDebt = getEntireSystemDebt();
 
-        totalColl = _isCollIncrease ? totalColl.add(_collChange) : totalColl.sub(_collChange);
-        totalDebt = _isDebtIncrease ? totalDebt.add(_debtChange) : totalDebt.sub(_debtChange);
+        totalColl = _isCollIncrease ? totalColl + _collChange : totalColl - _collChange;
+        totalDebt = _isDebtIncrease ? totalDebt + _debtChange : totalDebt - _debtChange;
 
         uint newTCR = LiquityMath._computeCR(totalColl, totalDebt, _price);
         return newTCR;

@@ -2,7 +2,6 @@
 
 pragma solidity ^0.8.10;
 
-import "../Dependencies/SafeMath.sol";
 import "../Dependencies/LiquityMath.sol";
 import "../Dependencies/IERC20.sol";
 import "../Interfaces/IBorrowerOperations.sol";
@@ -17,7 +16,6 @@ import "./PCVScript.sol";
 import "../Dependencies/console.sol";
 
 contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, ERC20TransferScript, PCVScript {
-    using SafeMath for uint;
 
     string constant public NAME = "BorrowerWrappersScript";
 
@@ -67,7 +65,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         // already checked in CollSurplusPool
         assert(balanceAfter > balanceBefore);
 
-        uint totalCollateral = balanceAfter.sub(balanceBefore).add(msg.value);
+        uint totalCollateral = balanceAfter - balanceBefore + msg.value;
 
         // Open trove with obtained collateral, plus collateral sent by user
         // if (borrowerOperations.collateralAddress() == address(0)) {
@@ -84,7 +82,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         stabilityPool.withdrawFromSP(0);
 
         uint collBalanceAfter = address(this).balance;
-        uint claimedCollateral = collBalanceAfter.sub(collBalanceBefore);
+        uint claimedCollateral = collBalanceAfter - collBalanceBefore;
 
         // Add claimed ETH to trove, get more THUSD and stake it into the Stability Pool
         if (claimedCollateral > 0) {
@@ -106,8 +104,8 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         uint collBalanceBefore = address(this).balance;
         uint thusdBalanceBefore = thusdToken.balanceOf(address(this));
 
-        uint gainedCollateral = address(this).balance.sub(collBalanceBefore); // stack too deep issues :'(
-        uint gainedTHUSD = thusdToken.balanceOf(address(this)).sub(thusdBalanceBefore);
+        uint gainedCollateral = address(this).balance - collBalanceBefore; // stack too deep issues :'(
+        uint gainedTHUSD = thusdToken.balanceOf(address(this)) - thusdBalanceBefore;
 
         uint netTHUSDAmount;
         // Top up trove and get more THUSD, keeping ICR constant
@@ -121,7 +119,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
             // }
         }
 
-        uint totalTHUSD = gainedTHUSD.add(netTHUSDAmount);
+        uint totalTHUSD = gainedTHUSD + netTHUSDAmount;
         if (totalTHUSD > 0) {
             stabilityPool.provideToSP(totalTHUSD);
         }
@@ -132,9 +130,9 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
         uint price = priceFeed.fetchPrice();
         uint ICR = troveManager.getCurrentICR(address(this), price);
 
-        uint THUSDAmount = _collateral.mul(price).div(ICR);
+        uint THUSDAmount = _collateral * price / ICR;
         uint borrowingRate = troveManager.getBorrowingRateWithDecay();
-        uint netDebt = THUSDAmount.mul(LiquityMath.DECIMAL_PRECISION).div(LiquityMath.DECIMAL_PRECISION.add(borrowingRate));
+        uint netDebt = THUSDAmount * LiquityMath.DECIMAL_PRECISION / (LiquityMath.DECIMAL_PRECISION + borrowingRate);
 
         return netDebt;
     }

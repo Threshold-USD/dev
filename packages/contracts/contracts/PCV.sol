@@ -3,7 +3,6 @@
 pragma solidity ^0.8.10;
 
 import "./Dependencies/BaseMath.sol";
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
@@ -13,7 +12,6 @@ import "./Interfaces/ITHUSDToken.sol";
 import "./Dependencies/IERC20.sol";
 
 contract PCV is IPCV, Ownable, CheckContract, BaseMath {
-    using SafeMath for uint;
 
     // --- Data ---
     string constant public NAME = "PCV";
@@ -65,14 +63,14 @@ contract PCV is IPCV, Ownable, CheckContract, BaseMath {
     function increaseF_ETH(uint _ETHFee) external override {
         _requireCallerIsTroveManager();
 
-        F_ETH = F_ETH.add(_ETHFee);
+        F_ETH += _ETHFee;
         emit F_ETHUpdated(F_ETH);
     }
 
     function increaseF_THUSD(uint _THUSDFee) external override {
         _requireCallerIsBorrowerOperations();
 
-        F_THUSD = F_THUSD.add(_THUSDFee);
+        F_THUSD += _THUSDFee;
         emit F_THUSDUpdated(F_THUSD);
     }
 

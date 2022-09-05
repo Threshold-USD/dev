@@ -9,7 +9,6 @@ import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 
 contract HintHelpers is LiquityBase, Ownable, CheckContract {
-    using SafeMath for uint256;
 
     string constant public NAME = "HintHelpers";
 
@@ -91,32 +90,32 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
 
         while (currentTroveuser != address(0) && remainingTHUSD > 0 && _maxIterations-- > 0) {
             uint netTHUSDDebt = _getNetDebt(troveManager.getTroveDebt(currentTroveuser))
-                .add(troveManager.getPendingTHUSDDebtReward(currentTroveuser));
+                + troveManager.getPendingTHUSDDebtReward(currentTroveuser);
 
             if (netTHUSDDebt > remainingTHUSD) {
                 if (netTHUSDDebt > MIN_NET_DEBT) {
-                    uint maxRedeemableTHUSD = LiquityMath._min(remainingTHUSD, netTHUSDDebt.sub(MIN_NET_DEBT));
+                    uint maxRedeemableTHUSD = LiquityMath._min(remainingTHUSD, netTHUSDDebt - MIN_NET_DEBT);
 
                     uint ETH = troveManager.getTroveColl(currentTroveuser)
-                        .add(troveManager.getPendingETHReward(currentTroveuser));
+                        + troveManager.getPendingETHReward(currentTroveuser);
 
-                    uint newColl = ETH.sub(maxRedeemableTHUSD.mul(DECIMAL_PRECISION).div(_price));
-                    uint newDebt = netTHUSDDebt.sub(maxRedeemableTHUSD);
+                    uint newColl = ETH - (maxRedeemableTHUSD * DECIMAL_PRECISION / _price);
+                    uint newDebt = netTHUSDDebt - maxRedeemableTHUSD;
 
                     uint compositeDebt = _getCompositeDebt(newDebt);
                     partialRedemptionHintNICR = LiquityMath._computeNominalCR(newColl, compositeDebt);
 
-                    remainingTHUSD = remainingTHUSD.sub(maxRedeemableTHUSD);
+                    remainingTHUSD -= maxRedeemableTHUSD;
                 }
                 break;
             } else {
-                remainingTHUSD = remainingTHUSD.sub(netTHUSDDebt);
+                remainingTHUSD -= netTHUSDDebt;
             }
 
             currentTroveuser = sortedTrovesCached.getPrev(currentTroveuser);
         }
 
-        truncatedTHUSDamount = _THUSDamount.sub(remainingTHUSD);
+        truncatedTHUSDamount = _THUSDamount - remainingTHUSD;
     }
 
     /* getApproxHint() - return address of a Trove that is, on average, (length / numTrials) positions away in the

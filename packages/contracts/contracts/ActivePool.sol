@@ -7,7 +7,6 @@ import './Interfaces/IActivePool.sol';
 import './Interfaces/ICollSurplusPool.sol';
 import './Interfaces/IDefaultPool.sol';
 import './Interfaces/IStabilityPool.sol';
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 // import "./Dependencies/console.sol";
@@ -20,7 +19,6 @@ import "./Dependencies/CheckContract.sol";
  *
  */
 contract ActivePool is Ownable, CheckContract, IActivePool {
-    using SafeMath for uint256;
 
     string constant public NAME = "ActivePool";
 
@@ -89,7 +87,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
 
     function sendCollateral(address _account, uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
-        collateral = collateral.sub(_amount);
+        collateral -= _amount;
         emit ActivePoolCollateralBalanceUpdated(collateral);
         emit CollateralSent(_account, _amount);
 
@@ -114,13 +112,13 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
 
     function increaseTHUSDDebt(uint _amount) external override {
         _requireCallerIsBOorTroveM();
-        THUSDDebt  = THUSDDebt.add(_amount);
+        THUSDDebt += _amount;
         emit ActivePoolTHUSDDebtUpdated(THUSDDebt);
     }
 
     function decreaseTHUSDDebt(uint _amount) external override {
         _requireCallerIsBOorTroveMorSP();
-        THUSDDebt = THUSDDebt.sub(_amount);
+        THUSDDebt -= _amount;
         emit ActivePoolTHUSDDebtUpdated(THUSDDebt);
     }
 
@@ -151,7 +149,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     // When ERC20 token collateral is received this function needs to be called
     function updateCollateralBalance(uint256 _amount) external override {
         _requireCallerIsBorrowerOperationsOrDefaultPool();
-		    collateral = collateral.add(_amount);
+        collateral += _amount;
         emit ActivePoolCollateralBalanceUpdated(collateral);
   	}
 
@@ -160,7 +158,7 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
     // This executes when the contract recieves ETH
     receive() external payable {
         _requireCallerIsBorrowerOperationsOrDefaultPool();
-        collateral = collateral.add(msg.value);
+        collateral += msg.value;
         emit ActivePoolCollateralBalanceUpdated(collateral);
     }
 }

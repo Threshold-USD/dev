@@ -5,7 +5,6 @@ pragma solidity ^0.8.10;
 import "./Dependencies/IERC20.sol";
 import './Interfaces/IDefaultPool.sol';
 import './Interfaces/IActivePool.sol';
-import "./Dependencies/SafeMath.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
@@ -18,7 +17,6 @@ import "./Dependencies/console.sol";
  * from the Default Pool to the Active Pool.
  */
 contract DefaultPool is Ownable, CheckContract, IDefaultPool {
-    using SafeMath for uint256;
 
     string constant public NAME = "DefaultPool";
 
@@ -73,7 +71,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     function sendCollateralToActivePool(uint _amount) external override {
         _requireCallerIsTroveManager();
         address activePool = activePoolAddress; // cache to save an SLOAD
-        collateral = collateral.sub(_amount);
+        collateral -= _amount;
         emit DefaultPoolCollateralBalanceUpdated(collateral);
         emit CollateralSent(activePool, _amount);
 
@@ -90,13 +88,13 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     function increaseTHUSDDebt(uint _amount) external override {
         _requireCallerIsTroveManager();
-        THUSDDebt = THUSDDebt.add(_amount);
+        THUSDDebt += _amount;
         emit DefaultPoolTHUSDDebtUpdated(THUSDDebt);
     }
 
     function decreaseTHUSDDebt(uint _amount) external override {
         _requireCallerIsTroveManager();
-        THUSDDebt = THUSDDebt.sub(_amount);
+        THUSDDebt -= _amount;
         emit DefaultPoolTHUSDDebtUpdated(THUSDDebt);
     }
 
@@ -113,7 +111,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     // When ERC20 token collateral is received this function needs to be called
     function updateCollateralBalance(uint256 _amount) external override {
         _requireCallerIsActivePool();
-		    collateral = collateral.add(_amount);
+        collateral += _amount;
         emit DefaultPoolCollateralBalanceUpdated(collateral);
   	}
 
@@ -121,7 +119,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     receive() external payable {
         _requireCallerIsActivePool();
-        collateral = collateral.add(msg.value);
+        collateral += msg.value;
         emit DefaultPoolCollateralBalanceUpdated(collateral);
     }
 }
