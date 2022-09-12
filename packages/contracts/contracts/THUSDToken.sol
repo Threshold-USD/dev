@@ -60,13 +60,14 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     mapping(address => bool) public borrowerOperations;
     mapping(address => bool) public mintList;
 
+    uint256 public constant GOVERNANCE_TIME_DELAY = 90 days;
+
     address public pendingTroveManager;
     address public pendingStabilityPool;
     address public pendingBorrowerOperations;
     address public pendingRevokedMintAddress;
-    uint256 internal constant GOVERNANCE_TIME_DELAY = 90 days;
-    uint256 private revokeMintListInitiated;
-    uint256 private addContractsInitiated;
+    uint256 public revokeMintListInitiated;
+    uint256 public addContractsInitiated;
 
     constructor
     (
@@ -92,7 +93,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     ) {
         require(_changeInitializedTimestamp > 0, "Change not initiated");
         require(
-            block.timestamp - _changeInitializedTimestamp >= _delay,
+            block.timestamp >= _changeInitializedTimestamp + _delay,
             "Governance delay has not elapsed"
         );
         _;
@@ -104,6 +105,8 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         external
         onlyOwner
     {
+        require(mintList[_account], "Incorrect address to revoke");
+
         revokeMintListInitiated = block.timestamp;
         pendingRevokedMintAddress = _account;
     }
@@ -133,7 +136,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         // save as provisional contracts to add
         pendingTroveManager = _troveManagerAddress;
         pendingStabilityPool = _stabilityPoolAddress;
-        pendingTroveManager = _borrowerOperationsAddress;
+        pendingBorrowerOperations = _borrowerOperationsAddress;
 
         // save block number
         addContractsInitiated = block.timestamp;
@@ -151,7 +154,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         require(
           pendingTroveManager == _troveManagerAddress &&
           pendingStabilityPool == _stabilityPoolAddress &&
-          pendingTroveManager == _borrowerOperationsAddress
+          pendingBorrowerOperations == _borrowerOperationsAddress
         );
         // make sure minimum blocks has passed
         _addSystemContracts(_troveManagerAddress, _stabilityPoolAddress, _borrowerOperationsAddress);

@@ -1,6 +1,10 @@
 const deploymentHelper = require("../utils/deploymentHelpers.js")
 const testHelpers = require("../utils/testHelpers.js")
 
+const StabilityPoolTester = artifacts.require("./StabilityPoolTester.sol")
+const BorrowerOperationsTester = artifacts.require("./BorrowerOperationsTester.sol")
+const TroveManagerTester = artifacts.require("./TroveManagerTester.sol")
+
 const { keccak256 } = require('@ethersproject/keccak256');
 const { defaultAbiCoder } = require('@ethersproject/abi');
 const { toUtf8Bytes } = require('@ethersproject/strings');
@@ -8,7 +12,15 @@ const { pack } = require('@ethersproject/solidity');
 const { hexlify } = require("@ethersproject/bytes");
 const { ecsign } = require('ethereumjs-util');
 
-const { toBN, assertRevert, assertAssert, dec, ZERO_ADDRESS } = testHelpers.TestHelper
+const { 
+  toBN, 
+  assertRevert, 
+  dec, 
+  ZERO_ADDRESS, 
+  getLatestBlockTimestamp,
+  fastForwardTime,
+  getEventArgByIndex
+} = testHelpers.TestHelper
 
 const sign = (digest, privateKey) => {
   return ecsign(Buffer.from(digest.slice(2), 'hex'), Buffer.from(privateKey.slice(2), 'hex'))
@@ -60,6 +72,8 @@ contract('THUSDToken', async accounts => {
 
   let tokenName
   let tokenVersion
+  
+  let delay
 
   const testCorpus = ({ withProxy = false }) => {
     beforeEach(async () => {
@@ -79,11 +93,13 @@ contract('THUSDToken', async accounts => {
       chainId = await thusdTokenOriginal.getChainId()
 
       stabilityPool = contracts.stabilityPool
-      troveManager = contracts.stabilityPool
+      troveManager = contracts.troveManager
       borrowerOperations = contracts.borrowerOperations
 
       tokenVersion = await thusdTokenOriginal.version()
       tokenName = await thusdTokenOriginal.name()
+      
+      delay = (await thusdTokenOriginal.GOVERNANCE_TIME_DELAY()).toNumber()
 
       // mint some tokens
       if (withProxy) {
@@ -96,6 +112,30 @@ contract('THUSDToken', async accounts => {
         await thusdTokenOriginal.unprotectedMint(carol, 50)
       }
     })
+    
+    if (!withProxy) {
+      it('Initial set of contracts was set correctly', async () => {
+        assert.isTrue(await thusdTokenTester.troveManagers(troveManager.address))
+        assert.isFalse(await thusdTokenTester.troveManagers(stabilityPool.address))
+        assert.isFalse(await thusdTokenTester.troveManagers(borrowerOperations.address))
+        assert.isFalse(await thusdTokenTester.troveManagers(owner))
+        
+        assert.isFalse(await thusdTokenTester.stabilityPools(troveManager.address))
+        assert.isTrue(await thusdTokenTester.stabilityPools(stabilityPool.address))
+        assert.isFalse(await thusdTokenTester.stabilityPools(borrowerOperations.address))
+        assert.isFalse(await thusdTokenTester.stabilityPools(owner))
+        
+        assert.isFalse(await thusdTokenTester.borrowerOperations(troveManager.address))
+        assert.isFalse(await thusdTokenTester.borrowerOperations(stabilityPool.address))
+        assert.isTrue(await thusdTokenTester.borrowerOperations(borrowerOperations.address))
+        assert.isFalse(await thusdTokenTester.borrowerOperations(owner))
+        
+        assert.isFalse(await thusdTokenTester.mintList(troveManager.address))
+        assert.isFalse(await thusdTokenTester.mintList(stabilityPool.address))
+        assert.isTrue(await thusdTokenTester.mintList(borrowerOperations.address))
+        assert.isFalse(await thusdTokenTester.mintList(owner))
+      })
+    }
 
     it('balanceOf(): gets the balance of the account', async () => {
       const aliceBalance = (await thusdTokenTester.balanceOf(alice)).toNumber()
@@ -177,7 +217,7 @@ contract('THUSDToken', async accounts => {
       assert.equal(await thusdTokenTester.balanceOf(carol), 100)
 
        // Check A's allowance of Bob's funds has decreased
-      const allowance_A_2= await thusdTokenTester.allowance(bob, alice)
+      const allowance_A_2 = await thusdTokenTester.allowance(bob, alice)
       assert.equal(allowance_A_2, '0')
 
       // Check bob's balance has decreased
@@ -382,6 +422,261 @@ contract('THUSDToken', async accounts => {
         )
 
         await assertRevert(tx, 'THUSD: invalid signature')
+      })
+    }
+
+    // Roles tests
+
+    if (!withProxy) {
+
+      context("new set of system contracts is ready", () => {
+        let newStabilityPool
+        let newTroveManager
+        let newBorrowerOperations
+
+        beforeEach(async () => {
+          newTroveManager = await TroveManagerTester.new()
+          newStabilityPool = await StabilityPoolTester.new()
+          newBorrowerOperations = await BorrowerOperationsTester.new()
+        })
+
+        it('startAddContracts(): reverts when caller is not owner', async () => {
+          await assertRevert(
+            thusdTokenTester.startAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: alice }),
+              "Ownable: caller is not the owner")
+        })
+        
+        it('startAddContracts(): reverts when provided addresses are not contracts', async () => {
+          await assertRevert(
+            thusdTokenTester.startAddContracts(
+              newTroveManager.address, newStabilityPool.address, alice, 
+              { from: owner }),
+              "Account code size cannot be zero")
+          await assertRevert(
+            thusdTokenTester.startAddContracts(
+              newTroveManager.address, alice, newBorrowerOperations.address, 
+              { from: owner }),
+              "Account code size cannot be zero")
+          await assertRevert(
+            thusdTokenTester.startAddContracts(
+              alice, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }),
+              "Account code size cannot be zero")
+              
+          await assertRevert(
+            thusdTokenTester.startAddContracts(
+              newTroveManager.address, newStabilityPool.address, ZERO_ADDRESS, 
+              { from: owner }),
+              "Account cannot be zero address")
+          await assertRevert(
+            thusdTokenTester.startAddContracts(
+              newTroveManager.address, ZERO_ADDRESS, newBorrowerOperations.address, 
+              { from: owner }),
+              "Account cannot be zero address")
+          await assertRevert(
+            thusdTokenTester.startAddContracts(
+              ZERO_ADDRESS, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }),
+              "Account cannot be zero address")
+        })
+        
+        it('startAddContracts(): puts new set of contracts to pending list', async () => {
+          await thusdTokenTester.startAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }
+            )
+          const timeNow = await getLatestBlockTimestamp(web3)
+          assert.equal(await thusdTokenTester.pendingTroveManager(), newTroveManager.address)
+          assert.equal(await thusdTokenTester.pendingStabilityPool(), newStabilityPool.address)
+          assert.equal(await thusdTokenTester.pendingBorrowerOperations(), newBorrowerOperations.address)
+          assert.equal(await thusdTokenTester.addContractsInitiated(), timeNow)
+          
+          assert.isFalse(await thusdTokenTester.troveManagers(newTroveManager.address))
+          assert.isFalse(await thusdTokenTester.stabilityPools(newStabilityPool.address))
+          assert.isFalse(await thusdTokenTester.borrowerOperations(newBorrowerOperations.address))
+          assert.isFalse(await thusdTokenTester.mintList(newBorrowerOperations.address))
+        })
+        
+        it('finalizeAddContracts(): reverts when caller is not owner', async () => {
+          await assertRevert(
+            thusdTokenTester.finalizeAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: alice }),
+              "Ownable: caller is not the owner")
+        })
+
+        it('finalizeAddContracts(): reverts when change is not initiated', async () => {
+          await assertRevert(
+            thusdTokenTester.finalizeAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }),
+              "Change not initiated")
+        })
+
+        it('finalizeAddContracts(): reverts when passed not enough time', async () => {
+          await thusdTokenTester.startAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }
+            )
+          await assertRevert(
+            thusdTokenTester.finalizeAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }),
+              "Governance delay has not elapsed")
+        })
+        
+        it('finalizeAddContracts(): reverts when provided wrong addresses', async () => {
+          await thusdTokenTester.startAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }
+            )
+          await fastForwardTime(delay, web3.currentProvider)
+
+          await assertRevert(
+            thusdTokenTester.finalizeAddContracts(
+              troveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }),
+          )
+          await assertRevert(
+            thusdTokenTester.finalizeAddContracts(
+              newTroveManager.address, stabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }),
+          )
+          await assertRevert(
+            thusdTokenTester.finalizeAddContracts(
+              newTroveManager.address, newStabilityPool.address, borrowerOperations.address, 
+              { from: owner }),
+          )
+        })
+
+        it('finalizeAddContracts(): enables new system contracts roles', async () => {
+          await thusdTokenTester.startAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }
+            )
+          await fastForwardTime(delay, web3.currentProvider)
+          
+          let tx = await thusdTokenTester.finalizeAddContracts(
+            newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+            { from: owner })
+
+          assert.equal(await thusdTokenTester.pendingTroveManager(), newTroveManager.address)
+          assert.equal(await thusdTokenTester.pendingStabilityPool(), newStabilityPool.address)
+          assert.equal(await thusdTokenTester.pendingBorrowerOperations(), newBorrowerOperations.address)
+          assert.equal(await thusdTokenTester.addContractsInitiated(), 0)
+          
+          assert.isTrue(await thusdTokenTester.troveManagers(troveManager.address))
+          assert.isTrue(await thusdTokenTester.troveManagers(newTroveManager.address))
+          assert.isFalse(await thusdTokenTester.troveManagers(newStabilityPool.address))
+          assert.isFalse(await thusdTokenTester.troveManagers(newBorrowerOperations.address))
+          
+          assert.isFalse(await thusdTokenTester.stabilityPools(newTroveManager.address))
+          assert.isTrue(await thusdTokenTester.stabilityPools(stabilityPool.address))
+          assert.isTrue(await thusdTokenTester.stabilityPools(newStabilityPool.address))
+          assert.isFalse(await thusdTokenTester.stabilityPools(newBorrowerOperations.address))
+          
+          assert.isFalse(await thusdTokenTester.borrowerOperations(newTroveManager.address))
+          assert.isFalse(await thusdTokenTester.borrowerOperations(newStabilityPool.address))
+          assert.isTrue(await thusdTokenTester.borrowerOperations(newBorrowerOperations.address))
+          assert.isTrue(await thusdTokenTester.borrowerOperations(borrowerOperations.address))
+          
+          assert.isFalse(await thusdTokenTester.mintList(newTroveManager.address))
+          assert.isFalse(await thusdTokenTester.mintList(newStabilityPool.address))
+          assert.isTrue(await thusdTokenTester.mintList(newBorrowerOperations.address))
+          assert.isTrue(await thusdTokenTester.mintList(borrowerOperations.address))
+          
+          assert.equal(getEventArgByIndex(tx, "TroveManagerAddressChanged", 0), newTroveManager.address)
+          assert.equal(getEventArgByIndex(tx, "StabilityPoolAddressChanged", 0), newStabilityPool.address)
+          assert.equal(getEventArgByIndex(tx, "BorrowerOperationsAddressChanged", 0), newBorrowerOperations.address)
+        })
+      })
+
+      it('startRevokeMintList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.startRevokeMintList(
+            borrowerOperations.address, 
+            { from: alice }),
+            "Ownable: caller is not the owner")
+      })
+
+      it('startRevokeMintList(): reverts when account has no minting role', async () => {
+        await assertRevert(
+          thusdTokenTester.startRevokeMintList(
+            alice, 
+            { from: owner }),
+            "Incorrect address to revoke")
+      })
+
+      it('startRevokeMintList(): puts account to pending list', async () => {
+        await thusdTokenTester.startRevokeMintList(borrowerOperations.address, { from: owner })
+        
+        const timeNow = await getLatestBlockTimestamp(web3)
+        assert.equal(await thusdTokenTester.pendingRevokedMintAddress(), borrowerOperations.address)
+        assert.equal(await thusdTokenTester.revokeMintListInitiated(), timeNow)
+        
+        assert.isTrue(await thusdTokenTester.mintList(borrowerOperations.address))
+      })
+
+      it('finalizeRevokeMintList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.finalizeRevokeMintList(
+            borrowerOperations.address,
+            { from: alice }),
+            "Ownable: caller is not the owner")
+      })
+
+      it('finalizeRevokeMintList(): reverts when change is not initiated', async () => {
+        await assertRevert(
+          thusdTokenTester.finalizeRevokeMintList(
+            borrowerOperations.address, 
+            { from: owner }),
+            "Change not initiated")
+      })
+
+      it('finalizeRevokeMintList(): reverts when passed not enough time', async () => {
+        await thusdTokenTester.startRevokeMintList(
+            borrowerOperations.address, 
+            { from: owner }
+          )
+        await assertRevert(
+          thusdTokenTester.finalizeRevokeMintList(
+            borrowerOperations.address, 
+            { from: owner }),
+            "Governance delay has not elapsed")
+      })
+      
+      it('finalizeRevokeMintList(): reverts when provided wrong address', async () => {
+        await thusdTokenTester.startRevokeMintList(
+            borrowerOperations.address, 
+            { from: owner }
+          )
+        await fastForwardTime(delay, web3.currentProvider)
+
+        await assertRevert(
+          thusdTokenTester.finalizeRevokeMintList(
+            alice, 
+            { from: owner }),
+            "Incorrect address to finalize"
+        )
+      })
+
+      it('finalizeRevokeMintList(): removes account from minting list', async () => {
+        await thusdTokenTester.startRevokeMintList(
+            borrowerOperations.address, 
+            { from: owner }
+          )
+        await fastForwardTime(delay, web3.currentProvider)
+        
+        let tx = await thusdTokenTester.finalizeRevokeMintList(
+          borrowerOperations.address, 
+          { from: owner })
+
+        assert.equal(await thusdTokenTester.pendingRevokedMintAddress(), borrowerOperations.address)
+        assert.equal(await thusdTokenTester.revokeMintListInitiated(), 0)
+        
+        assert.isFalse(await thusdTokenTester.mintList(borrowerOperations.address))
       })
     }
   }
