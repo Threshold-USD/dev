@@ -54,6 +54,7 @@ const deployContracts = async (
   deployer: Signer,
   getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
   priceFeedIsTestnet = true,
+  stablecoinAddress: string,
   overrides?: Overrides
 ): Promise<[addresses: Omit<_LiquityContractAddresses, "uniToken">, startBlock: number]> => {
   const [activePoolAddress, startBlock] = await deployContractAndGetBlockNumber(
@@ -100,7 +101,7 @@ const deployContracts = async (
   return [
     {
       ...addresses,
-      thusdToken: await deployContract(
+      thusdToken: (stablecoinAddress == "") ? await deployContract(
         deployer,
         getContractFactory,
         "THUSDToken",
@@ -108,7 +109,7 @@ const deployContracts = async (
         addresses.stabilityPool,
         addresses.borrowerOperations,
         { ...overrides }
-      ),
+      ) : stablecoinAddress,
 
       multiTroveGetter: await deployContract(
         deployer,
@@ -260,6 +261,7 @@ export const deployAndSetupContracts = async (
   getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
   _priceFeedIsTestnet = true,
   _isDev = true,
+  stablecoinAddress: string,
   overrides?: Overrides
 ): Promise<_LiquityDeploymentJSON> => {
   if (!deployer.provider) {
@@ -276,7 +278,7 @@ export const deployAndSetupContracts = async (
     _priceFeedIsTestnet,
     _isDev,
 
-    ...(await deployContracts(deployer, getContractFactory, _priceFeedIsTestnet, overrides).then(
+    ...(await deployContracts(deployer, getContractFactory, _priceFeedIsTestnet, stablecoinAddress, overrides).then(
       async ([addresses, startBlock]) => ({
         startBlock,
 
