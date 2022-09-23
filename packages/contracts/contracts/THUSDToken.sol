@@ -6,6 +6,7 @@ import "./Interfaces/ITHUSDToken.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/console.sol";
+import "./Dependencies/Bits.sol";
 
 /*
 *
@@ -26,6 +27,8 @@ import "./Dependencies/console.sol";
 */
 
 contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
+
+    using Bits for uint256;
 
     uint256 private _totalSupply;
     string constant internal _NAME = "thUSD Stablecoin";
@@ -55,10 +58,12 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     // --- Addresses ---
-    mapping(address => bool) public troveManagers;
-    mapping(address => bool) public stabilityPools;
-    mapping(address => bool) public borrowerOperations;
-    mapping(address => bool) public mintList;
+    mapping(address => uint256) public serviceContracts;
+
+    uint8 internal constant MINT_ROLE_INDEX = 0;
+    uint8 internal constant BURN_ROLE_INDEX = 1;
+    uint8 internal constant SEND_TO_POOL_ROLE_INDEX = 2;
+    uint8 internal constant RETURN_FROM_POOL_ROLE_INDEX = 3;
 
     uint256 public constant GOVERNANCE_TIME_DELAY = 90 days;
 
@@ -105,7 +110,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         external
         onlyOwner
     {
-        require(mintList[_account], "Incorrect address to revoke");
+        require(serviceContracts[_account].bitSet(MINT_ROLE_INDEX), "Incorrect address to revoke");
 
         revokeMintListInitiated = block.timestamp;
         pendingRevokedMintAddress = _account;
@@ -121,7 +126,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     {
         require(pendingRevokedMintAddress == _account, "Incorrect address to finalize");
 
-        mintList[_account] = false;
+        serviceContracts[_account] = serviceContracts[_account].toggleBit(MINT_ROLE_INDEX);
         revokeMintListInitiated = 0;
     }
 
@@ -164,22 +169,22 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     // --- Functions for intra-Liquity calls ---
 
     function mint(address _account, uint256 _amount) external override {
-        _requireCallerInMintList();
+        require(serviceContracts[msg.sender].bitSet(MINT_ROLE_INDEX), "THUSDToken: Caller not allowed to mint");
         _mint(_account, _amount);
     }
 
     function burn(address _account, uint256 _amount) external override {
-        _requireCallerIsBOorTroveMorSP();
+        require(serviceContracts[msg.sender].bitSet(BURN_ROLE_INDEX), "THUSD: Caller is neither BorrowerOperations nor TroveManager nor StabilityPool");
         _burn(_account, _amount);
     }
 
     function sendToPool(address _sender,  address _poolAddress, uint256 _amount) external override {
-        _requireCallerIsStabilityPool();
+        require(serviceContracts[msg.sender].bitSet(SEND_TO_POOL_ROLE_INDEX), "THUSD: Caller is not the StabilityPool");
         _transfer(_sender, _poolAddress, _amount);
     }
 
     function returnFromPool(address _poolAddress, address _receiver, uint256 _amount) external override {
-        _requireCallerIsTroveMorSP();
+        require(serviceContracts[msg.sender].bitSet(RETURN_FROM_POOL_ROLE_INDEX), "THUSD: Caller is neither TroveManager nor StabilityPool");
         _transfer(_poolAddress, _receiver, _amount);
     }
 
@@ -266,6 +271,22 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         return _nonces[owner];
     }
 
+    function mintList(address contractAddress) external view returns (bool) {
+        return serviceContracts[contractAddress].bitSet(MINT_ROLE_INDEX);
+    }
+
+    function getRoles(address contractAddress) external view returns (
+        bool mintRole, 
+        bool burnRole, 
+        bool sendToPoolRole, 
+        bool returnFromPoolRole
+    ) {
+        mintRole = serviceContracts[contractAddress].bitSet(MINT_ROLE_INDEX);
+        burnRole = serviceContracts[contractAddress].bitSet(BURN_ROLE_INDEX);
+        sendToPoolRole = serviceContracts[contractAddress].bitSet(SEND_TO_POOL_ROLE_INDEX);
+        returnFromPoolRole = serviceContracts[contractAddress].bitSet(RETURN_FROM_POOL_ROLE_INDEX);
+    }
+
     // --- Internal operations ---
 
     function _chainID() private view returns (uint256 chainID) {
@@ -285,16 +306,22 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         checkContract(_stabilityPoolAddress);
         checkContract(_borrowerOperationsAddress);
 
-        troveManagers[_troveManagerAddress] = true;
+        serviceContracts[_troveManagerAddress] = serviceContracts[_troveManagerAddress]
+            .toggleBit(BURN_ROLE_INDEX)
+            .toggleBit(RETURN_FROM_POOL_ROLE_INDEX);
+
         emit TroveManagerAddressChanged(_troveManagerAddress);
 
-        stabilityPools[_stabilityPoolAddress] = true;
+        serviceContracts[_stabilityPoolAddress] = serviceContracts[_stabilityPoolAddress]
+            .toggleBit(BURN_ROLE_INDEX)
+            .toggleBit(SEND_TO_POOL_ROLE_INDEX)
+            .toggleBit(RETURN_FROM_POOL_ROLE_INDEX);
         emit StabilityPoolAddressChanged(_stabilityPoolAddress);
 
-        borrowerOperations[_borrowerOperationsAddress] = true;
+        serviceContracts[_borrowerOperationsAddress] = serviceContracts[_borrowerOperationsAddress]
+            .toggleBit(BURN_ROLE_INDEX)
+            .toggleBit(MINT_ROLE_INDEX);
         emit BorrowerOperationsAddressChanged(_borrowerOperationsAddress);
-
-        mintList[_borrowerOperationsAddress] = true;
     }
 
     // Warning: sanity checks (for sender and recipient) should have been done before calling these internal functions
@@ -342,29 +369,6 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
             _recipient != address(this),
             "THUSD: Cannot transfer tokens directly to the THUSD token contract or the zero address"
         );
-    }
-
-    function _requireCallerInMintList() internal view {
-        require(mintList[msg.sender], "THUSDToken: Caller not allowed to mint");
-    }
-
-    function _requireCallerIsBOorTroveMorSP() internal view {
-        require(
-            borrowerOperations[msg.sender] ||
-            troveManagers[msg.sender] ||
-            stabilityPools[msg.sender],
-            "THUSD: Caller is neither BorrowerOperations nor TroveManager nor StabilityPool"
-        );
-    }
-
-    function _requireCallerIsStabilityPool() internal view {
-        require(stabilityPools[msg.sender], "THUSD: Caller is not the StabilityPool");
-    }
-
-    function _requireCallerIsTroveMorSP() internal view {
-        require(
-            troveManagers[msg.sender] || stabilityPools[msg.sender],
-            "THUSD: Caller is neither TroveManager nor StabilityPool");
     }
 
     // --- Optional functions ---
