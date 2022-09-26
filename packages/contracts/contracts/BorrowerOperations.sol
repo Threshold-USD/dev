@@ -330,10 +330,11 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         ITroveManager troveManagerCached = troveManager;
         IActivePool activePoolCached = activePool;
         ITHUSDToken thusdTokenCached = thusdToken;
+        bool canMint = thusdTokenCached.mintList(address(this));
 
         _requireTroveisActive(troveManagerCached, msg.sender);
         uint256 price = priceFeed.fetchPrice();
-        if (thusdTokenCached.mintList(address(this))) {
+        if (canMint) {
             _requireNotInRecoveryMode(price);
         }
 
@@ -343,7 +344,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         uint256 debt = troveManagerCached.getTroveDebt(msg.sender);
 
         _requireSufficientTHUSDBalance(thusdTokenCached, msg.sender, debt - THUSD_GAS_COMPENSATION);
-        if (thusdTokenCached.mintList(address(this))) {
+        if (canMint) {
             uint256 newTCR = _getNewTCRFromTroveChange(coll, false, debt, false, price);
             _requireNewTCRisAboveCCR(newTCR);
         }
@@ -526,12 +527,11 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         internal
         view
     {
-        ITHUSDToken thusdTokenCached = thusdToken;
 
         /*
          * If contract has been removed from the thUSD mintlist remove the adjustment restrictions
          */
-        if (!thusdTokenCached.mintList(address(this))) {
+        if (!thusdToken.mintList(address(this))) {
             return;
         }
 
