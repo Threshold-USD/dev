@@ -52,7 +52,8 @@ contract EchidnaTester {
         thusdToken = new THUSDToken(
             address(troveManager),
             address(stabilityPool),
-            address(borrowerOperations)
+            address(borrowerOperations),
+            90 * 24 * 60 * 60
         );
 
         collSurplusPool = new CollSurplusPool();

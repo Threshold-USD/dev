@@ -42,6 +42,8 @@ const {
 
 const ZERO_ADDRESS = '0x' + '0'.repeat(40)
 const maxBytes32 = '0x' + 'f'.repeat(64)
+  
+const delay = 90 * 24 * 60 * 60  // 90 days in seconds
 
 class DeploymentHelper {
 
@@ -73,7 +75,8 @@ class DeploymentHelper {
     const thusdToken = await THUSDToken.new(
       troveManager.address,
       stabilityPool.address,
-      borrowerOperations.address
+      borrowerOperations.address,
+      delay
     )
     const pcv = await PCV.new()
 
@@ -141,7 +144,8 @@ class DeploymentHelper {
     testerContracts.thusdToken =  await THUSDTokenTester.new(
       testerContracts.troveManager.address,
       testerContracts.stabilityPool.address,
-      testerContracts.borrowerOperations.address
+      testerContracts.borrowerOperations.address,
+      delay
     )
     testerContracts.pcv = await PCVTester.new()
     return testerContracts
@@ -201,7 +205,8 @@ class DeploymentHelper {
     contracts.thusdToken = await THUSDToken.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
-      contracts.borrowerOperations.address
+      contracts.borrowerOperations.address,
+      delay
     )
     return contracts
   }
@@ -210,7 +215,8 @@ class DeploymentHelper {
     contracts.thusdToken = await THUSDTokenTester.new(
       contracts.troveManager.address,
       contracts.stabilityPool.address,
-      contracts.borrowerOperations.address
+      contracts.borrowerOperations.address,
+      delay
     )
     return contracts
   }

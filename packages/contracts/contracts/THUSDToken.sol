@@ -60,7 +60,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     mapping(address => bool) public isBorrowerOperations;
     mapping(address => bool) public mintList;
 
-    uint256 public constant GOVERNANCE_TIME_DELAY = 90 days;
+    uint256 public immutable governanceTimeDelay;
 
     address public pendingTroveManager;
     address public pendingStabilityPool;
@@ -73,7 +73,8 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     (
         address _troveManagerAddress,
         address _stabilityPoolAddress,
-        address _borrowerOperationsAddress
+        address _borrowerOperationsAddress,
+        uint256 _governanceTimeDelay
     )
     {
         // when created its linked to one set of contracts and collateral, other collateral types can be added via governance
@@ -85,15 +86,15 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         _HASHED_VERSION = hashedVersion;
         _CACHED_CHAIN_ID = _chainID();
         _CACHED_DOMAIN_SEPARATOR = _buildDomainSeparator(_TYPE_HASH, hashedName, hashedVersion);
+        governanceTimeDelay = _governanceTimeDelay;
     }
 
     modifier onlyAfterGovernanceDelay(
-        uint256 _changeInitializedTimestamp,
-        uint256 _delay
+        uint256 _changeInitializedTimestamp
     ) {
         require(_changeInitializedTimestamp > 0, "Change not initiated");
         require(
-            block.timestamp >= _changeInitializedTimestamp + _delay,
+            block.timestamp >= _changeInitializedTimestamp + governanceTimeDelay,
             "Governance delay has not elapsed"
         );
         _;
@@ -114,10 +115,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     function finalizeRevokeMintList(address _account)
         external
         onlyOwner
-        onlyAfterGovernanceDelay(
-            revokeMintListInitiated,
-            GOVERNANCE_TIME_DELAY
-        )
+        onlyAfterGovernanceDelay(revokeMintListInitiated)
     {
         require(pendingRevokedMintAddress == _account, "Incorrect address to finalize");
 
@@ -145,10 +143,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     function finalizeAddContracts(address _troveManagerAddress, address _stabilityPoolAddress, address _borrowerOperationsAddress)
         external
         onlyOwner
-        onlyAfterGovernanceDelay(
-            addContractsInitiated,
-            GOVERNANCE_TIME_DELAY
-        )
+        onlyAfterGovernanceDelay(addContractsInitiated)
     {
         // check contracts are the same
         require(

@@ -49,11 +49,7 @@ contract('Gas compensation tests', async accounts => {
   beforeEach(async () => {
     contracts = await deploymentHelper.deployLiquityCore(accounts)
     contracts.troveManager = await TroveManagerTester.new()
-    contracts.thusdToken = await THUSDToken.new(
-      contracts.troveManager.address,
-      contracts.stabilityPool.address,
-      contracts.borrowerOperations.address
-    )
+    contracts.thusdToken = (await deploymentHelper.deployTHUSDToken(contracts)).thusdToken
 
     priceFeed = contracts.priceFeedTestnet
     thusdToken = contracts.thusdToken

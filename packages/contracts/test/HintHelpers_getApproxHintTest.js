@@ -72,11 +72,7 @@ contract('HintHelpers', async accounts => {
   before(async () => {
     contracts = await deploymentHelper.deployLiquityCore(accounts)
     contracts.troveManager = await TroveManagerTester.new()
-    contracts.thusdToken = await THUSDToken.new(
-      contracts.troveManager.address,
-      contracts.stabilityPool.address,
-      contracts.borrowerOperations.address
-    )
+    contracts.thusdToken = (await deploymentHelper.deployTHUSDToken(contracts)).thusdToken
 
     sortedTroves = contracts.sortedTroves
     troveManager = contracts.troveManager

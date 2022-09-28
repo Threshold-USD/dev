@@ -11,10 +11,14 @@ contract THUSDTokenTester is THUSDToken {
     constructor(
         address _troveManagerAddress,
         address _stabilityPoolAddress,
-        address _borrowerOperationsAddress
-    ) THUSDToken(_troveManagerAddress,
-                      _stabilityPoolAddress,
-                      _borrowerOperationsAddress) {}
+        address _borrowerOperationsAddress,
+        uint256 _governanceTimeDelay
+    ) 
+        THUSDToken(_troveManagerAddress,
+                 _stabilityPoolAddress,
+                 _borrowerOperationsAddress,
+                 _governanceTimeDelay
+    ) {}
 
     function unprotectedMint(address _account, uint256 _amount) external {
         // No check on caller here
