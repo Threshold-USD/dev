@@ -115,20 +115,20 @@ contract('THUSDToken', async accounts => {
     
     if (!withProxy) {
       it('Initial set of contracts was set correctly', async () => {
-        assert.isTrue(await thusdTokenTester.troveManagers(troveManager.address))
-        assert.isFalse(await thusdTokenTester.troveManagers(stabilityPool.address))
-        assert.isFalse(await thusdTokenTester.troveManagers(borrowerOperations.address))
-        assert.isFalse(await thusdTokenTester.troveManagers(owner))
+        assert.isTrue(await thusdTokenTester.isTroveManager(troveManager.address))
+        assert.isFalse(await thusdTokenTester.isTroveManager(stabilityPool.address))
+        assert.isFalse(await thusdTokenTester.isTroveManager(borrowerOperations.address))
+        assert.isFalse(await thusdTokenTester.isTroveManager(owner))
         
-        assert.isFalse(await thusdTokenTester.stabilityPools(troveManager.address))
-        assert.isTrue(await thusdTokenTester.stabilityPools(stabilityPool.address))
-        assert.isFalse(await thusdTokenTester.stabilityPools(borrowerOperations.address))
-        assert.isFalse(await thusdTokenTester.stabilityPools(owner))
+        assert.isFalse(await thusdTokenTester.isStabilityPools(troveManager.address))
+        assert.isTrue(await thusdTokenTester.isStabilityPools(stabilityPool.address))
+        assert.isFalse(await thusdTokenTester.isStabilityPools(borrowerOperations.address))
+        assert.isFalse(await thusdTokenTester.isStabilityPools(owner))
         
-        assert.isFalse(await thusdTokenTester.borrowerOperations(troveManager.address))
-        assert.isFalse(await thusdTokenTester.borrowerOperations(stabilityPool.address))
-        assert.isTrue(await thusdTokenTester.borrowerOperations(borrowerOperations.address))
-        assert.isFalse(await thusdTokenTester.borrowerOperations(owner))
+        assert.isFalse(await thusdTokenTester.isBorrowerOperations(troveManager.address))
+        assert.isFalse(await thusdTokenTester.isBorrowerOperations(stabilityPool.address))
+        assert.isTrue(await thusdTokenTester.isBorrowerOperations(borrowerOperations.address))
+        assert.isFalse(await thusdTokenTester.isBorrowerOperations(owner))
         
         assert.isFalse(await thusdTokenTester.mintList(troveManager.address))
         assert.isFalse(await thusdTokenTester.mintList(stabilityPool.address))
@@ -493,9 +493,9 @@ contract('THUSDToken', async accounts => {
           assert.equal(await thusdTokenTester.pendingBorrowerOperations(), newBorrowerOperations.address)
           assert.equal(await thusdTokenTester.addContractsInitiated(), timeNow)
           
-          assert.isFalse(await thusdTokenTester.troveManagers(newTroveManager.address))
-          assert.isFalse(await thusdTokenTester.stabilityPools(newStabilityPool.address))
-          assert.isFalse(await thusdTokenTester.borrowerOperations(newBorrowerOperations.address))
+          assert.isFalse(await thusdTokenTester.isTroveManager(newTroveManager.address))
+          assert.isFalse(await thusdTokenTester.isStabilityPools(newStabilityPool.address))
+          assert.isFalse(await thusdTokenTester.isBorrowerOperations(newBorrowerOperations.address))
           assert.isFalse(await thusdTokenTester.mintList(newBorrowerOperations.address))
         })
         
@@ -567,20 +567,20 @@ contract('THUSDToken', async accounts => {
           assert.equal(await thusdTokenTester.pendingBorrowerOperations(), newBorrowerOperations.address)
           assert.equal(await thusdTokenTester.addContractsInitiated(), 0)
           
-          assert.isTrue(await thusdTokenTester.troveManagers(troveManager.address))
-          assert.isTrue(await thusdTokenTester.troveManagers(newTroveManager.address))
-          assert.isFalse(await thusdTokenTester.troveManagers(newStabilityPool.address))
-          assert.isFalse(await thusdTokenTester.troveManagers(newBorrowerOperations.address))
+          assert.isTrue(await thusdTokenTester.isTroveManager(troveManager.address))
+          assert.isTrue(await thusdTokenTester.isTroveManager(newTroveManager.address))
+          assert.isFalse(await thusdTokenTester.isTroveManager(newStabilityPool.address))
+          assert.isFalse(await thusdTokenTester.isTroveManager(newBorrowerOperations.address))
           
-          assert.isFalse(await thusdTokenTester.stabilityPools(newTroveManager.address))
-          assert.isTrue(await thusdTokenTester.stabilityPools(stabilityPool.address))
-          assert.isTrue(await thusdTokenTester.stabilityPools(newStabilityPool.address))
-          assert.isFalse(await thusdTokenTester.stabilityPools(newBorrowerOperations.address))
+          assert.isFalse(await thusdTokenTester.isStabilityPools(newTroveManager.address))
+          assert.isTrue(await thusdTokenTester.isStabilityPools(stabilityPool.address))
+          assert.isTrue(await thusdTokenTester.isStabilityPools(newStabilityPool.address))
+          assert.isFalse(await thusdTokenTester.isStabilityPools(newBorrowerOperations.address))
           
-          assert.isFalse(await thusdTokenTester.borrowerOperations(newTroveManager.address))
-          assert.isFalse(await thusdTokenTester.borrowerOperations(newStabilityPool.address))
-          assert.isTrue(await thusdTokenTester.borrowerOperations(newBorrowerOperations.address))
-          assert.isTrue(await thusdTokenTester.borrowerOperations(borrowerOperations.address))
+          assert.isFalse(await thusdTokenTester.isBorrowerOperations(newTroveManager.address))
+          assert.isFalse(await thusdTokenTester.isBorrowerOperations(newStabilityPool.address))
+          assert.isTrue(await thusdTokenTester.isBorrowerOperations(newBorrowerOperations.address))
+          assert.isTrue(await thusdTokenTester.isBorrowerOperations(borrowerOperations.address))
           
           assert.isFalse(await thusdTokenTester.mintList(newTroveManager.address))
           assert.isFalse(await thusdTokenTester.mintList(newStabilityPool.address))
