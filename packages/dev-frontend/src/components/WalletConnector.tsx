@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer } from "react";
 import { useWeb3React } from "@web3-react/core";
 import { AbstractConnector } from "@web3-react/abstract-connector";
-import { Button, Flex, Spinner, Box, Heading, Paragraph } from "theme-ui";
+import { Button, Flex, Spinner, Box, Paragraph, useColorMode } from "theme-ui";
 
 import { injectedConnector } from "../connectors/injectedConnector";
 import { useAuthorizedConnection } from "../hooks/useAuthorizedConnection";
@@ -76,6 +76,8 @@ type WalletConnectorProps = {
 };
 
 export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, loader }) => {
+  const [colorMode] = useColorMode()
+
   const { activate, deactivate, active, error } = useWeb3React<unknown>();
   const triedAuthorizedConnection = useAuthorizedConnection();
   const [connectionState, dispatch] = useReducer(connectionReducer, { type: "inactive" });
@@ -115,7 +117,7 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
         alignItems: "center",
         boxShadow: 1,
         borderRadius: "16px",
-        bg: "white",
+        bg: "background",
         py: ["3rem", "4.5rem", "5rem"],
         px: ["2.2rem","4rem", "6.5rem"],
         height: "fit-content"
@@ -126,10 +128,7 @@ export const WalletConnector: React.FC<WalletConnectorProps> = ({ children, load
           alignItems: "center",
           mb: "2.5rem"
         }}>
-          <GenericIcon imgSrc="./threshold-usd-icon.svg" height={"32px"} />
-          <Heading sx={{ ml:"0.5em", letterSpacing: -0.7, fontSize: ["1.2rem", "1.6rem"] }}>
-            Threshold USD
-          </Heading>
+          <GenericIcon imgSrc={colorMode === "dark" || colorMode === "darkGrey" ? "./dark-main-thresholdusd-logo.svg" : "./light-main-thresholdusd-logo.svg"} height={"66px"} />
         </Flex>
         <Paragraph sx={{
           fontWeight: "bold",

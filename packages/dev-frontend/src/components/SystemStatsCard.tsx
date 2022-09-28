@@ -155,6 +155,7 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
                   variant="layout.balanceRow"
                   sx={{
                   ...editableStyle,
+                  color: "inputText"
                   }}
                   type="number"
                   step="any"
@@ -163,7 +164,7 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
                 />
                 <Transaction
                   id="set-price"
-                  tooltip="Set"
+                  tooltip="Set the WETH price in the testnet"
                   tooltipPlacement="bottom"
                   send={overrides => {
                     if (!editedPrice) {

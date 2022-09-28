@@ -100,12 +100,12 @@ export const StaticAmounts: React.FC<StaticAmountsProps & SxProp> = ({
       }}
     >
       <Flex sx={{ alignItems: "center" }}>
-        <Text sx={{ color: "text", fontWeight: "semibold" }}>{amount}</Text>
+        <Text sx={{ color: "inputText", fontWeight: "semibold" }}>{amount}</Text>
 
         {unit && (
           <>
             &nbsp;
-            <Text sx={{ color: "black",fontWeight: "light" }}>{unit}</Text>
+            <Text sx={{ color: "text",fontWeight: "light" }}>{unit}</Text>
           </>
         )}
 

@@ -8,6 +8,7 @@ import { UserAccount } from "./UserAccount";
 export const Nav: React.FC = () => {
   return (
     <Box sx={{
+      bg: "background",
       display: "flex",
       justifyContent: "space-between",
       flexDirection: "column",

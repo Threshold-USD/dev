@@ -41,7 +41,7 @@ const EthersWeb3ReactProvider: React.FC = ({ children }) => {
 
 const App = () => {
   const loader = (
-    <Flex sx={{ alignItems: "center", justifyContent: "center", height: "100vh", width: "100vw" }}>
+    <Flex sx={{ alignItems: "center", justifyContent: "center", height: "75vh",  }}>
       <Spinner sx={{ m: 2, color: "text" }} size="32px" />
       <Heading>Loading...</Heading>
     </Flex>

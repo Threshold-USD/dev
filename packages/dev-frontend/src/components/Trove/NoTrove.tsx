@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Box, Button, Card, Flex, Link } from "theme-ui";
+import { Box, Button, Card, Flex, Link, useColorMode } from "theme-ui";
 import { useTroveView } from "./context/TroveViewContext";
 
 import { LiquityStoreState } from "@liquity/lib-base";
@@ -15,6 +15,7 @@ const select = ({ erc20TokenBalance }: LiquityStoreState) => ({
 });
 
 export const NoTrove: React.FC = props => {
+  const [colorMode] = useColorMode();
   const { dispatchEvent } = useTroveView();
 
   const handleOpenTrove = useCallback(() => {
@@ -47,7 +48,7 @@ export const NoTrove: React.FC = props => {
           </ActionDescription>
           { FIRST_ERC20_COLLATERAL } available 
           <Flex variant="layout.balanceRow">
-            <GenericIcon imgSrc="./icons/threshold-icon.svg" height={"18px"} />
+            <GenericIcon imgSrc={colorMode === "darkGrey" ? "./icons/darkgrey-threshold-icon.svg" : "./icons/threshold-icon.svg"} height={"18px"} />
             <Box sx={{ fontSize: 3 }}>
               {!erc20TokenBalance.eq(0) ? erc20TokenBalance.prettify() : '--'}
             </Box>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Button, Card, Flex, Link } from "theme-ui";
+import { Box, Button, Card, Flex, Link, useColorMode } from "theme-ui";
 import { NavLink } from "react-router-dom";
 
 import { GenericIcon } from "../GenericIcon";
@@ -23,6 +23,8 @@ export const BottomCard: React.FC<BottomCardProps> = ({
   disabled,
   children
 }) => {
+  const [colorMode] = useColorMode();
+
     return (
       <Card variant="layout.columns">
         <Flex sx={{
@@ -43,8 +45,8 @@ export const BottomCard: React.FC<BottomCardProps> = ({
           gap: "1em"
         }}>
           {token} available 
-          <Flex variant="layout.balanceRow">
-            <GenericIcon imgSrc={"./icons/threshold-icon.svg"} height={"18px"} />
+          <Flex variant="layout.balanceRow" sx={{ color: "inputText"}}>
+            <GenericIcon imgSrc={colorMode === "darkGrey" ? "./icons/darkgrey-threshold-icon.svg" : "./icons/threshold-icon.svg"} height={"18px"} />
             <Box sx={{ fontSize: 3 }}>
               {children}
             </Box>

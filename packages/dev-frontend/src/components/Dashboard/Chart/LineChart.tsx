@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Card, Flex } from "theme-ui";
+import { Box, Card, Flex, useColorMode } from "theme-ui";
 
 import { FIRST_ERC20_COLLATERAL } from '../../../strings';
 
@@ -52,7 +52,8 @@ ChartJS.register({
   }
 });
 
-export const LineChart: React.FC = () => { 
+export const LineChart: React.FC = () => {
+  const [colorMode] = useColorMode();
 
   const [activeData, setActiveData] = useState<number | string>('-');
   const [activeLabel, setActiveLabel] = useState<string>();
@@ -144,13 +145,13 @@ export const LineChart: React.FC = () => {
         lineTension: 0.4,
         label: 'TVL',
         data: chartData?.map((tvl: tvlData) => tvl?.totalCollateral),
-        borderColor: '#20cb9d',
-        pointBackgroundColor: '#20cb9d',
+        borderColor: colorMode === "dark" ? "#7d00ff" : colorMode === "darkGrey" ? "#f3f3f3b8" : "#20cb9d",
+        pointBackgroundColor: colorMode === 'dark' ? "#7d00ff" : colorMode === "darkGrey" ? "#f3f3f3b8" : "#20cb9d",
         backgroundColor: (context: ScriptableContext<"line">) => {
           const ctx = context.chart.ctx;
           const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-          gradient.addColorStop(0, "#28c39b40");
-          gradient.addColorStop(1, "#ffffff40");
+          gradient.addColorStop(0, colorMode === "dark" ? "#7c00fd8c" : colorMode === "darkGrey" ? "#e5e5e5b8" : "#28c39b40");
+          gradient.addColorStop(1, colorMode === "dark" ? "#7d00ff00" : colorMode === "darkGrey" ? "#f3f3f321" :  "#ffffff40");
           return gradient;
         },
       },

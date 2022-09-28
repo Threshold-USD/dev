@@ -18,7 +18,6 @@ import { useLiquity } from "../hooks/LiquityContext";
 import { COIN } from "../strings";
 
 import { Icon } from "./Icon";
-import { LoadingOverlay } from "./LoadingOverlay";
 import { Transaction } from "./Transaction";
 import { Tooltip } from "./Tooltip";
 import { Abbreviation } from "./Abbreviation";
@@ -78,9 +77,7 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
   } = useLiquitySelector(select);
   const { liquity } = useLiquity();
 
-  const [loading, setLoading] = useState(true);
   const [troves, setTroves] = useState<UserTrove[]>();
-
   const [reload, setReload] = useState({});
   const forceReload = useCallback(() => setReload({}), []);
 
@@ -109,8 +106,6 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
   useEffect(() => {
     let mounted = true;
 
-    setLoading(true);
-
     liquity
       .getTroves(
         {
@@ -123,7 +118,6 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
       .then(troves => {
         if (mounted) {
           setTroves(troves);
-          setLoading(false);
         }
       });
 
@@ -182,11 +176,9 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
                     {clampedPage * pageSize + 1}-{Math.min((clampedPage + 1) * pageSize, numberOfTroves)}{" "}
                     of {numberOfTroves}
                   </Abbreviation>
-
                   <Button variant="titleIcon" onClick={previousPage} disabled={clampedPage <= 0}>
                     <Icon name="chevron-left" size="sm" />
                   </Button>
-
                   <Button
                     variant="titleIcon"
                     onClick={nextPage}
@@ -198,7 +190,6 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
               )}
             </Flex>
           </Flex>
-
           {!troves || troves.length === 0 ? (
             <Box sx={{ p: [2, 3] }}>
               <Box sx={{ p: 4, fontSize: 3, textAlign: "center" }}>
@@ -212,7 +203,6 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
                 sx={{
                   mt: 2,
                   width: "100%",
-
                   textAlign: "left",
                   lineHeight: 1.15
                 }}
@@ -224,7 +214,6 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
                   <col />
                   <col style={{ width: rowHeight }} />
                 </colgroup>
-
                 <thead>
                   <tr style={{ opacity: 0.6 }}>
                     <th style={{ verticalAlign: "top" }}>Owner</th>
@@ -244,7 +233,6 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
                     <th></th>
                   </tr>
                 </thead>
-
                 <tbody>
                   {troves.map(
                     trove =>
@@ -347,8 +335,6 @@ export const RiskyVaults: React.FC<RiskyVaultsProps> = ({ pageSize }) => {
               </Box>
             </Box>
           )}
-
-          {loading && <LoadingOverlay />}
         </Card>
       </Card>
     </Container>  
