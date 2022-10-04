@@ -562,9 +562,9 @@ contract('THUSDToken', async accounts => {
             newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
             { from: owner })
 
-          assert.equal(await thusdTokenTester.pendingTroveManager(), newTroveManager.address)
-          assert.equal(await thusdTokenTester.pendingStabilityPool(), newStabilityPool.address)
-          assert.equal(await thusdTokenTester.pendingBorrowerOperations(), newBorrowerOperations.address)
+          assert.equal(await thusdTokenTester.pendingTroveManager(), ZERO_ADDRESS)
+          assert.equal(await thusdTokenTester.pendingStabilityPool(), ZERO_ADDRESS)
+          assert.equal(await thusdTokenTester.pendingBorrowerOperations(), ZERO_ADDRESS)
           assert.equal(await thusdTokenTester.addContractsInitiated(), 0)
           
           assert.isTrue(await thusdTokenTester.isTroveManager(troveManager.address))
@@ -673,7 +673,7 @@ contract('THUSDToken', async accounts => {
           borrowerOperations.address, 
           { from: owner })
 
-        assert.equal(await thusdTokenTester.pendingRevokedMintAddress(), borrowerOperations.address)
+        assert.equal(await thusdTokenTester.pendingRevokedMintAddress(), ZERO_ADDRESS)
         assert.equal(await thusdTokenTester.revokeMintListInitiated(), 0)
         
         assert.isFalse(await thusdTokenTester.mintList(borrowerOperations.address))

@@ -121,6 +121,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
 
         mintList[_account] = false;
         revokeMintListInitiated = 0;
+        pendingRevokedMintAddress = address(0);
     }
 
     function startAddContracts(address _troveManagerAddress, address _stabilityPoolAddress, address _borrowerOperationsAddress)
@@ -154,6 +155,9 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         // make sure minimum blocks has passed
         _addSystemContracts(_troveManagerAddress, _stabilityPoolAddress, _borrowerOperationsAddress);
         addContractsInitiated = 0;
+        pendingTroveManager = address(0);
+        pendingStabilityPool = address(0);
+        pendingBorrowerOperations = address(0);
     }
 
     // --- Functions for intra-Liquity calls ---
