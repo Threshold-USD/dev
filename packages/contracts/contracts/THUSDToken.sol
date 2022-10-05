@@ -112,6 +112,13 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         pendingRevokedMintAddress = _account;
     }
 
+    function cancelRevokeMintList() external onlyOwner {
+        require(revokeMintListInitiated != 0, "Revoking from mint list is not started");
+
+        revokeMintListInitiated = 0;
+        pendingRevokedMintAddress = address(0);
+    }
+
     function finalizeRevokeMintList(address _account)
         external
         onlyOwner
@@ -139,6 +146,15 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
 
         // save block number
         addContractsInitiated = block.timestamp;
+    }
+
+    function cancelAddContracts() external onlyOwner {
+        require(addContractsInitiated != 0, "Adding contracts is not started");
+
+        addContractsInitiated = 0;
+        pendingTroveManager = address(0);
+        pendingStabilityPool = address(0);
+        pendingBorrowerOperations = address(0);
     }
 
     function finalizeAddContracts(address _troveManagerAddress, address _stabilityPoolAddress, address _borrowerOperationsAddress)

@@ -499,6 +499,39 @@ contract('THUSDToken', async accounts => {
           assert.isFalse(await thusdTokenTester.mintList(newBorrowerOperations.address))
         })
         
+        it('cancelAddContracts(): reverts when caller is not owner', async () => {
+          await assertRevert(
+            thusdTokenTester.cancelAddContracts({ from: alice }), 
+            "Ownable: caller is not the owner"
+          )
+        })
+
+        it('cancelAddContracts(): reverts when change is not initiated', async () => {
+          await assertRevert(
+            thusdTokenTester.cancelAddContracts({ from: owner }),
+            "Adding contracts is not started"
+          )
+        })
+
+        it('cancelAddContracts(): cancels adding system contracts', async () => {
+          await thusdTokenTester.startAddContracts(
+              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
+              { from: owner }
+          )
+          
+          await thusdTokenTester.cancelAddContracts({ from: owner })
+
+          assert.equal(await thusdTokenTester.pendingTroveManager(), ZERO_ADDRESS)
+          assert.equal(await thusdTokenTester.pendingStabilityPool(), ZERO_ADDRESS)
+          assert.equal(await thusdTokenTester.pendingBorrowerOperations(), ZERO_ADDRESS)
+          assert.equal(await thusdTokenTester.addContractsInitiated(), 0)
+          
+          assert.isFalse(await thusdTokenTester.isTroveManager(newTroveManager.address))
+          assert.isFalse(await thusdTokenTester.isStabilityPools(newStabilityPool.address))
+          assert.isFalse(await thusdTokenTester.isBorrowerOperations(newBorrowerOperations.address))
+          assert.isFalse(await thusdTokenTester.mintList(newBorrowerOperations.address))
+        })
+        
         it('finalizeAddContracts(): reverts when caller is not owner', async () => {
           await assertRevert(
             thusdTokenTester.finalizeAddContracts(
@@ -615,6 +648,34 @@ contract('THUSDToken', async accounts => {
         const timeNow = await getLatestBlockTimestamp(web3)
         assert.equal(await thusdTokenTester.pendingRevokedMintAddress(), borrowerOperations.address)
         assert.equal(await thusdTokenTester.revokeMintListInitiated(), timeNow)
+        
+        assert.isTrue(await thusdTokenTester.mintList(borrowerOperations.address))
+      })
+        
+      it('cancelRevokeMintList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.cancelRevokeMintList({ from: alice }), 
+          "Ownable: caller is not the owner"
+        )
+      })
+
+      it('cancelRevokeMintList(): reverts when change is not initiated', async () => {
+        await assertRevert(
+          thusdTokenTester.cancelRevokeMintList({ from: owner }),
+          "Revoking from mint list is not started"
+        )
+      })
+
+      it('cancelRevokeMintList(): cancels adding system contracts', async () => {
+        await thusdTokenTester.startRevokeMintList(
+            borrowerOperations.address, 
+            { from: owner }
+        )
+        
+        await thusdTokenTester.cancelRevokeMintList({ from: owner })
+
+        assert.equal(await thusdTokenTester.pendingRevokedMintAddress(), ZERO_ADDRESS)
+        assert.equal(await thusdTokenTester.revokeMintListInitiated(), 0)
         
         assert.isTrue(await thusdTokenTester.mintList(borrowerOperations.address))
       })
