@@ -66,8 +66,10 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     address public pendingStabilityPool;
     address public pendingBorrowerOperations;
     address public pendingRevokedMintAddress;
+    address public pendingAddedMintAddress;
     uint256 public revokeMintListInitiated;
     uint256 public addContractsInitiated;
+    uint256 public addMintListInitiated;
 
     constructor
     (
@@ -129,6 +131,32 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         mintList[_account] = false;
         revokeMintListInitiated = 0;
         pendingRevokedMintAddress = address(0);
+    }
+
+    function startAddMintList(address _account) external onlyOwner {
+        require(!mintList[_account], "Incorrect address to add");
+
+        addMintListInitiated = block.timestamp;
+        pendingAddedMintAddress = _account;
+    }
+
+    function cancelAddMintList() external onlyOwner {
+        require(addMintListInitiated != 0, "Adding to mint list is not started");
+
+        addMintListInitiated = 0;
+        pendingAddedMintAddress = address(0);
+    }
+
+    function finalizeAddMintList(address _account)
+        external
+        onlyOwner
+        onlyAfterGovernanceDelay(addMintListInitiated)
+    {
+        require(pendingAddedMintAddress == _account, "Incorrect address to finalize");
+
+        mintList[_account] = true;
+        addMintListInitiated = 0;
+        pendingAddedMintAddress = address(0);
     }
 
     function startAddContracts(address _troveManagerAddress, address _stabilityPoolAddress, address _borrowerOperationsAddress)

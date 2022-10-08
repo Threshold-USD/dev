@@ -666,7 +666,7 @@ contract('THUSDToken', async accounts => {
         )
       })
 
-      it('cancelRevokeMintList(): cancels adding system contracts', async () => {
+      it('cancelRevokeMintList(): cancels revoking from mint list', async () => {
         await thusdTokenTester.startRevokeMintList(
             borrowerOperations.address, 
             { from: owner }
@@ -730,7 +730,7 @@ contract('THUSDToken', async accounts => {
           )
         await fastForwardTime(delay, web3.currentProvider)
         
-        let tx = await thusdTokenTester.finalizeRevokeMintList(
+        await thusdTokenTester.finalizeRevokeMintList(
           borrowerOperations.address, 
           { from: owner })
 
@@ -738,6 +738,120 @@ contract('THUSDToken', async accounts => {
         assert.equal(await thusdTokenTester.revokeMintListInitiated(), 0)
         
         assert.isFalse(await thusdTokenTester.mintList(borrowerOperations.address))
+      })
+
+      it('startAddMintList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.startAddMintList(
+            alice, 
+            { from: alice }),
+            "Ownable: caller is not the owner")
+      })
+
+      it('startAddMintList(): reverts when account already has minting role', async () => {
+        await assertRevert(
+          thusdTokenTester.startAddMintList(
+            borrowerOperations.address, 
+            { from: owner }),
+            "Incorrect address to add")
+      })
+
+      it('startAddMintList(): puts account to pending list', async () => {
+        await thusdTokenTester.startAddMintList(alice, { from: owner })
+        
+        const timeNow = await getLatestBlockTimestamp(web3)
+        assert.equal(await thusdTokenTester.pendingAddedMintAddress(), alice)
+        assert.equal(await thusdTokenTester.addMintListInitiated(), timeNow)
+        
+        assert.isFalse(await thusdTokenTester.mintList(alice))
+      })
+        
+      it('cancelAddMintList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.cancelAddMintList({ from: alice }), 
+          "Ownable: caller is not the owner"
+        )
+      })
+
+      it('cancelAddMintList(): reverts when change is not initiated', async () => {
+        await assertRevert(
+          thusdTokenTester.cancelAddMintList({ from: owner }),
+          "Adding to mint list is not started"
+        )
+      })
+
+      it('cancelAddMintList(): cancels adding to mint list', async () => {
+        await thusdTokenTester.startAddMintList(
+            alice, 
+            { from: owner }
+        )
+        
+        await thusdTokenTester.cancelAddMintList({ from: owner })
+
+        assert.equal(await thusdTokenTester.pendingAddedMintAddress(), ZERO_ADDRESS)
+        assert.equal(await thusdTokenTester.addMintListInitiated(), 0)
+        
+        assert.isFalse(await thusdTokenTester.mintList(alice))
+      })
+
+      it('finalizeAddMintList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.finalizeAddMintList(
+            alice,
+            { from: alice }),
+            "Ownable: caller is not the owner")
+      })
+
+      it('finalizeAddMintList(): reverts when change is not initiated', async () => {
+        await assertRevert(
+          thusdTokenTester.finalizeAddMintList(
+            alice, 
+            { from: owner }),
+            "Change not initiated")
+      })
+
+      it('finalizeAddMintList(): reverts when passed not enough time', async () => {
+        await thusdTokenTester.startAddMintList(
+          alice, 
+            { from: owner }
+          )
+        await assertRevert(
+          thusdTokenTester.finalizeAddMintList(
+            alice, 
+            { from: owner }),
+            "Governance delay has not elapsed")
+      })
+      
+      it('finalizeAddMintList(): reverts when provided wrong address', async () => {
+        await thusdTokenTester.startAddMintList(
+          alice, 
+            { from: owner }
+          )
+        await fastForwardTime(delay, web3.currentProvider)
+
+        await assertRevert(
+          thusdTokenTester.finalizeAddMintList(
+            owner, 
+            { from: owner }),
+            "Incorrect address to finalize"
+        )
+      })
+
+      it('finalizeAddMintList(): adds account to minting list', async () => {
+        await thusdTokenTester.startAddMintList(
+          alice, 
+            { from: owner }
+          )
+        await fastForwardTime(delay, web3.currentProvider)
+        
+        await thusdTokenTester.finalizeAddMintList(
+          alice, 
+          { from: owner })
+
+        assert.equal(await thusdTokenTester.pendingAddedMintAddress(), ZERO_ADDRESS)
+        assert.equal(await thusdTokenTester.addMintListInitiated(), 0)
+        
+        assert.isTrue(await thusdTokenTester.mintList(alice))
       })
     }
   }
