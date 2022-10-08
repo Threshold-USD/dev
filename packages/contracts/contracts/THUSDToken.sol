@@ -121,14 +121,12 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         pendingRevokedMintAddress = address(0);
     }
 
-    function finalizeRevokeMintList(address _account)
+    function finalizeRevokeMintList()
         external
         onlyOwner
         onlyAfterGovernanceDelay(revokeMintListInitiated)
     {
-        require(pendingRevokedMintAddress == _account, "Incorrect address to finalize");
-
-        mintList[_account] = false;
+        mintList[pendingRevokedMintAddress] = false;
         revokeMintListInitiated = 0;
         pendingRevokedMintAddress = address(0);
     }
@@ -147,14 +145,12 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         pendingAddedMintAddress = address(0);
     }
 
-    function finalizeAddMintList(address _account)
+    function finalizeAddMintList()
         external
         onlyOwner
         onlyAfterGovernanceDelay(addMintListInitiated)
     {
-        require(pendingAddedMintAddress == _account, "Incorrect address to finalize");
-
-        mintList[_account] = true;
+        mintList[pendingAddedMintAddress] = true;
         addMintListInitiated = 0;
         pendingAddedMintAddress = address(0);
     }
@@ -185,19 +181,13 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         pendingBorrowerOperations = address(0);
     }
 
-    function finalizeAddContracts(address _troveManagerAddress, address _stabilityPoolAddress, address _borrowerOperationsAddress)
+    function finalizeAddContracts()
         external
         onlyOwner
         onlyAfterGovernanceDelay(addContractsInitiated)
     {
-        // check contracts are the same
-        require(
-          pendingTroveManager == _troveManagerAddress &&
-          pendingStabilityPool == _stabilityPoolAddress &&
-          pendingBorrowerOperations == _borrowerOperationsAddress
-        );
         // make sure minimum blocks has passed
-        _addSystemContracts(_troveManagerAddress, _stabilityPoolAddress, _borrowerOperationsAddress);
+        _addSystemContracts(pendingTroveManager, pendingStabilityPool, pendingBorrowerOperations);
         addContractsInitiated = 0;
         pendingTroveManager = address(0);
         pendingStabilityPool = address(0);

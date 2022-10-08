@@ -1202,7 +1202,7 @@ class TestHelper {
   static async removeMintlist(contracts, owner, delay) {
     await contracts.thusdToken.startRevokeMintList(contracts.borrowerOperations.address, { from: owner })
     await this.fastForwardTime(delay, web3.currentProvider)
-    await contracts.thusdToken.finalizeRevokeMintList(contracts.borrowerOperations.address, { from: owner })
+    await contracts.thusdToken.finalizeRevokeMintList({ from: owner })
   }
 }
 

@@ -535,7 +535,6 @@ contract('THUSDToken', async accounts => {
         it('finalizeAddContracts(): reverts when caller is not owner', async () => {
           await assertRevert(
             thusdTokenTester.finalizeAddContracts(
-              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
               { from: alice }),
               "Ownable: caller is not the owner")
         })
@@ -543,7 +542,6 @@ contract('THUSDToken', async accounts => {
         it('finalizeAddContracts(): reverts when change is not initiated', async () => {
           await assertRevert(
             thusdTokenTester.finalizeAddContracts(
-              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
               { from: owner }),
               "Change not initiated")
         })
@@ -555,33 +553,8 @@ contract('THUSDToken', async accounts => {
             )
           await assertRevert(
             thusdTokenTester.finalizeAddContracts(
-              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
               { from: owner }),
               "Governance delay has not elapsed")
-        })
-        
-        it('finalizeAddContracts(): reverts when provided wrong addresses', async () => {
-          await thusdTokenTester.startAddContracts(
-              newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
-              { from: owner }
-            )
-          await fastForwardTime(delay, web3.currentProvider)
-
-          await assertRevert(
-            thusdTokenTester.finalizeAddContracts(
-              troveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
-              { from: owner }),
-          )
-          await assertRevert(
-            thusdTokenTester.finalizeAddContracts(
-              newTroveManager.address, stabilityPool.address, newBorrowerOperations.address, 
-              { from: owner }),
-          )
-          await assertRevert(
-            thusdTokenTester.finalizeAddContracts(
-              newTroveManager.address, newStabilityPool.address, borrowerOperations.address, 
-              { from: owner }),
-          )
         })
 
         it('finalizeAddContracts(): enables new system contracts roles', async () => {
@@ -591,9 +564,7 @@ contract('THUSDToken', async accounts => {
             )
           await fastForwardTime(delay, web3.currentProvider)
           
-          let tx = await thusdTokenTester.finalizeAddContracts(
-            newTroveManager.address, newStabilityPool.address, newBorrowerOperations.address, 
-            { from: owner })
+          let tx = await thusdTokenTester.finalizeAddContracts({ from: owner })
 
           assert.equal(await thusdTokenTester.pendingTroveManager(), ZERO_ADDRESS)
           assert.equal(await thusdTokenTester.pendingStabilityPool(), ZERO_ADDRESS)
@@ -683,7 +654,6 @@ contract('THUSDToken', async accounts => {
       it('finalizeRevokeMintList(): reverts when caller is not owner', async () => {
         await assertRevert(
           thusdTokenTester.finalizeRevokeMintList(
-            borrowerOperations.address,
             { from: alice }),
             "Ownable: caller is not the owner")
       })
@@ -691,7 +661,6 @@ contract('THUSDToken', async accounts => {
       it('finalizeRevokeMintList(): reverts when change is not initiated', async () => {
         await assertRevert(
           thusdTokenTester.finalizeRevokeMintList(
-            borrowerOperations.address, 
             { from: owner }),
             "Change not initiated")
       })
@@ -703,24 +672,8 @@ contract('THUSDToken', async accounts => {
           )
         await assertRevert(
           thusdTokenTester.finalizeRevokeMintList(
-            borrowerOperations.address, 
             { from: owner }),
             "Governance delay has not elapsed")
-      })
-      
-      it('finalizeRevokeMintList(): reverts when provided wrong address', async () => {
-        await thusdTokenTester.startRevokeMintList(
-            borrowerOperations.address, 
-            { from: owner }
-          )
-        await fastForwardTime(delay, web3.currentProvider)
-
-        await assertRevert(
-          thusdTokenTester.finalizeRevokeMintList(
-            alice, 
-            { from: owner }),
-            "Incorrect address to finalize"
-        )
       })
 
       it('finalizeRevokeMintList(): removes account from minting list', async () => {
@@ -730,9 +683,7 @@ contract('THUSDToken', async accounts => {
           )
         await fastForwardTime(delay, web3.currentProvider)
         
-        await thusdTokenTester.finalizeRevokeMintList(
-          borrowerOperations.address, 
-          { from: owner })
+        await thusdTokenTester.finalizeRevokeMintList({ from: owner })
 
         assert.equal(await thusdTokenTester.pendingRevokedMintAddress(), ZERO_ADDRESS)
         assert.equal(await thusdTokenTester.revokeMintListInitiated(), 0)
@@ -781,10 +732,7 @@ contract('THUSDToken', async accounts => {
       })
 
       it('cancelAddMintList(): cancels adding to mint list', async () => {
-        await thusdTokenTester.startAddMintList(
-            alice, 
-            { from: owner }
-        )
+        await thusdTokenTester.startAddMintList(alice, { from: owner })
         
         await thusdTokenTester.cancelAddMintList({ from: owner })
 
@@ -797,7 +745,6 @@ contract('THUSDToken', async accounts => {
       it('finalizeAddMintList(): reverts when caller is not owner', async () => {
         await assertRevert(
           thusdTokenTester.finalizeAddMintList(
-            alice,
             { from: alice }),
             "Ownable: caller is not the owner")
       })
@@ -805,48 +752,23 @@ contract('THUSDToken', async accounts => {
       it('finalizeAddMintList(): reverts when change is not initiated', async () => {
         await assertRevert(
           thusdTokenTester.finalizeAddMintList(
-            alice, 
             { from: owner }),
             "Change not initiated")
       })
 
       it('finalizeAddMintList(): reverts when passed not enough time', async () => {
-        await thusdTokenTester.startAddMintList(
-          alice, 
-            { from: owner }
-          )
+        await thusdTokenTester.startAddMintList(alice, { from: owner })
         await assertRevert(
           thusdTokenTester.finalizeAddMintList(
-            alice, 
             { from: owner }),
             "Governance delay has not elapsed")
       })
-      
-      it('finalizeAddMintList(): reverts when provided wrong address', async () => {
-        await thusdTokenTester.startAddMintList(
-          alice, 
-            { from: owner }
-          )
-        await fastForwardTime(delay, web3.currentProvider)
-
-        await assertRevert(
-          thusdTokenTester.finalizeAddMintList(
-            owner, 
-            { from: owner }),
-            "Incorrect address to finalize"
-        )
-      })
 
       it('finalizeAddMintList(): adds account to minting list', async () => {
-        await thusdTokenTester.startAddMintList(
-          alice, 
-            { from: owner }
-          )
+        await thusdTokenTester.startAddMintList(alice, { from: owner })
         await fastForwardTime(delay, web3.currentProvider)
         
-        await thusdTokenTester.finalizeAddMintList(
-          alice, 
-          { from: owner })
+        await thusdTokenTester.finalizeAddMintList({ from: owner })
 
         assert.equal(await thusdTokenTester.pendingAddedMintAddress(), ZERO_ADDRESS)
         assert.equal(await thusdTokenTester.addMintListInitiated(), 0)
