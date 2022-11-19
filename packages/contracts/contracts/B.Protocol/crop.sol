@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.10;
 
 interface VatLike {
     function urns(bytes32, address) external view returns (uint256, uint256);
@@ -56,7 +56,7 @@ contract CropJoin {
     event Flee();
     event Tack(address indexed src, address indexed dst, uint256 wad);
 
-    constructor(address vat_, bytes32 ilk_, address gem_, address bonus_) public {
+    constructor(address vat_, bytes32 ilk_, address gem_, address bonus_) {
         vat = VatLike(vat_);
         ilk = ilk_;
         gem = ERC20(gem_);
@@ -69,43 +69,34 @@ contract CropJoin {
         bonus = ERC20(bonus_);
     }
 
-    function add(uint256 x, uint256 y) public pure returns (uint256 z) {
-        require((z = x + y) >= x, "ds-math-add-overflow");
-    }
-    function sub(uint256 x, uint256 y) public pure returns (uint256 z) {
-        require((z = x - y) <= x, "ds-math-sub-underflow");
-    }
-    function mul(uint256 x, uint256 y) public pure returns (uint256 z) {
-        require(y == 0 || (z = x * y) / y == x, "ds-math-mul-overflow");
-    }
     function divup(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        z = add(x, sub(y, 1)) / y;
+        z = (x + (y - 1)) / y;
     }
     uint256 constant WAD  = 10 ** 18;
     function wmul(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = mul(x, y) / WAD;
+        z = x * y / WAD;
     }
     function wdiv(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = mul(x, WAD) / y;
+        z = x * WAD / y;
     }
     function wdivup(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = divup(mul(x, WAD), y);
+        z = divup(x * WAD, y);
     }
     uint256 constant RAY  = 10 ** 27;
     function rmul(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = mul(x, y) / RAY;
+        z = x * y / RAY;
     }
     function rmulup(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = divup(mul(x, y), RAY);
+        z = divup(x * y, RAY);
     }
     function rdiv(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = mul(x, RAY) / y;
+        z = x * RAY / y;
     }
 
     // Net Asset Valuation [wad]
     function nav() public virtual returns (uint256) {
         uint256 _nav = gem.balanceOf(address(this));
-        return mul(_nav, to18ConversionFactor);
+        return _nav * to18ConversionFactor;
     }
 
     // Net Assets per Share [wad]
@@ -114,12 +105,12 @@ contract CropJoin {
         else return wdiv(nav(), total);
     }
 
-    function crop() internal virtual returns (uint256) {
-        return sub(bonus.balanceOf(address(this)), stock);
+    function crop() internal view virtual returns (uint256) {
+        return bonus.balanceOf(address(this)) - stock;
     }
 
     function harvest(address from, address to) internal {
-        if (total > 0) share = add(share, rdiv(crop(), total));
+        if (total > 0) share = share + rdiv(crop(), total);
 
         uint256 last = crops[from];
         uint256 curr = rmul(stake[from], share);
@@ -130,7 +121,7 @@ contract CropJoin {
     function join(address urn, uint256 val) internal virtual {
         harvest(urn, urn);
         if (val > 0) {
-            uint256 wad = wdiv(mul(val, to18ConversionFactor), nps());
+            uint256 wad = wdiv(val * to18ConversionFactor, nps());
 
             // Overflow check for int256(wad) cast below
             // Also enforces a non-zero wad
@@ -139,8 +130,8 @@ contract CropJoin {
             require(gem.transferFrom(msg.sender, address(this), val));
             vat.slip(ilk, urn, int256(wad));
 
-            total = add(total, wad);
-            stake[urn] = add(stake[urn], wad);
+            total += wad;
+            stake[urn] += wad;
         }
         crops[urn] = rmulup(stake[urn], share);
         emit Join(val);
@@ -149,7 +140,7 @@ contract CropJoin {
     function exit(address guy, uint256 val) internal virtual {
         harvest(msg.sender, guy);
         if (val > 0) {
-            uint256 wad = wdivup(mul(val, to18ConversionFactor), nps());
+            uint256 wad = wdivup(val * to18ConversionFactor, nps());
 
             // Overflow check for int256(wad) cast below
             // Also enforces a non-zero wad
@@ -158,8 +149,8 @@ contract CropJoin {
             require(gem.transfer(guy, val));
             vat.slip(ilk, msg.sender, -int256(wad));
 
-            total = sub(total, wad);
-            stake[msg.sender] = sub(stake[msg.sender], wad);
+            total -= wad;
+            stake[msg.sender] -= wad;
         }
         crops[msg.sender] = rmulup(stake[msg.sender], share);
         emit Exit(val);

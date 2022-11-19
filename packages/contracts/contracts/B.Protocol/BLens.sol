@@ -1,43 +1,33 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.8.10;
 
 import "./BAMM.sol";
 
 
 contract BLens {
-    function add(uint256 x, uint256 y) public pure returns (uint256 z) {
-        require((z = x + y) >= x, "ds-math-add-overflow");
-    }
-    function sub(uint256 x, uint256 y) public pure returns (uint256 z) {
-        require((z = x - y) <= x, "ds-math-sub-underflow");
-    }
-    function mul(uint256 x, uint256 y) public pure returns (uint256 z) {
-        require(y == 0 || (z = x * y) / y == x, "ds-math-mul-overflow");
-    }
     function divup(uint256 x, uint256 y) internal pure returns (uint256 z) {
-        z = add(x, sub(y, 1)) / y;
+        z = (x + (y - 1)) / y;
     }
     uint256 constant WAD  = 10 ** 18;
     function wmul(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = mul(x, y) / WAD;
+        z = x * y / WAD;
     }
     function wdiv(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = mul(x, WAD) / y;
+        z = x * WAD / y;
     }
     function wdivup(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = divup(mul(x, WAD), y);
+        z = divup(x * WAD, y);
     }
     uint256 constant RAY  = 10 ** 27;
     function rmul(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = mul(x, y) / RAY;
+        z = x * y / RAY;
     }
     function rmulup(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = divup(mul(x, y), RAY);
+        z = divup(x * y, RAY);
     }
     function rdiv(uint256 x, uint256 y) public pure returns (uint256 z) {
-        z = mul(x, RAY) / y;
+        z = x * RAY / y;
     }
 
     function getUnclaimedLqty(address user, BAMM bamm, ERC20 token) public returns(uint) {
@@ -47,8 +37,8 @@ contract BLens {
         if(bamm.total() == 0) return 0;
 
         // duplicate harvest logic
-        uint crop = sub(token.balanceOf(address(bamm)), bamm.stock());
-        uint share = add(bamm.share(), rdiv(crop, bamm.total()));
+        uint crop = token.balanceOf(address(bamm)) - bamm.stock();
+        uint share = bamm.share() + rdiv(crop, bamm.total());
 
         uint last = bamm.crops(user);
         uint curr = rmul(bamm.stake(user), share);
@@ -62,10 +52,10 @@ contract BLens {
         uint bammUserBalance;
         uint bammTotalSupply;
 
-        uint lusdUserBalance;
+        uint thusdUserBalance;
         uint ethUserBalance;
 
-        uint lusdTotal;
+        uint thusdTotal;
         uint ethTotal;
     }
 
@@ -75,10 +65,10 @@ contract BLens {
         info.bammTotalSupply = bamm.totalSupply();
         
         StabilityPool sp = bamm.SP();
-        info.lusdTotal = sp.getCompoundedLUSDDeposit(address(bamm));
-        info.ethTotal = sp.getDepositorETHGain(address(bamm)) + address(bamm).balance;
+        info.thusdTotal = sp.getCompoundedTHUSDDeposit(address(bamm));
+        info.ethTotal = sp.getDepositorCollateralGain(address(bamm)) + address(bamm).balance;
 
-        info.lusdUserBalance = info.lusdTotal * info.bammUserBalance / info.bammTotalSupply;
+        info.thusdUserBalance = info.thusdTotal * info.bammUserBalance / info.bammTotalSupply;
         info.ethUserBalance = info.ethTotal * info.bammUserBalance / info.bammTotalSupply;        
     }
 }

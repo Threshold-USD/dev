@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.10;
 
 import "./../TestContracts/PriceFeedTestnet.sol";
 
@@ -14,7 +14,7 @@ contract ChainlinkTestnet {
     uint price = 0;
     uint time = 0;
 
-    constructor(PriceFeedTestnet _feed) public {
+    constructor(PriceFeedTestnet _feed) {
         feed = _feed;
     }
 
@@ -42,7 +42,7 @@ contract ChainlinkTestnet {
         if(price > 0) answer = int(price);
         else answer = int(feed.getPrice());
         
-        if(time == 0 ) timestamp = now;
+        if(time == 0 ) timestamp = block.timestamp;
         else timestamp = time;
     }
 }

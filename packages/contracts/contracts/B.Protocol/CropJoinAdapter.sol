@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity 0.6.11;
+pragma solidity ^0.8.10;
 
 import "./crop.sol";
 import "./../StabilityPool.sol";
 
 // NOTE! - this is not an ERC20 token. transfer is not supported.
 contract CropJoinAdapter is CropJoin {
-    string constant public name = "B.AMM LUSD-ETH";
-    string constant public symbol = "LUSDETH";
+    string constant public name = "B.AMM THUSD-ETH";
+    string constant public symbol = "THUSDETH";
     uint constant public decimals = 18;
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
-    constructor(address _lqty) public 
+    constructor(address _lqty)  
         CropJoin(address(new Dummy()), "B.AMM", address(new DummyGem()), _lqty)
     {
     }
 
     // adapter to cropjoin
-    function nav() public override returns (uint256) {
+    function nav() public view override returns (uint256) {
         return total;
     }
     
