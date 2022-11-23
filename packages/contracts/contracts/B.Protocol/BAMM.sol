@@ -39,11 +39,10 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
         address _thusd2UsdPriceAggregator,
         address payable _SP,
         address _thusdToken,
-        address _LQTY,
         uint _maxDiscount,
         address payable _feePool
     )
-        CropJoinAdapter(_LQTY)
+        CropJoinAdapter()
     {
         priceAggregator = AggregatorV3Interface(_priceAggregator);
         thusd2UsdPriceAggregator = AggregatorV3Interface(_thusd2UsdPriceAggregator);
@@ -178,7 +177,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
         else newEthAmount = ethAmount;
     }
 
-    function getSwapEthAmount(uint thusdQty) public view returns(uint ethAmount, uint feethusdAmount) {
+    function getSwapEthAmount(uint thusdQty) public view returns(uint ethAmount, uint feeTHusdAmount) {
         uint thusdBalance = SP.getCompoundedTHUSDDeposit(address(this));
         uint ethBalance  = SP.getDepositorCollateralGain(address(this)) + address(this).balance;
 
@@ -201,7 +200,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
         if(maxReturn < basicEthReturn) basicEthReturn = maxReturn;
 
         ethAmount = basicEthReturn;
-        feethusdAmount = addBps(thusdQty, int(fee)) - thusdQty;
+        feeTHusdAmount = addBps(thusdQty, int(fee)) - thusdQty;
     }
 
     // get ETH in return to THUSD

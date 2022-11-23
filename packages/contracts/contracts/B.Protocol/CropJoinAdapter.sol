@@ -13,8 +13,8 @@ contract CropJoinAdapter is CropJoin {
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
-    constructor(address _lqty)  
-        CropJoin(address(new Dummy()), "B.AMM", address(new DummyGem()), _lqty)
+    constructor()  
+        CropJoin(address(new Dummy()), "B.AMM", address(new DummyGem()), address(new DummyGem()))
     {
     }
 
@@ -57,5 +57,9 @@ contract DummyGem is Dummy {
 
     function decimals() external pure returns(uint) {
         return 18;
-    } 
+    }  
+
+    function balanceOf(address) public view returns (uint256 balance) {
+        balance = 0;
+    }
 }
