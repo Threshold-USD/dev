@@ -17,10 +17,6 @@ const ZERO = toBN('0')
 const ZERO_ADDRESS = th.ZERO_ADDRESS
 const maxBytes32 = th.maxBytes32
 
-const getFrontEndTag = async (stabilityPool, depositor) => {
-  return (await stabilityPool.deposits(depositor))[1]
-}
-
 contract('BAMM', async accounts => {
   const [owner,
     defaulter_1, defaulter_2, defaulter_3,
@@ -66,6 +62,7 @@ contract('BAMM', async accounts => {
       contracts = await deploymentHelper.deployLiquityCore(accounts)
       contracts.troveManager = await TroveManagerTester.new()
       contracts.thusdToken = (await deploymentHelper.deployTHUSDToken(contracts)).thusdToken
+      contracts.erc20.address = ZERO_ADDRESS
       
       await deploymentHelper.connectCoreContracts(contracts)
 
@@ -158,7 +155,7 @@ contract('BAMM', async accounts => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
-      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
+      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: whale } })
       const whaleTHUSD = await thusdToken.balanceOf(whale)
       await thusdToken.approve(bamm.address, whaleTHUSD, { from: whale })
       bamm.deposit(whaleTHUSD, { from: whale } )
@@ -168,7 +165,7 @@ contract('BAMM', async accounts => {
       await openTrove({ extraTHUSDAmount: 0, ICR: toBN(dec(2, 18)), extraParams: { from: defaulter_2, } })
 
       // Alice makes Trove and withdraws 100 THUSD
-      await openTrove({ extraTHUSDAmount: toBN(dec(100, 18)), ICR: toBN(dec(5, 18)), extraParams: { from: alice, value: dec(50, 'ether') } })
+      await openTrove({ extraTHUSDAmount: toBN(dec(100, 18)), ICR: toBN(dec(5, 18)), extraParams: { from: alice } })
 
 
       // price drops: defaulter's Troves fall below MCR, whale doesn't
@@ -186,7 +183,7 @@ contract('BAMM', async accounts => {
       assert.isTrue(SPTHUSD_After.lt(SPTHUSD_Before))
 
       console.log((await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
-      console.log((await stabilityPool.getDepositorETHGain(bamm.address)).toString())
+      console.log((await stabilityPool.getDepositorCollateralGain(bamm.address)).toString())
       const price = await priceFeed.fetchPrice.call()
       console.log(price.toString())
 
@@ -224,7 +221,7 @@ contract('BAMM', async accounts => {
       await thusdToken.approve(bamm.address, dec(2000, 18), { from: E })
       await bamm.deposit(dec(1000, 18), { from: D })
       await bamm.deposit(dec(2000, 18), { from: E })
-      await stabilityPool.provideToSP(dec(3000, 18), frontEnd_1, { from: F })
+      await stabilityPool.provideToSP(dec(3000, 18), { from: F })
 
       // Get F1, F2, F3 LQTY balances before, and confirm they're zero
       const D_LQTYBalance_Before = await lqtyToken.balanceOf(D)
@@ -261,7 +258,6 @@ contract('BAMM', async accounts => {
       const E_LQTYBalance_After = await lqtyToken.balanceOf(E)
       const F_LQTYBalance_After = await lqtyToken.balanceOf(F)
 
-      assert((await lqtyToken.balanceOf(frontEnd_1)).gt(toBN(0)))
       assert.equal(D_LQTYBalance_After.sub(D_LQTYBalance_Before).toString(), expectdDLqtyDelta.toString())
       assert.equal(E_LQTYBalance_After.sub(E_LQTYBalance_Before).toString(), expectdELqtyDelta.toString())      
 
@@ -290,7 +286,7 @@ contract('BAMM', async accounts => {
         totalDeposits += Number(qty.toString())
         userBalance[i] += Number(qty.toString())
         await bamm.deposit(qty, { from: ammUsers[i] })
-        await stabilityPool.provideToSP(qty, frontEnd_1, { from: nonAmmUsers[i] })
+        await stabilityPool.provideToSP(qty, { from: nonAmmUsers[i] })
       }
 
       for(n = 0 ; n < 10 ; n++) {
@@ -312,7 +308,7 @@ contract('BAMM', async accounts => {
           else {
             console.log("deposit", i)
             await bamm.deposit(qty, { from: ammUsers[i]} )
-            await stabilityPool.provideToSP(qty, frontEnd_1, { from: nonAmmUsers[i] })
+            await stabilityPool.provideToSP(qty, { from: nonAmmUsers[i] })
 
             totalDeposits += qty
             userBalance[i] += qty            
@@ -385,12 +381,12 @@ contract('BAMM', async accounts => {
       console.log("stake D:", (await bamm.stake(D)).toString())
       console.log("stake E:", (await bamm.stake(E)).toString())
 
-      await stabilityPool.provideToSP(dec(1000, 18), frontEnd_1, { from: A })
+      await stabilityPool.provideToSP(dec(1000, 18), { from: A })
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
       await bamm.deposit(dec(3000, 18), { from: F })
-      await stabilityPool.provideToSP(dec(3000, 18), frontEnd_1, { from: B })
+      await stabilityPool.provideToSP(dec(3000, 18), { from: B })
 
       await stabilityPool.withdrawFromSP(0, { from: A })
       console.log("lqty A", (await lqtyToken.balanceOf(A)).toString())        
@@ -436,7 +432,7 @@ contract('BAMM', async accounts => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
-      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
+      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
       await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: A } })
       await openTrove({ extraTHUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: B } })
       
@@ -460,7 +456,7 @@ contract('BAMM', async accounts => {
       // 4k liquidations
       assert.equal(toBN(dec(6000, 18)).toString(), (await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
       const ethGains = web3.utils.toBN("39799999999999999975")
-      //console.log(ethGains.toString(), (await stabilityPool.getDepositorETHGain(bamm.address)).toString())
+      //console.log(ethGains.toString(), (await stabilityPool.getDepositorCollateralGain(bamm.address)).toString())
 
       // send some ETH to simulate partial rebalance
       await web3.eth.sendTransaction({from: whale, to: bamm.address, value: toBN(dec(1, 18))})
@@ -492,7 +488,7 @@ contract('BAMM', async accounts => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
-      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
+      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
       await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: A } })
       await openTrove({ extraTHUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: B } })
       
@@ -542,7 +538,7 @@ contract('BAMM', async accounts => {
       assert.equal(priceDepletedWithFee.feeTHusdAmount.toString(), dec(1050000000000000, 16))      
     })
 
-    it.only('test getSwapEthAmount', async () => {
+    it('test getSwapEthAmount', async () => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
@@ -615,7 +611,7 @@ contract('BAMM', async accounts => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
-      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
+      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
       await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: A } })
       await openTrove({ extraTHUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: B } })
       
@@ -667,7 +663,7 @@ contract('BAMM', async accounts => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
-      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: whale, value: dec(50, 'ether') } })
+      await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: whale } })
       await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: A } })
       await openTrove({ extraTHUSDAmount: toBN(dec(20000, 18)), ICR: toBN(dec(20, 18)), extraParams: { from: B } })
       
@@ -731,13 +727,13 @@ contract('BAMM', async accounts => {
       await thusdToken.approve(bamm.address, whaleTHUSD, { from: whale })
       await thusdToken.approve(bamm.address, toBN(dec(10000, 18)), { from: A })
       await bamm.deposit(toBN(dec(10000, 18)), { from: A } )
-      await stabilityPool.provideToSP(toBN(dec(10000, 18)), frontEnd_1, {from: C})
+      await stabilityPool.provideToSP(toBN(dec(10000, 18)), {from: C})
 
       assert.equal(await bamm.balanceOf(A), dec(1, 18))
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
-      await stabilityPool.provideToSP(toBN(dec(5000, 18)), frontEnd_1, {from: D})      
+      await stabilityPool.provideToSP(toBN(dec(5000, 18)), {from: D})      
 
       await bamm.transfer(B, dec(5, 17), {from: A})
       assert.equal(await bamm.balanceOf(A), dec(5, 17))

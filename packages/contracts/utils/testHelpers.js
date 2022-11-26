@@ -687,6 +687,9 @@ class TestHelper {
     if (ICR === undefined) ICR = this.toBN(this.dec(15, 17)) // 150%
     else if (typeof ICR == 'string') ICR = this.toBN(ICR)
     const assetAmount = ('value' in extraParams) ? extraParams.value : ICR.mul(totalDebt).div(price);
+    if (contracts.erc20.address == this.ZERO_ADDRESS) {
+      extraParams.value = assetAmount
+    }
 
     const tx = await contracts.borrowerOperations.openTrove(maxFeePercentage, thusdAmount, assetAmount, upperHint, lowerHint, extraParams)
 
