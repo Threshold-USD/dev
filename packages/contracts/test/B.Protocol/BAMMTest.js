@@ -205,7 +205,7 @@ contract('BAMM', async accounts => {
       assert.equal(swapBalance, ammExpectedEth.ethAmount)
     })
 
-    it("test basic LQTY allocation", async () => {
+    it("test basic shares allocation", async () => {
       await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C, open troves 
@@ -223,26 +223,13 @@ contract('BAMM', async accounts => {
       await bamm.deposit(dec(2000, 18), { from: E })
       await stabilityPool.provideToSP(dec(3000, 18), { from: F })
 
-      // Get F1, F2, F3 LQTY balances before, and confirm they're zero
-      const D_LQTYBalance_Before = await lqtyToken.balanceOf(D)
-      const E_LQTYBalance_Before = await lqtyToken.balanceOf(E)
-      const F_LQTYBalance_Before = await lqtyToken.balanceOf(F)
-
-      assert.equal(D_LQTYBalance_Before, '0')
-      assert.equal(E_LQTYBalance_Before, '0')
-      assert.equal(F_LQTYBalance_Before, '0')
-
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
-
-      const expectdDLqtyDelta = await lens.getUnclaimedLqty.call(D, bamm.address, lqtyToken.address)
-      const expectdELqtyDelta = await lens.getUnclaimedLqty.call(E, bamm.address, lqtyToken.address)
 
       // test get user info
       // send eth to get non zero eth
       await web3.eth.sendTransaction({from: whale, to: bamm.address, value: toBN(dec(3, 18))})
-      const userInfo = await lens.getUserInfo.call(D, bamm.address, lqtyToken.address)
+      const userInfo = await lens.getUserInfo.call(D, bamm.address)
       //console.log({userInfo})
-      assert.equal(userInfo.unclaimedLqty.toString(), expectdDLqtyDelta.toString())
       assert.equal(userInfo.bammUserBalance.toString(), (await bamm.balanceOf(D)).toString())
       assert.equal(userInfo.thusdUserBalance.toString(), dec(1000, 18).toString())
       assert.equal(userInfo.ethUserBalance.toString(), dec(1, 18).toString())
@@ -252,19 +239,9 @@ contract('BAMM', async accounts => {
       await stabilityPool.withdrawFromSP(0, { from: F })
       await bamm.withdraw(0, { from: D })
       await bamm.withdraw(0, { from: E })      
-
-      // Get F1, F2, F3 LQTY balances after, and confirm they have increased
-      const D_LQTYBalance_After = await lqtyToken.balanceOf(D)
-      const E_LQTYBalance_After = await lqtyToken.balanceOf(E)
-      const F_LQTYBalance_After = await lqtyToken.balanceOf(F)
-
-      assert.equal(D_LQTYBalance_After.sub(D_LQTYBalance_Before).toString(), expectdDLqtyDelta.toString())
-      assert.equal(E_LQTYBalance_After.sub(E_LQTYBalance_Before).toString(), expectdELqtyDelta.toString())      
-
-      assert.equal(D_LQTYBalance_After.add(E_LQTYBalance_After).toString(), F_LQTYBalance_After.toString())
     })
 
-    it("test share + LQTY fuzzy", async () => {
+    it("test share", async () => {
       const ammUsers = [u1, u2, u3, u4, u5]
       const userBalance = [0, 0, 0, 0, 0]
       const nonAmmUsers = [v1, v2, v3, v4, v5]
@@ -292,7 +269,6 @@ contract('BAMM', async accounts => {
       for(n = 0 ; n < 10 ; n++) {
         for(let i = 0 ; i < ammUsers.length ; i++) {
           await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR * (i + n + 1), web3.currentProvider)
-          assert(almostTheSame((await lqtyToken.balanceOf(ammUsers[i])).toString(), (await lqtyToken.balanceOf(nonAmmUsers[i])).toString()))
           assert.equal((await thusdToken.balanceOf(ammUsers[i])).toString(), (await thusdToken.balanceOf(nonAmmUsers[i])).toString())
 
           const qty = (i+1) * 1000 + (n+1)*1000 // small number as 0 decimals
@@ -327,24 +303,12 @@ contract('BAMM', async accounts => {
           await bamm.withdraw(0, { from: ammUsers[0] })
           await stabilityPool.withdrawFromSP(0, { from: nonAmmUsers[0] })                      
 
-          assert.equal((await thusdToken.balanceOf(ammUsers[i])).toString(), (await thusdToken.balanceOf(nonAmmUsers[i])).toString())
-          assert(almostTheSame((await lqtyToken.balanceOf(ammUsers[i])).toString(), (await lqtyToken.balanceOf(nonAmmUsers[i])).toString()))
-          assert(almostTheSame((await lqtyToken.balanceOf(ammUsers[0])).toString(), (await lqtyToken.balanceOf(nonAmmUsers[0])).toString()))          
+          assert.equal((await thusdToken.balanceOf(ammUsers[i])).toString(), (await thusdToken.balanceOf(nonAmmUsers[i])).toString())        
         }
       }
-
-      console.log("get all lqty")
-      for(let i = 0 ; i < ammUsers.length ; i++) {
-        await bamm.withdraw(0, { from: ammUsers[i] })
-        await stabilityPool.withdrawFromSP(0, { from: nonAmmUsers[i] })                    
-      }
-
-      for(let i = 0 ; i < ammUsers.length ; i++) {
-        assert(almostTheSame((await lqtyToken.balanceOf(ammUsers[i])).toString(), (await lqtyToken.balanceOf(nonAmmUsers[i])).toString()))
-      }      
     })
     
-    it("test complex LQTY allocation", async () => {
+    it("test complex shares allocation", async () => {
       await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(10, 18)), extraParams: { from: whale } })
 
       // A, B, C, open troves 
@@ -354,16 +318,6 @@ contract('BAMM', async accounts => {
       await openTrove({ extraTHUSDAmount: toBN(dec(1000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: D } })
       await openTrove({ extraTHUSDAmount: toBN(dec(2000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: E } })
       await openTrove({ extraTHUSDAmount: toBN(dec(3000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: F } })
-
-      const A_LQTYBalance_Before = await lqtyToken.balanceOf(A)      
-      const D_LQTYBalance_Before = await lqtyToken.balanceOf(D)
-      const E_LQTYBalance_Before = await lqtyToken.balanceOf(E)
-      const F_LQTYBalance_Before = await lqtyToken.balanceOf(F)
-
-      assert.equal(A_LQTYBalance_Before, '0')      
-      assert.equal(D_LQTYBalance_Before, '0')
-      assert.equal(E_LQTYBalance_Before, '0')
-      assert.equal(F_LQTYBalance_Before, '0')
 
       // D, E provide to bamm, F provide to SP
       await thusdToken.approve(bamm.address, dec(1000, 18), { from: D })
@@ -375,7 +329,6 @@ contract('BAMM', async accounts => {
       //await bamm.deposit(dec(3000, 18), { from: F }) 
 
       await bamm.withdraw(0, { from: D })
-      console.log((await lqtyToken.balanceOf(D)).toString())
 
       console.log("share:", (await bamm.share.call()).toString())
       console.log("stake D:", (await bamm.stake(D)).toString())
@@ -388,8 +341,7 @@ contract('BAMM', async accounts => {
       await bamm.deposit(dec(3000, 18), { from: F })
       await stabilityPool.provideToSP(dec(3000, 18), { from: B })
 
-      await stabilityPool.withdrawFromSP(0, { from: A })
-      console.log("lqty A", (await lqtyToken.balanceOf(A)).toString())        
+      await stabilityPool.withdrawFromSP(0, { from: A })   
 
       await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)      
 
@@ -398,34 +350,18 @@ contract('BAMM', async accounts => {
       console.log("stake E:", (await bamm.stake(E)).toString())
       console.log("stake F:", (await bamm.stake(F)).toString())
 
-      await stabilityPool.withdrawFromSP(0, { from: A })
-      console.log("lqty A", (await lqtyToken.balanceOf(A)).toString())        
+      await stabilityPool.withdrawFromSP(0, { from: A })    
 
       await stabilityPool.withdrawFromSP(0, { from: A })
       await stabilityPool.withdrawFromSP(0, { from: B })      
       await bamm.withdraw(0, { from: D })
       await bamm.withdraw(0, { from: E })
-      await bamm.withdraw(0, { from: F })            
-
-      console.log("lqty D", (await lqtyToken.balanceOf(D)).toString())
-      console.log("lqty E", (await lqtyToken.balanceOf(E)).toString())
-      console.log("lqty F", (await lqtyToken.balanceOf(F)).toString())      
+      await bamm.withdraw(0, { from: F })               
       
       console.log("share:", (await bamm.share()).toString())
       console.log("stake D:", (await bamm.stake(D)).toString())
       console.log("stake E:", (await bamm.stake(E)).toString())
-      console.log("stake F:", (await bamm.stake(F)).toString())      
-
-      // Get F1, F2, F3 LQTY balances after, and confirm they have increased
-      const A_LQTYBalance_After = await lqtyToken.balanceOf(A)
-      const B_LQTYBalance_After = await lqtyToken.balanceOf(B)      
-      const D_LQTYBalance_After = await lqtyToken.balanceOf(D)
-      const E_LQTYBalance_After = await lqtyToken.balanceOf(E)
-      const F_LQTYBalance_After = await lqtyToken.balanceOf(F)
-
-      assert.equal(D_LQTYBalance_After.toString(), A_LQTYBalance_After.toString())
-      assert.equal(E_LQTYBalance_After.toString(), A_LQTYBalance_After.mul(toBN(2)).toString())
-      assert.equal(F_LQTYBalance_After.toString(), B_LQTYBalance_After.toString()) 
+      console.log("stake F:", (await bamm.stake(F)).toString())
     })
 
     it('test share with ether', async () => {
