@@ -968,7 +968,7 @@ export class PopulatableEthersLiquity
     const { depositCollateral, withdrawCollateral, borrowTHUSD, repayTHUSD } = normalizedParams;
 
     const [trove, feeVars] = await Promise.all([
-      this._readable.getTrove(address),
+      this._readable.getTrove(contract, address),
       borrowTHUSD &&
         promiseAllValues({
           fees: this._readable._getFeesFactory(contract),
@@ -1074,7 +1074,7 @@ export class PopulatableEthersLiquity
     }
 
     return this._wrapSimpleTransaction(
-      await priceFeed.estimateAndPopulate.setPrice(contract, { ...overrides }, id, Decimal.from(price).hex)
+      await priceFeed.estimateAndPopulate.setPrice({ ...overrides }, id, Decimal.from(price).hex)
     );
   }
 
@@ -1189,11 +1189,11 @@ export class PopulatableEthersLiquity
     const { stabilityPool } = _getContracts(this._readable.connection);
 
     const [initialTrove, stabilityDeposit] = await Promise.all([
-      this._readable.getTrove(address),
-      this._readable.getStabilityDeposit(address)
+      this._readable.getTrove(contract, address),
+      this._readable.getStabilityDeposit(contract, address)
     ]);
 
-    const finalTrove = initialTrove.addCollateral(contract, stabilityDeposit.collateralGain);
+    const finalTrove = initialTrove.addCollateral(contract.name, stabilityDeposit.collateralGain);
 
     return this._wrapCollateralGainTransfer(
       contract,
