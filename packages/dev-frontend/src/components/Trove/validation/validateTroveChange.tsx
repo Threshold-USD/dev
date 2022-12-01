@@ -1,4 +1,5 @@
 import {
+  CollateralContract,
   Decimal,
   THUSD_MINIMUM_DEBT,
   THUSD_MINIMUM_NET_DEBT,
@@ -22,10 +23,11 @@ const mcrPercent = new Percent(MINIMUM_COLLATERAL_RATIO).toString(0);
 const ccrPercent = new Percent(CRITICAL_COLLATERAL_RATIO).toString(0);
 
 type TroveAdjustmentDescriptionParams = {
+  contract: CollateralContract;
   params: TroveAdjustmentParams<Decimal>;
 };
 
-const TroveChangeDescription: React.FC<TroveAdjustmentDescriptionParams> = ({ params }) => (
+const TroveChangeDescription: React.FC<TroveAdjustmentDescriptionParams> = ({ contract, params }) => (
   <ActionDescription>
     {params.depositCollateral && params.borrowTHUSD ? (
       <>
@@ -101,6 +103,7 @@ interface TroveChangeValidationContext extends TroveChangeValidationSelectedStat
 }
 
 export const validateTroveChange = (
+  contract: CollateralContract,
   originalTrove: Trove,
   adjustedTrove: Trove,
   borrowingRate: Decimal,
@@ -117,7 +120,7 @@ export const validateTroveChange = (
 
   // Reapply change to get the exact state the Trove will end up in (which could be slightly
   // different from `edited` due to imprecision).
-  const resultingTrove = originalTrove.apply(change, borrowingRate);
+  const resultingTrove = originalTrove.apply(contract.name, change, borrowingRate);
   const recoveryMode = total.collateralRatioIsBelowCritical(price);
   const wouldTriggerRecoveryMode = total
     .subtract(originalTrove)
@@ -157,7 +160,7 @@ export const validateTroveChange = (
     return [undefined, errorDescription];
   }
 
-  return [change, <TroveChangeDescription params={change.params} />];
+  return [change, <TroveChangeDescription contract={contract} params={change.params} />];
 };
 
 const validateTroveCreation = (

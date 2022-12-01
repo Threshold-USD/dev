@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { Button, Flex, Link } from "theme-ui";
 
-import { LiquityStoreState, Decimal, Trove, Decimalish, THUSD_MINIMUM_DEBT } from "@liquity/lib-base";
+import { LiquityStoreState, Decimal, Trove, Decimalish, THUSD_MINIMUM_DEBT, CollateralContract } from "@liquity/lib-base";
 
 import { LiquityStoreUpdate, useLiquityReducer, useLiquitySelector } from "@liquity/lib-react";
 
@@ -18,131 +18,6 @@ import {
   validateTroveChange
 } from "./validation/validateTroveChange";
 
-const init = ({ trove }: LiquityStoreState) => ({
-  original: trove,
-  edited: new Trove(trove.collateral, trove.debt),
-  changePending: false,
-  debtDirty: false,
-  addedMinimumDebt: false
-});
-
-type TroveManagerState = ReturnType<typeof init>;
-type TroveManagerAction =
-  | LiquityStoreUpdate
-  | { type: "startChange" | "finishChange" | "revert" | "addMinimumDebt" | "removeMinimumDebt" }
-  | { type: "setCollateral" | "setDebt"; newValue: Decimalish };
-
-const reduceWith = (action: TroveManagerAction) => (state: TroveManagerState): TroveManagerState =>
-  reduce(state, action);
-
-const addMinimumDebt = reduceWith({ type: "addMinimumDebt" });
-const removeMinimumDebt = reduceWith({ type: "removeMinimumDebt" });
-const finishChange = reduceWith({ type: "finishChange" });
-const revert = reduceWith({ type: "revert" });
-
-const reduce = (state: TroveManagerState, action: TroveManagerAction): TroveManagerState => {
-  // console.log(state);
-  // console.log(action);
-
-  const { original, edited, changePending, debtDirty, addedMinimumDebt } = state;
-
-  switch (action.type) {
-    case "startChange": {
-      console.log("starting change");
-      return { ...state, changePending: true };
-    }
-
-    case "finishChange":
-      return { ...state, changePending: false };
-
-    case "setCollateral": {
-      const newCollateral = Decimal.from(action.newValue);
-
-      const newState = {
-        ...state,
-        edited: edited.setCollateral(newCollateral)
-      };
-
-      if (!debtDirty) {
-        if (edited.isEmpty && newCollateral.nonZero) {
-          return addMinimumDebt(newState);
-        }
-        if (addedMinimumDebt && newCollateral.isZero) {
-          return removeMinimumDebt(newState);
-        }
-      }
-
-      return newState;
-    }
-
-    case "setDebt":
-      return {
-        ...state,
-        edited: edited.setDebt(action.newValue),
-        debtDirty: true
-      };
-
-    case "addMinimumDebt":
-      return {
-        ...state,
-        edited: edited.setDebt(THUSD_MINIMUM_DEBT),
-        addedMinimumDebt: true
-      };
-
-    case "removeMinimumDebt":
-      return {
-        ...state,
-        edited: edited.setDebt(0),
-        addedMinimumDebt: false
-      };
-
-    case "revert":
-      return {
-        ...state,
-        edited: new Trove(original.collateral, original.debt),
-        debtDirty: false,
-        addedMinimumDebt: false
-      };
-
-    case "updateStore": {
-      const {
-        newState: { trove },
-        stateChange: { troveBeforeRedistribution: changeCommitted }
-      } = action;
-
-      const newState = {
-        ...state,
-        original: trove
-      };
-
-      if (changePending && changeCommitted) {
-        return finishChange(revert(newState));
-      }
-
-      const change = original.whatChanged(edited, 0);
-
-      if (
-        (change?.type === "creation" && !trove.isEmpty) ||
-        (change?.type === "closure" && trove.isEmpty)
-      ) {
-        return revert(newState);
-      }
-
-      return { ...newState, edited: trove.apply(change, 0) };
-    }
-  }
-};
-
-const feeFrom = (original: Trove, edited: Trove, borrowingRate: Decimal): Decimal => {
-  const change = original.whatChanged(edited, borrowingRate);
-
-  if (change && change.type !== "invalidCreation" && change.params.borrowTHUSD) {
-    return change.params.borrowTHUSD.mul(borrowingRate);
-  } else {
-    return Decimal.ZERO;
-  }
-};
-
 const select = (state: LiquityStoreState) => ({
   fees: state.fees,
   validationContext: selectForTroveChangeValidation(state)
@@ -152,11 +27,136 @@ const transactionIdPrefix = "trove-";
 const transactionIdMatcher = new RegExp(`^${transactionIdPrefix}`);
 
 type TroveManagerProps = {
+  contract: CollateralContract;
   collateral?: Decimalish;
   debt?: Decimalish;
 };
 
-export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) => {
+export const TroveManager: React.FC<TroveManagerProps> = ({contract, collateral, debt }) => {
+  const init = ({ trove }: LiquityStoreState) => ({
+    original: trove,
+    edited: new Trove(contract.name, trove.collateral, trove.debt),
+    changePending: false,
+    debtDirty: false,
+    addedMinimumDebt: false
+  });
+  
+  type TroveManagerState = ReturnType<typeof init>;
+  type TroveManagerAction =
+    | LiquityStoreUpdate
+    | { type: "startChange" | "finishChange" | "revert" | "addMinimumDebt" | "removeMinimumDebt" }
+    | { type: "setCollateral" | "setDebt"; newValue: Decimalish };
+  
+  const reduceWith = (action: TroveManagerAction) => (state: TroveManagerState): TroveManagerState =>
+    reduce(state, action);
+  
+  const addMinimumDebt = reduceWith({ type: "addMinimumDebt" });
+  const removeMinimumDebt = reduceWith({ type: "removeMinimumDebt" });
+  const finishChange = reduceWith({ type: "finishChange" });
+  const revert = reduceWith({ type: "revert" });
+  
+  const reduce = (state: TroveManagerState, action: TroveManagerAction): TroveManagerState => {
+    // console.log(state);
+    // console.log(action);
+  
+    const { original, edited, changePending, debtDirty, addedMinimumDebt } = state;
+  
+    switch (action.type) {
+      case "startChange": {
+        console.log("starting change");
+        return { ...state, changePending: true };
+      }
+  
+      case "finishChange":
+        return { ...state, changePending: false };
+  
+      case "setCollateral": {
+        const newCollateral = Decimal.from(action.newValue);
+  
+        const newState = {
+          ...state,
+          edited: edited.setCollateral(contract.name, newCollateral)
+        };
+  
+        if (!debtDirty) {
+          if (edited.isEmpty && newCollateral.nonZero) {
+            return addMinimumDebt(newState);
+          }
+          if (addedMinimumDebt && newCollateral.isZero) {
+            return removeMinimumDebt(newState);
+          }
+        }
+  
+        return newState;
+      }
+  
+      case "setDebt":
+        return {
+          ...state,
+          edited: edited.setDebt(contract.name, action.newValue),
+          debtDirty: true
+        };
+  
+      case "addMinimumDebt":
+        return {
+          ...state,
+          edited: edited.setDebt(contract.name, THUSD_MINIMUM_DEBT),
+          addedMinimumDebt: true
+        };
+  
+      case "removeMinimumDebt":
+        return {
+          ...state,
+          edited: edited.setDebt(contract.name, 0),
+          addedMinimumDebt: false
+        };
+  
+      case "revert":
+        return {
+          ...state,
+          edited: new Trove(contract.name, original.collateral, original.debt),
+          debtDirty: false,
+          addedMinimumDebt: false
+        };
+  
+      case "updateStore": {
+        const {
+          newState: { trove },
+          stateChange: { troveBeforeRedistribution: changeCommitted }
+        } = action;
+  
+        const newState = {
+          ...state,
+          original: trove
+        };
+  
+        if (changePending && changeCommitted) {
+          return finishChange(revert(newState));
+        }
+  
+        const change = original.whatChanged(edited, 0);
+  
+        if (
+          (change?.type === "creation" && !trove.isEmpty) ||
+          (change?.type === "closure" && trove.isEmpty)
+        ) {
+          return revert(newState);
+        }
+  
+        return { ...newState, edited: trove.apply(contract.name, change, 0) };
+      }
+    }
+  };
+  
+  const feeFrom = (original: Trove, edited: Trove, borrowingRate: Decimal): Decimal => {
+    const change = original.whatChanged(edited, borrowingRate);
+  
+    if (change && change.type !== "invalidCreation" && change.params.borrowTHUSD) {
+      return change.params.borrowTHUSD.mul(borrowingRate);
+    } else {
+      return Decimal.ZERO;
+    }
+  };
   const [{ original, edited, changePending }, dispatch] = useLiquityReducer(reduce, init);
   const { fees, validationContext } = useLiquitySelector(select);
 
@@ -173,6 +173,7 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
   const maxBorrowingRate = borrowingRate.add(0.005); // TODO slippage tolerance
 
   const [validChange, description] = validateTroveChange(
+    contract,
     original,
     edited,
     borrowingRate,
@@ -182,8 +183,8 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
   const { dispatchEvent } = useTroveView();
 
   const handleCancel = useCallback(() => {
-    dispatchEvent("CANCEL_ADJUST_TROVE_PRESSED");
-  }, [dispatchEvent]);
+    dispatchEvent("CANCEL_ADJUST_TROVE_PRESSED", contract);
+  }, [dispatchEvent, contract]);
 
   const openingNewTrove = original.isEmpty;
 
@@ -199,12 +200,12 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
       dispatch({ type: "finishChange" });
     } else if (myTransactionState.type === "confirmedOneShot") {
       if (myTransactionState.id === `${transactionIdPrefix}closure`) {
-        dispatchEvent("TROVE_CLOSED");
+        dispatchEvent("TROVE_CLOSED", contract);
       } else {
-        dispatchEvent("TROVE_ADJUSTED");
+        dispatchEvent("TROVE_ADJUSTED", contract);
       }
     }
-  }, [myTransactionState, dispatch, dispatchEvent]);
+  }, [myTransactionState, dispatch, dispatchEvent, contract]);
 
   return (
     <TroveEditor
@@ -229,6 +230,7 @@ export const TroveManager: React.FC<TroveManagerProps> = ({ collateral, debt }) 
       <Flex variant="layout.actions" sx={{ flexDirection: "column" }}>
         {validChange ? (
           <TroveAction
+            contract={contract}
             transactionId={`${transactionIdPrefix}${validChange.type}`}
             change={validChange}
             maxBorrowingRate={maxBorrowingRate}

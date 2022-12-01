@@ -64,6 +64,9 @@ const deployContracts = async (
   );
 
   const addresses = {
+    testCollateral: await deployContract(deployer, getContractFactory, "BorrowerOperations", {
+      ...overrides
+    }),
     activePool: activePoolAddress,
     borrowerOperations: await deployContract(deployer, getContractFactory, "BorrowerOperations", {
       ...overrides
@@ -107,6 +110,7 @@ const deployContracts = async (
         addresses.troveManager,
         addresses.stabilityPool,
         addresses.borrowerOperations,
+        0,
         { ...overrides }
       ),
 
@@ -134,6 +138,7 @@ export const deployTellorCaller = (
 
 const connectContracts = async (
   {
+    testCollateral,
     activePool,
     borrowerOperations,
     troveManager,
@@ -181,6 +186,22 @@ const connectContracts = async (
 
     nonce =>
       borrowerOperations.setAddresses(
+        troveManager.address,
+        activePool.address,
+        defaultPool.address,
+        stabilityPool.address,
+        gasPool.address,
+        collSurplusPool.address,
+        priceFeed.address,
+        sortedTroves.address,
+        thusdToken.address,
+        pcv.address,
+        erc20.address,
+        { ...overrides, nonce }
+      ),
+
+    nonce =>
+      testCollateral.setAddresses(
         troveManager.address,
         activePool.address,
         defaultPool.address,

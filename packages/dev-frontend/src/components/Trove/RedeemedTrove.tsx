@@ -6,18 +6,20 @@ import { useLiquitySelector } from "@liquity/lib-react";
 import { useTroveView } from "./context/TroveViewContext";
 import { COIN } from "../../strings";
 import { InfoMessage } from "../InfoMessage";
+import { VaultProps } from "./Vault";
 
 const select = ({ collateralSurplusBalance }: LiquityStoreState) => ({
   hasSurplusCollateral: !collateralSurplusBalance.isZero
 });
 
-export const RedeemedTrove: React.FC = () => {
+export const RedeemedTrove: React.FC<VaultProps> = props => {
+  const { contract } = props;
   const { hasSurplusCollateral } = useLiquitySelector(select);
   const { dispatchEvent } = useTroveView();
 
   const handleOpenTrove = useCallback(() => {
-    dispatchEvent("OPEN_TROVE_PRESSED");
-  }, [dispatchEvent]);
+    dispatchEvent("OPEN_TROVE_PRESSED", contract);
+  }, [dispatchEvent, contract]);
 
   return (
     <Card variant="mainCards">

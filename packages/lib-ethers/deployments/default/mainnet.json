@@ -8,6 +8,7 @@
   "addresses": {
     "activePool": "0xDf9Eb223bAFBE5c5271415C75aeCD68C21fE3D7F",
     "borrowerOperations": "0x24179CD81c9e782A4096035f7eC97fB8B783e007",
+    "testCollateral": "0xBB5156E0796D7fE4bfC2943509b20757B22017E9",
     "troveManager": "0xA39739EF8b0231DbFA0DcdA07d7e29faAbCf4bb2",
     "collSurplusPool": "0x3D32e8b97Ed5881324241Cf03b2DA5E2EBcE5521",
     "defaultPool": "0x896a3F03176f05CFbb4f006BfCd8723F2B0D741C",

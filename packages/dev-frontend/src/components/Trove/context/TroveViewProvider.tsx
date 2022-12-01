@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useLiquitySelector } from "@liquity/lib-react";
-import { LiquityStoreState, UserTroveStatus } from "@liquity/lib-base";
+import { LiquityStoreState, UserTroveStatus, CollateralContract } from "@liquity/lib-base";
 import { TroveViewContext } from "./TroveViewContext";
 import type { TroveView, TroveEvent } from "./types";
 
@@ -75,16 +75,17 @@ const getInitialView = (troveStatus: UserTroveStatus): TroveView => {
   return "NONE";
 };
 
-const select = ({ trove: { status } }: LiquityStoreState) => status;
+const select = ({ trove: { status }, mintList }: LiquityStoreState) => ({status, mintList});
 
 export const TroveViewProvider: React.FC = props => {
   const { children } = props;
-  const troveStatus = useLiquitySelector(select);
+  const {status, mintList} = useLiquitySelector(select);
 
-  const [view, setView] = useState<TroveView>(getInitialView(troveStatus));
+  const [view, setView] = useState<TroveView>(getInitialView(status));
+  const [contract, setContract] = useState<CollateralContract>(mintList.BorrowersOperations)
   const viewRef = useRef<TroveView>(view);
 
-  const dispatchEvent = useCallback((event: TroveEvent) => {
+  const dispatchEvent = useCallback((event: TroveEvent, contract: CollateralContract) => {
     const nextView = transition(viewRef.current, event);
 
     console.log(
@@ -94,6 +95,7 @@ export const TroveViewProvider: React.FC = props => {
       nextView
     );
     setView(nextView);
+    setContract(contract)
   }, []);
 
   useEffect(() => {
@@ -101,13 +103,14 @@ export const TroveViewProvider: React.FC = props => {
   }, [view]);
 
   useEffect(() => {
-    const event = troveStatusEvents[troveStatus] ?? null;
+    const event = troveStatusEvents[status] ?? null;
     if (event !== null) {
-      dispatchEvent(event);
+      dispatchEvent(event, mintList.BorrowersOperations);
     }
-  }, [troveStatus, dispatchEvent]);
+  }, [status, dispatchEvent, mintList.BorrowersOperations]);
 
   const provider = {
+    contract,
     view,
     dispatchEvent
   };

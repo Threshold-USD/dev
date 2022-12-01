@@ -8,23 +8,25 @@ import { Icon } from "../Icon";
 import { InfoIcon } from "../InfoIcon";
 import { COIN, FIRST_ERC20_COLLATERAL } from "../../strings";
 import { CollateralRatio } from "./CollateralRatio";
+import { VaultProps } from "./Vault";
 
 const select = ({ trove, price }: LiquityStoreState) => ({ trove, price });
 
-export const ReadOnlyTrove: React.FC = () => {
+export const ReadOnlyTrove: React.FC<VaultProps> = props => {
+  const { contract } = props;
   const { dispatchEvent } = useTroveView();
   const handleAdjustTrove = useCallback(() => {
-    dispatchEvent("ADJUST_TROVE_PRESSED");
-  }, [dispatchEvent]);
+    dispatchEvent("ADJUST_TROVE_PRESSED", contract);
+  }, [dispatchEvent, contract]);
   const handleCloseTrove = useCallback(() => {
-    dispatchEvent("CLOSE_TROVE_PRESSED");
-  }, [dispatchEvent]);
+    dispatchEvent("CLOSE_TROVE_PRESSED", contract);
+  }, [dispatchEvent, contract]);
 
   const { trove, price } = useLiquitySelector(select);
 
   // console.log("READONLY TROVE", trove.collateral.prettify(4));
   return (
-    <Card variant="mainCards">
+    <Card variant="mainCards" sx={{ width: "50%"}}>
       <Card variant="layout.columns">
         <Flex sx={{
           width: "100%",

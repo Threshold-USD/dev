@@ -8,43 +8,57 @@
 export class _CachedReadableLiquity<T extends unknown[]> implements _ReadableLiquityWithExtraParams<T> {
     constructor(readable: _ReadableLiquityWithExtraParams<T>, cache: _LiquityReadCache<T>);
     // (undocumented)
-    getCollateralSurplusBalance(address?: string, ...extraParams: T): Promise<Decimal>;
+    checkMintList(address: string, ...extraParams: T): Promise<boolean>;
     // (undocumented)
-    getErc20TokenAllowance(address?: string, ...extraParams: T): Promise<Decimal>;
+    getCollateralSurplusBalance(contract: CollateralContract, address?: string, ...extraParams: T): Promise<Decimal>;
     // (undocumented)
-    getErc20TokenBalance(address?: string, ...extraParams: T): Promise<Decimal>;
+    getErc20TokenAllowance(contract: CollateralContract, address?: string, ...extraParams: T): Promise<Decimal>;
     // (undocumented)
-    getFees(...extraParams: T): Promise<Fees>;
+    getErc20TokenBalance(contract: CollateralContract, address?: string, ...extraParams: T): Promise<Decimal>;
     // (undocumented)
-    getNumberOfTroves(...extraParams: T): Promise<number>;
+    getFees(contract: CollateralContract, ...extraParams: T): Promise<Fees>;
     // (undocumented)
-    getPCVBalance(...extraParams: T): Promise<Decimal>;
+    getNumberOfTroves(contract: CollateralContract, ...extraParams: T): Promise<number>;
     // (undocumented)
-    getPrice(...extraParams: T): Promise<Decimal>;
+    getPCVBalance(contract: CollateralContract, ...extraParams: T): Promise<Decimal>;
     // (undocumented)
-    getStabilityDeposit(address?: string, ...extraParams: T): Promise<StabilityDeposit>;
+    getPrice(contract: CollateralContract, ...extraParams: T): Promise<Decimal>;
+    // (undocumented)
+    getStabilityDeposit(contract: CollateralContract, address?: string, ...extraParams: T): Promise<StabilityDeposit>;
     // (undocumented)
     getTHUSDBalance(address?: string, ...extraParams: T): Promise<Decimal>;
     // (undocumented)
-    getTHUSDInStabilityPool(...extraParams: T): Promise<Decimal>;
+    getTHUSDInStabilityPool(contract: CollateralContract, ...extraParams: T): Promise<Decimal>;
     // (undocumented)
-    getTotal(...extraParams: T): Promise<Trove>;
+    getTotal(contract: CollateralContract, ...extraParams: T): Promise<Trove>;
     // (undocumented)
-    getTotalRedistributed(...extraParams: T): Promise<Trove>;
+    getTotalRedistributed(contract: CollateralContract, ...extraParams: T): Promise<Trove>;
     // (undocumented)
-    getTrove(address?: string, ...extraParams: T): Promise<UserTrove>;
+    getTrove(contract: CollateralContract, address?: string, ...extraParams: T): Promise<UserTrove>;
     // (undocumented)
-    getTroveBeforeRedistribution(address?: string, ...extraParams: T): Promise<TroveWithPendingRedistribution>;
+    getTroveBeforeRedistribution(contract: CollateralContract, address?: string, ...extraParams: T): Promise<TroveWithPendingRedistribution>;
     // (undocumented)
-    getTroves(params: TroveListingParams & {
+    getTroves(contract: CollateralContract, params: TroveListingParams & {
         beforeRedistribution: true;
     }, ...extraParams: T): Promise<TroveWithPendingRedistribution[]>;
     // (undocumented)
-    getTroves(params: TroveListingParams, ...extraParams: T): Promise<UserTrove[]>;
+    getTroves(contract: CollateralContract, params: TroveListingParams, ...extraParams: T): Promise<UserTrove[]>;
     }
 
 // @internal (undocumented)
 export type _CollateralChange<T> = (_CollateralDeposit<T> & _NoCollateralWithdrawal) | (_CollateralWithdrawal<T> & _NoCollateralDeposit);
+
+// @public
+export interface CollateralContract {
+    // (undocumented)
+    collateralAddress: string;
+    // (undocumented)
+    collateralSymbol: string;
+    // (undocumented)
+    name: _LiquityContractsKeys;
+    // (undocumented)
+    usersBalance: Decimal;
+}
 
 // @internal (undocumented)
 export type _CollateralDeposit<T> = {
@@ -161,7 +175,7 @@ export class Difference {
 }
 
 // @internal (undocumented)
-export const _emptyTrove: Trove;
+export const _emptyTrove: (contractName: _LiquityContractsKeys) => Trove;
 
 // @public
 export type FailedReceipt<R = unknown> = {
@@ -175,7 +189,7 @@ export const _failedReceipt: <R>(rawReceipt: R) => FailedReceipt<R>;
 // @public
 export class Fees {
     // @internal
-    constructor(baseRateWithoutDecay: Decimalish, minuteDecayFactor: Decimalish, beta: Decimalish, lastFeeOperation: Date, timeOfLatestBlock: Date, recoveryMode: boolean);
+    constructor(contractName: _LiquityContractsKeys, baseRateWithoutDecay: Decimalish, minuteDecayFactor: Decimalish, beta: Decimalish, lastFeeOperation: Date, timeOfLatestBlock: Date, recoveryMode: boolean);
     // @internal (undocumented)
     baseRate(when?: Date): Decimal;
     borrowingRate(when?: Date): Decimal;
@@ -195,14 +209,17 @@ export interface LiquidationDetails {
     totalLiquidated: Trove;
 }
 
+// @public
+export type _LiquityContractsKeys = 'testCollateral' | 'borrowerOperations';
+
 // @internal (undocumented)
 export interface _LiquityReadCache<T extends unknown[]> extends _LiquityReadCacheBase<T> {
     // (undocumented)
-    getTroves(params: TroveListingParams & {
+    getTroves(contract: CollateralContract, params: TroveListingParams & {
         beforeRedistribution: true;
     }, ...extraParams: T): TroveWithPendingRedistribution[] | undefined;
     // (undocumented)
-    getTroves(params: TroveListingParams, ...extraParams: T): UserTrove[] | undefined;
+    getTroves(contract: CollateralContract, params: TroveListingParams, ...extraParams: T): UserTrove[] | undefined;
 }
 
 // @internal (undocumented)
@@ -240,6 +257,8 @@ export interface LiquityStoreBaseState {
     erc20TokenBalance: Decimal;
     // @internal (undocumented)
     _feesInNormalMode: Fees;
+    isAllowedToMint: boolean;
+    mintList: MintList;
     numberOfTroves: number;
     pcvBalance: Decimal;
     price: Decimal;
@@ -286,6 +305,9 @@ export const MINIMUM_COLLATERAL_RATIO: Decimal;
 
 // @public
 export const MINIMUM_REDEMPTION_RATE: Decimal;
+
+// @public
+export type MintList = Record<string, CollateralContract>;
 
 // @internal (undocumented)
 export type _NoCollateralChange = _NoCollateralDeposit & _NoCollateralWithdrawal;
@@ -366,25 +388,25 @@ export type _PopulatableFrom<T, P> = {
 //
 // @public
 export interface PopulatableLiquity<R = unknown, S = unknown, P = unknown> extends _PopulatableFrom<SendableLiquity<R, S>, P> {
-    adjustTrove(params: TroveAdjustmentParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
-    approveErc20(allowance?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
-    borrowTHUSD(amount: Decimalish, maxBorrowingRate?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
-    claimCollateralSurplus(): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
-    closeTrove(): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveClosureDetails>>>>;
-    depositCollateral(amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
-    depositTHUSDInStabilityPool(amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>>;
-    liquidate(address: string | string[]): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>>;
-    liquidateUpTo(maximumNumberOfTrovesToLiquidate: number): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>>;
-    openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveCreationDetails>>>>;
-    redeemTHUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<PopulatedRedemption<P, S, R>>;
-    repayTHUSD(amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
+    adjustTrove(contract: CollateralContract, params: TroveAdjustmentParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
+    approveErc20(contract: CollateralContract, allowance?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
+    borrowTHUSD(contract: CollateralContract, amount: Decimalish, maxBorrowingRate?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
+    claimCollateralSurplus(contract: CollateralContract): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
+    closeTrove(contract: CollateralContract): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveClosureDetails>>>>;
+    depositCollateral(contract: CollateralContract, amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
+    depositTHUSDInStabilityPool(contract: CollateralContract, amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>>;
+    liquidate(contract: CollateralContract, address: string | string[]): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>>;
+    liquidateUpTo(contract: CollateralContract, maximumNumberOfTrovesToLiquidate: number): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>>;
+    openTrove(contract: CollateralContract, params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveCreationDetails>>>>;
+    redeemTHUSD(contract: CollateralContract, amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<PopulatedRedemption<P, S, R>>;
+    repayTHUSD(contract: CollateralContract, amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
     sendTHUSD(toAddress: string, amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
     // @internal (undocumented)
-    setPrice(price: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
-    transferCollateralGainToTrove(): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, CollateralGainTransferDetails>>>>;
-    withdrawCollateral(amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
-    withdrawGainsFromStabilityPool(): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, StabilityPoolGainsWithdrawalDetails>>>>;
-    withdrawTHUSDFromStabilityPool(amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>>;
+    setPrice(contract: CollateralContract, price: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>>;
+    transferCollateralGainToTrove(contract: CollateralContract): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, CollateralGainTransferDetails>>>>;
+    withdrawCollateral(contract: CollateralContract, amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>>;
+    withdrawGainsFromStabilityPool(contract: CollateralContract): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, StabilityPoolGainsWithdrawalDetails>>>>;
+    withdrawTHUSDFromStabilityPool(contract: CollateralContract, amount: Decimalish): Promise<PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>>;
 }
 
 // @public
@@ -403,35 +425,36 @@ export interface PopulatedRedemption<P = unknown, S = unknown, R = unknown> exte
 
 // @public
 export interface ReadableLiquity {
-    getCollateralSurplusBalance(address?: string): Promise<Decimal>;
-    getErc20TokenAllowance(address?: string): Promise<Decimal>;
-    getErc20TokenBalance(address?: string): Promise<Decimal>;
-    getFees(): Promise<Fees>;
-    getNumberOfTroves(): Promise<number>;
-    getPCVBalance(): Promise<Decimal>;
-    getPrice(): Promise<Decimal>;
-    getStabilityDeposit(address?: string): Promise<StabilityDeposit>;
+    checkMintList(address: string): Promise<boolean>;
+    getCollateralSurplusBalance(contract: CollateralContract, address?: string): Promise<Decimal>;
+    getErc20TokenAllowance(contract: CollateralContract, address?: string): Promise<Decimal>;
+    getErc20TokenBalance(contract: CollateralContract, address?: string): Promise<Decimal>;
+    getFees(contract: CollateralContract): Promise<Fees>;
+    getNumberOfTroves(contract: CollateralContract): Promise<number>;
+    getPCVBalance(contract: CollateralContract): Promise<Decimal>;
+    getPrice(contract: CollateralContract): Promise<Decimal>;
+    getStabilityDeposit(contract: CollateralContract, address?: string): Promise<StabilityDeposit>;
     getTHUSDBalance(address?: string): Promise<Decimal>;
-    getTHUSDInStabilityPool(): Promise<Decimal>;
-    getTotal(): Promise<Trove>;
-    getTotalRedistributed(): Promise<Trove>;
-    getTrove(address?: string): Promise<UserTrove>;
-    getTroveBeforeRedistribution(address?: string): Promise<TroveWithPendingRedistribution>;
+    getTHUSDInStabilityPool(contract: CollateralContract): Promise<Decimal>;
+    getTotal(contract: CollateralContract): Promise<Trove>;
+    getTotalRedistributed(contract: CollateralContract): Promise<Trove>;
+    getTrove(contract: CollateralContract, address?: string): Promise<UserTrove>;
+    getTroveBeforeRedistribution(contract: CollateralContract, address?: string): Promise<TroveWithPendingRedistribution>;
     // @internal (undocumented)
-    getTroves(params: TroveListingParams & {
+    getTroves(contract: CollateralContract, params: TroveListingParams & {
         beforeRedistribution: true;
     }): Promise<TroveWithPendingRedistribution[]>;
-    getTroves(params: TroveListingParams): Promise<UserTrove[]>;
+    getTroves(contract: CollateralContract, params: TroveListingParams): Promise<UserTrove[]>;
 }
 
 // @internal (undocumented)
 export interface _ReadableLiquityWithExtraParams<T extends unknown[]> extends _ReadableLiquityWithExtraParamsBase<T> {
     // (undocumented)
-    getTroves(params: TroveListingParams & {
+    getTroves(contract: CollateralContract, params: TroveListingParams & {
         beforeRedistribution: true;
     }, ...extraParams: T): Promise<TroveWithPendingRedistribution[]>;
     // (undocumented)
-    getTroves(params: TroveListingParams, ...extraParams: T): Promise<UserTrove[]>;
+    getTroves(contract: CollateralContract, params: TroveListingParams, ...extraParams: T): Promise<UserTrove[]>;
 }
 
 // @internal (undocumented)
@@ -456,25 +479,25 @@ export type _SendableFrom<T, R, S> = {
 //
 // @public
 export interface SendableLiquity<R = unknown, S = unknown> extends _SendableFrom<TransactableLiquity, R, S> {
-    adjustTrove(params: TroveAdjustmentParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
-    approveErc20(allowance?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
-    borrowTHUSD(amount: Decimalish, maxBorrowingRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
-    claimCollateralSurplus(): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
-    closeTrove(): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveClosureDetails>>>;
-    depositCollateral(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
-    depositTHUSDInStabilityPool(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>;
-    liquidate(address: string | string[]): Promise<SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>;
-    liquidateUpTo(maximumNumberOfTrovesToLiquidate: number): Promise<SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>;
-    openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveCreationDetails>>>;
-    redeemTHUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, RedemptionDetails>>>;
-    repayTHUSD(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
+    adjustTrove(contract: CollateralContract, params: TroveAdjustmentParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
+    approveErc20(contract: CollateralContract, allowance?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
+    borrowTHUSD(contract: CollateralContract, amount: Decimalish, maxBorrowingRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
+    claimCollateralSurplus(contract: CollateralContract): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
+    closeTrove(contract: CollateralContract): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveClosureDetails>>>;
+    depositCollateral(contract: CollateralContract, amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
+    depositTHUSDInStabilityPool(contract: CollateralContract, amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>;
+    liquidate(contract: CollateralContract, address: string | string[]): Promise<SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>;
+    liquidateUpTo(contract: CollateralContract, maximumNumberOfTrovesToLiquidate: number): Promise<SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>;
+    openTrove(contract: CollateralContract, params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveCreationDetails>>>;
+    redeemTHUSD(contract: CollateralContract, amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, RedemptionDetails>>>;
+    repayTHUSD(contract: CollateralContract, amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
     sendTHUSD(toAddress: string, amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
     // @internal (undocumented)
-    setPrice(price: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
-    transferCollateralGainToTrove(): Promise<SentLiquityTransaction<S, LiquityReceipt<R, CollateralGainTransferDetails>>>;
-    withdrawCollateral(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
-    withdrawGainsFromStabilityPool(): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityPoolGainsWithdrawalDetails>>>;
-    withdrawTHUSDFromStabilityPool(amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>;
+    setPrice(contract: CollateralContract, price: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
+    transferCollateralGainToTrove(contract: CollateralContract): Promise<SentLiquityTransaction<S, LiquityReceipt<R, CollateralGainTransferDetails>>>;
+    withdrawCollateral(contract: CollateralContract, amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
+    withdrawGainsFromStabilityPool(contract: CollateralContract): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityPoolGainsWithdrawalDetails>>>;
+    withdrawTHUSDFromStabilityPool(contract: CollateralContract, amount: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>;
 }
 
 // @public
@@ -487,9 +510,10 @@ export interface SentLiquityTransaction<S = unknown, T extends LiquityReceipt = 
 // @public
 export class StabilityDeposit {
     // @internal
-    constructor(initialTHUSD: Decimal, currentTHUSD: Decimal, collateralGain: Decimal);
+    constructor(contractName: _LiquityContractsKeys, initialTHUSD: Decimal, currentTHUSD: Decimal, collateralGain: Decimal);
     apply(change: StabilityDepositChange<Decimalish> | undefined): Decimal;
     readonly collateralGain: Decimal;
+    readonly contractName: _LiquityContractsKeys;
     readonly currentTHUSD: Decimal;
     equals(that: StabilityDeposit): boolean;
     readonly initialTHUSD: Decimal;
@@ -553,25 +577,25 @@ export type _THUSDRepayment<T> = {
 
 // @public
 export interface TransactableLiquity {
-    adjustTrove(params: TroveAdjustmentParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<TroveAdjustmentDetails>;
-    approveErc20(allowance?: Decimalish): Promise<void>;
-    borrowTHUSD(amount: Decimalish, maxBorrowingRate?: Decimalish): Promise<TroveAdjustmentDetails>;
-    claimCollateralSurplus(): Promise<void>;
-    closeTrove(): Promise<TroveClosureDetails>;
-    depositCollateral(amount: Decimalish): Promise<TroveAdjustmentDetails>;
-    depositTHUSDInStabilityPool(amount: Decimalish): Promise<StabilityDepositChangeDetails>;
-    liquidate(address: string | string[]): Promise<LiquidationDetails>;
-    liquidateUpTo(maximumNumberOfTrovesToLiquidate: number): Promise<LiquidationDetails>;
-    openTrove(params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<TroveCreationDetails>;
-    redeemTHUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<RedemptionDetails>;
-    repayTHUSD(amount: Decimalish): Promise<TroveAdjustmentDetails>;
+    adjustTrove(contract: CollateralContract, params: TroveAdjustmentParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<TroveAdjustmentDetails>;
+    approveErc20(contract: CollateralContract, allowance?: Decimalish): Promise<void>;
+    borrowTHUSD(contract: CollateralContract, amount: Decimalish, maxBorrowingRate?: Decimalish): Promise<TroveAdjustmentDetails>;
+    claimCollateralSurplus(contract: CollateralContract): Promise<void>;
+    closeTrove(contract: CollateralContract): Promise<TroveClosureDetails>;
+    depositCollateral(contract: CollateralContract, amount: Decimalish): Promise<TroveAdjustmentDetails>;
+    depositTHUSDInStabilityPool(contract: CollateralContract, amount: Decimalish): Promise<StabilityDepositChangeDetails>;
+    liquidate(contract: CollateralContract, address: string | string[]): Promise<LiquidationDetails>;
+    liquidateUpTo(contract: CollateralContract, maximumNumberOfTrovesToLiquidate: number): Promise<LiquidationDetails>;
+    openTrove(contract: CollateralContract, params: TroveCreationParams<Decimalish>, maxBorrowingRate?: Decimalish): Promise<TroveCreationDetails>;
+    redeemTHUSD(contract: CollateralContract, amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<RedemptionDetails>;
+    repayTHUSD(contract: CollateralContract, amount: Decimalish): Promise<TroveAdjustmentDetails>;
     sendTHUSD(toAddress: string, amount: Decimalish): Promise<void>;
     // @internal (undocumented)
-    setPrice(price: Decimalish): Promise<void>;
-    transferCollateralGainToTrove(): Promise<CollateralGainTransferDetails>;
-    withdrawCollateral(amount: Decimalish): Promise<TroveAdjustmentDetails>;
-    withdrawGainsFromStabilityPool(): Promise<StabilityPoolGainsWithdrawalDetails>;
-    withdrawTHUSDFromStabilityPool(amount: Decimalish): Promise<StabilityDepositChangeDetails>;
+    setPrice(contract: CollateralContract, price: Decimalish): Promise<void>;
+    transferCollateralGainToTrove(contract: CollateralContract): Promise<CollateralGainTransferDetails>;
+    withdrawCollateral(contract: CollateralContract, amount: Decimalish): Promise<TroveAdjustmentDetails>;
+    withdrawGainsFromStabilityPool(contract: CollateralContract): Promise<StabilityPoolGainsWithdrawalDetails>;
+    withdrawTHUSDFromStabilityPool(contract: CollateralContract, amount: Decimalish): Promise<StabilityDepositChangeDetails>;
 }
 
 // @public
@@ -585,21 +609,22 @@ export class TransactionFailedError<T extends FailedReceipt = FailedReceipt> ext
 // @public
 export class Trove {
     // @internal
-    constructor(collateral?: Decimal, debt?: Decimal);
+    constructor(contractName: _LiquityContractsKeys, collateral?: Decimal, debt?: Decimal);
     // (undocumented)
     add(that: Trove): Trove;
     // (undocumented)
-    addCollateral(collateral: Decimalish): Trove;
+    addCollateral(contractName: _LiquityContractsKeys, collateral: Decimalish): Trove;
     // (undocumented)
-    addDebt(debt: Decimalish): Trove;
-    adjust(params: TroveAdjustmentParams<Decimalish>, borrowingRate?: Decimalish): Trove;
+    addDebt(contractName: _LiquityContractsKeys, debt: Decimalish): Trove;
+    adjust(contractName: _LiquityContractsKeys, params: TroveAdjustmentParams<Decimalish>, borrowingRate?: Decimalish): Trove;
     adjustTo(that: Trove, borrowingRate?: Decimalish): TroveAdjustmentParams<Decimal>;
-    apply(change: TroveChange<Decimal> | undefined, borrowingRate?: Decimalish): Trove;
+    apply(contractName: _LiquityContractsKeys, change: TroveChange<Decimal> | undefined, borrowingRate?: Decimalish): Trove;
     readonly collateral: Decimal;
     collateralRatio(price: Decimalish): Decimal;
     collateralRatioIsBelowCritical(price: Decimalish): boolean;
     collateralRatioIsBelowMinimum(price: Decimalish): boolean;
-    static create(params: TroveCreationParams<Decimalish>, borrowingRate?: Decimalish): Trove;
+    readonly contractName: _LiquityContractsKeys;
+    static create(contractName: _LiquityContractsKeys, params: TroveCreationParams<Decimalish>, borrowingRate?: Decimalish): Trove;
     readonly debt: Decimal;
     // (undocumented)
     equals(that: Trove): boolean;
@@ -607,21 +632,21 @@ export class Trove {
     get isEmpty(): boolean;
     isOpenableInRecoveryMode(price: Decimalish): boolean;
     // (undocumented)
-    multiply(multiplier: Decimalish): Trove;
+    multiply(contractName: _LiquityContractsKeys, multiplier: Decimalish): Trove;
     get netDebt(): Decimal;
     // @internal (undocumented)
     get _nominalCollateralRatio(): Decimal;
-    static recreate(that: Trove, borrowingRate?: Decimalish): TroveCreationParams<Decimal>;
+    static recreate(contractName: _LiquityContractsKeys, that: Trove, borrowingRate?: Decimalish): TroveCreationParams<Decimal>;
     // (undocumented)
-    setCollateral(collateral: Decimalish): Trove;
+    setCollateral(contractName: _LiquityContractsKeys, collateral: Decimalish): Trove;
     // (undocumented)
-    setDebt(debt: Decimalish): Trove;
+    setDebt(contractName: _LiquityContractsKeys, debt: Decimalish): Trove;
     // (undocumented)
     subtract(that: Trove): Trove;
     // (undocumented)
-    subtractCollateral(collateral: Decimalish): Trove;
+    subtractCollateral(contractName: _LiquityContractsKeys, collateral: Decimalish): Trove;
     // (undocumented)
-    subtractDebt(debt: Decimalish): Trove;
+    subtractDebt(contractName: _LiquityContractsKeys, debt: Decimalish): Trove;
     // @internal (undocumented)
     toString(): string;
     whatChanged(that: Trove, borrowingRate?: Decimalish): TroveChange<Decimal> | undefined;
@@ -701,7 +726,7 @@ export interface TroveListingParams {
 // @public
 export class TroveWithPendingRedistribution extends UserTrove {
     // @internal
-    constructor(ownerAddress: string, status: UserTroveStatus, collateral?: Decimal, debt?: Decimal, stake?: Decimal, snapshotOfTotalRedistributed?: Trove);
+    constructor(ownerAddress: string, status: UserTroveStatus, contractName: _LiquityContractsKeys, collateral?: Decimal, debt?: Decimal, stake?: Decimal, snapshotOfTotalRedistributed?: Trove);
     // (undocumented)
     applyRedistribution(totalRedistributed: Trove): UserTrove;
     // (undocumented)
@@ -711,7 +736,7 @@ export class TroveWithPendingRedistribution extends UserTrove {
 // @public
 export class UserTrove extends Trove {
     // @internal
-    constructor(ownerAddress: string, status: UserTroveStatus, collateral?: Decimal, debt?: Decimal);
+    constructor(ownerAddress: string, status: UserTroveStatus, contractName: _LiquityContractsKeys, collateral?: Decimal, debt?: Decimal);
     // (undocumented)
     equals(that: UserTrove): boolean;
     readonly ownerAddress: string;

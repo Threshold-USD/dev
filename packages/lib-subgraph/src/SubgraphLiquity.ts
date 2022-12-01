@@ -272,6 +272,10 @@ export class SubgraphLiquity implements ReadableLiquity, ObservableLiquity {
     throw new Error("Method not implemented.");
   }
 
+  checkMintList(address: string): Promise<boolean> {
+    throw new Error("Method not implemented.");
+  }
+
   getPCVBalance(): Promise<Decimal> {
     throw new Error("Method not implemented.");
   }

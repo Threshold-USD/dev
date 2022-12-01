@@ -9,6 +9,7 @@ const PriceFeed = artifacts.require("./PriceFeed.sol")
 const THUSDToken = artifacts.require("./THUSDToken.sol")
 const FunctionCaller = artifacts.require("./FunctionCaller.sol")
 const BorrowerOperations = artifacts.require("./BorrowerOperations.sol")
+const TestCollateral = artifacts.require("./BorrowerOperations.sol")
 
 const deploymentHelpers = require("../utils/deploymentHelpers.js")
 
@@ -16,6 +17,7 @@ const getAddresses = deploymentHelpers.getAddresses
 const connectContracts = deploymentHelpers.connectContracts
 
 module.exports = async () => {
+  const testCollateral = await TestCollateral.new()
   const borrowerOperations = await BorrowerOperations.new()
   const priceFeed = await PriceFeed.new()
   const sortedTroves = await SortedTroves.new()
@@ -27,8 +29,10 @@ module.exports = async () => {
   const thusdToken = await THUSDToken.new(
     troveManager.address,
     stabilityPool.address,
-    borrowerOperations.address
+    borrowerOperations.address,
+    0
   )
+  TestCollateral.setAsDeployed(testCollateral)
   BorrowerOperations.setAsDeployed(borrowerOperations)
   PriceFeed.setAsDeployed(priceFeed)
   SortedTroves.setAsDeployed(sortedTroves)
@@ -40,6 +44,7 @@ module.exports = async () => {
   THUSDToken.setAsDeployed(thusdToken)
 
   const contracts = {
+    testCollateral,
     borrowerOperations,
     priceFeed,
     thusdToken,

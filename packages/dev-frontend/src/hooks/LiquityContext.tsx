@@ -100,6 +100,7 @@ export const LiquityProvider: React.FC<LiquityProviderProps> = ({
   }
 
   const liquity = EthersLiquity._from(connection);
+  console.log('liquity: ', liquity)
   liquity.store.logging = true;
 
   return (

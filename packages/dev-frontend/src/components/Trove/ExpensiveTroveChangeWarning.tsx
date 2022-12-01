@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { Decimal, TroveChange } from "@liquity/lib-base";
+import { Decimal, TroveChange, CollateralContract } from "@liquity/lib-base";
 import { PopulatedEthersLiquityTransaction } from "@liquity/lib-ethers";
 
 import { useLiquity } from "../../hooks/LiquityContext";
@@ -11,6 +11,7 @@ export type GasEstimationState =
   | { type: "complete"; populatedTx: PopulatedEthersLiquityTransaction };
 
 type ExpensiveTroveChangeWarningParams = {
+  contract: CollateralContract;
   troveChange?: Exclude<TroveChange<Decimal>, { type: "invalidCreation" }>;
   maxBorrowingRate: Decimal;
   borrowingFeeDecayToleranceMinutes: number;
@@ -19,6 +20,7 @@ type ExpensiveTroveChangeWarningParams = {
 };
 
 export const ExpensiveTroveChangeWarning: React.FC<ExpensiveTroveChangeWarningParams> = ({
+  contract,
   troveChange,
   maxBorrowingRate,
   borrowingFeeDecayToleranceMinutes,
@@ -34,11 +36,11 @@ export const ExpensiveTroveChangeWarning: React.FC<ExpensiveTroveChangeWarningPa
 
       const timeoutId = setTimeout(async () => {
         const populatedTx = await (troveChange.type === "creation"
-          ? liquity.populate.openTrove(troveChange.params, {
+          ? liquity.populate.openTrove(contract, troveChange.params, {
               maxBorrowingRate,
               borrowingFeeDecayToleranceMinutes
             })
-          : liquity.populate.adjustTrove(troveChange.params, {
+          : liquity.populate.adjustTrove(contract, troveChange.params, {
               maxBorrowingRate,
               borrowingFeeDecayToleranceMinutes
             }));

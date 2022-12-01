@@ -1,11 +1,28 @@
 import React from "react";
 import { Box, Card, Container, Heading, Link, Paragraph } from "theme-ui";
-import { SystemStatsCard } from "../components/SystemStatsCard";
+//import { SystemStatsCard } from "../components/SystemStatsCard";
+import { LiquityStoreState } from "@liquity/lib-base";
+import { useLiquitySelector } from "@liquity/lib-react";
 import { InfoMessage } from "../components/InfoMessage";
 import { Vault } from "../components/Trove/Vault";
 import { COIN, FIRST_ERC20_COLLATERAL } from "../strings";
 
+const select = ({
+  mintList
+}: LiquityStoreState) => ({
+  mintList
+});
+
 export const VaultPage: React.FC = () => {
+  const {
+    mintList
+  } = useLiquitySelector(select);
+
+  const mintListContracts = [];
+  for (const contract in mintList) {
+    mintListContracts.push(<Vault key={contract} contract={mintList[contract]} contractName={contract} />)
+  }
+
   return (
     <Container variant="singlePage">
       <Heading as="h2" sx={{ ml: "1em", mt: "2.5em", fontWeight: "semibold" }}>
@@ -23,13 +40,8 @@ export const VaultPage: React.FC = () => {
           </InfoMessage>
         </Box>
       </Card>
-      <Container variant="pageRow">
-        <Container variant="firstHalf">
-          <Vault />
-        </Container>
-        <Container variant="secondHalf">
-          <SystemStatsCard />
-        </Container>
+      <Container variant="vaultCard">
+        {mintListContracts}
       </Container>
     </Container>
   );

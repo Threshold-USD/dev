@@ -464,6 +464,15 @@ const theme: Theme = {
       maxWidth: "980px"
     },
 
+    vaultCard: {
+      flexWrap: "wrap",
+      display: "flex",
+      flexDirection: "row",
+      justifyItems: "start",
+      alignItems: "start",
+      width:"100%",
+    },
+
     dashboardGrid: {
       ...columns,
 
@@ -487,11 +496,12 @@ const theme: Theme = {
 
     firstHalf: {
       pr: [0, "1em", "2.5em"],
-      width: ["100%", "100%", "50%"]
+      width: ["100%", "100%", "50%"],
+      justifyItems: "start"
     },
 
     secondHalf: {
-      pr: cardGapX,
+      pr: [0, "1em", "2.5em"],
       width: ["100%", "100%", "50%"]
     },
 

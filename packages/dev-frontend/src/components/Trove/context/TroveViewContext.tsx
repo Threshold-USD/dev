@@ -1,9 +1,11 @@
 import { createContext, useContext } from "react";
 import type { TroveView, TroveEvent } from "./types";
+import { CollateralContract } from "@liquity/lib-base";
 
 type TroveViewContextType = {
+  contract: CollateralContract;
   view: TroveView;
-  dispatchEvent: (event: TroveEvent) => void;
+  dispatchEvent: (event: TroveEvent, contract: CollateralContract) => void;
 };
 
 export const TroveViewContext = createContext<TroveViewContextType | null>(null);

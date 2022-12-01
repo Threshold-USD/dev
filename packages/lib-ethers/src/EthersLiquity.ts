@@ -1,6 +1,7 @@
 import { BlockTag } from "@ethersproject/abstract-provider";
 
 import {
+  CollateralContract,
   CollateralGainTransferDetails,
   Decimal,
   Decimalish,
@@ -156,61 +157,67 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTotalRedistributed} */
-  getTotalRedistributed(overrides?: EthersCallOverrides): Promise<Trove> {
-    return this._readable.getTotalRedistributed(overrides);
+  getTotalRedistributed(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Trove> {
+    return this._readable.getTotalRedistributed(contract, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTroveBeforeRedistribution} */
   getTroveBeforeRedistribution(
+    contract: CollateralContract,
     address?: string,
     overrides?: EthersCallOverrides
   ): Promise<TroveWithPendingRedistribution> {
-    return this._readable.getTroveBeforeRedistribution(address, overrides);
+    return this._readable.getTroveBeforeRedistribution(contract, address, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTrove} */
-  getTrove(address?: string, overrides?: EthersCallOverrides): Promise<UserTrove> {
-    return this._readable.getTrove(address, overrides);
+  getTrove(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<UserTrove> {
+    return this._readable.getTrove(contract, address, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getNumberOfTroves} */
-  getNumberOfTroves(overrides?: EthersCallOverrides): Promise<number> {
-    return this._readable.getNumberOfTroves(overrides);
+  getNumberOfTroves(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<number> {
+    return this._readable.getNumberOfTroves(contract, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getPrice} */
-  getPrice(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getPrice(overrides);
+  getPrice(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal> {
+    return this._readable.getPrice(contract, overrides);
   }
 
   /** @internal */
-  _getActivePool(overrides?: EthersCallOverrides): Promise<Trove> {
-    return this._readable._getActivePool(overrides);
+  _getActivePool(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Trove> {
+    return this._readable._getActivePool(contract, overrides);
   }
 
   /** @internal */
-  _getDefaultPool(overrides?: EthersCallOverrides): Promise<Trove> {
-    return this._readable._getDefaultPool(overrides);
+  _getDefaultPool(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Trove> {
+    return this._readable._getDefaultPool(contract, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTotal} */
-  getTotal(overrides?: EthersCallOverrides): Promise<Trove> {
-    return this._readable.getTotal(overrides);
+  getTotal(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Trove> {
+    return this._readable.getTotal(contract, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getStabilityDeposit} */
-  getStabilityDeposit(address?: string, overrides?: EthersCallOverrides): Promise<StabilityDeposit> {
-    return this._readable.getStabilityDeposit(address, overrides);
+  getStabilityDeposit(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<StabilityDeposit> {
+    return this._readable.getStabilityDeposit(contract, address, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTHUSDInStabilityPool} */
-  getTHUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getTHUSDInStabilityPool(overrides);
+  getTHUSDInStabilityPool(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal> {
+    return this._readable.getTHUSDInStabilityPool(contract, overrides);
+  }
+
+  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.checkMintList} */
+  checkMintList(address: string, overrides?: EthersCallOverrides): Promise<boolean> {
+    return this._readable.checkMintList(address, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getPCVBalance} */
-  getPCVBalance(overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getPCVBalance(overrides);
+  getPCVBalance(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal> {
+    return this._readable.getPCVBalance(contract, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTHUSDBalance} */
@@ -219,31 +226,32 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getErc20TokenBalance} */
-  getErc20TokenBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getErc20TokenBalance(address, overrides);
+  getErc20TokenBalance(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
+    return this._readable.getErc20TokenBalance(contract, address, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getErc20TokenAllowance} */
-  getErc20TokenAllowance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getErc20TokenAllowance(address, overrides);
+  getErc20TokenAllowance(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
+    return this._readable.getErc20TokenAllowance(contract, address, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getCollateralSurplusBalance} */
-  getCollateralSurplusBalance(address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
-    return this._readable.getCollateralSurplusBalance(address, overrides);
+  getCollateralSurplusBalance(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
+    return this._readable.getCollateralSurplusBalance(contract, address, overrides);
   }
 
   /** @internal */
   getTroves(
+    contract: CollateralContract, 
     params: TroveListingParams & { beforeRedistribution: true },
     overrides?: EthersCallOverrides
   ): Promise<TroveWithPendingRedistribution[]>;
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.(getTroves:2)} */
-  getTroves(params: TroveListingParams, overrides?: EthersCallOverrides): Promise<UserTrove[]>;
+  getTroves(contract: CollateralContract, params: TroveListingParams, overrides?: EthersCallOverrides): Promise<UserTrove[]>;
 
-  getTroves(params: TroveListingParams, overrides?: EthersCallOverrides): Promise<UserTrove[]> {
-    return this._readable.getTroves(params, overrides);
+  getTroves(contract: CollateralContract, params: TroveListingParams, overrides?: EthersCallOverrides): Promise<UserTrove[]> {
+    return this._readable.getTroves(contract, params, overrides);
   }
 
   /** @internal */
@@ -253,14 +261,15 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
 
   /** @internal */
   _getFeesFactory(
+    contract: CollateralContract, 
     overrides?: EthersCallOverrides
   ): Promise<(blockTimestamp: number, recoveryMode: boolean) => Fees> {
-    return this._readable._getFeesFactory(overrides);
+    return this._readable._getFeesFactory(contract, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getFees} */
-  getFees(overrides?: EthersCallOverrides): Promise<Fees> {
-    return this._readable.getFees(overrides);
+  getFees(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Fees> {
+    return this._readable.getFees(contract, overrides);
   }
 
   /**
@@ -271,12 +280,13 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   openTrove(
+    contract: CollateralContract,
     params: TroveCreationParams<Decimalish>,
     maxBorrowingRateOrOptionalParams?: Decimalish | BorrowingOperationOptionalParams,
     overrides?: EthersTransactionOverrides
   ): Promise<TroveCreationDetails> {
     return this.send
-      .openTrove(params, maxBorrowingRateOrOptionalParams, overrides)
+      .openTrove(contract, params, maxBorrowingRateOrOptionalParams, overrides)
       .then(waitForSuccess);
   }
 
@@ -287,8 +297,8 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionFailedError} in case of transaction failure.
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
-  closeTrove(overrides?: EthersTransactionOverrides): Promise<TroveClosureDetails> {
-    return this.send.closeTrove(overrides).then(waitForSuccess);
+  closeTrove(contract: CollateralContract, overrides?: EthersTransactionOverrides): Promise<TroveClosureDetails> {
+    return this.send.closeTrove(contract, overrides).then(waitForSuccess);
   }
 
   /**
@@ -299,12 +309,13 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   adjustTrove(
+    contract: CollateralContract,
     params: TroveAdjustmentParams<Decimalish>,
     maxBorrowingRateOrOptionalParams?: Decimalish | BorrowingOperationOptionalParams,
     overrides?: EthersTransactionOverrides
   ): Promise<TroveAdjustmentDetails> {
     return this.send
-      .adjustTrove(params, maxBorrowingRateOrOptionalParams, overrides)
+      .adjustTrove(contract, params, maxBorrowingRateOrOptionalParams, overrides)
       .then(waitForSuccess);
   }
 
@@ -316,10 +327,11 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   depositCollateral(
+    contract: CollateralContract,
     amount: Decimalish,
     overrides?: EthersTransactionOverrides
   ): Promise<TroveAdjustmentDetails> {
-    return this.send.depositCollateral(amount, overrides).then(waitForSuccess);
+    return this.send.depositCollateral(contract, amount, overrides).then(waitForSuccess);
   }
 
   /**
@@ -330,10 +342,11 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   withdrawCollateral(
+    contract: CollateralContract,
     amount: Decimalish,
     overrides?: EthersTransactionOverrides
   ): Promise<TroveAdjustmentDetails> {
-    return this.send.withdrawCollateral(amount, overrides).then(waitForSuccess);
+    return this.send.withdrawCollateral(contract, amount, overrides).then(waitForSuccess);
   }
 
   /**
@@ -344,11 +357,12 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   borrowTHUSD(
+    contract: CollateralContract,
     amount: Decimalish,
     maxBorrowingRate?: Decimalish,
     overrides?: EthersTransactionOverrides
   ): Promise<TroveAdjustmentDetails> {
-    return this.send.borrowTHUSD(amount, maxBorrowingRate, overrides).then(waitForSuccess);
+    return this.send.borrowTHUSD(contract, amount, maxBorrowingRate, overrides).then(waitForSuccess);
   }
 
   /**
@@ -359,15 +373,16 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   repayTHUSD(
+    contract: CollateralContract,
     amount: Decimalish,
     overrides?: EthersTransactionOverrides
   ): Promise<TroveAdjustmentDetails> {
-    return this.send.repayTHUSD(amount, overrides).then(waitForSuccess);
+    return this.send.repayTHUSD(contract, amount, overrides).then(waitForSuccess);
   }
 
   /** @internal */
-  setPrice(price: Decimalish, overrides?: EthersTransactionOverrides): Promise<void> {
-    return this.send.setPrice(price, overrides).then(waitForSuccess);
+  setPrice(contract: CollateralContract, price: Decimalish, overrides?: EthersTransactionOverrides): Promise<void> {
+    return this.send.setPrice(contract, price, overrides).then(waitForSuccess);
   }
 
   /**
@@ -378,10 +393,11 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   liquidate(
+    contract: CollateralContract,
     address: string | string[],
     overrides?: EthersTransactionOverrides
   ): Promise<LiquidationDetails> {
-    return this.send.liquidate(address, overrides).then(waitForSuccess);
+    return this.send.liquidate(contract, address, overrides).then(waitForSuccess);
   }
 
   /**
@@ -392,10 +408,11 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   liquidateUpTo(
+    contract: CollateralContract,
     maximumNumberOfTrovesToLiquidate: number,
     overrides?: EthersTransactionOverrides
   ): Promise<LiquidationDetails> {
-    return this.send.liquidateUpTo(maximumNumberOfTrovesToLiquidate, overrides).then(waitForSuccess);
+    return this.send.liquidateUpTo(contract, maximumNumberOfTrovesToLiquidate, overrides).then(waitForSuccess);
   }
 
   /**
@@ -406,10 +423,11 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   depositTHUSDInStabilityPool(
+    contract: CollateralContract,
     amount: Decimalish,
     overrides?: EthersTransactionOverrides
   ): Promise<StabilityDepositChangeDetails> {
-    return this.send.depositTHUSDInStabilityPool(amount, overrides).then(waitForSuccess);
+    return this.send.depositTHUSDInStabilityPool(contract, amount, overrides).then(waitForSuccess);
   }
 
   /**
@@ -420,10 +438,11 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   withdrawTHUSDFromStabilityPool(
+    contract: CollateralContract, 
     amount: Decimalish,
     overrides?: EthersTransactionOverrides
   ): Promise<StabilityDepositChangeDetails> {
-    return this.send.withdrawTHUSDFromStabilityPool(amount, overrides).then(waitForSuccess);
+    return this.send.withdrawTHUSDFromStabilityPool(contract, amount, overrides).then(waitForSuccess);
   }
 
   /**
@@ -434,9 +453,10 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   withdrawGainsFromStabilityPool(
+    contract: CollateralContract, 
     overrides?: EthersTransactionOverrides
   ): Promise<StabilityPoolGainsWithdrawalDetails> {
-    return this.send.withdrawGainsFromStabilityPool(overrides).then(waitForSuccess);
+    return this.send.withdrawGainsFromStabilityPool(contract, overrides).then(waitForSuccess);
   }
 
   /**
@@ -447,9 +467,10 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   transferCollateralGainToTrove(
+    contract: CollateralContract, 
     overrides?: EthersTransactionOverrides
   ): Promise<CollateralGainTransferDetails> {
-    return this.send.transferCollateralGainToTrove(overrides).then(waitForSuccess);
+    return this.send.transferCollateralGainToTrove(contract, overrides).then(waitForSuccess);
   }
 
   /**
@@ -475,11 +496,12 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
   redeemTHUSD(
+    contract: CollateralContract, 
     amount: Decimalish,
     maxRedemptionRate?: Decimalish,
     overrides?: EthersTransactionOverrides
   ): Promise<RedemptionDetails> {
-    return this.send.redeemTHUSD(amount, maxRedemptionRate, overrides).then(waitForSuccess);
+    return this.send.redeemTHUSD(contract, amount, maxRedemptionRate, overrides).then(waitForSuccess);
   }
 
   /**
@@ -489,8 +511,8 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionFailedError} in case of transaction failure.
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
-  approveErc20(allowance?: Decimalish, overrides?: EthersTransactionOverrides): Promise<void> {
-    return this.send.approveErc20(allowance, overrides).then(waitForSuccess);
+  approveErc20(contract: CollateralContract, allowance?: Decimalish, overrides?: EthersTransactionOverrides): Promise<void> {
+    return this.send.approveErc20(contract, allowance, overrides).then(waitForSuccess);
   }
 
   /**
@@ -500,8 +522,8 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
    * Throws {@link EthersTransactionFailedError} in case of transaction failure.
    * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
    */
-  claimCollateralSurplus(overrides?: EthersTransactionOverrides): Promise<void> {
-    return this.send.claimCollateralSurplus(overrides).then(waitForSuccess);
+  claimCollateralSurplus(contract: CollateralContract, overrides?: EthersTransactionOverrides): Promise<void> {
+    return this.send.claimCollateralSurplus(contract, overrides).then(waitForSuccess);
   }
 }
 

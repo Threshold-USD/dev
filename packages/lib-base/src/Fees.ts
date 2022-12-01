@@ -8,6 +8,10 @@ import {
   MINIMUM_REDEMPTION_RATE
 } from "./constants";
 
+import { 
+  _LiquityContractsKeys
+} from "./TransactableLiquity"
+
 /**
  * Calculator for fees.
  *
@@ -17,6 +21,9 @@ import {
  * @public
  */
 export class Fees {
+  /** Name of the contract used for opening the trove. */
+  private readonly contractName: _LiquityContractsKeys;
+
   private readonly _baseRateWithoutDecay: Decimal;
   private readonly _minuteDecayFactor: Decimal;
   private readonly _beta: Decimal;
@@ -26,6 +33,7 @@ export class Fees {
 
   /** @internal */
   constructor(
+    contractName: _LiquityContractsKeys,
     baseRateWithoutDecay: Decimalish,
     minuteDecayFactor: Decimalish,
     beta: Decimalish,
@@ -33,6 +41,7 @@ export class Fees {
     timeOfLatestBlock: Date,
     recoveryMode: boolean
   ) {
+    this.contractName = contractName;
     this._baseRateWithoutDecay = Decimal.from(baseRateWithoutDecay);
     this._minuteDecayFactor = Decimal.from(minuteDecayFactor);
     this._beta = Decimal.from(beta);
@@ -46,6 +55,7 @@ export class Fees {
   /** @internal */
   _setRecoveryMode(recoveryMode: boolean): Fees {
     return new Fees(
+      this.contractName,
       this._baseRateWithoutDecay,
       this._minuteDecayFactor,
       this._beta,

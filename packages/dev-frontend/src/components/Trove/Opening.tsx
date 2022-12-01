@@ -27,6 +27,7 @@ import {
   selectForTroveChangeValidation,
   validateTroveChange
 } from "./validation/validateTroveChange";
+import { VaultProps } from "./Vault";
 
 const selector = (state: LiquityStoreState) => {
   const { fees, price, erc20TokenBalance } = state;
@@ -38,11 +39,13 @@ const selector = (state: LiquityStoreState) => {
   };
 };
 
-const EMPTY_TROVE = new Trove(Decimal.ZERO, Decimal.ZERO);
 const TRANSACTION_ID = "trove-creation";
 const APPROVE_TRANSACTION_ID = "trove-approve";
 
-export const Opening: React.FC = () => {
+export const Opening: React.FC<VaultProps> = props => {
+  const { contract } = props;
+
+  const EMPTY_TROVE = new Trove(contract.name, Decimal.ZERO, Decimal.ZERO);
   const {
     liquity: { send: liquity }
   } = useLiquity();
@@ -60,13 +63,14 @@ export const Opening: React.FC = () => {
   const feePct = new Percent(borrowingRate);
   const totalDebt = borrowAmount.add(THUSD_LIQUIDATION_RESERVE).add(fee);
   const isDirty = !collateral.isZero || !borrowAmount.isZero;
-  const trove = isDirty ? new Trove(collateral, totalDebt) : EMPTY_TROVE;
+  const trove = isDirty ? new Trove(contract.name, collateral, totalDebt) : EMPTY_TROVE;
   const maxCollateral = erc20TokenBalance;
   const collateralMaxedOut = collateral.eq(maxCollateral);
   const collateralRatio =
     !collateral.isZero && !borrowAmount.isZero ? trove.collateralRatio(price) : undefined;
 
   const [troveChange, description] = validateTroveChange(
+    contract,
     EMPTY_TROVE,
     trove,
     borrowingRate,
@@ -84,8 +88,8 @@ export const Opening: React.FC = () => {
     transactionState.type === "waitingForConfirmation";
 
   const handleCancelPressed = useCallback(() => {
-    dispatchEvent("CANCEL_ADJUST_TROVE_PRESSED");
-  }, [dispatchEvent]);
+    dispatchEvent("CANCEL_ADJUST_TROVE_PRESSED", contract);
+  }, [dispatchEvent, contract]);
 
   useEffect(() => {
     if (!collateral.isZero && borrowAmount.isZero) {
@@ -120,7 +124,7 @@ export const Opening: React.FC = () => {
             maxAmount={maxCollateral.toString()}
             maxedOut={collateralMaxedOut}
             editingState={editingState}
-            unit={ FIRST_ERC20_COLLATERAL }
+            unit={contract.collateralSymbol}
             editedAmount={collateral.toString(4)}
             setEditedAmount={(amount: string) => setCollateral(Decimal.from(amount))}
           />
@@ -204,6 +208,7 @@ export const Opening: React.FC = () => {
       
           {hasApproved && (
             <ExpensiveTroveChangeWarning
+              contract={contract}
               troveChange={stableTroveChange}
               maxBorrowingRate={maxBorrowingRate}
               borrowingFeeDecayToleranceMinutes={60}
@@ -228,6 +233,7 @@ export const Opening: React.FC = () => {
                 </Button>
               ) : stableTroveChange ? (
               <TroveAction
+                contract={contract}
                 transactionId={TRANSACTION_ID}
                 change={stableTroveChange}
                 maxBorrowingRate={maxBorrowingRate}

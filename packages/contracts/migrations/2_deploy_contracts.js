@@ -9,6 +9,7 @@ const PriceFeed = artifacts.require("./PriceFeed.sol")
 const THUSDToken = artifacts.require("./THUSDToken.sol")
 const FunctionCaller = artifacts.require("./FunctionCaller.sol")
 const BorrowerOperations = artifacts.require("./BorrowerOperations.sol")
+const TestCollateral = artifacts.require("./BorrowerOperations.sol")
 
 const deploymentHelpers = require("../utils/truffleDeploymentHelpers.js")
 
@@ -16,6 +17,7 @@ const getAddresses = deploymentHelpers.getAddresses
 const connectContracts = deploymentHelpers.connectContracts
 
 module.exports = function(deployer) {
+  deployer.deploy(TestCollateral)
   deployer.deploy(BorrowerOperations)
   deployer.deploy(PriceFeed)
   deployer.deploy(SortedTroves)
@@ -27,6 +29,7 @@ module.exports = function(deployer) {
   deployer.deploy(FunctionCaller)
 
   deployer.then(async () => {
+    const testCollateral = await TestCollateral.deployed()
     const borrowerOperations = await BorrowerOperations.deployed()
     const priceFeed = await PriceFeed.deployed()
     const sortedTroves = await SortedTroves.deployed()
@@ -38,6 +41,7 @@ module.exports = function(deployer) {
     const functionCaller = await FunctionCaller.deployed()
 
     const liquityContracts = {
+      testCollateral,
       borrowerOperations,
       priceFeed,
       thusdToken,

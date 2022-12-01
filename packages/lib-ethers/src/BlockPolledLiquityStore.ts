@@ -7,13 +7,18 @@ import {
   TroveWithPendingRedistribution,
   StabilityDeposit,
   LiquityStore,
-  Fees
+  Fees,
+  MintList
 } from "@liquity/lib-base";
 
 import { decimalify, promiseAllValues } from "./_utils";
 import { ReadableEthersLiquity } from "./ReadableEthersLiquity";
-import { EthersLiquityConnection, _getProvider } from "./EthersLiquityConnection";
+import { EthersLiquityConnection, _getProvider, _getContracts } from "./EthersLiquityConnection";
 import { EthersCallOverrides, EthersProvider } from "./types";
+
+import {
+  _LiquityContracts,
+} from "./contracts";
 
 /**
  * Extra state added to {@link @liquity/lib-base#LiquityStoreState} by
@@ -82,10 +87,37 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
     return riskiestTroves[0];
   }
 
+  private async _getMintList(
+    overrides?: EthersCallOverrides
+  ): Promise<MintList> {
+    const contracts: _LiquityContracts = _getContracts(this.connection);
+    let mintList = {};
+
+    for (const contract in contracts) {
+      const currentContract = contracts[contract as keyof _LiquityContracts];
+      await this._readable.checkMintList(currentContract.address, overrides).then(
+        (response)=> {
+          if (response === true) {
+            mintList = {
+              ...mintList, 
+              [contract]: {
+                name: contract,
+                collateralAddress: currentContract.address, 
+                collateralSymbol: "TST", 
+                usersBalance: 100
+              }
+            };
+          }
+        });
+    }
+    return mintList;
+  }
+
   private async _get(
     blockTag?: number
   ): Promise<[baseState: LiquityStoreBaseState, extraState: BlockPolledLiquityStoreExtraState]> {
     const { userAddress } = this.connection;
+    const { borrowerOperations } = _getContracts(this.connection);
 
     const {
       blockTimestamp,
@@ -101,7 +133,10 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
       thusdInStabilityPool: this._readable.getTHUSDInStabilityPool({ blockTag }),
       pcvBalance: this._readable.getPCVBalance({ blockTag }),
       _riskiestTroveBeforeRedistribution: this._getRiskiestTroveBeforeRedistribution({ blockTag }),
-
+      ...(borrowerOperations    
+        ? {isAllowedToMint: this._readable.checkMintList(borrowerOperations.address ,{ blockTag })}
+        : {isAllowedToMint: false}),
+      mintList: this._getMintList({ blockTag }),
       ...(userAddress
         ? {
             accountBalance: this._provider.getBalance(userAddress, blockTag).then(decimalify),

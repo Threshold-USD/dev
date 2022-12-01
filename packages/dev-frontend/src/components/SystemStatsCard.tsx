@@ -31,7 +31,8 @@ const select = ({
   thusdInStabilityPool,
   borrowingRate,
   redemptionRate,
-  pcvBalance
+  pcvBalance,
+  mintList
 }: LiquityStoreState) => ({
   numberOfTroves,
   price,
@@ -39,11 +40,11 @@ const select = ({
   thusdInStabilityPool,
   borrowingRate,
   redemptionRate,
-  pcvBalance
+  pcvBalance,
+  mintList
 });
 
 export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "info" }) => {
-
   const {
     liquity: {
       send: liquity,
@@ -57,9 +58,11 @@ export const SystemStatsCard: React.FC<SystemStatsCardProps> = ({ variant = "inf
     total,
     borrowingRate,
     thusdInStabilityPool,
-    pcvBalance
+    pcvBalance,
+    mintList
   } = useLiquitySelector(select);
 
+  console.log('mintList: ', mintList)
   const [editedPrice, setEditedPrice] = useState(price.toString(2));
   const borrowingFeePct = new Percent(borrowingRate);
 

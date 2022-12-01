@@ -20,6 +20,32 @@ export class TransactionFailedError<T extends FailedReceipt = FailedReceipt> ext
 }
 
 /**
+ * Borrower Operations name strings.
+ *
+ * @public
+ */
+export type _LiquityContractsKeys = 'testCollateral' | 'borrowerOperations'
+
+/**
+ * Optional parameters taken by transaction functions.
+ *
+ * @public
+ */
+ export interface CollateralContract {
+  name: _LiquityContractsKeys,
+  collateralAddress: string;
+  collateralSymbol: string;
+  usersBalance: Decimal;
+}
+
+/**
+ * State variables read from the blockchain.
+ *
+ * @public
+ */
+export type MintList = Record<string, CollateralContract>
+
+/**
  * Details of an {@link TransactableLiquity.openTrove | openTrove()} transaction.
  *
  * @public
@@ -178,6 +204,7 @@ export interface TransactableLiquity {
    * acceptable rate.
    */
   openTrove(
+    contract: CollateralContract,
     params: TroveCreationParams<Decimalish>,
     maxBorrowingRate?: Decimalish
   ): Promise<TroveCreationDetails>;
@@ -188,7 +215,7 @@ export interface TransactableLiquity {
    * @throws
    * Throws {@link TransactionFailedError} in case of transaction failure.
    */
-  closeTrove(): Promise<TroveClosureDetails>;
+  closeTrove(contract: CollateralContract): Promise<TroveClosureDetails>;
 
   /**
    * Adjust existing Trove by changing its collateral, debt, or both.
@@ -209,6 +236,7 @@ export interface TransactableLiquity {
    * acceptable rate.
    */
   adjustTrove(
+    contract: CollateralContract,
     params: TroveAdjustmentParams<Decimalish>,
     maxBorrowingRate?: Decimalish
   ): Promise<TroveAdjustmentDetails>;
@@ -228,7 +256,7 @@ export interface TransactableLiquity {
    * adjustTrove({ depositCollateral: amount })
    * ```
    */
-  depositCollateral(amount: Decimalish): Promise<TroveAdjustmentDetails>;
+  depositCollateral(contract: CollateralContract, amount: Decimalish): Promise<TroveAdjustmentDetails>;
 
   /**
    * Adjust existing Trove by withdrawing some of its collateral.
@@ -245,7 +273,7 @@ export interface TransactableLiquity {
    * adjustTrove({ withdrawCollateral: amount })
    * ```
    */
-  withdrawCollateral(amount: Decimalish): Promise<TroveAdjustmentDetails>;
+  withdrawCollateral(contract: CollateralContract, amount: Decimalish): Promise<TroveAdjustmentDetails>;
 
   /**
    * Adjust existing Trove by borrowing more thUSD. 
@@ -264,7 +292,7 @@ export interface TransactableLiquity {
    * adjustTrove({ borrowTHUSD: amount }, maxBorrowingRate)
    * ```
    */
-  borrowTHUSD(amount: Decimalish, maxBorrowingRate?: Decimalish): Promise<TroveAdjustmentDetails>;
+  borrowTHUSD(contract: CollateralContract, amount: Decimalish, maxBorrowingRate?: Decimalish): Promise<TroveAdjustmentDetails>;
 
   /**
    * Adjust existing Trove by repaying some of its debt.
@@ -281,10 +309,10 @@ export interface TransactableLiquity {
    * adjustTrove({ repayTHUSD: amount })
    * ```
    */
-  repayTHUSD(amount: Decimalish): Promise<TroveAdjustmentDetails>;
+  repayTHUSD(contract: CollateralContract, amount: Decimalish): Promise<TroveAdjustmentDetails>;
 
   /** @internal */
-  setPrice(price: Decimalish): Promise<void>;
+  setPrice(contract: CollateralContract, price: Decimalish): Promise<void>;
 
   /**
    * Liquidate one or more undercollateralized Troves.
@@ -294,7 +322,7 @@ export interface TransactableLiquity {
    * @throws
    * Throws {@link TransactionFailedError} in case of transaction failure.
    */
-  liquidate(address: string | string[]): Promise<LiquidationDetails>;
+  liquidate(contract: CollateralContract, address: string | string[]): Promise<LiquidationDetails>;
 
   /**
    * Liquidate the least collateralized Troves up to a maximum number.
@@ -304,7 +332,7 @@ export interface TransactableLiquity {
    * @throws
    * Throws {@link TransactionFailedError} in case of transaction failure.
    */
-  liquidateUpTo(maximumNumberOfTrovesToLiquidate: number): Promise<LiquidationDetails>;
+  liquidateUpTo(contract: CollateralContract, maximumNumberOfTrovesToLiquidate: number): Promise<LiquidationDetails>;
 
   /**
    * Make a new Stability Deposit, or top up existing one.
@@ -318,6 +346,7 @@ export interface TransactableLiquity {
    * {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain}
    */
   depositTHUSDInStabilityPool(
+    contract: CollateralContract, 
     amount: Decimalish
   ): Promise<StabilityDepositChangeDetails>;
 
@@ -333,7 +362,7 @@ export interface TransactableLiquity {
    * As a side-effect, the transaction will also pay out the Stability Deposit's
    * {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain}.
    */
-  withdrawTHUSDFromStabilityPool(amount: Decimalish): Promise<StabilityDepositChangeDetails>;
+  withdrawTHUSDFromStabilityPool(contract: CollateralContract, amount: Decimalish): Promise<StabilityDepositChangeDetails>;
 
   /**
    * Withdraw {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain} from Stability Deposit.
@@ -341,7 +370,7 @@ export interface TransactableLiquity {
    * @throws
    * Throws {@link TransactionFailedError} in case of transaction failure.
    */
-  withdrawGainsFromStabilityPool(): Promise<StabilityPoolGainsWithdrawalDetails>;
+  withdrawGainsFromStabilityPool(contract: CollateralContract): Promise<StabilityPoolGainsWithdrawalDetails>;
 
   /**
    * Transfer {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain} from
@@ -353,7 +382,7 @@ export interface TransactableLiquity {
    * @remarks
    * The collateral gain is transfered to the Trove as additional collateral.
    */
-  transferCollateralGainToTrove(): Promise<CollateralGainTransferDetails>;
+  transferCollateralGainToTrove(contract: CollateralContract): Promise<CollateralGainTransferDetails>;
 
   /**
    * Send thUSD tokens to an address.
@@ -380,7 +409,7 @@ export interface TransactableLiquity {
    * If `maxRedemptionRate` is omitted, the current redemption rate (based on `amount`) plus 0.1%
    * is used as maximum acceptable rate.
    */
-  redeemTHUSD(amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<RedemptionDetails>;
+  redeemTHUSD(contract: CollateralContract, amount: Decimalish, maxRedemptionRate?: Decimalish): Promise<RedemptionDetails>;
 
   /**
    * Claim leftover collateral after a liquidation or redemption.
@@ -392,7 +421,7 @@ export interface TransactableLiquity {
    * @throws
    * Throws {@link TransactionFailedError} in case of transaction failure.
    */
-  claimCollateralSurplus(): Promise<void>;
+  claimCollateralSurplus(contract: CollateralContract): Promise<void>;
 
     /**
    * Allow the borrower operations contract to use user's erc20 tokens for
@@ -408,5 +437,5 @@ export interface TransactableLiquity {
    * @throws
    * Throws {@link TransactionFailedError} in case of transaction failure.
    */
-     approveErc20(allowance?: Decimalish): Promise<void>;
+     approveErc20(contract: CollateralContract, allowance?: Decimalish): Promise<void>;
 }

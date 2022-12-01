@@ -337,43 +337,50 @@ export interface IERC20
 }
 
 interface THUSDTokenCalls {
-  GOVERNANCE_TIME_DELAY(_overrides?: CallOverrides): Promise<BigNumber>;
   addContractsInitiated(_overrides?: CallOverrides): Promise<BigNumber>;
+  addMintListInitiated(_overrides?: CallOverrides): Promise<BigNumber>;
   allowance(owner: string, spender: string, _overrides?: CallOverrides): Promise<BigNumber>;
   balanceOf(account: string, _overrides?: CallOverrides): Promise<BigNumber>;
-  borrowerOperations(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   decimals(_overrides?: CallOverrides): Promise<number>;
   domainSeparator(_overrides?: CallOverrides): Promise<string>;
+  governanceTimeDelay(_overrides?: CallOverrides): Promise<BigNumber>;
+  isBorrowerOperations(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   isOwner(_overrides?: CallOverrides): Promise<boolean>;
+  isStabilityPools(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
+  isTroveManager(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   mintList(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   name(_overrides?: CallOverrides): Promise<string>;
   nonces(owner: string, _overrides?: CallOverrides): Promise<BigNumber>;
   owner(_overrides?: CallOverrides): Promise<string>;
+  pendingAddedMintAddress(_overrides?: CallOverrides): Promise<string>;
   pendingBorrowerOperations(_overrides?: CallOverrides): Promise<string>;
   pendingRevokedMintAddress(_overrides?: CallOverrides): Promise<string>;
   pendingStabilityPool(_overrides?: CallOverrides): Promise<string>;
   pendingTroveManager(_overrides?: CallOverrides): Promise<string>;
   permitTypeHash(_overrides?: CallOverrides): Promise<string>;
   revokeMintListInitiated(_overrides?: CallOverrides): Promise<BigNumber>;
-  stabilityPools(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   symbol(_overrides?: CallOverrides): Promise<string>;
   totalSupply(_overrides?: CallOverrides): Promise<BigNumber>;
-  troveManagers(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   version(_overrides?: CallOverrides): Promise<string>;
 }
 
 interface THUSDTokenTransactions {
   approve(spender: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;
   burn(_account: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
+  cancelAddContracts(_overrides?: Overrides): Promise<void>;
+  cancelAddMintList(_overrides?: Overrides): Promise<void>;
+  cancelRevokeMintList(_overrides?: Overrides): Promise<void>;
   decreaseAllowance(spender: string, subtractedValue: BigNumberish, _overrides?: Overrides): Promise<boolean>;
-  finalizeAddContracts(_troveManagerAddress: string, _stabilityPoolAddress: string, _borrowerOperationsAddress: string, _overrides?: Overrides): Promise<void>;
-  finalizeRevokeMintList(_account: string, _overrides?: Overrides): Promise<void>;
+  finalizeAddContracts(_overrides?: Overrides): Promise<void>;
+  finalizeAddMintList(_overrides?: Overrides): Promise<void>;
+  finalizeRevokeMintList(_overrides?: Overrides): Promise<void>;
   increaseAllowance(spender: string, addedValue: BigNumberish, _overrides?: Overrides): Promise<boolean>;
   mint(_account: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   permit(owner: string, spender: string, amount: BigNumberish, deadline: BigNumberish, v: BigNumberish, r: BytesLike, s: BytesLike, _overrides?: Overrides): Promise<void>;
   returnFromPool(_poolAddress: string, _receiver: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   sendToPool(_sender: string, _poolAddress: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   startAddContracts(_troveManagerAddress: string, _stabilityPoolAddress: string, _borrowerOperationsAddress: string, _overrides?: Overrides): Promise<void>;
+  startAddMintList(_account: string, _overrides?: Overrides): Promise<void>;
   startRevokeMintList(_account: string, _overrides?: Overrides): Promise<void>;
   transfer(recipient: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;
   transferFrom(sender: string, recipient: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;

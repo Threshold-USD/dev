@@ -9,17 +9,19 @@ import { COIN, FIRST_ERC20_COLLATERAL } from "../../strings";
 import { ActionDescription } from "../ActionDescription";
 import { GenericIcon } from "../GenericIcon";
 import { InfoIcon } from "../InfoIcon";
+import { VaultProps } from "./Vault";
 
 const select = ({ erc20TokenBalance }: LiquityStoreState) => ({
   erc20TokenBalance
 });
 
-export const NoTrove: React.FC = props => {
+export const NoTrove: React.FC<VaultProps> = props => {
+  const { contract } = props;
   const { dispatchEvent } = useTroveView();
 
   const handleOpenTrove = useCallback(() => {
-    dispatchEvent("OPEN_TROVE_PRESSED");
-  }, [dispatchEvent]);
+    dispatchEvent("OPEN_TROVE_PRESSED", contract);
+  }, [dispatchEvent, contract]);
 
   const { erc20TokenBalance } = useLiquitySelector(select);
 
@@ -45,14 +47,14 @@ export const NoTrove: React.FC = props => {
           <ActionDescription title={`You haven't borrowed ${COIN} any yet`}>
             You can borrow { COIN } by opening a vault.
           </ActionDescription>
-          { FIRST_ERC20_COLLATERAL } available 
+            {contract.collateralSymbol} available 
           <Flex variant="layout.balanceRow">
             <GenericIcon imgSrc="./icons/threshold-icon.svg" height={"18px"} />
             <Box sx={{ fontSize: 3 }}>
               {!erc20TokenBalance.eq(0) ? erc20TokenBalance.prettify() : '--'}
             </Box>
             <Box sx={{ fontSize: 14, pt: 1 }}>
-              { FIRST_ERC20_COLLATERAL }
+              { contract.collateralSymbol }
             </Box>
           </Flex>
           <Button onClick={handleOpenTrove} sx={{ mt: 2, width: "100%" }}>Open a Vault</Button>

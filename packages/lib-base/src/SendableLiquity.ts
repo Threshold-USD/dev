@@ -2,6 +2,7 @@ import { Decimalish } from "./Decimal";
 import { TroveAdjustmentParams, TroveCreationParams } from "./Trove";
 
 import {
+  CollateralContract,
   CollateralGainTransferDetails,
   LiquidationDetails,
   RedemptionDetails,
@@ -146,70 +147,80 @@ export interface SendableLiquity<R = unknown, S = unknown>
 
   /** {@inheritDoc TransactableLiquity.openTrove} */
   openTrove(
+    contract: CollateralContract,
     params: TroveCreationParams<Decimalish>,
     maxBorrowingRate?: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveCreationDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.closeTrove} */
-  closeTrove(): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveClosureDetails>>>;
+  closeTrove(contract: CollateralContract): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveClosureDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.adjustTrove} */
   adjustTrove(
+    contract: CollateralContract,
     params: TroveAdjustmentParams<Decimalish>,
     maxBorrowingRate?: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.depositCollateral} */
   depositCollateral(
+    contract: CollateralContract,
     amount: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.withdrawCollateral} */
   withdrawCollateral(
+    contract: CollateralContract,
     amount: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.borrowTHUSD} */
   borrowTHUSD(
+    contract: CollateralContract,
     amount: Decimalish,
     maxBorrowingRate?: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.repayTHUSD} */
   repayTHUSD(
+    contract: CollateralContract,
     amount: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, TroveAdjustmentDetails>>>;
 
   /** @internal */
-  setPrice(price: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
+  setPrice(contract: CollateralContract, price: Decimalish): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
 
   /** {@inheritDoc TransactableLiquity.liquidate} */
   liquidate(
+    contract: CollateralContract,
     address: string | string[]
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.liquidateUpTo} */
   liquidateUpTo(
+    contract: CollateralContract,
     maximumNumberOfTrovesToLiquidate: number
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, LiquidationDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.depositTHUSDInStabilityPool} */
   depositTHUSDInStabilityPool(
+    contract: CollateralContract, 
     amount: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.withdrawTHUSDFromStabilityPool} */
   withdrawTHUSDFromStabilityPool(
+    contract: CollateralContract, 
     amount: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.withdrawGainsFromStabilityPool} */
-  withdrawGainsFromStabilityPool(): Promise<
+  withdrawGainsFromStabilityPool(contract: CollateralContract): Promise<
     SentLiquityTransaction<S, LiquityReceipt<R, StabilityPoolGainsWithdrawalDetails>>
   >;
 
   /** {@inheritDoc TransactableLiquity.transferCollateralGainToTrove} */
-  transferCollateralGainToTrove(): Promise<
+  transferCollateralGainToTrove(contract: CollateralContract): Promise<
     SentLiquityTransaction<S, LiquityReceipt<R, CollateralGainTransferDetails>>
   >;
 
@@ -221,15 +232,17 @@ export interface SendableLiquity<R = unknown, S = unknown>
 
   /** {@inheritDoc TransactableLiquity.redeemTHUSD} */
   redeemTHUSD(
+    contract: CollateralContract, 
     amount: Decimalish,
     maxRedemptionRate?: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, RedemptionDetails>>>;
 
   /** {@inheritDoc TransactableLiquity.claimCollateralSurplus} */
-  claimCollateralSurplus(): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
+  claimCollateralSurplus(contract: CollateralContract): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
 
   /** {@inheritDoc TransactableLiquity.approveErc20} */
   approveErc20(
+    contract: CollateralContract,
     allowance?: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, void>>>;
 

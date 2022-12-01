@@ -1,5 +1,9 @@
 import { Decimal, Decimalish } from "./Decimal";
 
+import { 
+  _LiquityContractsKeys
+} from "./TransactableLiquity"
+
 /**
  * Represents the change between two Stability Deposit states.
  *
@@ -15,6 +19,9 @@ export type StabilityDepositChange<T> =
  * @public
  */
 export class StabilityDeposit {
+  /** Name of the Contract used for opening the trove. */
+  readonly contractName: _LiquityContractsKeys;
+
   /** Amount of thUSD in the Stability Deposit at the time of the last direct modification. */
   readonly initialTHUSD: Decimal;
 
@@ -26,10 +33,12 @@ export class StabilityDeposit {
 
   /** @internal */
   constructor(
+    contractName: _LiquityContractsKeys, 
     initialTHUSD: Decimal,
     currentTHUSD: Decimal,
     collateralGain: Decimal
   ) {
+    this.contractName = contractName;
     this.initialTHUSD = initialTHUSD;
     this.currentTHUSD = currentTHUSD;
     this.collateralGain = collateralGain;

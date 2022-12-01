@@ -1,4 +1,5 @@
 import React from "react";
+import { Flex } from "theme-ui";
 import { TroveManager } from "./TroveManager";
 import { ReadOnlyTrove } from "./ReadOnlyTrove";
 import { NoTrove } from "./NoTrove";
@@ -7,33 +8,41 @@ import { Adjusting } from "./Adjusting";
 import { RedeemedTrove } from "./RedeemedTrove";
 import { useTroveView } from "./context/TroveViewContext";
 import { LiquidatedTrove } from "./LiquidatedTrove";
-import { Decimal } from "@liquity/lib-base";
+import { Decimal, CollateralContract } from "@liquity/lib-base";
 
-export const Vault: React.FC = props => {
-  const { view } = useTroveView();
+export type VaultProps = {
+  key: any;
+  contract: CollateralContract;
+  contractName: string;
+}
 
-  switch (view) {
+export const Vault: React.FC<VaultProps> = (props) => {
+  const { view, contract } = useTroveView();
+
+  const getTroveView = () => {
     // loading state not needed, as main app has a loading spinner that blocks render until the liquity backend data is available
-    case "ACTIVE": {
+    if (view === "ACTIVE" && contract === props.contract) {
       return <ReadOnlyTrove {...props} />;
     }
-    case "ADJUSTING": {
+    else if (view === "ADJUSTING" && contract === props.contract) {
       return <Adjusting {...props} />;
     }
-    case "CLOSING": {
-      return <TroveManager {...props} collateral={Decimal.ZERO} debt={Decimal.ZERO} />;
+    else if  (view === "CLOSING" && contract === props.contract) {
+      return <TroveManager {...props} contract={props.contract} collateral={Decimal.ZERO} debt={Decimal.ZERO} />;
     }
-    case "OPENING": {
+    else if  (view === "OPENING" && contract === props.contract) {
       return <Opening {...props} />;
     }
-    case "LIQUIDATED": {
+    else if  (view === "LIQUIDATED" && contract === props.contract) {
       return <LiquidatedTrove {...props} />;
     }
-    case "REDEEMED": {
+    else if  (view === "REDEEMED" && contract === props.contract) {
       return <RedeemedTrove {...props} />;
     }
-    case "NONE": {
-      return <NoTrove {...props} />;
-    }
+
+    return <NoTrove {...props} />;
+
   }
+
+  return <Flex sx={{ width: "50%", pr: "2em" }}>{getTroveView()}</Flex>
 };

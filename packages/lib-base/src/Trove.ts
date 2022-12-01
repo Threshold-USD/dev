@@ -9,6 +9,10 @@ import {
   MINIMUM_BORROWING_RATE
 } from "./constants";
 
+import { 
+  _LiquityContractsKeys
+} from "./TransactableLiquity"
+
 /** @internal */ export type _CollateralDeposit<T> = { depositCollateral: T };
 /** @internal */ export type _CollateralWithdrawal<T> = { withdrawCollateral: T };
 /** @internal */ export type _THUSDBorrowing<T> = { borrowTHUSD: T };
@@ -407,6 +411,9 @@ const NOMINAL_COLLATERAL_RATIO_PRECISION = Decimal.from(100);
  * @public
  */
 export class Trove {
+  /** Name of the contract used for opening the trove. */
+  readonly contractName: _LiquityContractsKeys;
+
   /** Amount of native currency (e.g. Ether) collateralized. */
   readonly collateral: Decimal;
 
@@ -414,7 +421,8 @@ export class Trove {
   readonly debt: Decimal;
 
   /** @internal */
-  constructor(collateral = Decimal.ZERO, debt = Decimal.ZERO) {
+  constructor(contractName: _LiquityContractsKeys, collateral = Decimal.ZERO, debt = Decimal.ZERO) {
+    this.contractName = contractName;
     this.collateral = collateral;
     this.debt = debt;
   }
@@ -494,47 +502,49 @@ export class Trove {
   }
 
   add(that: Trove): Trove {
-    return new Trove(this.collateral.add(that.collateral), this.debt.add(that.debt));
+    return new Trove(that.contractName , this.collateral.add(that.collateral), this.debt.add(that.debt));
   }
 
-  addCollateral(collateral: Decimalish): Trove {
-    return new Trove(this.collateral.add(collateral), this.debt);
+  addCollateral(contractName: _LiquityContractsKeys, collateral: Decimalish): Trove {
+    return new Trove(contractName, this.collateral.add(collateral), this.debt);
   }
 
-  addDebt(debt: Decimalish): Trove {
-    return new Trove(this.collateral, this.debt.add(debt));
+  addDebt(contractName: _LiquityContractsKeys, debt: Decimalish): Trove {
+    return new Trove(contractName, this.collateral, this.debt.add(debt));
   }
 
   subtract(that: Trove): Trove {
     const { collateral, debt } = that;
 
     return new Trove(
+      that.contractName,
       this.collateral.gt(collateral) ? this.collateral.sub(collateral) : Decimal.ZERO,
       this.debt.gt(debt) ? this.debt.sub(debt) : Decimal.ZERO
     );
   }
 
-  subtractCollateral(collateral: Decimalish): Trove {
+  subtractCollateral(contractName: _LiquityContractsKeys, collateral: Decimalish): Trove {
     return new Trove(
+      contractName,
       this.collateral.gt(collateral) ? this.collateral.sub(collateral) : Decimal.ZERO,
       this.debt
     );
   }
 
-  subtractDebt(debt: Decimalish): Trove {
-    return new Trove(this.collateral, this.debt.gt(debt) ? this.debt.sub(debt) : Decimal.ZERO);
+  subtractDebt(contractName: _LiquityContractsKeys, debt: Decimalish): Trove {
+    return new Trove(contractName, this.collateral, this.debt.gt(debt) ? this.debt.sub(debt) : Decimal.ZERO);
   }
 
-  multiply(multiplier: Decimalish): Trove {
-    return new Trove(this.collateral.mul(multiplier), this.debt.mul(multiplier));
+  multiply(contractName: _LiquityContractsKeys, multiplier: Decimalish): Trove {
+    return new Trove(contractName, this.collateral.mul(multiplier), this.debt.mul(multiplier));
   }
 
-  setCollateral(collateral: Decimalish): Trove {
-    return new Trove(Decimal.from(collateral), this.debt);
+  setCollateral(contractName: _LiquityContractsKeys, collateral: Decimalish): Trove {
+    return new Trove(contractName, Decimal.from(collateral), this.debt);
   }
 
-  setDebt(debt: Decimalish): Trove {
-    return new Trove(this.collateral, Decimal.from(debt));
+  setDebt(contractName: _LiquityContractsKeys, debt: Decimalish): Trove {
+    return new Trove(contractName, this.collateral, Decimal.from(debt));
   }
 
   private _debtChange({ debt }: Trove, borrowingRate: Decimalish): _DebtChange<Decimal> {
@@ -605,6 +615,7 @@ export class Trove {
    * @param borrowingRate - Borrowing rate to use when adding a borrowed amount to the Trove's debt.
    */
   apply(
+    contractName: _LiquityContractsKeys, 
     change: TroveChange<Decimal> | undefined,
     borrowingRate: Decimalish = MINIMUM_BORROWING_RATE
   ): Trove {
@@ -628,6 +639,7 @@ export class Trove {
         const { depositCollateral, borrowTHUSD } = change.params;
 
         return new Trove(
+          contractName,
           depositCollateral,
           THUSD_LIQUIDATION_RESERVE.add(applyFee(borrowingRate, borrowTHUSD))
         );
@@ -638,7 +650,7 @@ export class Trove {
           throw new Error("Can't close empty Trove");
         }
 
-        return _emptyTrove;
+        return _emptyTrove(contractName);
 
       case "adjustment": {
         const {
@@ -652,13 +664,13 @@ export class Trove {
         const debtIncrease = borrowTHUSD ? applyFee(borrowingRate, borrowTHUSD) : Decimal.ZERO;
 
         return setToZero === "collateral"
-          ? this.setCollateral(Decimal.ZERO).addDebt(debtIncrease).subtractDebt(debtDecrease)
+          ? this.setCollateral(contractName, Decimal.ZERO).addDebt(contractName, debtIncrease).subtractDebt(contractName, debtDecrease)
           : setToZero === "debt"
-          ? this.setDebt(Decimal.ZERO)
-              .addCollateral(collateralIncrease)
-              .subtractCollateral(collateralDecrease)
-          : this.add(new Trove(collateralIncrease, debtIncrease)).subtract(
-              new Trove(collateralDecrease, debtDecrease)
+          ? this.setDebt(contractName, Decimal.ZERO)
+              .addCollateral(contractName, collateralIncrease)
+              .subtractCollateral(contractName, collateralDecrease)
+          : this.add(new Trove(contractName, collateralIncrease, debtIncrease)).subtract(
+              new Trove(contractName, collateralDecrease, debtDecrease)
             );
       }
     }
@@ -670,8 +682,8 @@ export class Trove {
    * @param params - Parameters of the transaction.
    * @param borrowingRate - Borrowing rate to use when calculating the Trove's debt.
    */
-  static create(params: TroveCreationParams<Decimalish>, borrowingRate?: Decimalish): Trove {
-    return _emptyTrove.apply(troveCreation(_normalizeTroveCreation(params)), borrowingRate);
+  static create(contractName: _LiquityContractsKeys, params: TroveCreationParams<Decimalish>, borrowingRate?: Decimalish): Trove {
+    return _emptyTrove(contractName).apply(contractName, troveCreation(_normalizeTroveCreation(params)), borrowingRate);
   }
 
   /**
@@ -681,8 +693,8 @@ export class Trove {
    * @param that - The Trove to recreate.
    * @param borrowingRate - Current borrowing rate.
    */
-  static recreate(that: Trove, borrowingRate?: Decimalish): TroveCreationParams<Decimal> {
-    const change = _emptyTrove.whatChanged(that, borrowingRate);
+  static recreate(contractName: _LiquityContractsKeys, that: Trove, borrowingRate?: Decimalish): TroveCreationParams<Decimal> {
+    const change = _emptyTrove(contractName).whatChanged(that, borrowingRate);
     assert(change?.type === "creation");
     return change.params;
   }
@@ -694,8 +706,8 @@ export class Trove {
    * @param params - Parameters of the transaction.
    * @param borrowingRate - Borrowing rate to use when adding to the Trove's debt.
    */
-  adjust(params: TroveAdjustmentParams<Decimalish>, borrowingRate?: Decimalish): Trove {
-    return this.apply(troveAdjustment(_normalizeTroveAdjustment(params)), borrowingRate);
+  adjust(contractName: _LiquityContractsKeys, params: TroveAdjustmentParams<Decimalish>, borrowingRate?: Decimalish): Trove {
+    return this.apply(contractName, troveAdjustment(_normalizeTroveAdjustment(params)), borrowingRate);
   }
 
   /**
@@ -713,7 +725,7 @@ export class Trove {
 }
 
 /** @internal */
-export const _emptyTrove = new Trove();
+export const _emptyTrove = (contractName: _LiquityContractsKeys) => new Trove(contractName);
 
 /**
  * Represents whether a UserTrove is open or not, or why it was closed.
@@ -748,8 +760,8 @@ export class UserTrove extends Trove {
   readonly status: UserTroveStatus;
 
   /** @internal */
-  constructor(ownerAddress: string, status: UserTroveStatus, collateral?: Decimal, debt?: Decimal) {
-    super(collateral, debt);
+  constructor(ownerAddress: string, status: UserTroveStatus, contractName: _LiquityContractsKeys, collateral?: Decimal, debt?: Decimal) {
+    super(contractName, collateral, debt);
 
     this.ownerAddress = ownerAddress;
     this.status = status;
@@ -790,12 +802,13 @@ export class TroveWithPendingRedistribution extends UserTrove {
   constructor(
     ownerAddress: string,
     status: UserTroveStatus,
+    contractName: _LiquityContractsKeys,
     collateral?: Decimal,
     debt?: Decimal,
     stake = Decimal.ZERO,
-    snapshotOfTotalRedistributed = _emptyTrove
+    snapshotOfTotalRedistributed = _emptyTrove(contractName)
   ) {
-    super(ownerAddress, status, collateral, debt);
+    super(ownerAddress, status, contractName, collateral, debt);
 
     this.stake = stake;
     this.snapshotOfTotalRedistributed = snapshotOfTotalRedistributed;
@@ -803,12 +816,13 @@ export class TroveWithPendingRedistribution extends UserTrove {
 
   applyRedistribution(totalRedistributed: Trove): UserTrove {
     const afterRedistribution = this.add(
-      totalRedistributed.subtract(this.snapshotOfTotalRedistributed).multiply(this.stake)
+      totalRedistributed.subtract(this.snapshotOfTotalRedistributed).multiply(this.contractName, this.stake)
     );
 
     return new UserTrove(
       this.ownerAddress,
       this.status,
+      this.contractName,
       afterRedistribution.collateral,
       afterRedistribution.debt
     );

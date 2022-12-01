@@ -1,5 +1,6 @@
 import { Decimal } from "./Decimal";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
+import { CollateralContract } from "./TransactableLiquity";
 import { StabilityDeposit } from "./StabilityDeposit";
 import { Fees } from "./Fees";
 
@@ -44,7 +45,7 @@ export interface ReadableLiquity {
    * @remarks
    * Needed when dealing with instances of {@link @liquity/lib-base#TroveWithPendingRedistribution}.
    */
-  getTotalRedistributed(): Promise<Trove>;
+  getTotalRedistributed(contract: CollateralContract): Promise<Trove>;
 
   /**
    * Get a Trove in its state after the last direct modification.
@@ -55,46 +56,51 @@ export interface ReadableLiquity {
    * The current state of a Trove can be fetched using
    * {@link @liquity/lib-base#ReadableLiquity.getTrove | getTrove()}.
    */
-  getTroveBeforeRedistribution(address?: string): Promise<TroveWithPendingRedistribution>;
+  getTroveBeforeRedistribution(contract: CollateralContract, address?: string): Promise<TroveWithPendingRedistribution>;
 
   /**
    * Get the current state of a Trove.
    *
    * @param address - Address that owns the Trove.
    */
-  getTrove(address?: string): Promise<UserTrove>;
+  getTrove(contract: CollateralContract, address?: string): Promise<UserTrove>;
 
   /**
    * Get number of Troves that are currently open.
    */
-  getNumberOfTroves(): Promise<number>;
+  getNumberOfTroves(contract: CollateralContract): Promise<number>;
 
   /**
    * Get the current price of the native currency (e.g. Ether) in USD.
    */
-  getPrice(): Promise<Decimal>;
+  getPrice(contract: CollateralContract): Promise<Decimal>;
 
   /**
    * Get the total amount of collateral and debt in the Liquity system.
    */
-  getTotal(): Promise<Trove>;
+  getTotal(contract: CollateralContract): Promise<Trove>;
 
   /**
    * Get the current state of a Stability Deposit.
    *
    * @param address - Address that owns the Stability Deposit.
    */
-  getStabilityDeposit(address?: string): Promise<StabilityDeposit>;
+  getStabilityDeposit(contract: CollateralContract, address?: string): Promise<StabilityDeposit>;
 
   /**
    * Get the total amount of thUSD currently deposited in the Stability Pool.
    */
-  getTHUSDInStabilityPool(): Promise<Decimal>;
+  getTHUSDInStabilityPool(contract: CollateralContract): Promise<Decimal>;
+
+  /**
+   * Check if a specific BorrowersOperations contract is included in the thUSD mintList.
+   */
+  checkMintList(address: string): Promise<boolean>;
 
   /**
    * Get the total amount of thUSD currently deposited in the PCV Pool.
    */
-  getPCVBalance(): Promise<Decimal>;
+  getPCVBalance(contract: CollateralContract): Promise<Decimal>;
 
   /**
    * Get the amount of thUSD held by an address.
@@ -108,14 +114,14 @@ export interface ReadableLiquity {
    *
    * @param address - Address whose balance should be retrieved.
    */
-  getErc20TokenBalance(address?: string): Promise<Decimal>;
+  getErc20TokenBalance(contract: CollateralContract, address?: string): Promise<Decimal>;
 
   /**
    * Get the Borrowers Operations contract's allowance of a holder's Erc20 tokens.
    *
    * @param address - Address holding the Erc20 tokens.
    */
-  getErc20TokenAllowance(address?: string): Promise<Decimal>;
+  getErc20TokenAllowance(contract: CollateralContract, address?: string): Promise<Decimal>;
 
   /**
    * Get the amount of leftover collateral available for withdrawal by an address.
@@ -126,10 +132,11 @@ export interface ReadableLiquity {
    * can be withdrawn from using
    * {@link @liquity/lib-base#TransactableLiquity.claimCollateralSurplus | claimCollateralSurplus()}.
    */
-  getCollateralSurplusBalance(address?: string): Promise<Decimal>;
+  getCollateralSurplusBalance(contract: CollateralContract, address?: string): Promise<Decimal>;
 
   /** @internal */
   getTroves(
+    contract: CollateralContract, 
     params: TroveListingParams & { beforeRedistribution: true }
   ): Promise<TroveWithPendingRedistribution[]>;
 
@@ -139,10 +146,10 @@ export interface ReadableLiquity {
    * @param params - Controls how the list is sorted, and where the slice begins and ends.
    * @returns Pairs of owner addresses and their Troves.
    */
-  getTroves(params: TroveListingParams): Promise<UserTrove[]>;
+  getTroves(contract: CollateralContract, params: TroveListingParams): Promise<UserTrove[]>;
 
   /**
    * Get a calculator for current fees.
    */
-  getFees(): Promise<Fees>;
+  getFees(contract: CollateralContract): Promise<Fees>;
 }

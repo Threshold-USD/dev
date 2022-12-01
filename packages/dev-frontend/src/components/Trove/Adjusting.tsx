@@ -27,6 +27,7 @@ import {
   selectForTroveChangeValidation,
   validateTroveChange
 } from "./validation/validateTroveChange";
+import { VaultProps } from "./Vault";
 
 const selector = (state: LiquityStoreState) => {
   const { trove, fees, price, erc20TokenBalance } = state;
@@ -82,7 +83,8 @@ const applyUnsavedNetDebtChanges = (unsavedChanges: Difference, trove: Trove) =>
   return trove.netDebt;
 };
 
-export const Adjusting: React.FC = () => {
+export const Adjusting: React.FC<VaultProps> = props => {
+  const { contract } = props;
   const {
     liquity: { send: liquity }
   } = useLiquity();
@@ -98,9 +100,9 @@ export const Adjusting: React.FC = () => {
 
   useEffect(() => {
     if (transactionState.type === "confirmedOneShot") {
-      dispatchEvent("TROVE_ADJUSTED");
+      dispatchEvent("TROVE_ADJUSTED", contract);
     }
-  }, [transactionState.type, dispatchEvent]);
+  }, [transactionState.type, dispatchEvent, contract]);
 
   useEffect(() => {
     if (!previousTrove.current.collateral.eq(trove.collateral)) {
@@ -117,19 +119,19 @@ export const Adjusting: React.FC = () => {
   }, [trove, collateral, netDebt]);
 
   const handleCancelPressed = useCallback(() => {
-    dispatchEvent("CANCEL_ADJUST_TROVE_PRESSED");
-  }, [dispatchEvent]);
+    dispatchEvent("CANCEL_ADJUST_TROVE_PRESSED", contract);
+  }, [dispatchEvent, contract]);
 
   const isDirty = !collateral.eq(trove.collateral) || !netDebt.eq(trove.netDebt);
   const isDebtIncrease = netDebt.gt(trove.netDebt);
   const debtIncreaseAmount = isDebtIncrease ? netDebt.sub(trove.netDebt) : Decimal.ZERO;
 
   const fee = isDebtIncrease
-    ? feeFrom(trove, new Trove(trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
+    ? feeFrom(trove, new Trove(contract.name, trove.collateral, trove.debt.add(debtIncreaseAmount)), borrowingRate)
     : Decimal.ZERO;
   const totalDebt = netDebt.add(THUSD_LIQUIDATION_RESERVE).add(fee);
   const maxBorrowingRate = borrowingRate.add(0.005);
-  const updatedTrove = isDirty ? new Trove(collateral, totalDebt) : trove;
+  const updatedTrove = isDirty ? new Trove(contract.name, collateral, totalDebt) : trove;
   const feePct = new Percent(borrowingRate);
   const availableErc20 = erc20TokenBalance;
   const maxCollateral = trove.collateral.add(availableErc20);
@@ -139,6 +141,7 @@ export const Adjusting: React.FC = () => {
   const collateralRatioChange = Difference.between(collateralRatio, trove.collateralRatio(price));
 
   const [troveChange, description] = validateTroveChange(
+    contract,
     trove,
     updatedTrove,
     borrowingRate,
@@ -270,6 +273,7 @@ export const Adjusting: React.FC = () => {
 
           {hasApproved &&
           (<ExpensiveTroveChangeWarning
+            contract={contract}
             troveChange={stableTroveChange}
             maxBorrowingRate={maxBorrowingRate}
             borrowingFeeDecayToleranceMinutes={60}
@@ -289,6 +293,7 @@ export const Adjusting: React.FC = () => {
               </Transaction>
             : stableTroveChange ? (
               <TroveAction
+                contract={contract}
                 transactionId={TRANSACTION_ID}
                 change={stableTroveChange}
                 maxBorrowingRate={maxBorrowingRate}

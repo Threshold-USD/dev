@@ -7,6 +7,7 @@ import { useLiquityStore } from "./useLiquityStore";
 
 export const useLiquitySelector = <S, T>(select: (state: LiquityStoreState<T>) => S): S => {
   const store = useLiquityStore<T>();
+  console.log('store: ', store)
   const [, rerender] = useReducer(() => ({}), {});
 
   useEffect(

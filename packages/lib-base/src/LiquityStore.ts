@@ -4,6 +4,7 @@ import { Decimal } from "./Decimal";
 import { StabilityDeposit } from "./StabilityDeposit";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { Fees } from "./Fees";
+import { MintList } from "./TransactableLiquity";
 
 /**
  * State variables read from the blockchain.
@@ -11,6 +12,7 @@ import { Fees } from "./Fees";
  * @public
  */
 export interface LiquityStoreBaseState {
+
   /** Number of Troves that are currently open. */
   numberOfTroves: number;
 
@@ -41,11 +43,17 @@ export interface LiquityStoreBaseState {
   /** Total amount of thUSD currently deposited in the Stability Pool. */
   thusdInStabilityPool: Decimal;
 
+  /** Check if a specific BorrowersOperations contract is included in the thUSD mintList. */
+  isAllowedToMint: boolean;
+
   /** Total amount of LUSD currently deposited in the PCV Pool. */
   pcvBalance: Decimal;
 
   /** Total collateral and debt in the Liquity system. */
   total: Trove;
+
+  /** Array of BorrowersOperations contract addresses */
+  mintList: MintList;
 
   /**
    * Total collateral and debt per stake that has been liquidated through redistribution.
@@ -304,6 +312,13 @@ export abstract class LiquityStore<T = unknown> {
         baseStateUpdate.thusdBalance
       ),
 
+      isAllowedToMint: this._updateIfChanged(
+        strictEquals,
+        "isAllowedToMint",
+        baseState.isAllowedToMint,
+        baseStateUpdate.isAllowedToMint
+      ),
+
       pcvBalance: this._updateIfChanged(
         eq,
         "pcvBalance",
@@ -342,6 +357,8 @@ export abstract class LiquityStore<T = unknown> {
       ),
 
       total: this._updateIfChanged(equals, "total", baseState.total, baseStateUpdate.total),
+
+      mintList: baseState.mintList,
 
       totalRedistributed: this._updateIfChanged(
         equals,
