@@ -6,8 +6,11 @@ import {
   ObservableLiquity,
   StabilityDeposit,
   Trove,
-  TroveWithPendingRedistribution
+  TroveWithPendingRedistribution,
+  MintList,
+  CollateralContract
 } from "@liquity/lib-base";
+import { BlockPolledLiquityStore } from "./BlockPolledLiquityStore"
 import { _getContracts, _requireAddress } from "./EthersLiquityConnection";
 import { ReadableEthersLiquity } from "./ReadableEthersLiquity";
 
@@ -43,14 +46,28 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     this._readable = readable;
   }
 
+  private _getBorrowerOperationsContracts(): Promise<MintList> {
+    const blockStore = new BlockPolledLiquityStore(this._readable);
+    const mintList = blockStore._getMintList();
+    return mintList;
+  }
+
+  private _getBorrowersOperationsContractsArray(): Promise<CollateralContract[]> {
+    return this._getBorrowerOperationsContracts().then((result) => {
+      return Object.values(result).map((contract) => contract)
+    });
+  }
+  
   watchTotalRedistributed(
+    contract: CollateralContract,
     onTotalRedistributedChanged: (totalRedistributed: Trove) => void
   ): () => void {
+
     const { activePool, defaultPool } = _getContracts(this._readable.connection);
     const collateralSent = activePool.filters.CollateralSent();
 
     const redistributionListener = debounce((blockTag: number) => {
-      this._readable.getTotalRedistributed({ blockTag }).then(onTotalRedistributedChanged);
+      this._readable.getTotalRedistributed(contract, { blockTag }).then(onTotalRedistributedChanged);
     });
 
     const collateralSentListener = (toAddress: string, _amount: BigNumber, event: Event) => {
@@ -67,6 +84,7 @@ export class ObservableEthersLiquity implements ObservableLiquity {
   }
 
   watchTroveWithoutRewards(
+    contract: CollateralContract,
     onTroveChanged: (trove: TroveWithPendingRedistribution) => void,
     address?: string
   ): () => void {
@@ -77,7 +95,7 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     const troveUpdatedByBorrowerOperations = borrowerOperations.filters.TroveUpdated(address);
 
     const troveListener = debounce((blockTag: number) => {
-      this._readable.getTroveBeforeRedistribution(address, { blockTag }).then(onTroveChanged);
+      this._readable.getTroveBeforeRedistribution(contract, address, { blockTag }).then(onTroveChanged);
     });
 
     troveManager.on(troveUpdatedByTroveManager, troveListener);
@@ -89,13 +107,13 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     };
   }
 
-  watchNumberOfTroves(onNumberOfTrovesChanged: (numberOfTroves: number) => void): () => void {
+  watchNumberOfTroves(contract: CollateralContract, onNumberOfTrovesChanged: (numberOfTroves: number) => void): () => void {
     const { troveManager } = _getContracts(this._readable.connection);
     const { TroveUpdated } = troveManager.filters;
     const troveUpdated = TroveUpdated();
 
     const troveUpdatedListener = debounce((blockTag: number) => {
-      this._readable.getNumberOfTroves({ blockTag }).then(onNumberOfTrovesChanged);
+      this._readable.getNumberOfTroves(contract, { blockTag }).then(onNumberOfTrovesChanged);
     });
 
     troveManager.on(troveUpdated, troveUpdatedListener);
@@ -113,13 +131,13 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     throw new Error("Method not implemented.");
   }
 
-  watchTotal(onTotalChanged: (total: Trove) => void): () => void {
+  watchTotal(contract: CollateralContract, onTotalChanged: (total: Trove) => void): () => void {
     const { troveManager } = _getContracts(this._readable.connection);
     const { TroveUpdated } = troveManager.filters;
     const troveUpdated = TroveUpdated();
 
     const totalListener = debounce((blockTag: number) => {
-      this._readable.getTotal({ blockTag }).then(onTotalChanged);
+      this._readable.getTotal(contract, { blockTag }).then(onTotalChanged);
     });
 
     troveManager.on(troveUpdated, totalListener);
@@ -130,6 +148,7 @@ export class ObservableEthersLiquity implements ObservableLiquity {
   }
 
   watchStabilityDeposit(
+    contract: CollateralContract, 
     onStabilityDepositChanged: (stabilityDeposit: StabilityDeposit) => void,
     address?: string
   ): () => void {
@@ -143,7 +162,7 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     const collateralSent = CollateralSent();
 
     const depositListener = debounce((blockTag: number) => {
-      this._readable.getStabilityDeposit(address, { blockTag }).then(onStabilityDepositChanged);
+      this._readable.getStabilityDeposit(contract, address, { blockTag }).then(onStabilityDepositChanged);
     });
 
     const collateralSentListener = (toAddress: string, _amount: BigNumber, event: Event) => {
@@ -164,6 +183,7 @@ export class ObservableEthersLiquity implements ObservableLiquity {
   }
 
   watchTHUSDInStabilityPool(
+    contract: CollateralContract, 
     onTHUSDInStabilityPoolChanged: (thusdInStabilityPool: Decimal) => void
   ): () => void {
     const { thusdToken, stabilityPool } = _getContracts(this._readable.connection);
@@ -175,7 +195,7 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     const stabilityPoolTHUSDFilters = [transferTHUSDFromStabilityPool, transferTHUSDToStabilityPool];
 
     const stabilityPoolTHUSDListener = debounce((blockTag: number) => {
-      this._readable.getTHUSDInStabilityPool({ blockTag }).then(onTHUSDInStabilityPoolChanged);
+      this._readable.getTHUSDInStabilityPool(contract, { blockTag }).then(onTHUSDInStabilityPoolChanged);
     });
 
     stabilityPoolTHUSDFilters.forEach(filter => thusdToken.on(filter, stabilityPoolTHUSDListener));
