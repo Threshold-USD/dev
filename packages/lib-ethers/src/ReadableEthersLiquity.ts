@@ -381,7 +381,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
 
   /** @internal */
   async _getFeesFactory(
-    contract: CollateralContract, 
+    contract?: CollateralContract, 
     overrides?: EthersCallOverrides
   ): Promise<(blockTimestamp: number, recoveryMode: boolean) => Fees> {
     const { troveManager } = _getContracts(this.connection);
@@ -393,7 +393,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
 
     return (blockTimestamp, recoveryMode) =>
       new Fees(
-        contract.name,
+        contract ? contract.name : 'borrowerOperations',
         baseRateWithoutDecay,
         MINUTE_DECAY_FACTOR,
         BETA,
@@ -577,12 +577,12 @@ class _BlockPolledReadableEthersLiquity
   }
 
   async _getFeesFactory(
-    contract: CollateralContract, 
+    contract?: CollateralContract, 
     overrides?: EthersCallOverrides
   ): Promise<(blockTimestamp: number, recoveryMode: boolean) => Fees> {
     return this._blockHit(overrides)
       ? this.store.state._feesFactory
-      : this._readable._getFeesFactory(contract, overrides);
+      : this._readable._getFeesFactory(contract && contract, overrides);
   }
 
   async getFees(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Fees> {

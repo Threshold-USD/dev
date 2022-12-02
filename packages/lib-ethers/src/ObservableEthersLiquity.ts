@@ -7,10 +7,9 @@ import {
   StabilityDeposit,
   Trove,
   TroveWithPendingRedistribution,
-  MintList,
   CollateralContract
 } from "@liquity/lib-base";
-import { BlockPolledLiquityStore } from "./BlockPolledLiquityStore"
+
 import { _getContracts, _requireAddress } from "./EthersLiquityConnection";
 import { ReadableEthersLiquity } from "./ReadableEthersLiquity";
 
@@ -44,18 +43,6 @@ export class ObservableEthersLiquity implements ObservableLiquity {
 
   constructor(readable: ReadableEthersLiquity) {
     this._readable = readable;
-  }
-
-  private _getBorrowerOperationsContracts(): Promise<MintList> {
-    const blockStore = new BlockPolledLiquityStore(this._readable);
-    const mintList = blockStore._getMintList();
-    return mintList;
-  }
-
-  private _getBorrowersOperationsContractsArray(): Promise<CollateralContract[]> {
-    return this._getBorrowerOperationsContracts().then((result) => {
-      return Object.values(result).map((contract) => contract)
-    });
   }
   
   watchTotalRedistributed(

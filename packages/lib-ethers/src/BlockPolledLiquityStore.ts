@@ -1,13 +1,15 @@
 import { AddressZero } from "@ethersproject/constants";
 
 import {
+  CollateralContract,
   Decimal,
+  Fees,
   LiquityStoreState,
   LiquityStoreBaseState,
+  Trove,
   TroveWithPendingRedistribution,
   StabilityDeposit,
   LiquityStore,
-  Fees,
   MintList
 } from "@liquity/lib-base";
 
@@ -20,6 +22,12 @@ import {
   _LiquityContracts,
 } from "./contracts";
 
+type feesFactory = (blockTimestamp: number, recoveryMode: boolean) => Fees
+
+type blockTagObject = { blockTag: number | undefined };
+
+type StorePromises = Promise<number | Decimal | Trove | TroveWithPendingRedistribution | feesFactory>
+
 /**
  * Extra state added to {@link @liquity/lib-base#LiquityStoreState} by
  * {@link BlockPolledLiquityStore}.
@@ -27,6 +35,7 @@ import {
  * @public
  */
 export interface BlockPolledLiquityStoreExtraState {
+  
   /**
    * Number of block that the store state was fetched from.
    *
@@ -38,11 +47,15 @@ export interface BlockPolledLiquityStoreExtraState {
   /**
    * Timestamp of latest block (number of seconds since epoch).
    */
-  blockTimestamp: number;
+   blockTimestamp: number;
+
 
   /** @internal */
   _feesFactory: (blockTimestamp: number, recoveryMode: boolean) => Fees;
 }
+
+export type IteratedCollateralContractStore = Record<string, CollateralContract | StorePromises>
+
 
 /**
  * The type of {@link BlockPolledLiquityStore}'s
@@ -72,16 +85,29 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
     this._provider = _getProvider(readable.connection);
   }
 
+  private _getBorrowerOperationsContracts(): Promise<MintList> {
+    const blockStore = new BlockPolledLiquityStore(this._readable);
+    const mintList = blockStore._getMintList();
+    return mintList;
+  }
+
+  private _getBorrowersOperationsContractsArray(): Promise<CollateralContract[]> {
+    return this._getBorrowerOperationsContracts().then((result) => {
+      return Object.values(result).map((contract) => contract)
+    });
+  }
+
   private async _getRiskiestTroveBeforeRedistribution(
+    contract: CollateralContract,
     overrides?: EthersCallOverrides
   ): Promise<TroveWithPendingRedistribution> {
     const riskiestTroves = await this._readable.getTroves(
-      { first: 1, sortedBy: "ascendingCollateralRatio", beforeRedistribution: true },
+      contract, { first: 1, sortedBy: "ascendingCollateralRatio", beforeRedistribution: true },
       overrides
     );
 
     if (riskiestTroves.length === 0) {
-      return new TroveWithPendingRedistribution(AddressZero, "nonExistent");
+      return new TroveWithPendingRedistribution(AddressZero, "nonExistent", contract.name);
     }
 
     return riskiestTroves[0];
@@ -113,19 +139,33 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
     return mintList;
   }
 
+  private async _iterateOverCollateralContracts (
+      fn: (contract?: CollateralContract | undefined, { blockTag }?: blockTagObject) => StorePromises, 
+      { blockTag }: blockTagObject
+    ): Promise<IteratedCollateralContractStore[]>  {
+    const collateralContractsArray = await this._getBorrowersOperationsContractsArray();
+    const iteratedResult = collateralContractsArray.map(async contract => {
+      const fnResult = fn(contract, { blockTag })
+      return {[contract.name]: contract, [fn.name]: fnResult}
+    })
+    return Promise.all(iteratedResult);
+  }
+
   private async _get(
     blockTag?: number
   ): Promise<[baseState: LiquityStoreBaseState, extraState: BlockPolledLiquityStoreExtraState]> {
     const { userAddress } = this.connection;
-    const { borrowerOperations } = _getContracts(this.connection);
+    const borrowerOperations  = await this._getBorrowersOperationsContractsArray()
 
     const {
       blockTimestamp,
       _feesFactory,
+      _getFeesFactory,
       ...baseState
     } = await promiseAllValues({
       blockTimestamp: this._readable._getBlockTimestamp(blockTag),
-      _feesFactory: this._readable._getFeesFactory({ blockTag }),
+      _feesFactory: this._iterateOverCollateralContracts(this._readable._getFeesFactory, { blockTag }),
+      _getFeesFactory: this._readable._getFeesFactory,
       price: this._readable.getPrice({ blockTag }),
       numberOfTroves: this._readable.getNumberOfTroves({ blockTag }),
       totalRedistributed: this._readable.getTotalRedistributed({ blockTag }),
@@ -168,11 +208,12 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
             )
           })
     });
+    const normalFee = await this._readable._getFeesFactory({ blockTag })
 
     return [
       {
         ...baseState,
-        _feesInNormalMode: _feesFactory(blockTimestamp, false)
+        _feesInNormalMode: normalFee(blockTimestamp, false),
       },
       {
         blockTag,
