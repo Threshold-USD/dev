@@ -62,7 +62,7 @@ contract('BAMM', async accounts => {
       contracts = await deploymentHelper.deployLiquityCore(accounts)
       contracts.troveManager = await TroveManagerTester.new()
       contracts.thusdToken = (await deploymentHelper.deployTHUSDToken(contracts)).thusdToken
-      contracts.erc20.address = ZERO_ADDRESS
+      // contracts.erc20.address = ZERO_ADDRESS
       
       await deploymentHelper.connectCoreContracts(contracts)
 
@@ -75,12 +75,21 @@ contract('BAMM', async accounts => {
       defaultPool = contracts.defaultPool
       borrowerOperations = contracts.borrowerOperations
       hintHelpers = contracts.hintHelpers
+      erc20 = contracts.erc20
 
       // deploy BAMM
       chainlink = await ChainlinkTestnet.new(priceFeed.address)
       thusdChainlink = await ChainlinkTestnet.new(ZERO_ADDRESS)
 
-      bamm = await BAMM.new(chainlink.address, thusdChainlink.address, stabilityPool.address, thusdToken.address, 400, feePool, {from: bammOwner})
+      bamm = await BAMM.new(
+        chainlink.address, 
+        thusdChainlink.address, 
+        stabilityPool.address, 
+        thusdToken.address, 
+        400, 
+        feePool, 
+        erc20.address,
+        {from: bammOwner})
       lens = await BLens.new()
 
       await thusdChainlink.setPrice(dec(1,18)) // 1 THUSD = 1 USD
@@ -187,12 +196,12 @@ contract('BAMM', async accounts => {
       const price = await priceFeed.fetchPrice.call()
       console.log(price.toString())
 
-      const ammExpectedEth = await bamm.getSwapEthAmount.call(toBN(dec(1, 18)))
+      const ammExpectedCollateral = await bamm.getSwapCollateralAmount.call(toBN(dec(1, 18)))
 
-      console.log("expected eth amount", ammExpectedEth.ethAmount.toString())
+      console.log("expected collateral amount", ammExpectedCollateral.collateralAmount.toString())
 
       const rate = await bamm.getConversionRate(thusdToken.address, "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", toBN(dec(1, 18)), 0)
-      assert.equal(rate.toString(), ammExpectedEth.ethAmount.toString())
+      assert.equal(rate.toString(), ammExpectedCollateral.collateralAmount.toString())
 
       await thusdToken.approve(bamm.address, toBN(dec(1, 18)), { from: alice })
 
@@ -200,9 +209,10 @@ contract('BAMM', async accounts => {
       //await bamm.swap(toBN(dec(1, 18)), dest, { from: alice })
       await bamm.trade(thusdToken.address, toBN(dec(1, 18)), "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", dest, rate, true, { from: alice });
 
-      const swapBalance = await web3.eth.getBalance(dest)
+      // const swapBalance = await web3.eth.getBalance(dest) // TODO make it work with both erc20 and eth
+      const swapBalance = (await erc20.balanceOf(dest)).toString()
 
-      assert.equal(swapBalance, ammExpectedEth.ethAmount)
+      assert.equal(swapBalance, ammExpectedCollateral.collateralAmount)
     })
 
     it("test basic shares allocation", async () => {
@@ -227,14 +237,15 @@ contract('BAMM', async accounts => {
 
       // test get user info
       // send eth to get non zero eth
-      await web3.eth.sendTransaction({from: whale, to: bamm.address, value: toBN(dec(3, 18))})
+      // await web3.eth.sendTransaction({from: whale, to: bamm.address, value: toBN(dec(3, 18))}) // TODO make it work with both erc20 and eth
+      await erc20.transfer(bamm.address, toBN(dec(3, 18)))
       const userInfo = await lens.getUserInfo.call(D, bamm.address)
       //console.log({userInfo})
       assert.equal(userInfo.bammUserBalance.toString(), (await bamm.balanceOf(D)).toString())
       assert.equal(userInfo.thusdUserBalance.toString(), dec(1000, 18).toString())
-      assert.equal(userInfo.ethUserBalance.toString(), dec(1, 18).toString())
+      assert.equal(userInfo.collateralUserBalance.toString(), dec(1, 18).toString())
       assert.equal(userInfo.thusdTotal.toString(), dec(3000, 18).toString())
-      assert.equal(userInfo.ethTotal.toString(), dec(3, 18).toString())      
+      assert.equal(userInfo.collateralTotal.toString(), dec(3, 18).toString())      
 
       await stabilityPool.withdrawFromSP(0, { from: F })
       await bamm.withdraw(0, { from: D })
@@ -364,7 +375,7 @@ contract('BAMM', async accounts => {
       console.log("stake F:", (await bamm.stake(F)).toString())
     })
 
-    it('test share with ether', async () => {
+    it('test share with collateral', async () => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
@@ -391,36 +402,41 @@ contract('BAMM', async accounts => {
 
       // 4k liquidations
       assert.equal(toBN(dec(6000, 18)).toString(), (await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
-      const ethGains = web3.utils.toBN("39799999999999999975")
-      //console.log(ethGains.toString(), (await stabilityPool.getDepositorCollateralGain(bamm.address)).toString())
+      const collateralGains = web3.utils.toBN("39799999999999999975")
+      //console.log(collateralGains.toString(), (await stabilityPool.getDepositorCollateralGain(bamm.address)).toString())
 
       // send some ETH to simulate partial rebalance
-      await web3.eth.sendTransaction({from: whale, to: bamm.address, value: toBN(dec(1, 18))})
-      assert.equal(toBN(await web3.eth.getBalance(bamm.address)).toString(), toBN(dec(1, 18)).toString())
+      // await web3.eth.sendTransaction({from: whale, to: bamm.address, value: toBN(dec(1, 18))}) // TODO
+      await erc20.transfer(bamm.address, toBN(dec(1, 18)))
+      // assert.equal(toBN(await web3.eth.getBalance(bamm.address)).toString(), toBN(dec(1, 18)).toString()) // TODO
+      assert.equal(toBN(await erc20.balanceOf(bamm.address)).toString(), toBN(dec(1, 18)).toString())
 
-      const totalEth = ethGains.add(toBN(dec(1, 18)))
-      const totaTHUsd = toBN(dec(6000, 18)).add(totalEth.mul(toBN(105)))
+      const totalCollateral = collateralGains.add(toBN(dec(1, 18)))
+      const totaTHUsd = toBN(dec(6000, 18)).add(totalCollateral.mul(toBN(105)))
 
       await thusdToken.approve(bamm.address, totaTHUsd, { from: B })            
       await bamm.deposit(totaTHUsd, { from: B } )      
 
       assert.equal((await bamm.balanceOf(A)).toString(), (await bamm.balanceOf(B)).toString())
 
-      const ethBalanceBefore = toBN(await web3.eth.getBalance(A))
+      // const ethBalanceBefore = toBN(await web3.eth.getBalance(A))  // TODO
+      const collateralBalanceBefore = toBN(await erc20.balanceOf(A))
       const THUSDBefore = await thusdToken.balanceOf(A)
       const tx = await bamm.withdraw(await bamm.balanceOf(A), {from: A})
-      const gasFee = toBN(tx.receipt.gasUsed).mul(toBN(tx.receipt.effectiveGasPrice))
-      const ethBalanceAfter = toBN(await web3.eth.getBalance(A))
+      // const gasFee = toBN(tx.receipt.gasUsed).mul(toBN(tx.receipt.effectiveGasPrice))  // TODO
+      // const ethBalanceAfter = toBN(await web3.eth.getBalance(A))  // TODO
+      const collateralBalanceAfter = toBN(await erc20.balanceOf(A))
       const THUSDAfter = await thusdToken.balanceOf(A)
 
-      const withdrawUsdValue = THUSDAfter.sub(THUSDBefore).add((ethBalanceAfter.add(gasFee).sub(ethBalanceBefore)).mul(toBN(105)))
+      // const withdrawUsdValue = THUSDAfter.sub(THUSDBefore).add((ethBalanceAfter.add(gasFee).sub(ethBalanceBefore)).mul(toBN(105))) // TODO
+      const withdrawUsdValue = THUSDAfter.sub(THUSDBefore).add((collateralBalanceAfter.sub(collateralBalanceBefore)).mul(toBN(105)))
       assert(in100WeiRadius(withdrawUsdValue.toString(), totaTHUsd.toString()))
 
       assert(in100WeiRadius("10283999999999999997375", "10283999999999999997322"))
       assert(! in100WeiRadius("10283999999999999996375", "10283999999999999997322"))      
     })
 
-    it('price exceed max dicount and/or eth balance', async () => {
+    it('price exceed max dicount and/or collateral balance', async () => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
@@ -447,34 +463,34 @@ contract('BAMM', async accounts => {
 
       // 4k liquidations
       assert.equal(toBN(dec(6000, 18)).toString(), (await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
-      const ethGains = web3.utils.toBN("39799999999999999975")
+      const collateralGains = web3.utils.toBN("39799999999999999975")
 
       // without fee
       await bamm.setParams(20, 0, {from: bammOwner})
-      const price = await bamm.getSwapEthAmount(dec(105, 18))
-      assert.equal(price.ethAmount.toString(), dec(104, 18-2).toString())
+      const price = await bamm.getSwapCollateralAmount(dec(105, 18))
+      assert.equal(price.collateralAmount.toString(), dec(104, 18-2).toString())
       assert.equal(price.feeTHusdAmount.toString(), "0")
 
       // with fee
       await bamm.setParams(20, 100, {from: bammOwner})
-      const priceWithFee = await bamm.getSwapEthAmount(dec(105, 18))
-      assert.equal(priceWithFee.ethAmount.toString(),price.ethAmount.toString())
+      const priceWithFee = await bamm.getSwapCollateralAmount(dec(105, 18))
+      assert.equal(priceWithFee.collateralAmount.toString(),price.collateralAmount.toString())
       assert.equal(priceWithFee.feeTHusdAmount.toString(), dec(105, 16))
 
       // without fee
       await bamm.setParams(20, 0, {from: bammOwner})
-      const priceDepleted = await bamm.getSwapEthAmount(dec(1050000000000000, 18))
-      assert.equal(priceDepleted.ethAmount.toString(), ethGains.toString())      
+      const priceDepleted = await bamm.getSwapCollateralAmount(dec(1050000000000000, 18))
+      assert.equal(priceDepleted.collateralAmount.toString(), collateralGains.toString())      
       assert.equal(priceDepleted.feeTHusdAmount.toString(), "0")
 
       // with fee
       await bamm.setParams(20, 100, {from: bammOwner})
-      const priceDepletedWithFee = await bamm.getSwapEthAmount(dec(1050000000000000, 18))
-      assert.equal(priceDepletedWithFee.ethAmount.toString(), priceDepleted.ethAmount.toString())
+      const priceDepletedWithFee = await bamm.getSwapCollateralAmount(dec(1050000000000000, 18))
+      assert.equal(priceDepletedWithFee.collateralAmount.toString(), priceDepleted.collateralAmount.toString())
       assert.equal(priceDepletedWithFee.feeTHusdAmount.toString(), dec(1050000000000000, 16))      
     })
 
-    it('test getSwapEthAmount', async () => {
+    it('test getSwapCollateralAmount', async () => {
       // --- SETUP ---
 
       // Whale opens Trove and deposits to SP
@@ -501,37 +517,37 @@ contract('BAMM', async accounts => {
 
       // 4k liquidations
       assert.equal(toBN(dec(6000, 18)).toString(), (await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
-      const ethGains = web3.utils.toBN("39799999999999999975")
+      const collateralGains = web3.utils.toBN("39799999999999999975")
 
       const thusdQty = dec(105, 18)
-      const expectedReturn = await bamm.getReturn(thusdQty, dec(6000, 18), toBN(dec(6000, 18)).add(ethGains.mul(toBN(2 * 105))), 200)
+      const expectedReturn = await bamm.getReturn(thusdQty, dec(6000, 18), toBN(dec(6000, 18)).add(collateralGains.mul(toBN(2 * 105))), 200)
 
       // without fee
       await bamm.setParams(200, 0, {from: bammOwner})
-      const priceWithoutFee = await bamm.getSwapEthAmount(thusdQty)
-      assert.equal(priceWithoutFee.ethAmount.toString(), expectedReturn.mul(toBN(100)).div(toBN(100 * 105)).toString())
+      const priceWithoutFee = await bamm.getSwapCollateralAmount(thusdQty)
+      assert.equal(priceWithoutFee.collateralAmount.toString(), expectedReturn.mul(toBN(100)).div(toBN(100 * 105)).toString())
       assert.equal(priceWithoutFee.feeTHusdAmount.toString(), "0")
 
       // with fee
       await bamm.setParams(200, 100, {from: bammOwner})
-      const priceWithFee = await bamm.getSwapEthAmount(thusdQty)
-      assert.equal(priceWithoutFee.ethAmount.toString(), priceWithFee.ethAmount.toString())      
+      const priceWithFee = await bamm.getSwapCollateralAmount(thusdQty)
+      assert.equal(priceWithoutFee.collateralAmount.toString(), priceWithFee.collateralAmount.toString())      
       assert.equal(priceWithFee.feeTHusdAmount.toString(), toBN(thusdQty).div(toBN("100")).toString())
       
       // with thusd price > 1
       await thusdChainlink.setPrice(dec(102,16)) // 1 thusd = 1.02 usd
-      const priceWithTHusdOver1 = await bamm.getSwapEthAmount(thusdQty)
-      assert.equal(priceWithTHusdOver1.ethAmount.toString(), toBN(priceWithoutFee.ethAmount).mul(toBN(102)).div(toBN(100)).toString())
+      const priceWithTHusdOver1 = await bamm.getSwapCollateralAmount(thusdQty)
+      assert.equal(priceWithTHusdOver1.collateralAmount.toString(), toBN(priceWithoutFee.collateralAmount).mul(toBN(102)).div(toBN(100)).toString())
 
       // with thusd price < 1
       await thusdChainlink.setPrice(dec(99,16)) // 1 thusd = 0.99 usd
-      const priceWithTHusdUnder1 = await bamm.getSwapEthAmount(thusdQty)
-      assert.equal(priceWithTHusdUnder1.ethAmount.toString(), priceWithoutFee.ethAmount.toString())
+      const priceWithTHusdUnder1 = await bamm.getSwapCollateralAmount(thusdQty)
+      assert.equal(priceWithTHusdUnder1.collateralAmount.toString(), priceWithoutFee.collateralAmount.toString())
 
       // with thusd price >> 1
       await thusdChainlink.setPrice(dec(112,16)) // 1 thusd = 1.12 usd
-      const priceWithTHusdTooHigh = await bamm.getSwapEthAmount(thusdQty)
-      assert.equal(priceWithTHusdTooHigh.ethAmount.toString(), dec(104,16)) // get max discount, namely 1.04 ETH instead of 1 ETH
+      const priceWithTHusdTooHigh = await bamm.getSwapCollateralAmount(thusdQty)
+      assert.equal(priceWithTHusdTooHigh.collateralAmount.toString(), dec(104,16)) // get max discount, namely 1.04 units instead of 1 unit
 
     })    
 
@@ -570,26 +586,27 @@ contract('BAMM', async accounts => {
 
       // 4k liquidations
       assert.equal(toBN(dec(6000, 18)).toString(), (await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
-      const ethGains = web3.utils.toBN("39799999999999999975")
+      const collateralGains = web3.utils.toBN("39799999999999999975")
 
       // with fee
       await bamm.setParams(20, 100, {from: bammOwner})
-      const priceWithFee = await bamm.getSwapEthAmount(dec(105, 18))
-      assert.equal(priceWithFee.ethAmount.toString(), dec(104, 18-2).toString())
+      const priceWithFee = await bamm.getSwapCollateralAmount(dec(105, 18))
+      assert.equal(priceWithFee.collateralAmount.toString(), dec(104, 18-2).toString())
       assert.equal(priceWithFee.feeTHusdAmount.toString(), dec(105, 16).toString())      
 
       await thusdToken.approve(bamm.address, dec(105,18), {from: whale})
       const dest = "0xdEADBEEF00AA81bBCF694bC5c05A397F5E5658D5"
 
-      await assertRevert(bamm.swap(dec(105,18), priceWithFee.ethAmount.add(toBN(1)), dest, {from: whale}), 'swap: low return')      
-      await bamm.swap(dec(105,18), priceWithFee.ethAmount, dest, {from: whale}) // TODO - check once with higher value so it will revert
+      await assertRevert(bamm.swap(dec(105,18), priceWithFee.collateralAmount.add(toBN(1)), dest, {from: whale}), 'swap: low return')      
+      await bamm.swap(dec(105,18), priceWithFee.collateralAmount, dest, {from: whale}) // TODO - check once with higher value so it will revert
 
       // check thusd balance
       const expectedPoolBalance = toBN(dec(6105, 18)).sub(priceWithFee.feeTHusdAmount)
       assert.equal(expectedPoolBalance.toString(), (await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
 
       // check eth balance
-      assert.equal(await web3.eth.getBalance(dest), priceWithFee.ethAmount)
+      // assert.equal(await web3.eth.getBalance(dest), priceWithFee.collateralAmount) // TODO
+      assert.equal((await erc20.balanceOf(dest)).toString(), priceWithFee.collateralAmount)
 
       // check fees
       assert.equal((await thusdToken.balanceOf(feePool)).toString(), priceWithFee.feeTHusdAmount.toString())
@@ -622,24 +639,24 @@ contract('BAMM', async accounts => {
 
       // 4k liquidations
       assert.equal(toBN(dec(6000, 18)).toString(), (await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
-      const ethGains = web3.utils.toBN("39799999999999999975")
+      const collateralGains = web3.utils.toBN("39799999999999999975")
 
       const thusdQty = dec(105, 18)
-      const expectedReturn200 = await bamm.getReturn(thusdQty, dec(6000, 18), toBN(dec(6000, 18)).add(ethGains.mul(toBN(2 * 105))), 200)
-      const expectedReturn190 = await bamm.getReturn(thusdQty, dec(6000, 18), toBN(dec(6000, 18)).add(ethGains.mul(toBN(2 * 105))), 190)      
+      const expectedReturn200 = await bamm.getReturn(thusdQty, dec(6000, 18), toBN(dec(6000, 18)).add(collateralGains.mul(toBN(2 * 105))), 200)
+      const expectedReturn190 = await bamm.getReturn(thusdQty, dec(6000, 18), toBN(dec(6000, 18)).add(collateralGains.mul(toBN(2 * 105))), 190)      
 
       assert(expectedReturn200.toString() !== expectedReturn190.toString())
 
       // without fee
       await bamm.setParams(200, 0, {from: bammOwner})
-      const priceWithoutFee = await bamm.getSwapEthAmount(thusdQty)
-      assert.equal(priceWithoutFee.ethAmount.toString(), expectedReturn200.mul(toBN(100)).div(toBN(100 * 105)).toString())
+      const priceWithoutFee = await bamm.getSwapCollateralAmount(thusdQty)
+      assert.equal(priceWithoutFee.collateralAmount.toString(), expectedReturn200.mul(toBN(100)).div(toBN(100 * 105)).toString())
       assert.equal(priceWithoutFee.feeTHusdAmount.toString(), "0")
 
       // with fee
       await bamm.setParams(190, 100, {from: bammOwner})
-      const priceWithFee = await bamm.getSwapEthAmount(thusdQty)
-      assert.equal(priceWithFee.ethAmount.toString(), expectedReturn190.mul(toBN(100)).div(toBN(100 * 105)).toString())
+      const priceWithFee = await bamm.getSwapCollateralAmount(thusdQty)
+      assert.equal(priceWithFee.collateralAmount.toString(), expectedReturn190.mul(toBN(100)).div(toBN(100 * 105)).toString())
       assert.equal(priceWithFee.feeTHusdAmount.toString(), toBN(thusdQty).div(toBN("100")).toString())            
     })    
     

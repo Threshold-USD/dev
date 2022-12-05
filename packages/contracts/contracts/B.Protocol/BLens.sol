@@ -11,10 +11,10 @@ contract BLens {
         uint bammTotalSupply;
 
         uint thusdUserBalance;
-        uint ethUserBalance;
+        uint collateralUserBalance;
 
         uint thusdTotal;
-        uint ethTotal;
+        uint collateralTotal;
     }
 
     function getUserInfo(address user, BAMM bamm) external view returns(UserInfo memory info) {
@@ -23,9 +23,9 @@ contract BLens {
         
         StabilityPool sp = bamm.SP();
         info.thusdTotal = sp.getCompoundedTHUSDDeposit(address(bamm));
-        info.ethTotal = sp.getDepositorCollateralGain(address(bamm)) + address(bamm).balance;
+        info.collateralTotal = bamm.getCollateralBalance();
 
         info.thusdUserBalance = info.thusdTotal * info.bammUserBalance / info.bammTotalSupply;
-        info.ethUserBalance = info.ethTotal * info.bammUserBalance / info.bammTotalSupply;        
+        info.collateralUserBalance = info.collateralTotal * info.bammUserBalance / info.bammTotalSupply;        
     }
 }

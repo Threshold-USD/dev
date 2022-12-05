@@ -9,14 +9,16 @@ import "./../Interfaces/IPriceFeed.sol";
 import "./../Dependencies/IERC20.sol";
 import "./../Dependencies/Ownable.sol";
 import "./../Dependencies/AggregatorV3Interface.sol";
+import "./../Dependencies/CheckContract.sol";
 
 
-contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
+contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
 
     AggregatorV3Interface public immutable priceAggregator;
     AggregatorV3Interface public immutable thusd2UsdPriceAggregator;    
     IERC20 public immutable thusdToken;
     StabilityPool immutable public SP;
+    IERC20 public immutable collateralERC20;
 
     address payable public immutable feePool;
     uint public constant MAX_FEE = 100; // 1%
@@ -31,8 +33,8 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
 
     event ParamsSet(uint A, uint fee);
     event UserDeposit(address indexed user, uint thusdAmount, uint numShares);
-    event UserWithdraw(address indexed user, uint thusdAmount, uint ethAmount, uint numShares);
-    event RebalanceSwap(address indexed user, uint thusdAmount, uint ethAmount, uint timestamp);
+    event UserWithdraw(address indexed user, uint thusdAmount, uint collateralAmount, uint numShares);
+    event RebalanceSwap(address indexed user, uint thusdAmount, uint collateralAmount, uint timestamp);
 
     constructor(
         address _priceAggregator,
@@ -40,14 +42,24 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
         address payable _SP,
         address _thusdToken,
         uint _maxDiscount,
-        address payable _feePool
+        address payable _feePool,
+        address _collateralERC20
     )
         CropJoinAdapter()
     {
+        checkContract(_priceAggregator);
+        checkContract(_thusd2UsdPriceAggregator);
+        checkContract(_thusdToken);
+        checkContract(_SP);
+        if (_collateralERC20 != address(0)) {
+            checkContract(_collateralERC20);
+        }
+
         priceAggregator = AggregatorV3Interface(_priceAggregator);
         thusd2UsdPriceAggregator = AggregatorV3Interface(_thusd2UsdPriceAggregator);
         thusdToken = IERC20(_thusdToken);
         SP = StabilityPool(_SP);
+        collateralERC20 = IERC20(_collateralERC20);
 
         feePool = _feePool;
         maxDiscount = _maxDiscount;
@@ -102,15 +114,24 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
         return chainlinkLatestAnswer * PRECISION / chainlinkFactor;
     }
 
+    function getCollateralBalance() public view returns (uint collateralValue) {
+        collateralValue = SP.getDepositorCollateralGain(address(this));
+        if (address(collateralERC20) == address(0)) {
+            collateralValue += address(this).balance;
+        } else {
+            collateralValue += collateralERC20.balanceOf(address(this));
+        }
+    }
+
     function deposit(uint thusdAmount) external {        
         // update share
         uint thusdValue = SP.getCompoundedTHUSDDeposit(address(this));
-        uint ethValue = SP.getDepositorCollateralGain(address(this)) + address(this).balance;
+        uint collateralValue = getCollateralBalance();
 
         uint price = fetchPrice();
-        require(ethValue == 0 || price > 0, "deposit: chainlink is down");
+        require(collateralValue == 0 || price > 0, "deposit: chainlink is down");
 
-        uint totalValue = thusdValue + ethValue * price / PRECISION;
+        uint totalValue = thusdValue + collateralValue * price / PRECISION;
 
         // this is in theory not reachable. if it is, better halt deposits
         // the condition is equivalent to: (totalValue = 0) ==> (total = 0)
@@ -131,10 +152,10 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
 
     function withdraw(uint numShares) external {
         uint thusdValue = SP.getCompoundedTHUSDDeposit(address(this));
-        uint ethValue = SP.getDepositorCollateralGain(address(this)) + address(this).balance;
+        uint collateralValue = getCollateralBalance();
 
         uint thusdAmount = thusdValue * numShares / total;
-        uint ethAmount = ethValue * numShares / total;
+        uint collateralAmount = collateralValue * numShares / total;
 
         // this withdraws thusdn and eth
         SP.withdrawFromSP(thusdAmount);
@@ -144,12 +165,20 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
 
         // send thusd and eth
         if(thusdAmount > 0) thusdToken.transfer(msg.sender, thusdAmount);
-        if(ethAmount > 0) {
-            (bool success, ) = msg.sender.call{ value: ethAmount }(""); // re-entry is fine here
-            require(success, "withdraw: sending ETH failed");
+        emit UserWithdraw(msg.sender, thusdAmount, collateralAmount, numShares);        
+        if(collateralAmount == 0) {
+            return;
         }
 
-        emit UserWithdraw(msg.sender, thusdAmount, ethAmount, numShares);            
+        if (address(collateralERC20) == address(0)) {
+            // ETH
+            (bool success, ) = msg.sender.call{ value: collateralAmount }(""); // re-entry is fine here
+            require(success, "withdraw: sending ETH failed");
+        } else {
+            // ERC20
+            bool success = collateralERC20.transfer(msg.sender, collateralAmount);
+            require(success, "withdraw: sending collateral failed");
+        }
     }
 
     function addBps(uint n, int bps) internal pure returns(uint) {
@@ -177,48 +206,56 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
         else newEthAmount = ethAmount;
     }
 
-    function getSwapEthAmount(uint thusdQty) public view returns(uint ethAmount, uint feeTHusdAmount) {
+    function getSwapCollateralAmount(uint thusdQty) public view returns(uint collateralAmount, uint feeTHusdAmount) {
         uint thusdBalance = SP.getCompoundedTHUSDDeposit(address(this));
-        uint ethBalance  = SP.getDepositorCollateralGain(address(this)) + address(this).balance;
+        uint collateralBalance = getCollateralBalance();
 
-        uint eth2usdPrice = fetchPrice();
-        if(eth2usdPrice == 0) return (0, 0); // chainlink is down
+        uint collateral2usdPrice = fetchPrice();
+        if(collateral2usdPrice == 0) return (0, 0); // chainlink is down
 
-        uint ethUsdValue = ethBalance * eth2usdPrice / PRECISION;
-        uint maxReturn = addBps(thusdQty * PRECISION / eth2usdPrice, int(maxDiscount));
+        uint collateralUsdValue = collateralBalance * collateral2usdPrice / PRECISION;
+        uint maxReturn = addBps(thusdQty * PRECISION / collateral2usdPrice, int(maxDiscount));
 
         uint xQty = thusdQty;
         uint xBalance = thusdBalance;
-        uint yBalance = thusdBalance + (ethUsdValue * 2);
+        uint yBalance = thusdBalance + (collateralUsdValue * 2);
         
         uint usdReturn = getReturn(xQty, xBalance, yBalance, A);
-        uint basicEthReturn = usdReturn * PRECISION / eth2usdPrice;
+        uint basicCollateralReturn = usdReturn * PRECISION / collateral2usdPrice;
 
-        basicEthReturn = compensateForTHusdDeviation(basicEthReturn);
+        basicCollateralReturn = compensateForTHusdDeviation(basicCollateralReturn);
 
-        if(ethBalance < basicEthReturn) basicEthReturn = ethBalance; // cannot give more than balance 
-        if(maxReturn < basicEthReturn) basicEthReturn = maxReturn;
+        if(collateralBalance < basicCollateralReturn) basicCollateralReturn = collateralBalance; // cannot give more than balance 
+        if(maxReturn < basicCollateralReturn) basicCollateralReturn = maxReturn;
 
-        ethAmount = basicEthReturn;
+        collateralAmount = basicCollateralReturn;
         feeTHusdAmount = addBps(thusdQty, int(fee)) - thusdQty;
     }
 
     // get ETH in return to THUSD
-    function swap(uint thusdAmount, uint minEthReturn, address payable dest) public returns(uint) {
-        (uint ethAmount, uint feeAmount) = getSwapEthAmount(thusdAmount);
+    function swap(uint thusdAmount, uint minCollateralReturn, address payable dest) public returns(uint) {
+        (uint collateralAmount, uint feeAmount) = getSwapCollateralAmount(thusdAmount);
 
-        require(ethAmount >= minEthReturn, "swap: low return");
+        require(collateralAmount >= minCollateralReturn, "swap: low return");
 
         thusdToken.transferFrom(msg.sender, address(this), thusdAmount);
         SP.provideToSP(thusdAmount - feeAmount);
 
         if(feeAmount > 0) thusdToken.transfer(feePool, feeAmount);
-        (bool success, ) = dest.call{ value: ethAmount }(""); // re-entry is fine here
-        require(success, "swap: sending ETH failed");
 
-        emit RebalanceSwap(msg.sender, thusdAmount, ethAmount, block.timestamp);
+        if (address(collateralERC20) == address(0)) {
+            // ETH
+            (bool success, ) = dest.call{ value: collateralAmount }(""); // re-entry is fine here
+            require(success, "swap: sending ETH failed");
+        } else {
+            // ERC20
+            bool success = collateralERC20.transfer(dest, collateralAmount);
+            require(success, "swap: sending collateral failed");
+        }
 
-        return ethAmount;
+        emit RebalanceSwap(msg.sender, thusdAmount, collateralAmount, block.timestamp);
+
+        return collateralAmount;
     }
 
     // kyber network reserve compatible function
@@ -239,7 +276,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable {
         uint256 srcQty,
         uint256 /* blockNumber */
     ) external view returns (uint256) {
-        (uint ethQty, ) = getSwapEthAmount(srcQty);
+        (uint ethQty, ) = getSwapCollateralAmount(srcQty);
         return ethQty * PRECISION / srcQty;
     }
 
