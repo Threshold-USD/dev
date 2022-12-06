@@ -11,6 +11,8 @@ import {
   CollateralGainTransferDetails,
   Decimal,
   Decimalish,
+  FeeFactoryFunction,
+  Fees,
   LiquidationDetails,
   LiquityReceipt,
   THUSD_MINIMUM_DEBT,
@@ -715,7 +717,7 @@ export class PopulatableEthersLiquity
       return [AddressZero, await sortedTroves.getFirst()];
     }
 
-    const totalNumberOfTrials = Math.ceil(10 * Math.sqrt(numberOfTroves));
+    const totalNumberOfTrials = Math.ceil(10 * Math.sqrt(numberOfTroves as number));
     const [firstTrials, ...restOfTrials] = generateTrials(totalNumberOfTrials);
 
     const collectApproxHint = (
@@ -791,7 +793,7 @@ export class PopulatableEthersLiquity
     ]
   > {
     const { hintHelpers } = _getContracts(this._readable.connection);
-    const price = await this._readable.getPrice(contract);
+    const price = await this._readable.getPrice(contract) as Decimal;
 
     const {
       firstRedemptionHint,
@@ -800,7 +802,7 @@ export class PopulatableEthersLiquity
     } = await hintHelpers.getRedemptionHints(amount.hex, price.hex, _redeemMaxIterations);
 
     const [
-      partialRedemptionUpperHint,
+      partialRedemptionUpperHint, 
       partialRedemptionLowerHint
     ] = partialRedemptionHintNICR.isZero()
       ? [AddressZero, AddressZero]
@@ -835,13 +837,13 @@ export class PopulatableEthersLiquity
     const { depositCollateral, borrowTHUSD } = normalizedParams;
 
     const [fees, blockTimestamp, total, price] = await Promise.all([
-      this._readable._getFeesFactory(contract),
-      this._readable._getBlockTimestamp(),
-      this._readable.getTotal(contract),
-      this._readable.getPrice(contract)
+      this._readable._getFeesFactory(contract) as Promise<FeeFactoryFunction>,
+      this._readable._getBlockTimestamp() as Promise<number>,
+      this._readable.getTotal(contract) as Promise<Trove>,
+      this._readable.getPrice(contract) as Promise<Decimal>
     ]);
 
-    const recoveryMode = total.collateralRatioIsBelowCritical(price);
+    const recoveryMode = total.collateralRatioIsBelowCritical(price as Decimal);
 
     const decayBorrowingRate = (seconds: number) =>
       fees(blockTimestamp + seconds, recoveryMode).borrowingRate();
@@ -971,10 +973,10 @@ export class PopulatableEthersLiquity
       this._readable.getTrove(contract, address),
       borrowTHUSD &&
         promiseAllValues({
-          fees: this._readable._getFeesFactory(contract),
-          blockTimestamp: this._readable._getBlockTimestamp(),
-          total: this._readable.getTotal(contract),
-          price: this._readable.getPrice(contract)
+          fees: this._readable._getFeesFactory(contract) as Promise<FeeFactoryFunction>,
+          blockTimestamp: this._readable._getBlockTimestamp() as Promise<number>,
+          total: this._readable.getTotal(contract) as Promise<Trove>,
+          price: this._readable.getPrice(contract) as Promise<Decimal>
         })
     ]);
 
@@ -982,7 +984,7 @@ export class PopulatableEthersLiquity
       feeVars
         ?.fees(
           feeVars.blockTimestamp + seconds,
-          feeVars.total.collateralRatioIsBelowCritical(feeVars.price)
+          feeVars.total.collateralRatioIsBelowCritical(feeVars.price as Decimal)
         )
         .borrowingRate();
 
@@ -1238,8 +1240,8 @@ export class PopulatableEthersLiquity
       total,
       [truncatedAmount, firstRedemptionHint, ...partialHints]
     ] = await Promise.all([
-      this._readable.getFees(contract),
-      this._readable.getTotal(contract),
+      this._readable.getFees(contract) as Promise<Fees>,
+      this._readable.getTotal(contract) as Promise<Trove>,
       this._findRedemptionHints(contract, attemptedTHUSDAmount)
     ]);
 

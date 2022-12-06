@@ -54,7 +54,9 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     const collateralSent = activePool.filters.CollateralSent();
 
     const redistributionListener = debounce((blockTag: number) => {
-      this._readable.getTotalRedistributed(contract, { blockTag }).then(onTotalRedistributedChanged);
+      this._readable.getTotalRedistributed(contract, { blockTag }).then((result) => {
+        onTotalRedistributedChanged(result as Trove)
+      });
     });
 
     const collateralSentListener = (toAddress: string, _amount: BigNumber, event: Event) => {
@@ -100,7 +102,9 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     const troveUpdated = TroveUpdated();
 
     const troveUpdatedListener = debounce((blockTag: number) => {
-      this._readable.getNumberOfTroves(contract, { blockTag }).then(onNumberOfTrovesChanged);
+      this._readable.getNumberOfTroves(contract, { blockTag }).then(
+        (result) => {onNumberOfTrovesChanged(result as number)}
+      );
     });
 
     troveManager.on(troveUpdated, troveUpdatedListener);
@@ -124,7 +128,7 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     const troveUpdated = TroveUpdated();
 
     const totalListener = debounce((blockTag: number) => {
-      this._readable.getTotal(contract, { blockTag }).then(onTotalChanged);
+      this._readable.getTotal(contract, { blockTag }).then((result) =>onTotalChanged(result as Trove));
     });
 
     troveManager.on(troveUpdated, totalListener);
@@ -182,7 +186,9 @@ export class ObservableEthersLiquity implements ObservableLiquity {
     const stabilityPoolTHUSDFilters = [transferTHUSDFromStabilityPool, transferTHUSDToStabilityPool];
 
     const stabilityPoolTHUSDListener = debounce((blockTag: number) => {
-      this._readable.getTHUSDInStabilityPool(contract, { blockTag }).then(onTHUSDInStabilityPoolChanged);
+      this._readable.getTHUSDInStabilityPool(contract, { blockTag }).then((result) => {
+        onTHUSDInStabilityPoolChanged(result as Decimal)
+      });
     });
 
     stabilityPoolTHUSDFilters.forEach(filter => thusdToken.on(filter, stabilityPoolTHUSDListener));

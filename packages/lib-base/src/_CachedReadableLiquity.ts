@@ -4,6 +4,7 @@ import { StabilityDeposit } from "./StabilityDeposit";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { ReadableLiquity, TroveListingParams } from "./ReadableLiquity";
 import { CollateralContract } from "./TransactableLiquity";
+import { IteratedCollateralContractStore } from "./LiquityStore";
 
 /** @internal */
 export type _ReadableLiquityWithExtraParamsBase<T extends unknown[]> = {
@@ -55,7 +56,7 @@ export class _CachedReadableLiquity<T extends unknown[]>
     this._cache = cache;
   }
 
-  async getTotalRedistributed(contract: CollateralContract, ...extraParams: T): Promise<Trove> {
+  async getTotalRedistributed(contract: CollateralContract, ...extraParams: T): Promise<Trove | IteratedCollateralContractStore[]> {
     return (
       this._cache.getTotalRedistributed(contract, ...extraParams) ??
       this._readable.getTotalRedistributed(contract, ...extraParams)
@@ -66,7 +67,7 @@ export class _CachedReadableLiquity<T extends unknown[]>
     contract: CollateralContract, 
     address?: string,
     ...extraParams: T
-  ): Promise<TroveWithPendingRedistribution> {
+  ): Promise<TroveWithPendingRedistribution | IteratedCollateralContractStore[]> {
     return (
       this._cache.getTroveBeforeRedistribution(contract, address, ...extraParams) ??
       this._readable.getTroveBeforeRedistribution(contract, address, ...extraParams)
@@ -75,25 +76,25 @@ export class _CachedReadableLiquity<T extends unknown[]>
 
   async getTrove(contract: CollateralContract, address?: string, ...extraParams: T): Promise<UserTrove> {
     const [troveBeforeRedistribution, totalRedistributed] = await Promise.all([
-      this.getTroveBeforeRedistribution(contract, address, ...extraParams),
-      this.getTotalRedistributed(contract, ...extraParams)
+      this.getTroveBeforeRedistribution(contract, address, ...extraParams) as Promise<TroveWithPendingRedistribution>,
+      this.getTotalRedistributed(contract, ...extraParams) as Promise<Trove>
     ]);
 
-    return troveBeforeRedistribution.applyRedistribution(totalRedistributed);
+    return troveBeforeRedistribution.applyRedistribution(totalRedistributed as Trove);
   }
 
-  async getNumberOfTroves(contract: CollateralContract, ...extraParams: T): Promise<number> {
+  async getNumberOfTroves(contract: CollateralContract, ...extraParams: T): Promise<number | IteratedCollateralContractStore[]> {
     return (
       this._cache.getNumberOfTroves(contract, ...extraParams) ??
       this._readable.getNumberOfTroves(contract, ...extraParams)
     );
   }
 
-  async getPrice(contract: CollateralContract, ...extraParams: T): Promise<Decimal> {
+  async getPrice(contract: CollateralContract, ...extraParams: T): Promise<Decimal | IteratedCollateralContractStore[]> {
     return this._cache.getPrice(contract, ...extraParams) ?? this._readable.getPrice(contract, ...extraParams);
   }
 
-  async getTotal(contract: CollateralContract, ...extraParams: T): Promise<Trove> {
+  async getTotal(contract: CollateralContract, ...extraParams: T): Promise<Trove | IteratedCollateralContractStore[]> {
     return this._cache.getTotal(contract, ...extraParams) ?? this._readable.getTotal(contract, ...extraParams);
   }
 
@@ -104,7 +105,7 @@ export class _CachedReadableLiquity<T extends unknown[]>
     );
   }
 
-  async getTHUSDInStabilityPool(contract: CollateralContract, ...extraParams: T): Promise<Decimal> {
+  async getTHUSDInStabilityPool(contract: CollateralContract, ...extraParams: T): Promise<Decimal | IteratedCollateralContractStore[]> {
     return (
       this._cache.getTHUSDInStabilityPool(contract, ...extraParams) ??
       this._readable.getTHUSDInStabilityPool(contract, ...extraParams)
@@ -125,7 +126,7 @@ export class _CachedReadableLiquity<T extends unknown[]>
   //  );
   //}
 
-  async getPCVBalance(contract: CollateralContract, ...extraParams: T): Promise<Decimal> {
+  async getPCVBalance(contract: CollateralContract, ...extraParams: T): Promise<Decimal | IteratedCollateralContractStore[]> {
     return (
       this._cache.getPCVBalance(contract, ...extraParams) ??
       this._readable.getPCVBalance(contract, ...extraParams)
@@ -139,14 +140,14 @@ export class _CachedReadableLiquity<T extends unknown[]>
     );
   }
 
-  async getErc20TokenBalance(contract: CollateralContract, address?: string, ...extraParams: T): Promise<Decimal> {
+  async getErc20TokenBalance(contract: CollateralContract, address?: string, ...extraParams: T): Promise<Decimal | IteratedCollateralContractStore[]> {
     return (
       this._cache.getErc20TokenBalance(contract, address, ...extraParams) ??
       this._readable.getErc20TokenBalance(contract, address, ...extraParams)
     );
   }
 
-  async getErc20TokenAllowance(contract: CollateralContract, address?: string, ...extraParams: T): Promise<Decimal> {
+  async getErc20TokenAllowance(contract: CollateralContract, address?: string, ...extraParams: T): Promise<Decimal | IteratedCollateralContractStore[]> {
     return (
       this._cache.getErc20TokenAllowance(contract, address, ...extraParams) ??
       this._readable.getErc20TokenAllowance(contract, address, ...extraParams)
@@ -178,7 +179,7 @@ export class _CachedReadableLiquity<T extends unknown[]>
     ]);
 
     if (totalRedistributed) {
-      return troves.map(trove => trove.applyRedistribution(totalRedistributed));
+      return troves.map(trove => trove.applyRedistribution(totalRedistributed as Trove));
     } else {
       return troves;
     }

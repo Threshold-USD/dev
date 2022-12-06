@@ -5,6 +5,13 @@ import { StabilityDeposit } from "./StabilityDeposit";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { Fees } from "./Fees";
 import { MintList } from "./TransactableLiquity";
+import { CollateralContract } from "./TransactableLiquity";
+
+export type FeesFactory = (blockTimestamp: number, recoveryMode: boolean) => Fees
+export type BlockTagObject = { blockTag: number | undefined };
+export type StorePromises = Promise<number | Decimal | Trove | TroveWithPendingRedistribution | FeesFactory | IteratedCollateralContractStore[] | FeeFactoryFunction>
+export type IteratedCollateralContractStore = Record<string, CollateralContract | StorePromises | Decimal>
+export type FeeFactoryFunction = (blockTimestamp: number, recoveryMode: boolean) => Fees
 
 /**
  * State variables read from the blockchain.
@@ -14,7 +21,7 @@ import { MintList } from "./TransactableLiquity";
 export interface LiquityStoreBaseState {
 
   /** Number of Troves that are currently open. */
-  numberOfTroves: number;
+  numberOfTroves: number | IteratedCollateralContractStore[] ;
 
   /** User's native currency balance (e.g. Ether). */
   accountBalance: Decimal;
@@ -23,10 +30,10 @@ export interface LiquityStoreBaseState {
   thusdBalance: Decimal;
 
   /** User's collateral erc20 token balance. */
-  erc20TokenBalance: Decimal;
+  erc20TokenBalance: Decimal | IteratedCollateralContractStore[];
 
   /** The borrower operation's allowance of user's collateral erc20 tokens. */
-  erc20TokenAllowance: Decimal;
+  erc20TokenAllowance: Decimal | IteratedCollateralContractStore[];
 
   /**
    * Amount of leftover collateral available for withdrawal to the user.
@@ -35,22 +42,22 @@ export interface LiquityStoreBaseState {
    * See {@link ReadableLiquity.getCollateralSurplusBalance | getCollateralSurplusBalance()} for
    * more information.
    */
-  collateralSurplusBalance: Decimal;
+  collateralSurplusBalance: Decimal | IteratedCollateralContractStore[];
 
   /** Current price of the native currency (e.g. Ether) in USD. */
-  price: Decimal;
+  price: Decimal | IteratedCollateralContractStore[];
 
   /** Total amount of thUSD currently deposited in the Stability Pool. */
-  thusdInStabilityPool: Decimal;
+  thusdInStabilityPool: Decimal | IteratedCollateralContractStore[];
 
   /** Check if a specific BorrowersOperations contract is included in the thUSD mintList. */
   isAllowedToMint: boolean;
 
   /** Total amount of LUSD currently deposited in the PCV Pool. */
-  pcvBalance: Decimal;
+  pcvBalance: Decimal | IteratedCollateralContractStore[];
 
   /** Total collateral and debt in the Liquity system. */
-  total: Trove;
+  total: Trove | IteratedCollateralContractStore[];
 
   /** Array of BorrowersOperations contract addresses */
   mintList: MintList;
@@ -61,7 +68,7 @@ export interface LiquityStoreBaseState {
    * @remarks
    * Needed when dealing with instances of {@link TroveWithPendingRedistribution}.
    */
-  totalRedistributed: Trove;
+  totalRedistributed: Trove | IteratedCollateralContractStore[];
 
   /**
    * User's Trove in its state after the last direct modification.
@@ -70,13 +77,13 @@ export interface LiquityStoreBaseState {
    * The current state of the user's Trove can be found as
    * {@link LiquityStoreDerivedState.trove | trove}.
    */
-  troveBeforeRedistribution: TroveWithPendingRedistribution;
+  troveBeforeRedistribution: TroveWithPendingRedistribution | IteratedCollateralContractStore[];
 
   /** User's stability deposit. */
-  stabilityDeposit: StabilityDeposit;
+  stabilityDeposit: StabilityDeposit | IteratedCollateralContractStore[];
 
   /** @internal */
-  _feesInNormalMode: Fees;
+  _feesInNormalMode: Fees | IteratedCollateralContractStore[];
 
   /** @internal */
   _riskiestTroveBeforeRedistribution: TroveWithPendingRedistribution;
@@ -329,15 +336,15 @@ export abstract class LiquityStore<T = unknown> {
       erc20TokenBalance: this._updateIfChanged(
         eq,
         "erc20TokenBalance",
-        baseState.erc20TokenBalance,
-        baseStateUpdate.erc20TokenBalance
+        baseState.erc20TokenBalance as Decimal,
+        baseStateUpdate.erc20TokenBalance as Decimal
       ),
 
       erc20TokenAllowance: this._updateIfChanged(
         eq,
         "erc20TokenAllowance",
-        baseState. erc20TokenAllowance,
-        baseStateUpdate.erc20TokenAllowance
+        baseState.erc20TokenAllowance as Decimal,
+        baseStateUpdate.erc20TokenAllowance as Decimal
       ),
 
       collateralSurplusBalance: this._updateIfChanged(
@@ -346,8 +353,8 @@ export abstract class LiquityStore<T = unknown> {
         baseState.collateralSurplusBalance,
         baseStateUpdate.collateralSurplusBalance
       ),
-
-      price: this._updateIfChanged(eq, "price", baseState.price, baseStateUpdate.price),
+        
+      price: this._updateIfChanged(eq, "price", baseState.price as Decimal, baseStateUpdate.price as Decimal),
 
       thusdInStabilityPool: this._updateIfChanged(
         eq,
@@ -403,7 +410,7 @@ export abstract class LiquityStore<T = unknown> {
     price,
     _riskiestTroveBeforeRedistribution
   }: LiquityStoreBaseState): LiquityStoreDerivedState {
-    const fees = _feesInNormalMode._setRecoveryMode(total.collateralRatioIsBelowCritical(price));
+    const fees = _feesInNormalMode._setRecoveryMode(total.collateralRatioIsBelowCritical(price as Decimal));
 
     return {
       trove: troveBeforeRedistribution.applyRedistribution(totalRedistributed),
@@ -412,7 +419,7 @@ export abstract class LiquityStore<T = unknown> {
       redemptionRate: fees.redemptionRate(),
       haveUndercollateralizedTroves: _riskiestTroveBeforeRedistribution
         .applyRedistribution(totalRedistributed)
-        .collateralRatioIsBelowMinimum(price)
+        .collateralRatioIsBelowMinimum(price as Decimal)
     };
   }
 

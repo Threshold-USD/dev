@@ -6,7 +6,9 @@ import {
   Decimal,
   Decimalish,
   FailedReceipt,
+  FeeFactoryFunction,
   Fees,
+  IteratedCollateralContractStore,
   LiquidationDetails,
   LiquityStore,
   RedemptionDetails,
@@ -157,7 +159,7 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTotalRedistributed} */
-  getTotalRedistributed(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Trove> {
+  getTotalRedistributed(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Trove | IteratedCollateralContractStore[]> {
     return this._readable.getTotalRedistributed(contract, overrides);
   }
 
@@ -166,7 +168,7 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     contract: CollateralContract,
     address?: string,
     overrides?: EthersCallOverrides
-  ): Promise<TroveWithPendingRedistribution> {
+  ): Promise<TroveWithPendingRedistribution | IteratedCollateralContractStore[]> {
     return this._readable.getTroveBeforeRedistribution(contract, address, overrides);
   }
 
@@ -176,12 +178,12 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getNumberOfTroves} */
-  getNumberOfTroves(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<number> {
+  getNumberOfTroves(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<number | IteratedCollateralContractStore[]> {
     return this._readable.getNumberOfTroves(contract, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getPrice} */
-  getPrice(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal> {
+  getPrice(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal | IteratedCollateralContractStore[]> {
     return this._readable.getPrice(contract, overrides);
   }
 
@@ -196,7 +198,7 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTotal} */
-  getTotal(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Trove> {
+  getTotal(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Trove | IteratedCollateralContractStore[]> {
     return this._readable.getTotal(contract, overrides);
   }
 
@@ -206,7 +208,7 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTHUSDInStabilityPool} */
-  getTHUSDInStabilityPool(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal> {
+  getTHUSDInStabilityPool(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal | IteratedCollateralContractStore[]> {
     return this._readable.getTHUSDInStabilityPool(contract, overrides);
   }
 
@@ -216,7 +218,7 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getPCVBalance} */
-  getPCVBalance(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal> {
+  getPCVBalance(contract: CollateralContract, overrides?: EthersCallOverrides): Promise<Decimal | IteratedCollateralContractStore[]> {
     return this._readable.getPCVBalance(contract, overrides);
   }
 
@@ -226,12 +228,12 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getErc20TokenBalance} */
-  getErc20TokenBalance(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
+  getErc20TokenBalance(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<Decimal | IteratedCollateralContractStore[]> {
     return this._readable.getErc20TokenBalance(contract, address, overrides);
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getErc20TokenAllowance} */
-  getErc20TokenAllowance(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<Decimal> {
+  getErc20TokenAllowance(contract: CollateralContract, address?: string, overrides?: EthersCallOverrides): Promise<Decimal | IteratedCollateralContractStore[]> {
     return this._readable.getErc20TokenAllowance(contract, address, overrides);
   }
 
@@ -263,7 +265,7 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   _getFeesFactory(
     contract: CollateralContract, 
     overrides?: EthersCallOverrides
-  ): Promise<(blockTimestamp: number, recoveryMode: boolean) => Fees> {
+  ): Promise<FeeFactoryFunction | IteratedCollateralContractStore[]> {
     return this._readable._getFeesFactory(contract, overrides);
   }
 

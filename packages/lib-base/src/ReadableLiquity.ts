@@ -1,4 +1,5 @@
 import { Decimal } from "./Decimal";
+import { IteratedCollateralContractStore } from "./LiquityStore";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { CollateralContract } from "./TransactableLiquity";
 import { StabilityDeposit } from "./StabilityDeposit";
@@ -45,7 +46,7 @@ export interface ReadableLiquity {
    * @remarks
    * Needed when dealing with instances of {@link @liquity/lib-base#TroveWithPendingRedistribution}.
    */
-  getTotalRedistributed(contract: CollateralContract): Promise<Trove>;
+  getTotalRedistributed(contract: CollateralContract): Promise<Trove | IteratedCollateralContractStore[]>;
 
   /**
    * Get a Trove in its state after the last direct modification.
@@ -56,7 +57,7 @@ export interface ReadableLiquity {
    * The current state of a Trove can be fetched using
    * {@link @liquity/lib-base#ReadableLiquity.getTrove | getTrove()}.
    */
-  getTroveBeforeRedistribution(contract: CollateralContract, address?: string): Promise<TroveWithPendingRedistribution>;
+  getTroveBeforeRedistribution(contract: CollateralContract, address?: string): Promise<TroveWithPendingRedistribution | IteratedCollateralContractStore[]>;
 
   /**
    * Get the current state of a Trove.
@@ -68,17 +69,17 @@ export interface ReadableLiquity {
   /**
    * Get number of Troves that are currently open.
    */
-  getNumberOfTroves(contract: CollateralContract): Promise<number>;
+  getNumberOfTroves(contract: CollateralContract): Promise<number | IteratedCollateralContractStore[]>;
 
   /**
    * Get the current price of the native currency (e.g. Ether) in USD.
    */
-  getPrice(contract: CollateralContract): Promise<Decimal>;
+  getPrice(contract: CollateralContract): Promise<Decimal | IteratedCollateralContractStore[]>;
 
   /**
    * Get the total amount of collateral and debt in the Liquity system.
    */
-  getTotal(contract: CollateralContract): Promise<Trove>;
+  getTotal(contract: CollateralContract): Promise<Trove | IteratedCollateralContractStore[]>;
 
   /**
    * Get the current state of a Stability Deposit.
@@ -90,7 +91,7 @@ export interface ReadableLiquity {
   /**
    * Get the total amount of thUSD currently deposited in the Stability Pool.
    */
-  getTHUSDInStabilityPool(contract: CollateralContract): Promise<Decimal>;
+  getTHUSDInStabilityPool(contract: CollateralContract): Promise<Decimal | IteratedCollateralContractStore[]>;
 
   /**
    * Check if a specific BorrowersOperations contract is included in the thUSD mintList.
@@ -100,7 +101,7 @@ export interface ReadableLiquity {
   /**
    * Get the total amount of thUSD currently deposited in the PCV Pool.
    */
-  getPCVBalance(contract: CollateralContract): Promise<Decimal>;
+  getPCVBalance(contract: CollateralContract): Promise<Decimal | IteratedCollateralContractStore[]>;
 
   /**
    * Get the amount of thUSD held by an address.
@@ -114,14 +115,14 @@ export interface ReadableLiquity {
    *
    * @param address - Address whose balance should be retrieved.
    */
-  getErc20TokenBalance(contract: CollateralContract, address?: string): Promise<Decimal>;
+  getErc20TokenBalance(contract: CollateralContract, address?: string): Promise<Decimal | IteratedCollateralContractStore[]>;
 
   /**
    * Get the Borrowers Operations contract's allowance of a holder's Erc20 tokens.
    *
    * @param address - Address holding the Erc20 tokens.
    */
-  getErc20TokenAllowance(contract: CollateralContract, address?: string): Promise<Decimal>;
+  getErc20TokenAllowance(contract: CollateralContract, address?: string): Promise<Decimal | IteratedCollateralContractStore[]>;
 
   /**
    * Get the amount of leftover collateral available for withdrawal by an address.

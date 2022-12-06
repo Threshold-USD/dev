@@ -725,7 +725,7 @@ export class Trove {
 }
 
 /** @internal */
-export const _emptyTrove = (contractName: _LiquityContractsKeys) => new Trove(contractName);
+export const _emptyTrove = (contractName: _LiquityContractsKeys) => new Trove(contractName as _LiquityContractsKeys);
 
 /**
  * Represents whether a UserTrove is open or not, or why it was closed.
