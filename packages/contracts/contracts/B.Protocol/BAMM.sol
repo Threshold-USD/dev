@@ -21,27 +21,27 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
     IERC20 public immutable collateralERC20;
 
     address payable public immutable feePool;
-    uint public constant MAX_FEE = 100; // 1%
-    uint public fee = 0; // fee in bps
-    uint public A = 20;
-    uint public constant MIN_A = 20;
-    uint public constant MAX_A = 200;    
+    uint256 public constant MAX_FEE = 100; // 1%
+    uint256 public fee = 0; // fee in bps
+    uint256 public A = 20;
+    uint256 public constant MIN_A = 20;
+    uint256 public constant MAX_A = 200;    
 
-    uint public immutable maxDiscount; // max discount in bips
+    uint256 public immutable maxDiscount; // max discount in bips
 
-    uint constant public PRECISION = 1e18;
+    uint256 constant public PRECISION = 1e18;
 
-    event ParamsSet(uint A, uint fee);
-    event UserDeposit(address indexed user, uint thusdAmount, uint numShares);
-    event UserWithdraw(address indexed user, uint thusdAmount, uint collateralAmount, uint numShares);
-    event RebalanceSwap(address indexed user, uint thusdAmount, uint collateralAmount, uint timestamp);
+    event ParamsSet(uint256 A, uint256 fee);
+    event UserDeposit(address indexed user, uint256 thusdAmount, uint256 numShares);
+    event UserWithdraw(address indexed user, uint256 thusdAmount, uint256 collateralAmount, uint256 numShares);
+    event RebalanceSwap(address indexed user, uint256 thusdAmount, uint256 collateralAmount, uint256 timestamp);
 
     constructor(
         address _priceAggregator,
         address _thusd2UsdPriceAggregator,
         address payable _SP,
         address _thusdToken,
-        uint _maxDiscount,
+        uint256 _maxDiscount,
         address payable _feePool,
         address _collateralERC20
     )
@@ -65,7 +65,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         maxDiscount = _maxDiscount;
     }
 
-    function setParams(uint _A, uint _fee) external onlyOwner {
+    function setParams(uint256 _A, uint256 _fee) external onlyOwner {
         require(_fee <= MAX_FEE, "setParams: fee is too big");
         require(_A >= MIN_A, "setParams: A too small");
         require(_A <= MAX_A, "setParams: A too big");
@@ -76,10 +76,10 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         emit ParamsSet(_A, _fee);
     }
 
-    function fetchPrice() public view returns(uint) {
-        uint chainlinkDecimals;
-        uint chainlinkLatestAnswer;
-        uint chainlinkTimestamp;
+    function fetchPrice() public view returns(uint256) {
+        uint256 chainlinkDecimals;
+        uint256 chainlinkLatestAnswer;
+        uint256 chainlinkTimestamp;
 
         // First, try to get current decimal precision:
         try priceAggregator.decimals() returns (uint8 decimals) {
@@ -101,7 +101,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         )
         {
             // If call to Chainlink succeeds, return the response and success = true
-            chainlinkLatestAnswer = uint(answer);
+            chainlinkLatestAnswer = uint256(answer);
             chainlinkTimestamp = timestamp;
         } catch {
             // If call to Chainlink aggregator reverts, return a zero response with success = false
@@ -110,11 +110,11 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
 
         if(chainlinkTimestamp + 1 hours < block.timestamp) return 0; // price is down
 
-        uint chainlinkFactor = 10 ** chainlinkDecimals;
+        uint256 chainlinkFactor = 10 ** chainlinkDecimals;
         return chainlinkLatestAnswer * PRECISION / chainlinkFactor;
     }
 
-    function getCollateralBalance() public view returns (uint collateralValue) {
+    function getCollateralBalance() public view returns (uint256 collateralValue) {
         collateralValue = SP.getDepositorCollateralGain(address(this));
         if (address(collateralERC20) == address(0)) {
             collateralValue += address(this).balance;
@@ -123,21 +123,21 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         }
     }
 
-    function deposit(uint thusdAmount) external {        
+    function deposit(uint256 thusdAmount) external {        
         // update share
-        uint thusdValue = SP.getCompoundedTHUSDDeposit(address(this));
-        uint collateralValue = getCollateralBalance();
+        uint256 thusdValue = SP.getCompoundedTHUSDDeposit(address(this));
+        uint256 collateralValue = getCollateralBalance();
 
-        uint price = fetchPrice();
+        uint256 price = fetchPrice();
         require(collateralValue == 0 || price > 0, "deposit: chainlink is down");
 
-        uint totalValue = thusdValue + collateralValue * price / PRECISION;
+        uint256 totalValue = thusdValue + collateralValue * price / PRECISION;
 
         // this is in theory not reachable. if it is, better halt deposits
         // the condition is equivalent to: (totalValue = 0) ==> (total = 0)
         require(totalValue > 0 || total == 0, "deposit: system is rekt");
 
-        uint newShare = PRECISION;
+        uint256 newShare = PRECISION;
         if(total > 0) newShare = total * thusdAmount / totalValue;
 
         // deposit
@@ -150,12 +150,12 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         emit UserDeposit(msg.sender, thusdAmount, newShare);        
     }
 
-    function withdraw(uint numShares) external {
-        uint thusdValue = SP.getCompoundedTHUSDDeposit(address(this));
-        uint collateralValue = getCollateralBalance();
+    function withdraw(uint256 numShares) external {
+        uint256 thusdValue = SP.getCompoundedTHUSDDeposit(address(this));
+        uint256 collateralValue = getCollateralBalance();
 
-        uint thusdAmount = thusdValue * numShares / total;
-        uint collateralAmount = collateralValue * numShares / total;
+        uint256 thusdAmount = thusdValue * numShares / total;
+        uint256 collateralAmount = collateralValue * numShares / total;
 
         // this withdraws thusdn and eth
         SP.withdrawFromSP(thusdAmount);
@@ -181,23 +181,23 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         }
     }
 
-    function addBps(uint n, int bps) internal pure returns(uint) {
+    function addBps(uint256 n, int bps) internal pure returns(uint) {
         require(bps <= 10000, "reduceBps: bps exceeds max");
         require(bps >= -10000, "reduceBps: bps exceeds min");
 
-        return n * uint(10000 + bps) / 10000;
+        return n * uint256(10000 + bps) / 10000;
     }
 
-    function compensateForTHusdDeviation(uint ethAmount) public view returns(uint newEthAmount) {
-        uint chainlinkDecimals;
-        uint chainlinkLatestAnswer;
+    function compensateForTHusdDeviation(uint256 ethAmount) public view returns(uint256 newEthAmount) {
+        uint256 chainlinkDecimals;
+        uint256 chainlinkLatestAnswer;
 
         // get current decimal precision:
         chainlinkDecimals = thusd2UsdPriceAggregator.decimals();
 
         // Secondly, try to get latest price data:
         (,int256 answer,,,) = thusd2UsdPriceAggregator.latestRoundData();
-        chainlinkLatestAnswer = uint(answer);
+        chainlinkLatestAnswer = uint256(answer);
 
         // adjust only if 1 thUSD > 1 USDC. If thUSD < USD, then we give a discount, and rebalance will happen anw
         if(chainlinkLatestAnswer > 10 ** chainlinkDecimals ) {
@@ -206,22 +206,22 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         else newEthAmount = ethAmount;
     }
 
-    function getSwapCollateralAmount(uint thusdQty) public view returns(uint collateralAmount, uint feeTHusdAmount) {
-        uint thusdBalance = SP.getCompoundedTHUSDDeposit(address(this));
-        uint collateralBalance = getCollateralBalance();
+    function getSwapCollateralAmount(uint256 thusdQty) public view returns(uint256 collateralAmount, uint256 feeTHusdAmount) {
+        uint256 thusdBalance = SP.getCompoundedTHUSDDeposit(address(this));
+        uint256 collateralBalance = getCollateralBalance();
 
-        uint collateral2usdPrice = fetchPrice();
+        uint256 collateral2usdPrice = fetchPrice();
         if(collateral2usdPrice == 0) return (0, 0); // chainlink is down
 
-        uint collateralUsdValue = collateralBalance * collateral2usdPrice / PRECISION;
-        uint maxReturn = addBps(thusdQty * PRECISION / collateral2usdPrice, int(maxDiscount));
+        uint256 collateralUsdValue = collateralBalance * collateral2usdPrice / PRECISION;
+        uint256 maxReturn = addBps(thusdQty * PRECISION / collateral2usdPrice, int(maxDiscount));
 
-        uint xQty = thusdQty;
-        uint xBalance = thusdBalance;
-        uint yBalance = thusdBalance + (collateralUsdValue * 2);
+        uint256 xQty = thusdQty;
+        uint256 xBalance = thusdBalance;
+        uint256 yBalance = thusdBalance + (collateralUsdValue * 2);
         
-        uint usdReturn = getReturn(xQty, xBalance, yBalance, A);
-        uint basicCollateralReturn = usdReturn * PRECISION / collateral2usdPrice;
+        uint256 usdReturn = getReturn(xQty, xBalance, yBalance, A);
+        uint256 basicCollateralReturn = usdReturn * PRECISION / collateral2usdPrice;
 
         basicCollateralReturn = compensateForTHusdDeviation(basicCollateralReturn);
 
@@ -233,8 +233,8 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
     }
 
     // get ETH in return to THUSD
-    function swap(uint thusdAmount, uint minCollateralReturn, address payable dest) public returns(uint) {
-        (uint collateralAmount, uint feeAmount) = getSwapCollateralAmount(thusdAmount);
+    function swap(uint256 thusdAmount, uint256 minCollateralReturn, address payable dest) public returns(uint) {
+        (uint256 collateralAmount, uint256 feeAmount) = getSwapCollateralAmount(thusdAmount);
 
         require(collateralAmount >= minCollateralReturn, "swap: low return");
 
@@ -276,7 +276,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         uint256 srcQty,
         uint256 /* blockNumber */
     ) external view returns (uint256) {
-        (uint ethQty, ) = getSwapCollateralAmount(srcQty);
+        (uint256 ethQty, ) = getSwapCollateralAmount(srcQty);
         return ethQty * PRECISION / srcQty;
     }
 

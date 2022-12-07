@@ -4,20 +4,20 @@ pragma solidity ^0.8.10;
 
 contract PriceFormula {
 
-    function getSumFixedPoint(uint x, uint y, uint A) public pure returns(uint) {
+    function getSumFixedPoint(uint256 x, uint256 y, uint256 A) public pure returns(uint) {
         if(x == 0 && y == 0) return 0;
 
-        uint sum = x + y;
+        uint256 sum = x + y;
 
-        for(uint i = 0 ; i < 255 ; i++) {
-            uint dP = sum;
+        for(uint256 i = 0 ; i < 255 ; i++) {
+            uint256 dP = sum;
             dP = dP * sum / ((x * 2) + 1);
             dP = dP * sum / ((y * 2) + 1);
 
-            uint prevSum = sum;
+            uint256 prevSum = sum;
 
-            uint n = (A * 2 * (x + y) + (dP * 2)) * sum;
-            uint d = (A * 2 - 1) * sum;
+            uint256 n = (A * 2 * (x + y) + (dP * 2)) * sum;
+            uint256 d = (A * 2 - 1) * sum;
             sum = n / (d + dP * 3);
 
             if(sum <= prevSum + 1 && prevSum <= sum + 1) break;
@@ -26,19 +26,19 @@ contract PriceFormula {
         return sum;
     }
 
-    function getReturn(uint xQty, uint xBalance, uint yBalance, uint A) public pure returns(uint) {
-        uint sum = getSumFixedPoint(xBalance, yBalance, A);
+    function getReturn(uint256 xQty, uint256 xBalance, uint256 yBalance, uint256 A) public pure returns(uint256) {
+        uint256 sum = getSumFixedPoint(xBalance, yBalance, A);
 
-        uint c = sum * sum / ((xQty + xBalance) * 2);
+        uint256 c = sum * sum / ((xQty + xBalance) * 2);
         c = c * sum / (A * 4);
-        uint b = (xQty + xBalance) + (sum / (A * 2));
-        uint yPrev = 0;
-        uint y = sum;
+        uint256 b = (xQty + xBalance) + (sum / (A * 2));
+        uint256 yPrev = 0;
+        uint256 y = sum;
 
-        for(uint i = 0 ; i < 255 ; i++) {
+        for(uint256 i = 0 ; i < 255 ; i++) {
             yPrev = y;
-            uint n = y * y + c;
-            uint d = y * 2 + b - sum; 
+            uint256 n = y * y + c;
+            uint256 d = y * 2 + b - sum; 
             y = n / d;
 
             if(y <= yPrev + 1 && yPrev <= y + 1) break;

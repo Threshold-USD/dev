@@ -9,7 +9,7 @@ import "./../StabilityPool.sol";
 contract CropJoinAdapter is CropJoin {
     string constant public name = "B.AMM THUSD-ETH";
     string constant public symbol = "THUSDETH";
-    uint constant public decimals = 18;
+    uint256 constant public decimals = 18;
 
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
 
@@ -31,12 +31,12 @@ contract CropJoinAdapter is CropJoin {
         balance = stake[owner];
     }
 
-    function mint(address to, uint value) virtual internal {
+    function mint(address to, uint256 value) virtual internal {
         join(to, value);
         emit Transfer(address(0), to, value);
     }
 
-    function burn(address owner, uint value) virtual internal {
+    function burn(address owner, uint256 value) virtual internal {
         exit(owner, value);
         emit Transfer(owner, address(0), value);        
     }
@@ -47,19 +47,19 @@ contract Dummy {
 }
 
 contract DummyGem is Dummy {
-    function transfer(address, uint) external pure returns(bool) {
+    function transfer(address, uint256) external pure returns(bool) {
         return true;
     }
 
-    function transferFrom(address, address, uint) external pure returns(bool) {
+    function transferFrom(address, address, uint256) external pure returns(bool) {
         return true;
     }
 
-    function decimals() external pure returns(uint) {
+    function decimals() external pure returns(uint256) {
         return 18;
     }  
 
-    function balanceOf(address) public view returns (uint256 balance) {
+    function balanceOf(address) public pure returns (uint256 balance) {
         balance = 0;
     }
 }

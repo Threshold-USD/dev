@@ -7,14 +7,14 @@ import "./BAMM.sol";
 
 contract BLens {
     struct UserInfo {
-        uint bammUserBalance;
-        uint bammTotalSupply;
+        uint256 bammUserBalance;
+        uint256 bammTotalSupply;
 
-        uint thusdUserBalance;
-        uint collateralUserBalance;
+        uint256 thusdUserBalance;
+        uint256 collateralUserBalance;
 
-        uint thusdTotal;
-        uint collateralTotal;
+        uint256 thusdTotal;
+        uint256 collateralTotal;
     }
 
     function getUserInfo(address user, BAMM bamm) external view returns(UserInfo memory info) {

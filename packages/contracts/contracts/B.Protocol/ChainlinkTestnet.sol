@@ -11,36 +11,40 @@ import "./../TestContracts/PriceFeedTestnet.sol";
 contract ChainlinkTestnet {
     
     PriceFeedTestnet feed;
-    uint price = 0;
-    uint time = 0;
+    uint256 price = 0;
+    uint256 time = 0;
 
     constructor(PriceFeedTestnet _feed) {
         feed = _feed;
     }
 
-    function decimals() external pure returns(uint) {
+    function decimals() external pure returns(uint256) {
         return 18;
     }
 
-    function setTimestamp(uint _time) external {
+    function setTimestamp(uint256 _time) external {
         time = _time;
     }
 
-    function setPrice(uint _price) external {
+    function setPrice(uint256 _price) external {
         price = _price;
     }
 
     function latestRoundData() external view returns
      (
-        uint80 /* roundId */,
+        uint80 roundId,
         int256 answer,
-        uint256 /* startedAt */,
+        uint256 startedAt,
         uint256 timestamp,
-        uint80 /* answeredInRound */
+        uint80 answeredInRound
     )
     {
-        if(price > 0) answer = int(price);
-        else answer = int(feed.getPrice());
+        roundId = 0;
+        startedAt = 0;
+        answeredInRound = 0;
+
+        if(price > 0) answer = int256(price);
+        else answer = int256(feed.getPrice());
         
         if(time == 0 ) timestamp = block.timestamp;
         else timestamp = time;
