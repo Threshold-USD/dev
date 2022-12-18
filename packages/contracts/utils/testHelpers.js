@@ -1207,6 +1207,23 @@ class TestHelper {
     await this.fastForwardTime(delay, web3.currentProvider)
     await contracts.thusdToken.finalizeRevokeMintList({ from: owner })
   }
+
+  static async sendCollateral(erc20, sender, recipient, valueToSend) {
+    // send eth or erc20
+    if (erc20.address === this.ZERO_ADDRESS) {
+      await web3.eth.sendTransaction({from: sender, to: recipient, value: valueToSend})
+    } else {
+      await erc20.transfer(recipient, valueToSend)
+    }
+  }
+
+  static async getCollateralBalance(erc20, address) {
+    if (erc20.address === this.ZERO_ADDRESS) {
+      return web3.utils.toBN(await web3.eth.getBalance(address))
+    } else {
+      return await erc20.balanceOf(address)
+    }
+  }
 }
 
 TestHelper.ZERO_ADDRESS = '0x' + '0'.repeat(40)

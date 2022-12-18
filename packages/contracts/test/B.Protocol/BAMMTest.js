@@ -40,8 +40,11 @@ contract('BAMM', async accounts => {
       let lens
       let chainlink
       let thusdChainlink
+      let erc20
       
       const openTrove = async (params) => th.openTrove(contracts, params)
+      const sendCollateral = async (recipient, valueToSend) => th.sendCollateral(erc20, whale, recipient, valueToSend)
+      const getCollateralBalance = async (address) => th.getCollateralBalance(erc20, address)
 
       beforeEach(async () => {
         contracts = await deploymentHelper.deployLiquityCore(accounts)
@@ -81,23 +84,6 @@ contract('BAMM', async accounts => {
 
         await thusdChainlink.setPrice(dec(1,18)) // 1 THUSD = 1 USD
       })
-
-      async function sendCollateral(recipient, valueToSend) {
-        // send eth or erc20
-        if (!isCollateralERC20) {
-          await web3.eth.sendTransaction({from: whale, to: recipient, value: valueToSend})
-        } else {
-          await erc20.transfer(recipient, valueToSend)
-        }
-      }
-
-      async function getCollateralBalance(address) {
-        if (!isCollateralERC20) {
-          return await web3.eth.getBalance(address)
-        } else {
-          return (await erc20.balanceOf(address)).toString()
-        }
-      }
 
       // --- provideToSP() ---
       // increases recorded THUSD at Stability Pool
@@ -215,7 +201,7 @@ contract('BAMM', async accounts => {
 
         const swapBalance = await getCollateralBalance(dest)
 
-        assert.equal(swapBalance, ammExpectedCollateral.collateralAmount)
+        assert.isTrue(swapBalance.eq(ammExpectedCollateral.collateralAmount))
       })
 
       it("test basic shares allocation", async () => {
@@ -409,7 +395,7 @@ contract('BAMM', async accounts => {
         // send some ETH/ERC20 to simulate partial rebalance
         await sendCollateral(bamm.address, toBN(dec(1, 18)))
         const balance = await getCollateralBalance(bamm.address)
-        assert.equal(balance, toBN(dec(1, 18)).toString())
+        assert.isTrue(balance.eq(toBN(dec(1, 18))))
 
         const totalCollateral = collateralGains.add(toBN(dec(1, 18)))
         const totaTHUsd = toBN(dec(6000, 18)).add(totalCollateral.mul(toBN(105)))
@@ -419,14 +405,14 @@ contract('BAMM', async accounts => {
 
         assert.equal((await bamm.balanceOf(A)).toString(), (await bamm.balanceOf(B)).toString())
 
-        const collateralBalanceBefore = toBN(await getCollateralBalance(A))
+        const collateralBalanceBefore = await getCollateralBalance(A)
         const THUSDBefore = await thusdToken.balanceOf(A)
         const tx = await bamm.withdraw(await bamm.balanceOf(A), {from: A})
         let gasFee = toBN(0)
         if (!isCollateralERC20) {
           gasFee = toBN(tx.receipt.gasUsed).mul(toBN(tx.receipt.effectiveGasPrice))
         }
-        const collateralBalanceAfter = toBN(await getCollateralBalance(A))
+        const collateralBalanceAfter = await getCollateralBalance(A)
         const THUSDAfter = await thusdToken.balanceOf(A)
 
         const withdrawUsdValue = THUSDAfter.sub(THUSDBefore).add((collateralBalanceAfter.add(gasFee).sub(collateralBalanceBefore)).mul(toBN(105)))
@@ -606,7 +592,7 @@ contract('BAMM', async accounts => {
 
         // check eth balance
         const balance = await getCollateralBalance(dest)
-        assert.equal(balance, priceWithFee.collateralAmount)
+        assert.isTrue(balance.eq(priceWithFee.collateralAmount))
 
         // check fees
         assert.equal((await thusdToken.balanceOf(feePool)).toString(), priceWithFee.feeTHusdAmount.toString())
