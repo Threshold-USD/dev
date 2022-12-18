@@ -79,10 +79,9 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
         if (collateralAddress == address(0)) {
             (bool success, ) = activePool.call{ value: _amount }("");
-            require(success, "DefaultPool: sending collateral failed");
+            require(success, "DefaultPool: sending ETH failed");
         } else {
             bool success = IERC20(collateralAddress).transfer(activePool, _amount);
-            // TODO add call to trigger the update in activePool
             require(success, "DefaultPool: sending collateral failed");
             IActivePool(activePool).updateCollateralBalance(_amount);
         }
@@ -113,6 +112,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     // When ERC20 token collateral is received this function needs to be called
     function updateCollateralBalance(uint256 _amount) external override {
         _requireCallerIsActivePool();
+        require(collateralAddress != address(0), "DefaultPool: collateral must be ETH");
         collateral += _amount;
         emit DefaultPoolCollateralBalanceUpdated(collateral);
   	}
@@ -121,6 +121,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
 
     receive() external payable {
         _requireCallerIsActivePool();
+        require(collateralAddress == address(0), "DefaultPool: collateral must be ERC20 token");
         collateral += msg.value;
         emit DefaultPoolCollateralBalanceUpdated(collateral);
     }
