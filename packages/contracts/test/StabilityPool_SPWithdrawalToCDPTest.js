@@ -4,6 +4,7 @@ const TroveManagerTester = artifacts.require("./TroveManagerTester.sol")
 
 const { dec, toBN } = testHelpers.TestHelper
 const th = testHelpers.TestHelper
+const ZERO_ADDRESS = th.ZERO_ADDRESS
 
 contract('StabilityPool - Withdrawal of stability deposit - Reward calculations', async accounts => {
 
@@ -43,8 +44,6 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
     let borrowerOperations
 
     let gasPriceInWei
-
-    const ZERO_ADDRESS = th.ZERO_ADDRESS
 
     const getOpenTroveTHUSDAmount = async (totalDebt) => th.getOpenTroveTHUSDAmount(contracts, totalDebt)
 
