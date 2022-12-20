@@ -171,9 +171,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
         assert(vars.compositeDebt > 0);
 
         // if ETH overwrite the asset value
-        if (collateralAddress == address(0)) {
-          _assetAmount = msg.value;
-        }
+        _assetAmount = getAssetAmount(_assetAmount);
         vars.ICR = LiquityMath._computeCR(_assetAmount, vars.compositeDebt, vars.price);
         vars.NICR = LiquityMath._computeNominalCR(_assetAmount, vars.compositeDebt);
 
@@ -212,19 +210,24 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     // Send collateral to a trove
     function addColl(uint256 _assetAmount, address _upperHint, address _lowerHint) external payable override {
-        if (collateralAddress == address(0)) {
-            _assetAmount = msg.value;
-        }
+        _assetAmount = getAssetAmount(_assetAmount);
         _adjustTrove(msg.sender, 0, 0, false, _assetAmount, _upperHint, _lowerHint, 0);
     }
 
     // Send collateral to a trove. Called by only the Stability Pool.
     function moveCollateralGainToTrove(address _borrower, uint256 _assetAmount, address _upperHint, address _lowerHint) external payable override {
         _requireCallerIsStabilityPool();
-        if (collateralAddress == address(0)) {
-            _assetAmount = msg.value;
-        }
+        _assetAmount = getAssetAmount(_assetAmount);
         _adjustTrove(_borrower, 0, 0, false, _assetAmount, _upperHint, _lowerHint, 0);
+    }
+
+    function getAssetAmount(uint256 _assetAmount) internal view returns (uint256) {
+        if (collateralAddress == address(0)) {
+            return msg.value;
+        }
+
+        require(msg.value == 0, "BorrowerOperations: collateral must be ERC20 token");
+        return _assetAmount;
     }
 
     // Withdraw collateral from a trove
@@ -243,9 +246,7 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
     }
 
     function adjustTrove(uint256 _maxFeePercentage, uint256 _collWithdrawal, uint256 _THUSDChange, bool _isDebtIncrease, uint256 _assetAmount, address _upperHint, address _lowerHint) external payable override {
-        if (collateralAddress == address(0)) {
-            _assetAmount = msg.value;
-        }
+        _assetAmount = getAssetAmount(_assetAmount);
         _adjustTrove(msg.sender, _collWithdrawal, _THUSDChange, _isDebtIncrease, _assetAmount, _upperHint, _lowerHint, _maxFeePercentage);
     }
 

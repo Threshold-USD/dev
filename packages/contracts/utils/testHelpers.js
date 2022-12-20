@@ -689,6 +689,8 @@ class TestHelper {
     const assetAmount = ('value' in extraParams) ? extraParams.value : ICR.mul(totalDebt).div(price);
     if (contracts.erc20.address === this.ZERO_ADDRESS) {
       extraParams.value = assetAmount
+    } else {
+      extraParams.value = 0
     }
 
     const tx = await contracts.borrowerOperations.openTrove(maxFeePercentage, thusdAmount, assetAmount, upperHint, lowerHint, extraParams)
