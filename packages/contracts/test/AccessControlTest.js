@@ -340,7 +340,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     it("mint(): reverts when called by an account that is not BorrowerOperations", async () => {
       // Attempt call from alice
       const txAlice = thusdToken.mint(bob, 100, { from: alice })
-      await th.assertRevert(txAlice, "Caller is not BorrowerOperations")
+      await th.assertRevert(txAlice, "THUSDToken: Caller not allowed to mint")
     })
 
     // burn

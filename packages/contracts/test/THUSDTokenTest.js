@@ -328,7 +328,8 @@ contract('THUSDToken', async accounts => {
     it('decreaseAllowance(): fails trying to decrease more than previously allowed', async () => {
       await thusdTokenTester.approve(bob, dec(3, 18), { from: alice })
       assert.equal((await thusdTokenTester.allowance(alice, bob)).toString(), dec(3, 18))
-      await assertRevert(thusdTokenTester.decreaseAllowance(bob, dec(4, 18), { from: alice }), 'ERC20: decreased allowance below zero')
+      await assertRevert(thusdTokenTester.decreaseAllowance(bob, dec(4, 18), { from: alice }), 
+      !withProxy ? 'ERC20: decreased allowance below zero' : undefined)
       assert.equal((await thusdTokenTester.allowance(alice, bob)).toString(), dec(3, 18))
     })
 

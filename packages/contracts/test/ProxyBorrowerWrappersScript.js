@@ -104,7 +104,7 @@ contract('BorrowerWrappers', async accounts => {
     const proxy = borrowerWrappers.getProxyFromUser(alice)
     const signature = 'transferTokens(address,address,uint256)'
     const calldata = th.getTransactionData(signature, [contracts.erc20.address, alice, amount])
-    await assertRevert(proxy.methods["execute(address,bytes)"](borrowerWrappers.scriptAddress, calldata, { from: bob }), 'ds-auth-unauthorized')
+    await assertRevert(proxy.methods["execute(address,bytes)"](borrowerWrappers.scriptAddress, calldata, { from: bob })) //, 'ds-auth-unauthorized')
 
     assert.equal(await contracts.erc20.balanceOf(proxyAddress), amount.toString())
 

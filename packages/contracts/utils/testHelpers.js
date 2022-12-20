@@ -1152,11 +1152,10 @@ class TestHelper {
     } catch (err) {
       // console.log("tx failed")
       assert.include(err.message, "revert")
-      // TODO !!!
 
-      // if (message) {
-      //   assert.include(err.message, message)
-      // }
+      if (message) {
+        assert.include(err.message, message)
+      }
     }
   }
 
