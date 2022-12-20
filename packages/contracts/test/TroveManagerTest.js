@@ -2814,11 +2814,10 @@ contract('TroveManager', async accounts => {
     await assertRevert(th.redeemCollateralAndGetTxObject(A, contracts, dec(10, 18), '4999999999999999'), "Max fee percentage must be between 0.5% and 100%")
   })
 
-  // FIXME reedem reverts with another error, test is not working as suppose
-  it.skip("redeemCollateral(): reverts if fee exceeds max fee percentage", async () => {
-    const { totalDebt: A_totalDebt } = await openTrove({ ICR: toBN(dec(400, 16)), extraTHUSDAmount: dec(80, 18), extraParams: { from: A } })
-    const { totalDebt: B_totalDebt } = await openTrove({ ICR: toBN(dec(400, 16)), extraTHUSDAmount: dec(90, 18), extraParams: { from: B } })
-    const { totalDebt: C_totalDebt } = await openTrove({ ICR: toBN(dec(400, 16)), extraTHUSDAmount: dec(100, 18), extraParams: { from: C } })
+  it("redeemCollateral(): reverts if fee exceeds max fee percentage", async () => {
+    const { totalDebt: A_totalDebt } = await openTrove({ ICR: toBN(dec(400, 16)), extraTHUSDAmount: dec(8000, 18), extraParams: { from: A } })
+    const { totalDebt: B_totalDebt } = await openTrove({ ICR: toBN(dec(400, 16)), extraTHUSDAmount: dec(9000, 18), extraParams: { from: B } })
+    const { totalDebt: C_totalDebt } = await openTrove({ ICR: toBN(dec(400, 16)), extraTHUSDAmount: dec(10000, 18), extraParams: { from: C } })
     const expectedTotalSupply = A_totalDebt.add(B_totalDebt).add(C_totalDebt)
 
     // Check total THUSD supply
