@@ -1123,9 +1123,9 @@ class TestHelper {
     let collateral = {}
 
     // Liquidate wallet (use 0 gas price to easily check the amount the compensation amount the liquidator receives)
-    collateral.before = await contracts.erc20.balanceOf(liquidator)
+    collateral.before = await this.getCollateralBalance(contracts.erc20, liquidator)
     await troveManager.liquidate(wallet, { from: liquidator, gasPrice: 0 })
-    collateral.after = await contracts.erc20.balanceOf(liquidator)
+    collateral.after = await this.getCollateralBalance(contracts.erc20, liquidator)
 
     // Check liquidator's balance increases by 0.5% of A's coll (1 ETH)
     let compensation = (collateral.after.sub(collateral.before)).toString()
