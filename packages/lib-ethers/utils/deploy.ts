@@ -13,6 +13,8 @@ import {
 
 let silent = true;
 
+export const delay = 90 * 24 * 60 * 60  // 90 days in seconds
+
 export const log = (...args: unknown[]): void => {
   if (!silent) {
     console.log(...args);
@@ -77,7 +79,7 @@ const deployContracts = async (
     }),
     defaultPool: await deployContract(deployer, getContractFactory, "DefaultPool", { ...overrides }),
     hintHelpers: await deployContract(deployer, getContractFactory, "HintHelpers", { ...overrides }),
-    pcv: await deployContract(deployer, getContractFactory, "PCV", { ...overrides }),
+    pcv: await deployContract(deployer, getContractFactory, "PCV", delay, { ...overrides }),
     priceFeed: await deployContract(
       deployer,
       getContractFactory,
@@ -105,6 +107,7 @@ const deployContracts = async (
     addresses.troveManager,
     addresses.stabilityPool,
     addresses.borrowerOperations,
+    delay,
     { ...overrides }
   );
 
@@ -245,9 +248,8 @@ const connectContracts = async (
     nonce =>
       pcv.setAddresses(
         thusdToken.address,
-        troveManager.address,
         borrowerOperations.address,
-        activePool.address,
+        erc20.address,
         { ...overrides, nonce }
       )
   ];
