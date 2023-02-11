@@ -13,8 +13,6 @@ import {
 
 let silent = true;
 
-export const delay = 90 * 24 * 60 * 60  // 90 days in seconds
-
 export const log = (...args: unknown[]): void => {
   if (!silent) {
     console.log(...args);
@@ -55,6 +53,7 @@ const deployContract: (
 const deployContracts = async (
   deployer: Signer,
   getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
+  delay: number,
   stablecoinAddress: string,
   priceFeedIsTestnet = true,
   overrides?: Overrides
@@ -263,6 +262,7 @@ const connectContracts = async (
 export const deployAndSetupContracts = async (
   deployer: Signer,
   getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
+  delay: number,
   stablecoinAddress: string,
   _priceFeedIsTestnet = true,
   _isDev = true,
@@ -282,7 +282,7 @@ export const deployAndSetupContracts = async (
     _priceFeedIsTestnet,
     _isDev,
 
-    ...(await deployContracts(deployer, getContractFactory, stablecoinAddress, _priceFeedIsTestnet, overrides).then(
+    ...(await deployContracts(deployer, getContractFactory, delay, stablecoinAddress, _priceFeedIsTestnet, overrides).then(
       async ([addresses, startBlock]) => ({
         startBlock,
 

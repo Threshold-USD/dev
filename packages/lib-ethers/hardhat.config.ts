@@ -139,6 +139,7 @@ declare module "hardhat/types/runtime" {
   interface HardhatRuntimeEnvironment {
     deployLiquity: (
       deployer: Signer,
+      delay?: number,
       stablecoinAddress?: string,
       useRealPriceFeed?: boolean,
       overrides?: Overrides
@@ -161,6 +162,7 @@ const getContractFactory: (
 extendEnvironment(env => {
   env.deployLiquity = async (
     deployer,
+    delay = 90 * 24 * 60 * 60,
     stablecoinAddress = "",
     useRealPriceFeed = false,
     overrides?: Overrides
@@ -168,6 +170,7 @@ extendEnvironment(env => {
     const deployment = await deployAndSetupContracts(
       deployer,
       getContractFactory(env),
+      delay,
       stablecoinAddress,
       !useRealPriceFeed,
       env.network.name === "dev",
@@ -182,6 +185,7 @@ type DeployParams = {
   channel: string;
   collateral: string;
   contractsVersion: string;
+  delay: number;
   stablecoinAddress: string;
   gasPrice?: number;
   useRealPriceFeed?: boolean;
@@ -191,6 +195,7 @@ const defaultChannel = process.env.CHANNEL || "default";
 const defaultCollateral = process.env.COLLATERAL || "eth";
 const defaultRelease = process.env.RELEASE || "v1";
 const defaultToken = process.env.TOKEN_ADDRESS || "";
+const defaultDelay = process.env.DELAY || 90 * 24 * 60 * 60;
 
 task("deploy", "Deploys the contracts to the network")
   .addOptionalParam("channel", "Deployment channel to deploy into", defaultChannel, types.string)
@@ -204,13 +209,19 @@ task("deploy", "Deploys the contracts to the network")
     types.boolean
   )
   .addOptionalParam(
+    "delay",
+    "Governance time set to thUSD contract",
+    defaultDelay,
+    types.int
+  )
+  .addOptionalParam(
     "stablecoinAddress",
     "Address of existing stablecoin to add the new collateral to",
     defaultToken,
     types.string
   )
   .setAction(
-    async ({ channel, collateral, contractsVersion, stablecoinAddress, gasPrice, useRealPriceFeed }: DeployParams, env) => {
+    async ({ channel, collateral, contractsVersion, delay, stablecoinAddress, gasPrice, useRealPriceFeed }: DeployParams, env) => {
       const overrides = { gasPrice: gasPrice && Decimal.from(gasPrice).div(1000000000).hex };
       const [deployer] = await env.ethers.getSigners();
       useRealPriceFeed ??= env.network.name === "mainnet";
@@ -222,11 +233,12 @@ task("deploy", "Deploys the contracts to the network")
       console.log('network', env.network.name);
       console.log('collateral', collateral);
       console.log('version', contractsVersion);
+      console.log('delay', delay);
       console.log('stablecoin address:', stablecoinAddress);
       console.log('gas price: ', gasPrice);
       setSilent(false);
 
-      const deployment = await env.deployLiquity(deployer, stablecoinAddress, useRealPriceFeed, overrides);
+      const deployment = await env.deployLiquity(deployer, delay, stablecoinAddress, useRealPriceFeed, overrides);
 
       if (useRealPriceFeed) {
         const contracts = _connectToContracts(deployer, deployment);
