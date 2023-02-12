@@ -25,14 +25,15 @@ interface IOracles {
   tellor: string,
 }
 
-interface ICollaterals {
-  eth: IOracles,
+export interface IAssets {
+  [eth: string]: IOracles,
   btc: IOracles,
+  thusd: IOracles
 }
 
-interface INetworkOracles {
-  mainnet: ICollaterals,
-  goerli: ICollaterals,
+export interface INetworkOracles {
+  mainnet: IAssets,
+  goerli: IAssets,
 }
 
 dotenv.config();
@@ -89,6 +90,10 @@ const oracleAddresses: INetworkOracles = {
     eth: {
       chainlink: "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419",
       tellor: "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
+    },
+    thusd: {
+      chainlink: "0x3D7aE7E594f2f2091Ad8798313450130d0Aba3a0", // TODO this is LUSD:USD address, should be replaced with thUSD
+      tellor: "0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0"
     }
   },
   goerli: {
@@ -99,6 +104,10 @@ const oracleAddresses: INetworkOracles = {
     eth: {
       chainlink: "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e",
       tellor: "0x20374E579832859f180536A69093A126Db1c8aE9" // Playground
+    },
+    thusd: {
+      chainlink: "",
+      tellor: ""
     }
   }
 };
@@ -139,6 +148,8 @@ declare module "hardhat/types/runtime" {
   interface HardhatRuntimeEnvironment {
     deployLiquity: (
       deployer: Signer,
+      oracleAddresses: INetworkOracles,
+      collateral: (keyof IAssets),
       delay?: number,
       stablecoinAddress?: string,
       useRealPriceFeed?: boolean,
@@ -162,6 +173,8 @@ const getContractFactory: (
 extendEnvironment(env => {
   env.deployLiquity = async (
     deployer,
+    oracleAddresses,
+    collateral,
     delay = 90 * 24 * 60 * 60,
     stablecoinAddress = "",
     useRealPriceFeed = false,
@@ -169,6 +182,8 @@ extendEnvironment(env => {
   ) => {
     const deployment = await deployAndSetupContracts(
       deployer,
+      oracleAddresses,
+      collateral,
       getContractFactory(env),
       delay,
       stablecoinAddress,
@@ -238,7 +253,7 @@ task("deploy", "Deploys the contracts to the network")
       console.log('gas price: ', gasPrice);
       setSilent(false);
 
-      const deployment = await env.deployLiquity(deployer, delay, stablecoinAddress, useRealPriceFeed, overrides);
+      const deployment = await env.deployLiquity(deployer, oracleAddresses, collateral, delay, stablecoinAddress, useRealPriceFeed, overrides);
 
       if (useRealPriceFeed) {
         const contracts = _connectToContracts(deployer, deployment);
@@ -249,14 +264,14 @@ task("deploy", "Deploys the contracts to the network")
           const tellorCallerAddress = await deployTellorCaller(
             deployer,
             getContractFactory(env),
-            oracleAddresses[env.network.name][collateral as keyof ICollaterals].tellor,
+            oracleAddresses[env.network.name][collateral as keyof IAssets].tellor,
             overrides
           );
 
           console.log(`Hooking up PriceFeed with oracles ...`);
 
           const tx = await contracts.priceFeed.setAddresses(
-            oracleAddresses[env.network.name][collateral as keyof ICollaterals].chainlink,
+            oracleAddresses[env.network.name][collateral as keyof IAssets].chainlink,
             tellorCallerAddress,
             overrides
           );

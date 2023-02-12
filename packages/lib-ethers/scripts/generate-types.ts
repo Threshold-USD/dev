@@ -18,6 +18,9 @@ import PriceFeed from "../../contracts/artifacts/contracts/PriceFeed.sol/PriceFe
 import PriceFeedTestnet from "../../contracts/artifacts/contracts/TestContracts/PriceFeedTestnet.sol/PriceFeedTestnet.json";
 import SortedTroves from "../../contracts/artifacts/contracts/SortedTroves.sol/SortedTroves.json";
 import StabilityPool from "../../contracts/artifacts/contracts/StabilityPool.sol/StabilityPool.json";
+import BAMM from "../../contracts/artifacts/contracts/B.Protocol/BAMM.sol/BAMM.json";
+import BLens from "../../contracts/artifacts/contracts/B.Protocol/BLens.sol/BLens.json";
+import ChainlinkTestnet from "../../contracts/artifacts/contracts/B.Protocol/ChainlinkTestnet.sol/ChainlinkTestnet.json"
 import TroveManager from "../../contracts/artifacts/contracts/TroveManager.sol/TroveManager.json";
 
 const getTupleType = (components: ParamType[], flexible: boolean) => {
@@ -154,6 +157,9 @@ const contractArtifacts = [
   PriceFeedTestnet,
   SortedTroves,
   StabilityPool,
+  BAMM,
+  BLens,
+  ChainlinkTestnet,
   TroveManager
 ];
 

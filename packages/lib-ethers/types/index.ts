@@ -96,8 +96,10 @@ interface BorrowerOperationsCalls {
 interface BorrowerOperationsTransactions {
   addColl(_assetAmount: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: PayableOverrides): Promise<void>;
   adjustTrove(_maxFeePercentage: BigNumberish, _collWithdrawal: BigNumberish, _THUSDChange: BigNumberish, _isDebtIncrease: boolean, _assetAmount: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: PayableOverrides): Promise<void>;
+  burnDebtFromPCV(_thusdToBurn: BigNumberish, _overrides?: Overrides): Promise<void>;
   claimCollateral(_overrides?: Overrides): Promise<void>;
   closeTrove(_overrides?: Overrides): Promise<void>;
+  mintBootstrapLoanFromPCV(_thusdToMint: BigNumberish, _overrides?: Overrides): Promise<void>;
   moveCollateralGainToTrove(_borrower: string, _assetAmount: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: PayableOverrides): Promise<void>;
   openTrove(_maxFeePercentage: BigNumberish, _THUSDAmount: BigNumberish, _assetAmount: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: PayableOverrides): Promise<void>;
   repayTHUSD(_THUSDAmount: BigNumberish, _upperHint: string, _lowerHint: string, _overrides?: Overrides): Promise<void>;
@@ -337,43 +339,50 @@ export interface IERC20
 }
 
 interface THUSDTokenCalls {
-  GOVERNANCE_TIME_DELAY(_overrides?: CallOverrides): Promise<BigNumber>;
   addContractsInitiated(_overrides?: CallOverrides): Promise<BigNumber>;
+  addMintListInitiated(_overrides?: CallOverrides): Promise<BigNumber>;
   allowance(owner: string, spender: string, _overrides?: CallOverrides): Promise<BigNumber>;
   balanceOf(account: string, _overrides?: CallOverrides): Promise<BigNumber>;
-  borrowerOperations(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   decimals(_overrides?: CallOverrides): Promise<number>;
   domainSeparator(_overrides?: CallOverrides): Promise<string>;
+  governanceTimeDelay(_overrides?: CallOverrides): Promise<BigNumber>;
+  isBorrowerOperations(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   isOwner(_overrides?: CallOverrides): Promise<boolean>;
+  isStabilityPools(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
+  isTroveManager(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   mintList(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   name(_overrides?: CallOverrides): Promise<string>;
   nonces(owner: string, _overrides?: CallOverrides): Promise<BigNumber>;
   owner(_overrides?: CallOverrides): Promise<string>;
+  pendingAddedMintAddress(_overrides?: CallOverrides): Promise<string>;
   pendingBorrowerOperations(_overrides?: CallOverrides): Promise<string>;
   pendingRevokedMintAddress(_overrides?: CallOverrides): Promise<string>;
   pendingStabilityPool(_overrides?: CallOverrides): Promise<string>;
   pendingTroveManager(_overrides?: CallOverrides): Promise<string>;
   permitTypeHash(_overrides?: CallOverrides): Promise<string>;
   revokeMintListInitiated(_overrides?: CallOverrides): Promise<BigNumber>;
-  stabilityPools(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   symbol(_overrides?: CallOverrides): Promise<string>;
   totalSupply(_overrides?: CallOverrides): Promise<BigNumber>;
-  troveManagers(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   version(_overrides?: CallOverrides): Promise<string>;
 }
 
 interface THUSDTokenTransactions {
   approve(spender: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;
   burn(_account: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
+  cancelAddContracts(_overrides?: Overrides): Promise<void>;
+  cancelAddMintList(_overrides?: Overrides): Promise<void>;
+  cancelRevokeMintList(_overrides?: Overrides): Promise<void>;
   decreaseAllowance(spender: string, subtractedValue: BigNumberish, _overrides?: Overrides): Promise<boolean>;
-  finalizeAddContracts(_troveManagerAddress: string, _stabilityPoolAddress: string, _borrowerOperationsAddress: string, _overrides?: Overrides): Promise<void>;
-  finalizeRevokeMintList(_account: string, _overrides?: Overrides): Promise<void>;
+  finalizeAddContracts(_overrides?: Overrides): Promise<void>;
+  finalizeAddMintList(_overrides?: Overrides): Promise<void>;
+  finalizeRevokeMintList(_overrides?: Overrides): Promise<void>;
   increaseAllowance(spender: string, addedValue: BigNumberish, _overrides?: Overrides): Promise<boolean>;
   mint(_account: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   permit(owner: string, spender: string, amount: BigNumberish, deadline: BigNumberish, v: BigNumberish, r: BytesLike, s: BytesLike, _overrides?: Overrides): Promise<void>;
   returnFromPool(_poolAddress: string, _receiver: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   sendToPool(_sender: string, _poolAddress: string, _amount: BigNumberish, _overrides?: Overrides): Promise<void>;
   startAddContracts(_troveManagerAddress: string, _stabilityPoolAddress: string, _borrowerOperationsAddress: string, _overrides?: Overrides): Promise<void>;
+  startAddMintList(_account: string, _overrides?: Overrides): Promise<void>;
   startRevokeMintList(_account: string, _overrides?: Overrides): Promise<void>;
   transfer(recipient: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;
   transferFrom(sender: string, recipient: string, amount: BigNumberish, _overrides?: Overrides): Promise<boolean>;
@@ -400,43 +409,72 @@ export interface THUSDToken
 }
 
 interface PCVCalls {
-  DECIMAL_PRECISION(_overrides?: CallOverrides): Promise<BigNumber>;
-  F_ETH(_overrides?: CallOverrides): Promise<BigNumber>;
-  F_THUSD(_overrides?: CallOverrides): Promise<BigNumber>;
+  BOOTSTRAP_LOAN(_overrides?: CallOverrides): Promise<BigNumber>;
   NAME(_overrides?: CallOverrides): Promise<string>;
-  activePoolAddress(_overrides?: CallOverrides): Promise<string>;
-  borrowerOperationsAddress(_overrides?: CallOverrides): Promise<string>;
+  bamm(_overrides?: CallOverrides): Promise<string>;
+  borrowerOperations(_overrides?: CallOverrides): Promise<string>;
+  changingRolesInitiated(_overrides?: CallOverrides): Promise<BigNumber>;
+  collateralERC20(_overrides?: CallOverrides): Promise<string>;
+  council(_overrides?: CallOverrides): Promise<string>;
+  debtToPay(_overrides?: CallOverrides): Promise<BigNumber>;
+  governanceTimeDelay(_overrides?: CallOverrides): Promise<BigNumber>;
+  isInitialized(_overrides?: CallOverrides): Promise<boolean>;
   isOwner(_overrides?: CallOverrides): Promise<boolean>;
   owner(_overrides?: CallOverrides): Promise<string>;
-  stakes(arg0: string, _overrides?: CallOverrides): Promise<BigNumber>;
+  pendingCouncilAddress(_overrides?: CallOverrides): Promise<string>;
+  pendingTreasuryAddress(_overrides?: CallOverrides): Promise<string>;
+  recipientsWhitelist(arg0: string, _overrides?: CallOverrides): Promise<boolean>;
   thusdToken(_overrides?: CallOverrides): Promise<string>;
-  troveManagerAddress(_overrides?: CallOverrides): Promise<string>;
+  treasury(_overrides?: CallOverrides): Promise<string>;
 }
 
 interface PCVTransactions {
-  increaseF_ETH(_ETHFee: BigNumberish, _overrides?: Overrides): Promise<void>;
-  increaseF_THUSD(_THUSDFee: BigNumberish, _overrides?: Overrides): Promise<void>;
-  setAddresses(_thusdTokenAddress: string, _troveManagerAddress: string, _borrowerOperationsAddress: string, _activePoolAddress: string, _overrides?: Overrides): Promise<void>;
+  addRecipientToWhitelist(_recipient: string, _overrides?: Overrides): Promise<void>;
+  addRecipientsToWhitelist(_recipients: string[], _overrides?: Overrides): Promise<void>;
+  cancelChangingRoles(_overrides?: Overrides): Promise<void>;
+  depositToBAMM(_thusdAmount: BigNumberish, _overrides?: Overrides): Promise<void>;
+  finalizeChangingRoles(_overrides?: Overrides): Promise<void>;
+  initialize(_bammAddress: string, _overrides?: Overrides): Promise<void>;
+  payDebt(_thusdToBurn: BigNumberish, _overrides?: Overrides): Promise<void>;
+  removeRecipientFromWhitelist(_recipient: string, _overrides?: Overrides): Promise<void>;
+  removeRecipientsFromWhitelist(_recipients: string[], _overrides?: Overrides): Promise<void>;
+  setAddresses(_thusdTokenAddress: string, _borrowerOperations: string, _collateralERC20: string, _overrides?: Overrides): Promise<void>;
+  startChangingRoles(_council: string, _treasury: string, _overrides?: Overrides): Promise<void>;
+  withdrawCollateral(_recipient: string, _collateralAmount: BigNumberish, _overrides?: Overrides): Promise<void>;
+  withdrawFromBAMM(_numShares: BigNumberish, _overrides?: Overrides): Promise<void>;
+  withdrawTHUSD(_recipient: string, _thusdAmount: BigNumberish, _overrides?: Overrides): Promise<void>;
 }
 
 export interface PCV
   extends _TypedLiquityContract<PCVCalls, PCVTransactions> {
   readonly filters: {
-    ActivePoolAddressSet(_activePoolAddress?: null): EventFilter;
+    BAMMAddressSet(_bammAddress?: null): EventFilter;
+    BAMMDeposit(_thusdAmount?: null): EventFilter;
+    BAMMWithdraw(_numShares?: null): EventFilter;
     BorrowerOperationsAddressSet(_borrowerOperationsAddress?: null): EventFilter;
-    F_ETHUpdated(_F_ETH?: null): EventFilter;
-    F_THUSDUpdated(_F_THUSD?: null): EventFilter;
+    CollateralAddressSet(_collateralAddress?: null): EventFilter;
+    CollateralWithdraw(_recipient?: null, _collateralAmount?: null): EventFilter;
     OwnershipTransferred(previousOwner?: string | null, newOwner?: string | null): EventFilter;
+    PCVDebtPaid(_paidDebt?: null): EventFilter;
+    RecipientAdded(_recipient?: null): EventFilter;
+    RecipientRemoved(_recipient?: null): EventFilter;
+    RolesSet(_council?: null, _treasury?: null): EventFilter;
     THUSDTokenAddressSet(_thusdTokenAddress?: null): EventFilter;
-    TroveManagerAddressSet(_troveManager?: null): EventFilter;
+    THUSDWithdraw(_recipient?: null, _thusdAmount?: null): EventFilter;
   };
-  extractEvents(logs: Log[], name: "ActivePoolAddressSet"): _TypedLogDescription<{ _activePoolAddress: string }>[];
+  extractEvents(logs: Log[], name: "BAMMAddressSet"): _TypedLogDescription<{ _bammAddress: string }>[];
+  extractEvents(logs: Log[], name: "BAMMDeposit"): _TypedLogDescription<{ _thusdAmount: BigNumber }>[];
+  extractEvents(logs: Log[], name: "BAMMWithdraw"): _TypedLogDescription<{ _numShares: BigNumber }>[];
   extractEvents(logs: Log[], name: "BorrowerOperationsAddressSet"): _TypedLogDescription<{ _borrowerOperationsAddress: string }>[];
-  extractEvents(logs: Log[], name: "F_ETHUpdated"): _TypedLogDescription<{ _F_ETH: BigNumber }>[];
-  extractEvents(logs: Log[], name: "F_THUSDUpdated"): _TypedLogDescription<{ _F_THUSD: BigNumber }>[];
+  extractEvents(logs: Log[], name: "CollateralAddressSet"): _TypedLogDescription<{ _collateralAddress: string }>[];
+  extractEvents(logs: Log[], name: "CollateralWithdraw"): _TypedLogDescription<{ _recipient: string; _collateralAmount: BigNumber }>[];
   extractEvents(logs: Log[], name: "OwnershipTransferred"): _TypedLogDescription<{ previousOwner: string; newOwner: string }>[];
+  extractEvents(logs: Log[], name: "PCVDebtPaid"): _TypedLogDescription<{ _paidDebt: BigNumber }>[];
+  extractEvents(logs: Log[], name: "RecipientAdded"): _TypedLogDescription<{ _recipient: string }>[];
+  extractEvents(logs: Log[], name: "RecipientRemoved"): _TypedLogDescription<{ _recipient: string }>[];
+  extractEvents(logs: Log[], name: "RolesSet"): _TypedLogDescription<{ _council: string; _treasury: string }>[];
   extractEvents(logs: Log[], name: "THUSDTokenAddressSet"): _TypedLogDescription<{ _thusdTokenAddress: string }>[];
-  extractEvents(logs: Log[], name: "TroveManagerAddressSet"): _TypedLogDescription<{ _troveManager: string }>[];
+  extractEvents(logs: Log[], name: "THUSDWithdraw"): _TypedLogDescription<{ _recipient: string; _thusdAmount: BigNumber }>[];
 }
 
 interface MultiTroveGetterCalls {
@@ -638,6 +676,117 @@ export interface StabilityPool
   extractEvents(logs: Log[], name: "THUSDTokenAddressChanged"): _TypedLogDescription<{ _newTHUSDTokenAddress: string }>[];
   extractEvents(logs: Log[], name: "TroveManagerAddressChanged"): _TypedLogDescription<{ _newTroveManagerAddress: string }>[];
   extractEvents(logs: Log[], name: "UserDepositChanged"): _TypedLogDescription<{ _depositor: string; _newDeposit: BigNumber }>[];
+}
+
+interface BAMMCalls {
+  A(_overrides?: CallOverrides): Promise<BigNumber>;
+  MAX_A(_overrides?: CallOverrides): Promise<BigNumber>;
+  MAX_FEE(_overrides?: CallOverrides): Promise<BigNumber>;
+  MIN_A(_overrides?: CallOverrides): Promise<BigNumber>;
+  PRECISION(_overrides?: CallOverrides): Promise<BigNumber>;
+  SP(_overrides?: CallOverrides): Promise<string>;
+  balanceOf(owner: string, _overrides?: CallOverrides): Promise<BigNumber>;
+  bonus(_overrides?: CallOverrides): Promise<string>;
+  collateralERC20(_overrides?: CallOverrides): Promise<string>;
+  compensateForTHusdDeviation(ethAmount: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  crops(arg0: string, _overrides?: CallOverrides): Promise<BigNumber>;
+  dec(_overrides?: CallOverrides): Promise<BigNumber>;
+  decimals(_overrides?: CallOverrides): Promise<BigNumber>;
+  fee(_overrides?: CallOverrides): Promise<BigNumber>;
+  feePool(_overrides?: CallOverrides): Promise<string>;
+  fetchPrice(_overrides?: CallOverrides): Promise<BigNumber>;
+  gem(_overrides?: CallOverrides): Promise<string>;
+  getCollateralBalance(_overrides?: CallOverrides): Promise<BigNumber>;
+  getConversionRate(arg0: string, arg1: string, srcQty: BigNumberish, arg3: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  getReturn(xQty: BigNumberish, xBalance: BigNumberish, yBalance: BigNumberish, A: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  getSumFixedPoint(x: BigNumberish, y: BigNumberish, A: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  getSwapCollateralAmount(thusdQty: BigNumberish, _overrides?: CallOverrides): Promise<{ collateralAmount: BigNumber; feeTHusdAmount: BigNumber }>;
+  ilk(_overrides?: CallOverrides): Promise<string>;
+  isOwner(_overrides?: CallOverrides): Promise<boolean>;
+  maxDiscount(_overrides?: CallOverrides): Promise<BigNumber>;
+  name(_overrides?: CallOverrides): Promise<string>;
+  nav(_overrides?: CallOverrides): Promise<BigNumber>;
+  owner(_overrides?: CallOverrides): Promise<string>;
+  priceAggregator(_overrides?: CallOverrides): Promise<string>;
+  rdiv(x: BigNumberish, y: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  rmul(x: BigNumberish, y: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  rmulup(x: BigNumberish, y: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  share(_overrides?: CallOverrides): Promise<BigNumber>;
+  stake(arg0: string, _overrides?: CallOverrides): Promise<BigNumber>;
+  stock(_overrides?: CallOverrides): Promise<BigNumber>;
+  symbol(_overrides?: CallOverrides): Promise<string>;
+  thusd2UsdPriceAggregator(_overrides?: CallOverrides): Promise<string>;
+  thusdToken(_overrides?: CallOverrides): Promise<string>;
+  total(_overrides?: CallOverrides): Promise<BigNumber>;
+  totalSupply(_overrides?: CallOverrides): Promise<BigNumber>;
+  vat(_overrides?: CallOverrides): Promise<string>;
+  wdiv(x: BigNumberish, y: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  wdivup(x: BigNumberish, y: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+  wmul(x: BigNumberish, y: BigNumberish, _overrides?: CallOverrides): Promise<BigNumber>;
+}
+
+interface BAMMTransactions {
+  deposit(thusdAmount: BigNumberish, _overrides?: Overrides): Promise<void>;
+  nps(_overrides?: Overrides): Promise<BigNumber>;
+  setParams(_A: BigNumberish, _fee: BigNumberish, _overrides?: Overrides): Promise<void>;
+  swap(thusdAmount: BigNumberish, minCollateralReturn: BigNumberish, dest: string, _overrides?: Overrides): Promise<BigNumber>;
+  trade(arg0: string, srcAmount: BigNumberish, arg2: string, destAddress: string, arg4: BigNumberish, arg5: boolean, _overrides?: PayableOverrides): Promise<boolean>;
+  withdraw(numShares: BigNumberish, _overrides?: Overrides): Promise<void>;
+}
+
+export interface BAMM
+  extends _TypedLiquityContract<BAMMCalls, BAMMTransactions> {
+  readonly filters: {
+    Exit(val?: null): EventFilter;
+    Flee(): EventFilter;
+    Join(val?: null): EventFilter;
+    OwnershipTransferred(previousOwner?: string | null, newOwner?: string | null): EventFilter;
+    ParamsSet(A?: null, fee?: null): EventFilter;
+    RebalanceSwap(user?: string | null, thusdAmount?: null, collateralAmount?: null, timestamp?: null): EventFilter;
+    Tack(src?: string | null, dst?: string | null, wad?: null): EventFilter;
+    Transfer(_from?: string | null, _to?: string | null, _value?: null): EventFilter;
+    UserDeposit(user?: string | null, thusdAmount?: null, numShares?: null): EventFilter;
+    UserWithdraw(user?: string | null, thusdAmount?: null, collateralAmount?: null, numShares?: null): EventFilter;
+  };
+  extractEvents(logs: Log[], name: "Exit"): _TypedLogDescription<{ val: BigNumber }>[];
+  extractEvents(logs: Log[], name: "Flee"): _TypedLogDescription<{  }>[];
+  extractEvents(logs: Log[], name: "Join"): _TypedLogDescription<{ val: BigNumber }>[];
+  extractEvents(logs: Log[], name: "OwnershipTransferred"): _TypedLogDescription<{ previousOwner: string; newOwner: string }>[];
+  extractEvents(logs: Log[], name: "ParamsSet"): _TypedLogDescription<{ A: BigNumber; fee: BigNumber }>[];
+  extractEvents(logs: Log[], name: "RebalanceSwap"): _TypedLogDescription<{ user: string; thusdAmount: BigNumber; collateralAmount: BigNumber; timestamp: BigNumber }>[];
+  extractEvents(logs: Log[], name: "Tack"): _TypedLogDescription<{ src: string; dst: string; wad: BigNumber }>[];
+  extractEvents(logs: Log[], name: "Transfer"): _TypedLogDescription<{ _from: string; _to: string; _value: BigNumber }>[];
+  extractEvents(logs: Log[], name: "UserDeposit"): _TypedLogDescription<{ user: string; thusdAmount: BigNumber; numShares: BigNumber }>[];
+  extractEvents(logs: Log[], name: "UserWithdraw"): _TypedLogDescription<{ user: string; thusdAmount: BigNumber; collateralAmount: BigNumber; numShares: BigNumber }>[];
+}
+
+interface BLensCalls {
+  getUserInfo(user: string, bamm: string, _overrides?: CallOverrides): Promise<{ bammUserBalance: BigNumber; bammTotalSupply: BigNumber; thusdUserBalance: BigNumber; collateralUserBalance: BigNumber; thusdTotal: BigNumber; collateralTotal: BigNumber }>;
+}
+
+interface BLensTransactions {
+}
+
+export interface BLens
+  extends _TypedLiquityContract<BLensCalls, BLensTransactions> {
+  readonly filters: {
+  };
+}
+
+interface ChainlinkTestnetCalls {
+  decimals(_overrides?: CallOverrides): Promise<BigNumber>;
+  latestRoundData(_overrides?: CallOverrides): Promise<{ roundId: BigNumber; answer: BigNumber; startedAt: BigNumber; timestamp: BigNumber; answeredInRound: BigNumber }>;
+}
+
+interface ChainlinkTestnetTransactions {
+  setPrice(_price: BigNumberish, _overrides?: Overrides): Promise<void>;
+  setTimestamp(_time: BigNumberish, _overrides?: Overrides): Promise<void>;
+}
+
+export interface ChainlinkTestnet
+  extends _TypedLiquityContract<ChainlinkTestnetCalls, ChainlinkTestnetTransactions> {
+  readonly filters: {
+  };
 }
 
 interface TroveManagerCalls {
