@@ -28,7 +28,6 @@ interface IOracles {
 export interface IAssets {
   [eth: string]: IOracles,
   btc: IOracles,
-  thusd: IOracles
 }
 
 export interface INetworkOracles {
@@ -104,10 +103,6 @@ const oracleAddresses: INetworkOracles = {
     eth: {
       chainlink: "0xD4a33860578De61DBAbDc8BFdb98FD742fA7028e",
       tellor: "0x20374E579832859f180536A69093A126Db1c8aE9" // Playground
-    },
-    thusd: {
-      chainlink: "",
-      tellor: ""
     }
   }
 };
@@ -149,7 +144,8 @@ declare module "hardhat/types/runtime" {
     deployLiquity: (
       deployer: Signer,
       oracleAddresses: INetworkOracles,
-      collateral: (keyof IAssets),
+      collateralSymbol: (keyof IAssets),
+      collateralAddress?: string,
       delay?: number,
       stablecoinAddress?: string,
       useRealPriceFeed?: boolean,
@@ -174,7 +170,8 @@ extendEnvironment(env => {
   env.deployLiquity = async (
     deployer,
     oracleAddresses,
-    collateral,
+    collateralSymbol,
+    collateralAddress = "",
     delay = 90 * 24 * 60 * 60,
     stablecoinAddress = "",
     useRealPriceFeed = false,
@@ -183,7 +180,8 @@ extendEnvironment(env => {
     const deployment = await deployAndSetupContracts(
       deployer,
       oracleAddresses,
-      collateral,
+      collateralSymbol,
+      collateralAddress,
       getContractFactory(env),
       delay,
       stablecoinAddress,
@@ -198,7 +196,8 @@ extendEnvironment(env => {
 
 type DeployParams = {
   channel: string;
-  collateral: string;
+  collateralSymbol: string;
+  collateralAddress: string;
   contractsVersion: string;
   delay: number;
   stablecoinAddress: string;
@@ -207,14 +206,16 @@ type DeployParams = {
 };
 
 const defaultChannel = process.env.CHANNEL || "default";
-const defaultCollateral = process.env.COLLATERAL || "eth";
+const defaultCollateralSymbol = process.env.COLLATERAL_SYMBOL || "tbtc";
+const defaultCollateralAddress = process.env.COLLATERAL_ADDRESS || "";
 const defaultRelease = process.env.RELEASE || "v1";
 const defaultToken = process.env.TOKEN_ADDRESS || "";
 const defaultDelay = process.env.DELAY || 90 * 24 * 60 * 60;
 
 task("deploy", "Deploys the contracts to the network")
   .addOptionalParam("channel", "Deployment channel to deploy into", defaultChannel, types.string)
-  .addOptionalParam("collateral", "Asset to use as collateral", defaultCollateral, types.string)
+  .addOptionalParam("collateralSymbol", "Asset symbol to use as collateral", defaultCollateralSymbol, types.string)
+  .addOptionalParam("collateralAddress", "Asset address to use as collateral", defaultCollateralAddress, types.string)
   .addOptionalParam("contractsVersion", "Version of contracts for collateral type", defaultRelease, types.string)
   .addOptionalParam("gasPrice", "Price to pay for 1 gas [Gwei]", undefined, types.float)
   .addOptionalParam(
@@ -236,7 +237,7 @@ task("deploy", "Deploys the contracts to the network")
     types.string
   )
   .setAction(
-    async ({ channel, collateral, contractsVersion, delay, stablecoinAddress, gasPrice, useRealPriceFeed }: DeployParams, env) => {
+    async ({ channel, collateralSymbol, collateralAddress, contractsVersion, delay, stablecoinAddress, gasPrice, useRealPriceFeed }: DeployParams, env) => {
       const overrides = { gasPrice: gasPrice && Decimal.from(gasPrice).div(1000000000).hex };
       const [deployer] = await env.ethers.getSigners();
       useRealPriceFeed ??= env.network.name === "mainnet";
@@ -246,14 +247,25 @@ task("deploy", "Deploys the contracts to the network")
       }
 
       console.log('network', env.network.name);
-      console.log('collateral', collateral);
+      console.log('collateralSymbol', collateralSymbol);
+      console.log('collateralAddress', collateralAddress);
       console.log('version', contractsVersion);
       console.log('delay', delay);
       console.log('stablecoin address:', stablecoinAddress);
       console.log('gas price: ', gasPrice);
       setSilent(false);
 
-      const deployment = await env.deployLiquity(deployer, oracleAddresses, collateral, delay, stablecoinAddress, useRealPriceFeed, overrides);
+      const deployment = await env
+        .deployLiquity(
+          deployer, 
+          oracleAddresses, 
+          collateralSymbol, 
+          collateralAddress, 
+          delay, 
+          stablecoinAddress, 
+          useRealPriceFeed, 
+          overrides
+        );
 
       if (useRealPriceFeed) {
         const contracts = _connectToContracts(deployer, deployment);
@@ -264,14 +276,14 @@ task("deploy", "Deploys the contracts to the network")
           const tellorCallerAddress = await deployTellorCaller(
             deployer,
             getContractFactory(env),
-            oracleAddresses[env.network.name][collateral as keyof IAssets].tellor,
+            oracleAddresses[env.network.name][collateralSymbol as keyof IAssets].tellor,
             overrides
           );
 
           console.log(`Hooking up PriceFeed with oracles ...`);
 
           const tx = await contracts.priceFeed.setAddresses(
-            oracleAddresses[env.network.name][collateral as keyof IAssets].chainlink,
+            oracleAddresses[env.network.name][collateralSymbol as keyof IAssets].chainlink,
             tellorCallerAddress,
             overrides
           );
@@ -280,12 +292,29 @@ task("deploy", "Deploys the contracts to the network")
         }
       }
 
-      fs.mkdirSync(path.join("deployments", channel, collateral, contractsVersion), { recursive: true });
+      fs.mkdirSync(path.join("deployments", channel, collateralSymbol, contractsVersion), { recursive: true });
 
       fs.writeFileSync(
-        path.join("deployments", channel, collateral, contractsVersion, `${env.network.name}.json`),
+        path.join("deployments", channel, collateralSymbol, contractsVersion, `${env.network.name}.json`),
         JSON.stringify(deployment, undefined, 2)
       );
+
+      const pathcu = path.join("deployments", channel)
+
+      function getFolderInfo(pathcu: string) {
+        const folders = fs.readdirSync(pathcu, { withFileTypes: true })
+          .filter(dirent => dirent.isDirectory())
+          .map(dirent => ({
+            name: dirent.name,
+            path: `${pathcu}/${dirent.name}`
+          }));
+      
+        return { path: pathcu, folders };
+      }
+      
+
+      const folderInfo = getFolderInfo(pathcu);
+      console.log('folderInfo: ', folderInfo);
 
       console.log();
       console.log(deployment);

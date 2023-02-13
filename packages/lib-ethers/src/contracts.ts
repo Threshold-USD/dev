@@ -175,7 +175,7 @@ export interface _LiquityContracts {
   stabilityPool: StabilityPool;
   bamm: BAMM;
   bLens: BLens;
-  chainlinkTestnet?: ChainlinkTestnet;
+  chainlink: ChainlinkTestnet;
   gasPool: GasPool;
   erc20: ERC20Test;
 }
@@ -207,7 +207,7 @@ const getAbi = (priceFeedIsTestnet: boolean): LiquityContractAbis => ({
   stabilityPool: stabilityPoolAbi,
   bamm: bammAbi,
   bLens: bLensAbi,
-  chainlinkTestnet: chainlinkTestnetAbi,
+  chainlink: chainlinkTestnetAbi,
   gasPool: gasPoolAbi,
   collSurplusPool: collSurplusPoolAbi,
   erc20: erc20Abi,
@@ -224,7 +224,7 @@ const mapLiquityContracts = <T, U>(
 /** @internal */
 export interface _LiquityDeploymentJSON {
   readonly chainId: number;
-  readonly addresses: Omit<_LiquityContractAddresses, "chainlinkTestnet">;
+  readonly addresses: _LiquityContractAddresses;
   readonly version: string;
   readonly deploymentDate: number;
   readonly startBlock: number;

@@ -51,13 +51,14 @@ const deployContract: (
 const deployContracts = async (
   deployer: Signer,
   oracleAddresses: INetworkOracles,
-  collateral: keyof IAssets,
+  collateralSymbol: keyof IAssets,
+  collateralAddress: string,
   getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
   delay: number,
   stablecoinAddress: string,
   priceFeedIsTestnet = true,
   overrides?: Overrides
-): Promise<[addresses: Omit<_LiquityContractAddresses, "chainlinkTestnet">, startBlock: number]> => {
+): Promise<[addresses: _LiquityContractAddresses, startBlock: number]> => {
   const [activePoolAddress, startBlock] = await deployContractAndGetBlockNumber(
     deployer,
     getContractFactory,
@@ -97,13 +98,15 @@ const deployContracts = async (
     gasPool: await deployContract(deployer, getContractFactory, "GasPool", {
       ...overrides
     }),
-    erc20: await deployContract(deployer, getContractFactory, "ERC20Test", {
+    erc20: (collateralAddress != "") 
+    ? collateralAddress
+    : await deployContract(deployer, getContractFactory, "ERC20Test", {
       ...overrides
     })
   };
 
   const chainlink = (priceFeedIsTestnet === false) 
-    ? oracleAddresses["mainnet"][collateral as keyof IAssets]
+    ? oracleAddresses["mainnet"][collateralSymbol as keyof IAssets]
     : await deployContract(
         deployer,
         getContractFactory,
@@ -152,6 +155,7 @@ const deployContracts = async (
       ...addresses,
       bamm: bamm,
       thusdToken: thusdToken,
+      chainlink: chainlink as string,
       multiTroveGetter: await deployContract(
         deployer,
         getContractFactory,
@@ -188,7 +192,7 @@ const connectContracts = async (
     stabilityPool,
     bamm,
     bLens,
-    chainlinkTestnet,
+    chainlink,
     gasPool,
     erc20
   }: _LiquityContracts,
@@ -301,7 +305,8 @@ const connectContracts = async (
 export const deployAndSetupContracts = async (
   deployer: Signer,
   oracleAddresses: INetworkOracles,
-  collateral: keyof IAssets,
+  collateralSymbol: keyof IAssets,
+  collateralAddress: string,
   getContractFactory: (name: string, signer: Signer) => Promise<ContractFactory>,
   delay: number,
   stablecoinAddress: string,
@@ -323,7 +328,7 @@ export const deployAndSetupContracts = async (
     _priceFeedIsTestnet,
     _isDev,
 
-    ...(await deployContracts(deployer, oracleAddresses, collateral, getContractFactory, delay, stablecoinAddress, _priceFeedIsTestnet, overrides).then(
+    ...(await deployContracts(deployer, oracleAddresses, collateralSymbol, collateralAddress, getContractFactory, delay, stablecoinAddress, _priceFeedIsTestnet, overrides).then(
       async ([addresses, startBlock]) => ({
         startBlock,
 

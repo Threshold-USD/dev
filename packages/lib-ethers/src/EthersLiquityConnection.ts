@@ -285,7 +285,7 @@ export function _connectByChainId(
 export async function _getVersionedDeployments(network: string): Promise<_VersionedLiquityDeployments> {
   const versionedDeployments: _VersionedLiquityDeployments = {};
 
-  for (let i = 1; i < 100; i++) {
+  for (let i = 1; i < 10; i++) {
     import(`../deployments/default/eth/v${i.toString()}/${network}.json`)
       .then((deployment) => {
         versionedDeployments['v'+i] = deployment;
