@@ -175,7 +175,7 @@ export interface _LiquityContracts {
   stabilityPool: StabilityPool;
   bamm: BAMM;
   bLens: BLens;
-  chainlinkTestnet: ChainlinkTestnet;
+  chainlinkTestnet?: ChainlinkTestnet;
   gasPool: GasPool;
   erc20: ERC20Test;
 }
@@ -224,7 +224,7 @@ const mapLiquityContracts = <T, U>(
 /** @internal */
 export interface _LiquityDeploymentJSON {
   readonly chainId: number;
-  readonly addresses: _LiquityContractAddresses;
+  readonly addresses: Omit<_LiquityContractAddresses, "chainlinkTestnet">;
   readonly version: string;
   readonly deploymentDate: number;
   readonly startBlock: number;

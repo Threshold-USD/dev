@@ -57,7 +57,7 @@ const deployContracts = async (
   stablecoinAddress: string,
   priceFeedIsTestnet = true,
   overrides?: Overrides
-): Promise<[addresses: _LiquityContractAddresses, startBlock: number]> => {
+): Promise<[addresses: Omit<_LiquityContractAddresses, "chainlinkTestnet">, startBlock: number]> => {
   const [activePoolAddress, startBlock] = await deployContractAndGetBlockNumber(
     deployer,
     getContractFactory,
@@ -152,7 +152,6 @@ const deployContracts = async (
       ...addresses,
       bamm: bamm,
       thusdToken: thusdToken,
-      chainlinkTestnet: chainlink as string,
       multiTroveGetter: await deployContract(
         deployer,
         getContractFactory,
