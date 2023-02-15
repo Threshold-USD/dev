@@ -12,7 +12,7 @@ import {
 } from "@liquity/lib-base";
 import { useThresholdSelector } from "@liquity/lib-react";
 
-import { COIN } from "../../strings";
+import { COIN } from "../../utils/constants";
 
 import { StaticRow } from "./Editor";
 import { LoadingOverlay } from "../LoadingOverlay";

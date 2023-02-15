@@ -15,7 +15,7 @@ import { useWeb3React } from "@web3-react/core";
 
 import { shortenAddress } from "../utils/shortenAddress";
 import { useThreshold } from "../hooks/ThresholdContext";
-import { COIN } from "../strings";
+import { COIN } from "../utils/constants";
 
 import { Icon } from "./Icon";
 import { Transaction } from "./Transaction";

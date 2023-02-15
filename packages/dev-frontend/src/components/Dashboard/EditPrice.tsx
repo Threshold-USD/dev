@@ -42,7 +42,7 @@ export const EditPrice = ({ version }: EditPriceProps): JSX.Element => {
       <Flex sx={{
         width: "100%",
         gap: 1,
-        pt: 4,
+        pt: "1.5rem",
         pb: 2,
         borderBottom: 1,
         borderColor: "border"

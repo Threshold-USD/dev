@@ -13,7 +13,7 @@ import {
   TroveCreationParams as VaultCreationParams
 } from "@liquity/lib-base";
 
-import { COIN,  } from "../../../strings";
+import { COIN,  } from "../../../utils/constants";
 
 import { ActionDescription, Amount } from "../../ActionDescription";
 import { ErrorDescription } from "../../ErrorDescription";

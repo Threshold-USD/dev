@@ -45,6 +45,7 @@ export const LiquidationManager = ({ version, isMintList }: LiquidationManagerPr
           width: "100%",
           gap: 1,
           pb: "1em",
+          px: ["2em", 0],
           borderBottom: 1, 
           borderColor: "border"
         }}>

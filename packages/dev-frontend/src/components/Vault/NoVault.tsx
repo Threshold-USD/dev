@@ -5,7 +5,7 @@ import { useVaultView } from "./context/VaultViewContext";
 import { LiquityStoreState as ThresholdStoreState} from "@liquity/lib-base";
 import { useThresholdSelector} from "@liquity/lib-react";
 
-import { COIN } from "../../strings";
+import { COIN } from "../../utils/constants";
 import { ActionDescription } from "../ActionDescription";
 import { GenericIcon } from "../GenericIcon";
 import { InfoIcon } from "../InfoIcon";
@@ -34,6 +34,7 @@ export const NoVault = ({ version, isMintList }: NoVaultProps): JSX.Element => {
           width: "100%",
           gap: 1,
           pb: "1em",
+          px: ["2em", 0],
           borderBottom: 1, 
           borderColor: "border"
         }}>
@@ -78,7 +79,8 @@ export const NoVault = ({ version, isMintList }: NoVaultProps): JSX.Element => {
             fontWeight: "body",
             justifyContent: "space-between",
             width: "100%",
-            px: "1em"
+            px: "1em",
+            pt: "1em",
           }}>
             <Flex>
               <Link variant="cardLinks" href="https://github.com/Threshold-USD/dev#readme" target="_blank">Read about</Link>

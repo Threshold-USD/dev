@@ -1,6 +1,7 @@
 import { Theme, ThemeUIStyleObject } from "theme-ui";
 
 const baseColors = {
+  white: "#FFF",
   blue: "#1542cd",
   purple: "#7C08F9",
   cyan: "#E2F2FF",
@@ -11,28 +12,6 @@ const baseColors = {
   lightgrey: "#e8eef3",
   grey: "#6A7793",
   lightBlue: "#F6F7FA",
-};
-
-const colors = {
-  primary: baseColors.purple,
-  secondary: baseColors.blue,
-  terciary: baseColors.lightBlue,
-  accent: baseColors.cyan,
-
-  success: baseColors.green,
-  warning: baseColors.yellow,
-  danger: baseColors.red,
-  dangerHover: baseColors.lightRed,
-  info: baseColors.blue,
-  border: baseColors.lightgrey,
-  greytext: baseColors.grey,
-  invalid: "pink",
-
-  menu: "#939393",
-  text: "#191d28",
-  heading: "#6A7793",
-  background: "white",
-  muted: "#eaebed"
 };
 
 const buttonBase: ThemeUIStyleObject = {
@@ -105,12 +84,12 @@ const card: ThemeUIStyleObject = {
 const infoCard: ThemeUIStyleObject = {
   ...card,
 
-  color: "heading",
+  color: "text",
   fontWeight: "medium",
   px: "2.5em",
   py: "1.5em",
   borderRadius: "12px",
-  background: ["white", "#F3F8FC"],
+  bg: "background",
 };
 
 const formBase: ThemeUIStyleObject = {
@@ -155,6 +134,8 @@ const columns: ThemeUIStyleObject = {
 };
 
 const theme: Theme = {
+  initialColorModeName: 'light',
+
   breakpoints: ["45em", "80em", "120em"],
 
   space: [0, 4, 8, 16, 32, 64, 128, 256, 512],
@@ -189,8 +170,72 @@ const theme: Theme = {
     body: 1.5,
     heading: 1.25
   },
+  
+  colors: {
+    primary: baseColors.purple,
+    secondary: baseColors.blue,
+    terciary: baseColors.lightBlue,
+    accent: baseColors.cyan,
+  
+    success: baseColors.green,
+    warning: baseColors.yellow,
+    danger: baseColors.red,
+    dangerHover: baseColors.lightRed,
+    info: baseColors.blue,
+    border: baseColors.lightgrey,
+    greytext: baseColors.grey,
+    invalid: "pink",
+  
+    activeMenu: baseColors.purple,
+    menu: "#939393",
+    text: "#191d28",
+    heading: "#6A7793",
+    background: baseColors.white,
+    systemStatsBackGround: "#f3f8fc",
+    wrapperBackground: "#f7fafca1",
+    muted: "#eaebed",
+    inputText: "#6A7793",
+    metaMaskButtonBg: "#EDF2F7",
+    metaMaskInnerButtonBg: "#CBD5E0",  
+    modes: {
+      dark: {
+        primary: "#7D00FF",      
+        info: baseColors.red,
+        border: "#9974FF23",
+        greytext: "#b1bccc",
+        
+        activeMenu: baseColors.white,
+        menu: "#b1bccc",
+        text: "#FCF9FF",
+        heading: "#9974FF",
+        background: "#200c5a",
+        muted: "#9974FF23",
+        systemStatsBackGround: "#200c5a",
+        wrapperBackground: "#150640",
+        metaMaskButtonBg: "#7D00FF", 
+        metaMaskInnerButtonBg: "#200c5a"
+      },
+      darkGrey: {
+        primary: "#4A5568",
+        info: baseColors.red,
+        border: "#72727223",
+        greytext: "#B1BCCC",
+        
+        activeMenu: "#F6F7FA",
+        menu: "#b1bccc",
+        text: "#F6F7FA",
+        heading: "#F6F7FA",
+        background: "#323A47",
+        muted: "#9974FF23",
+        systemStatsBackGround: "#323A47",
+        wrapperBackground: "#1D2229",
+        metaMaskButtonBg: "#4A5568", 
+        metaMaskInnerButtonBg: "#323A47"
+      },
+    }
+  },
 
-  colors,
+
 
   borders: [0, "1px solid", "2px solid"],
 
@@ -356,7 +401,7 @@ const theme: Theme = {
       px: "1em",
       py: ".5em",
       gap: "1em",
-      backgroundColor: "#EDF2F7",
+      backgroundColor: "metaMaskButtonBg",
       borderRadius: ".5em"
     },
     
@@ -366,12 +411,12 @@ const theme: Theme = {
       py: ".1em", 
       bg:"white", 
       justifyContent: "center",
-      backgroundColor: "#CBD5E0",
+      backgroundColor: "metaMaskInnerButtonBg",
       borderRadius: ".4em"
     },
 
     balanceRow: {
-      color: "text",
+      color: "inputText",
       justifyContent: "start",
       alignItems: "center",
       backgroundColor: "terciary",
@@ -399,7 +444,7 @@ const theme: Theme = {
 
       borderBottom: 1,
       borderColor: "border",
-      background: "white"
+      bg: "background",
     },
 
     sideBar: {
@@ -414,7 +459,7 @@ const theme: Theme = {
       zIndex: 0,
       borderRight: 1,
       borderColor: "border",
-      background: "white",
+      bg: "background",
       pt: "7em",
     },
 
@@ -434,7 +479,7 @@ const theme: Theme = {
       display: "flex",
       flexDirection: "column",
       minHeight: "100%",
-      backgroundColor: "#f7fafca1"
+      backgroundColor: "wrapperBackground"
     },
 
     main: {
@@ -482,6 +527,7 @@ const theme: Theme = {
     },
 
     twoThirds: {
+      display: "flex",
       pr: cardGapX,
       width: ["100%", "100%", "67%"]
     },
@@ -585,7 +631,7 @@ const theme: Theme = {
       color: "primary",
       ":hover": { color: "accent" },
       textDecoration: "none",
-      fontWeight: "bold"
+      fontWeight: "bold",
     },
   },
 
@@ -604,8 +650,8 @@ const theme: Theme = {
       color: "menu",
       gap: "1em",
       textDecoration: "none",
-      ":hover, :enabled": {
-        color: "primary",
+      ":hover, :enabled, &.active": {
+        color: "activeMenu",
       },
     },
     socialIcons: {
@@ -638,10 +684,6 @@ const theme: Theme = {
       fontSize: "0.87rem", 
       fontWeight: "extrabold",
       letterSpacing: -0.7,
-      color: "black",
-      ":visited": {
-        color: "black",
-      },
     },
   }
 };

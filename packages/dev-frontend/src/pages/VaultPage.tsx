@@ -1,6 +1,6 @@
 import { Container } from "theme-ui";
 import { Vault } from "../components/Vault/Vault";
-import { COIN } from "../strings";
+import { COIN } from "../utils/constants";
 import { PageRow } from "../components/PageRow";
 import { PageHeading } from "../components/PageHeading";
 

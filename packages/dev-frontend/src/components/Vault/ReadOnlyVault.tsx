@@ -6,7 +6,7 @@ import { DisabledEditableRow } from "./Editor";
 import { useVaultView } from "./context/VaultViewContext";
 import { Icon } from "../Icon";
 import { InfoIcon } from "../InfoIcon";
-import { COIN } from "../../strings";
+import { COIN } from "../../utils/constants";
 import { CollateralRatio } from "./CollateralRatio";
 
 const select = ({ trove, price, symbol }: ThresholdStoreState) => ({ trove, price, symbol });
@@ -33,6 +33,7 @@ export const ReadOnlyVault = ({ version }: ReadOnlyVaultProps): JSX.Element => {
           width: "100%",
           gap: 1,
           pb: "1em",
+          px: ["2em", 0],
           borderBottom: 1, 
           borderColor: "border",
         }}>
@@ -78,7 +79,8 @@ export const ReadOnlyVault = ({ version }: ReadOnlyVaultProps): JSX.Element => {
             fontWeight: "body",
             justifyContent: "space-between",
             width: "100%",
-            px: "1em"
+            px: "1em",
+            pt: "1em",
           }}>
             <Flex>
               <Link variant="cardLinks" href="https://github.com/Threshold-USD/dev#readme" target="_blank">Read about</Link>

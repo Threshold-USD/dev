@@ -4,7 +4,7 @@ import { CollateralSurplusAction } from "../CollateralSurplusAction";
 import { LiquityStoreState as ThresholdStoreState} from "@liquity/lib-base";
 import { useThresholdSelector} from "@liquity/lib-react";
 import { useVaultView } from "./context/VaultViewContext";
-import { COIN } from "../../strings";
+import { COIN } from "../../utils/constants";
 import { InfoMessage } from "../InfoMessage";
 
 const select = ({ collateralSurplusBalance, symbol }: ThresholdStoreState) => ({
@@ -33,6 +33,7 @@ export const LiquidatedVault = ({ version, isMintList }: LiquidatedVaultProps): 
           width: "100%",
           gap: 1,
           pb: "1em",
+          px: ["2em", 0],
           borderBottom: 1, 
           borderColor: "border"
         }}>
@@ -68,7 +69,8 @@ export const LiquidatedVault = ({ version, isMintList }: LiquidatedVaultProps): 
             fontWeight: "body",
             justifyContent: "space-between",
             width: "100%",
-            px: "1em"
+            px: "1em",
+            pt: "1em"
           }}>
             <Flex>
               <Link variant="cardLinks" href="https://github.com/Threshold-USD/dev#readme" target="_blank">Read about</Link>

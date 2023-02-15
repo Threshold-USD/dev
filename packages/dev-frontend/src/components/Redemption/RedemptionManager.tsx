@@ -4,7 +4,7 @@ import { Box, Flex, Card, Link } from "theme-ui";
 import { Decimal, Percent, LiquityStoreState as ThresholdStoreState, MINIMUM_COLLATERAL_RATIO } from "@liquity/lib-base";
 import { useThresholdSelector } from "@liquity/lib-react";
 
-import { COIN } from "../../strings";
+import { COIN } from "../../utils/constants";
 
 import { LoadingOverlay } from "../LoadingOverlay";
 import { EditableRow, StaticRow } from "../Vault/Editor";
@@ -108,6 +108,7 @@ export const RedemptionManager = ({ version }: RedemptionManagerProps): JSX.Elem
             width: "100%",
             gap: 1,
             pb: "1em",
+            px: ["2em", 0],
             borderBottom: 1, 
             borderColor: "border"
           }}>

@@ -1,13 +1,14 @@
 import React from "react";
-import { Box, Image } from "theme-ui";
+import { Flex, Image } from "theme-ui";
 
-type GenericIconProps = React.ComponentProps<typeof Box> & {
+type GenericIconProps = React.ComponentProps<typeof Flex> & {
   height?: number | string;
   imgSrc: string;
+  justifyContent?: string;
 };
 
-export const GenericIcon = ({ imgSrc, height, ...boxProps }: GenericIconProps): JSX.Element => (
-  <Box sx={{ lineHeight: 0 }} {...boxProps}>
+export const GenericIcon = ({ imgSrc, height, justifyContent, ...boxProps }: GenericIconProps): JSX.Element => (
+  <Flex sx={{ lineHeight: 0, justifyContent }} {...boxProps}>
     <Image src={imgSrc} sx={{ height }} />
-  </Box>
+  </Flex>
 );

@@ -8,7 +8,7 @@ type ChartCardProps = {
 
 export const Chart = ({ variant = "mainCards" }: ChartCardProps): JSX.Element => {
   return (
-    <Card {...{ variant }}>
+    <Card {...{ variant }} sx={{ width: "100%" }}>
       <LineChart />
     </Card>
   );

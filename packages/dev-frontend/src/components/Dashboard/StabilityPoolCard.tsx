@@ -1,5 +1,5 @@
 import { Card } from "theme-ui";
-import { COIN } from "../../strings";
+import { COIN } from "../../utils/constants";
 
 import { LiquityStoreState as ThresholdStoreState } from "@liquity/lib-base";
 import { useThresholdSelector} from "@liquity/lib-react";

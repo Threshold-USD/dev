@@ -1,8 +1,9 @@
 export type ThresholdConfig = {
+  coingeckoIdsByVersion?: object
   infuraApiKey?: string;
   testnetOnly?: boolean;
-  BlocksApiUrl?: string;
-  ThresholdUsdApiUrl?: string;
+  blocksApiUrl?: string;
+  thresholdUsdApiUrl?: string;
 };
 
 const defaultConfig: ThresholdConfig = {
@@ -16,9 +17,15 @@ const parseConfig = (json: unknown): ThresholdConfig => {
   const config = { ...defaultConfig };
 
   if (typeof json === "object" && json !== null) {
+    if (hasKey(json, "coingeckoIdsByVersion") && typeof json.coingeckoIdsByVersion === "object" && json.coingeckoIdsByVersion !== null) {
+      const { coingeckoIdsByVersion } = json;
+      config.coingeckoIdsByVersion = coingeckoIdsByVersion;
+    } else {
+      console.error("Malformed infuraApiKey:");
+    }
+
     if (hasKey(json, "infuraApiKey") && json.infuraApiKey !== "") {
       const { infuraApiKey } = json;
-
       if (typeof infuraApiKey === "string") {
         config.infuraApiKey = infuraApiKey;
       } else {
@@ -38,25 +45,24 @@ const parseConfig = (json: unknown): ThresholdConfig => {
       }
     }
 
-    if (hasKey(json, "BlocksApiUrl") && json.BlocksApiUrl !== "") {
-      const { BlocksApiUrl } = json;
-
-      if (typeof BlocksApiUrl === "string") {
-        config.BlocksApiUrl = BlocksApiUrl;
+    if (hasKey(json, "blocksApiUrl") && json.blocksApiUrl !== "") {
+      const { blocksApiUrl } = json;
+      if (typeof blocksApiUrl === "string") {
+        config.blocksApiUrl = blocksApiUrl;
       } else {
-        console.error("Malformed BlocksApiUrl:");
-        console.log(BlocksApiUrl);
+        console.error("Malformed blocksApiUrl:");
+        console.log(blocksApiUrl);
       }
     }
 
-    if (hasKey(json, "ThresholdUsdApiUrl") && json.ThresholdUsdApiUrl !== "") {
-      const { ThresholdUsdApiUrl } = json;
+    if (hasKey(json, "thresholdUsdApiUrl") && json.thresholdUsdApiUrl !== "") {
+      const { thresholdUsdApiUrl } = json;
 
-      if (typeof ThresholdUsdApiUrl === "string") {
-        config.ThresholdUsdApiUrl = ThresholdUsdApiUrl;
+      if (typeof thresholdUsdApiUrl === "string") {
+        config.thresholdUsdApiUrl = thresholdUsdApiUrl;
       } else {
-        console.error("Malformed ThresholdUsdApiUrl:");
-        console.log(ThresholdUsdApiUrl);
+        console.error("Malformed thresholdUsdApiUrl:");
+        console.log(thresholdUsdApiUrl);
       }
     }
   } else {

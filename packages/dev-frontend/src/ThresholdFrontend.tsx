@@ -87,9 +87,9 @@ export const ThresholdFrontend = ({ loader }: ThresholdFrontendProps): JSX.Eleme
                 unsupportedNetworkFallback={unsupportedNetworkFallback}
                 unsupportedMainnetFallback={<UnsupportedMainnetFallback />}
               >
-                <ChartProvider loader={loader}>
-                  <TransactionProvider>
-                    <FunctionalPanel loader={loader}>
+                <TransactionProvider>
+                  <FunctionalPanel loader={loader}>
+                    <ChartProvider>
                       <Switch>
                         <Route path="/" exact>
                           <Dashboard />
@@ -107,9 +107,9 @@ export const ThresholdFrontend = ({ loader }: ThresholdFrontendProps): JSX.Eleme
                           <RiskyVaultsPage />
                         </Route>
                       </Switch>
-                    </FunctionalPanel>
-                  </TransactionProvider>
-                </ChartProvider>
+                    </ChartProvider>
+                  </FunctionalPanel>
+                </TransactionProvider>
               </ThresholdProvider>
             </WalletConnector>
           </Container>

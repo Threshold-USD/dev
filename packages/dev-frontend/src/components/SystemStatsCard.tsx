@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Box, Card, Flex } from "theme-ui";
 import { Decimal, Percent, LiquityStoreState as ThresholdStoreState } from "@liquity/lib-base";
 import { useThresholdSelector } from "@liquity/lib-react";
-import { COIN } from '../strings';
+import { COIN } from "../utils/constants";
 
 import { SystemStat } from "./SystemStat";
 import { EditPrice } from "./Dashboard/EditPrice";
@@ -70,7 +70,7 @@ export const SystemStatsCard = ({ variant = "info", IsPriceEditable }: SystemSta
   }, [isMounted])
 
   return (
-    <Card {...{ variant }} sx={{ width: "100%" }}>
+    <Card {...{ variant }} sx={{ width: "100%", bg: "systemStatsBackGround", maxHeight: "26rem" }}>
       <Card variant="layout.columns">
         <Flex sx={{
           width: "100%",

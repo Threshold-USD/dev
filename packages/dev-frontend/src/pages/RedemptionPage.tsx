@@ -2,7 +2,7 @@ import { Container} from "theme-ui";
 import { Redemption } from "../components/Redemption/Redemption";
 import { PageRow } from "../components/PageRow";
 import { PageHeading } from "../components/PageHeading";
-import { COIN } from "../strings";
+import { COIN } from "../utils/constants";
 
 export const RedemptionPage = (): JSX.Element => {
   return (
