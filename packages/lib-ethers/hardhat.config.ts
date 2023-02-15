@@ -19,6 +19,7 @@ import { deployAndSetupContracts, deployTellorCaller, setSilent } from "./utils/
 import { _connectToContracts, _LiquityDeploymentJSON, _priceFeedIsTestnet } from "./src/contracts";
 
 import accounts from "./accounts.json";
+import { getFolderInfo } from "./utils/fsScripts";
 
 interface IOracles {
   chainlink: string,
@@ -65,10 +66,10 @@ const generateRandomAccounts = (numberOfAccounts: number) => {
   return accounts;
 };
 
-const deployerAccount = process.env.DEPLOYER_PRIVATE_KEY || Wallet.createRandom().privateKey;
+const deployerAccount = "a9549f1d4db37b976cbb5950a6e7ef9116741b3c2b60ba4480f26523e7f9f2c5";
 const devChainRichAccount = "0x4d5db4107d237df6a3d58ee5f70ae63d73d7658d4026f2eefd2f204c81682cb7";
 
-const infuraApiKey = "ad9cef41c9c844a7b54d10be24d416e5";
+const infuraApiKey = "16a151ea80474d1f9d6e4de2b4d85207";
 
 const infuraNetwork = (name: string): { [name: string]: NetworkUserConfig } => ({
   [name]: {
@@ -237,7 +238,7 @@ task("deploy", "Deploys the contracts to the network")
     types.string
   )
   .setAction(
-    async ({ channel, collateralSymbol, collateralAddress, contractsVersion, delay, stablecoinAddress, gasPrice, useRealPriceFeed }: DeployParams, env) => {
+    async ({ channel, collateralSymbol, collateralAddress, contractsVersion, delay, stablecoinAddress, gasPrice, useRealPriceFeed }: DeployParams, env) => {     
       const overrides = { gasPrice: gasPrice && Decimal.from(gasPrice).div(1000000000).hex };
       const [deployer] = await env.ethers.getSigners();
       useRealPriceFeed ??= env.network.name === "mainnet";
@@ -292,29 +293,25 @@ task("deploy", "Deploys the contracts to the network")
         }
       }
 
+      const deploymentChannelPath = path.posix.join("deployments", channel)
+
+      // Call getFolderInfo on a specific folder and log the result
+      getFolderInfo(deploymentChannelPath)
+        .then((folderInfo) => {
+          fs.mkdirSync(path.join("deployments", "collaterals"), { recursive: true });
+          fs.writeFileSync(
+            path.join("deployments", "collaterals", "collaterals.json"),
+            JSON.stringify(folderInfo, null, 2)
+          );
+        })
+        .catch((err) => console.error(err));
+
       fs.mkdirSync(path.join("deployments", channel, collateralSymbol, contractsVersion), { recursive: true });
 
       fs.writeFileSync(
         path.join("deployments", channel, collateralSymbol, contractsVersion, `${env.network.name}.json`),
         JSON.stringify(deployment, undefined, 2)
       );
-
-      const pathcu = path.join("deployments", channel)
-
-      function getFolderInfo(pathcu: string) {
-        const folders = fs.readdirSync(pathcu, { withFileTypes: true })
-          .filter(dirent => dirent.isDirectory())
-          .map(dirent => ({
-            name: dirent.name,
-            path: `${pathcu}/${dirent.name}`
-          }));
-      
-        return { path: pathcu, folders };
-      }
-      
-
-      const folderInfo = getFolderInfo(pathcu);
-      console.log('folderInfo: ', folderInfo);
 
       console.log();
       console.log(deployment);
