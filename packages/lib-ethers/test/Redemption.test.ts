@@ -24,6 +24,7 @@ import { _LiquityDeploymentJSON } from "../src/contracts";
 import { _redeemMaxIterations } from "../src/PopulatableEthersLiquity";
 import * as th from "../utils/testHelpers";
 import * as dh from "../utils/debugHelpers";
+import { oracleAddresses } from "../hardhat.config";
 
 const STARTING_BALANCE = Decimal.from(100); // amount of tokens and ETH to initialise
 
@@ -56,7 +57,7 @@ describe("EthersLiquity - Redemptions", () => {
     [deployer, funder, user, ...otherUsers] = await ethers.getSigners();
 
     // deploy the smart contracts
-    deployment = await deployLiquity(deployer);
+    deployment = await deployLiquity(deployer, oracleAddresses, "tbtc");
 
     // create account / connection to liquity for the user wallet
     const otherUsersSubset = otherUsers.slice(0, 3);

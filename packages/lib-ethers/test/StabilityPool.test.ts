@@ -21,6 +21,7 @@ import { EthersLiquity } from "../src/EthersLiquity";
 import { _LiquityDeploymentJSON } from "../src/contracts";
 import * as th from "../utils/testHelpers";
 import * as dh from "../utils/debugHelpers";
+import { oracleAddresses } from "../hardhat.config";
 
 const STARTING_BALANCE = Decimal.from(100);
 
@@ -55,7 +56,7 @@ describe("EthersLiquity - StabilityPool", () => {
     [deployer, funder, user, ...otherUsers] = await ethers.getSigners();
 
     // deploy smart contracts
-    deployment = await deployLiquity(deployer);
+    deployment = await deployLiquity(deployer, oracleAddresses, "tbtc");
 
     // create different accounts / liquity connections for the users
     const otherUsersSubset = otherUsers.slice(0, 5);

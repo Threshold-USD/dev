@@ -19,6 +19,7 @@ import erc20Abi from "../abi/ERC20Test.json";
 import { EthersLiquity } from "../src/EthersLiquity";
 import * as th from "../utils/testHelpers";
 import { _LiquityDeploymentJSON } from "../src/contracts";
+import { oracleAddresses } from "../hardhat.config";
 
 const STARTING_BALANCE = Decimal.from(100); // amount of tokens and ETH to initialise
 
@@ -45,7 +46,7 @@ describe("EthersLiquity - Trove", () => {
     [deployer, funder, user] = await ethers.getSigners();
 
     // deploy the smart contracts
-    deployment = await deployLiquity(deployer);
+    deployment = await deployLiquity(deployer, oracleAddresses, "tbtc");
 
     // create account / connection to liquity for the user wallet
     liquity = await th.connectToDeployment(deployment, user);

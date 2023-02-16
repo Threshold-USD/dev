@@ -25,6 +25,7 @@ import { _LiquityDeploymentJSON } from "../src/contracts";
 import { EthersLiquity } from "../src/EthersLiquity";
 import erc20Abi from "../abi/ERC20Test.json";
 import * as th from "../utils/testHelpers";
+import { oracleAddresses } from "../hardhat.config";
 
 const provider = ethers.provider;
 
@@ -56,7 +57,7 @@ describe("Gas estimation", () => {
     [rudeUser, ...fiveOtherUsers] = otherUsers.slice(0, 6);
 
     // deploy smart contracts
-    deployment = await deployLiquity(deployer);
+    deployment = await deployLiquity(deployer, oracleAddresses, "tbtc");
 
     // create account / connection to liquity for the wallets
     [deployerLiquity, liquity, rudeLiquity, ...otherLiquities] = await th.connectUsers(deployment, [
@@ -190,7 +191,7 @@ describe("Gas estimation (fee decay)", () => {
 
     this.timeout("1m");
 
-    deployment = await deployLiquity(deployer);
+    deployment = await deployLiquity(deployer, oracleAddresses, "tbtc");
     const [redeemedUser, ...someMoreUsers] = otherUsers.slice(0, 21);
     [liquity, ...otherLiquities] = await th.connectUsers(deployment, [user, ...someMoreUsers]);
 
