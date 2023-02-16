@@ -233,7 +233,10 @@ export interface _LiquityDeploymentJSON {
 }
 
 /** @internal */
-export type _VersionedLiquityDeployments = Record<string, _LiquityDeploymentJSON>
+export type Versions = Record<string, _LiquityDeploymentJSON>
+
+/** @public */
+export type CollateralsVersionedDeployments = Record<string, Versions>
 
 /** @internal */
 export const _connectToContracts = (

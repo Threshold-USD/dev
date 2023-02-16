@@ -10,9 +10,9 @@ import {
   EthersLiquity as EthersThreshold,
   EthersLiquityWithStore as EthersThresholdWithStore,
   _connectByChainId,
-  _getVersionedDeployments
+  getVersionedDeployments
 } from "@liquity/lib-ethers";
-import { _VersionedLiquityDeployments } from "@liquity/lib-ethers/dist/src/contracts";
+import { CollateralsVersionedDeployments } from "@liquity/lib-ethers/src/contracts";
 
 import { ThresholdConfig, getConfig } from "../config";
 
@@ -39,12 +39,12 @@ const wsParams = (network: string, infuraApiKey: string): [string, string] => [
 
 const supportedNetworks = ["homestead", "goerli"];
 
-const getDeploymentVersions = async (chainId: number): Promise<_VersionedLiquityDeployments> => {
-  return await _getVersionedDeployments(chainId === 1 ? 'mainnet' : 'goerli');
+const getCollateralVersions = async (chainId: number): Promise<CollateralsVersionedDeployments> => {
+  return await getVersionedDeployments(chainId === 1 ? 'mainnet' : 'goerli');
 }
 
 const getConnections = async (
-    versionedDeployments: _VersionedLiquityDeployments, 
+    versionedDeployments: CollateralsVersionedDeployments, 
     provider: Web3Provider, 
     account: string, 
     chainId: number,
@@ -54,7 +54,7 @@ const getConnections = async (
     for (const [key, value] of Object.entries(versionedDeployments)) {
       connectionsByChainId.push(_connectByChainId(
         key, 
-        value, 
+        value.deployment, 
         provider, 
         provider.getSigner(account), chainId, 
         { userAddress: account, useStore: "blockPolled" }
@@ -78,8 +78,9 @@ export const ThresholdProvider = ({
     if (!chainId || !provider || !account || !config) {
       return;
     }
-    getDeploymentVersions(chainId)
+    getCollateralVersions(chainId)
     .then((result) => {
+      console.log('result: ',result)
       getConnections(result, provider, account, chainId, setConnections)
     })
   }, [chainId, provider, account, config])

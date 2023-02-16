@@ -66,10 +66,10 @@ const generateRandomAccounts = (numberOfAccounts: number) => {
   return accounts;
 };
 
-const deployerAccount = "a9549f1d4db37b976cbb5950a6e7ef9116741b3c2b60ba4480f26523e7f9f2c5";
+const deployerAccount = process.env.DEPLOYER_PRIVATE_KEY || Wallet.createRandom().privateKey;
 const devChainRichAccount = "0x4d5db4107d237df6a3d58ee5f70ae63d73d7658d4026f2eefd2f204c81682cb7";
 
-const infuraApiKey = "16a151ea80474d1f9d6e4de2b4d85207";
+const infuraApiKey = "ad9cef41c9c844a7b54d10be24d416e5";
 
 const infuraNetwork = (name: string): { [name: string]: NetworkUserConfig } => ({
   [name]: {
@@ -81,7 +81,7 @@ const infuraNetwork = (name: string): { [name: string]: NetworkUserConfig } => (
 // https://docs.chain.link/docs/ethereum-addresses
 // https://docs.tellor.io/tellor/the-basics/contracts-reference
 
-const oracleAddresses: INetworkOracles = {
+export const oracleAddresses: INetworkOracles = {
   mainnet: {
     btc: {
       chainlink: "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c",

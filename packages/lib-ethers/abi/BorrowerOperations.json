@@ -433,6 +433,19 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_thusdToBurn",
+        "type": "uint256"
+      }
+    ],
+    "name": "burnDebtFromPCV",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "claimCollateral",
     "outputs": [],
@@ -541,6 +554,19 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_thusdToMint",
+        "type": "uint256"
+      }
+    ],
+    "name": "mintBootstrapLoanFromPCV",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

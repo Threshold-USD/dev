@@ -22,7 +22,7 @@ import {
   _LiquityDeploymentJSON
 } from "./contracts"
 import {
-  _getVersionedDeployments,
+  getVersionedDeployments,
   EthersLiquityConnection,
   EthersLiquityConnectionOptionalParams,
   EthersLiquityStoreOption,
@@ -133,9 +133,9 @@ export class ReadableEthersLiquity implements ReadableLiquity {
   ): Promise<ReadableEthersLiquity> {
     const [provider, signer] = getProviderAndSigner(signerOrProvider);
     const chainId = (await provider.getNetwork()).chainId
-    const versionedDeployments = await _getVersionedDeployments(chainId === 1 ? 'mainnet': 'goerli')
+    const versionedDeployments = await getVersionedDeployments(chainId === 1 ? 'mainnet': 'goerli')
     const importedDeployment: _LiquityDeploymentJSON =
-    versionedDeployments.v1 ?? panic(new UnsupportedNetworkError(chainId));
+    versionedDeployments.v1.deployment ?? panic(new UnsupportedNetworkError(chainId));
 
     return ReadableEthersLiquity._from(await _connect(DEPLOYMENT_VERSION_FOR_TESTING, importedDeployment, provider, signer, optionalParams));
   }

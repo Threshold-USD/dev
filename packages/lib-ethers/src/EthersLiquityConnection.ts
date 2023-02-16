@@ -4,8 +4,10 @@ import { Signer } from "@ethersproject/abstract-signer";
 import { numberify, panic } from "./_utils";
 import { EthersProvider, EthersSigner } from "./types";
 
+import deployments from "../deployments/collaterals/collaterals.json";
+
 import {
-  _VersionedLiquityDeployments,
+  CollateralsVersionedDeployments,
   _connectToContracts,
   _LiquityContractAddresses,
   _LiquityContracts,
@@ -13,6 +15,7 @@ import {
 } from "./contracts";
 
 import { _connectToMulticall, _Multicall } from "./_Multicall";
+import { FolderInfo } from "../utils/fsScripts";
 
 declare const brand: unique symbol;
 
@@ -281,21 +284,43 @@ export function _connectByChainId(
   );
 }
 
-/** @internal */
-export async function _getVersionedDeployments(network: string): Promise<_VersionedLiquityDeployments> {
-  const versionedDeployments: _VersionedLiquityDeployments = {};
+/**
+ * Get the versioned Liquity deployments for a given network.
+ * @param network - The name of the network to get deployments for.
+ * @returns A Promise that resolves with an object containing the versioned deployments for each collateral.
+ */
+/** @public */
+export async function getVersionedDeployments(network: string): Promise<CollateralsVersionedDeployments> {
+  // Initialize an empty object to hold the versioned deployments.
+  const versionedDeployments: CollateralsVersionedDeployments = {};
+  
+  // Get an array of DeploymentFolder objects for all the collaterals.
+  const collateralDeployments: FolderInfo[] = deployments.subfolders;
+  // Loop through each collateral DeploymentFolder and map over its subfolders.
+ for (let index = 0; index < collateralDeployments.length; index++) {
+    const collateral = collateralDeployments[index]
+    
+    await Promise.all((collateral.subfolders as FolderInfo[]).map(async (versionDeployment) => {
+      try {
 
-  for (let i = 1; i < 10; i++) {
-    import(`../deployments/default/eth/v${i.toString()}/${network}.json`)
-      .then((deployment) => {
-        versionedDeployments['v'+i] = deployment;
-      })
-      .catch((err) => {
-        return err
-      })
+        // Construct the absolute path of the JSON file for the specified network and version.
+        import(`@liquity/lib-ethers/${versionDeployment.path}/${network}.json`).then((deployment) => {
+          // Load the JSON file for the specified network and version.
+          versionedDeployments[collateral.name] = {
+            ...versionedDeployments[collateralDeployments[index].name],
+            [versionDeployment.name]: deployment.j,
+          }
+        })
+        // Add the versioned deployment to the corresponding collateral in the versionedDeployments object.
+      } catch (error) {
+        // Handle errors by logging or throwing an error.
+        console.error(`Failed to load deployment for ${collateralDeployments[index].name} version ${versionDeployment.name}: ${error}`);
+      }
+    }));
   }
-  return versionedDeployments
-  ;
+
+  // Return the versioned deployments object.
+  return versionedDeployments;
 }
 
 /** @internal */

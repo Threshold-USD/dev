@@ -65,8 +65,8 @@
     "ts-node": "9.1.1",
     "typescript": "4.1.5",
     "ws": "7.4.6",
-    "webpack": "^4.32.2",
-    "webpack-cli": "^3.3.2",
+    "webpack": "4.32.2",
+    "webpack-cli": "3.3.2",
     "wepack-cli": "0.0.1-security"
   }
 }

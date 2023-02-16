@@ -1,15 +1,52 @@
 [
   {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_governanceTimeDelay",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
         "indexed": false,
         "internalType": "address",
-        "name": "_activePoolAddress",
+        "name": "_bammAddress",
         "type": "address"
       }
     ],
-    "name": "ActivePoolAddressSet",
+    "name": "BAMMAddressSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_thusdAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "BAMMDeposit",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_numShares",
+        "type": "uint256"
+      }
+    ],
+    "name": "BAMMWithdraw",
     "type": "event"
   },
   {
@@ -30,12 +67,12 @@
     "inputs": [
       {
         "indexed": false,
-        "internalType": "uint256",
-        "name": "_F_ETH",
-        "type": "uint256"
+        "internalType": "address",
+        "name": "_collateralAddress",
+        "type": "address"
       }
     ],
-    "name": "F_ETHUpdated",
+    "name": "CollateralAddressSet",
     "type": "event"
   },
   {
@@ -43,12 +80,18 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      },
+      {
+        "indexed": false,
         "internalType": "uint256",
-        "name": "_F_THUSD",
+        "name": "_collateralAmount",
         "type": "uint256"
       }
     ],
-    "name": "F_THUSDUpdated",
+    "name": "CollateralWithdraw",
     "type": "event"
   },
   {
@@ -75,6 +118,64 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "uint256",
+        "name": "_paidDebt",
+        "type": "uint256"
+      }
+    ],
+    "name": "PCVDebtPaid",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      }
+    ],
+    "name": "RecipientAdded",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      }
+    ],
+    "name": "RecipientRemoved",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_council",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "address",
+        "name": "_treasury",
+        "type": "address"
+      }
+    ],
+    "name": "RolesSet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
         "internalType": "address",
         "name": "_thusdTokenAddress",
         "type": "address"
@@ -89,42 +190,22 @@
       {
         "indexed": false,
         "internalType": "address",
-        "name": "_troveManager",
+        "name": "_recipient",
         "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "_thusdAmount",
+        "type": "uint256"
       }
     ],
-    "name": "TroveManagerAddressSet",
+    "name": "THUSDWithdraw",
     "type": "event"
   },
   {
     "inputs": [],
-    "name": "DECIMAL_PRECISION",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "F_ETH",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "F_THUSD",
+    "name": "BOOTSTRAP_LOAN",
     "outputs": [
       {
         "internalType": "uint256",
@@ -149,8 +230,93 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      }
+    ],
+    "name": "addRecipientToWhitelist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "_recipients",
+        "type": "address[]"
+      }
+    ],
+    "name": "addRecipientsToWhitelist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [],
-    "name": "activePoolAddress",
+    "name": "bamm",
+    "outputs": [
+      {
+        "internalType": "contract BAMM",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "borrowerOperations",
+    "outputs": [
+      {
+        "internalType": "contract BorrowerOperations",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "cancelChangingRoles",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "changingRolesInitiated",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "collateralERC20",
+    "outputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "council",
     "outputs": [
       {
         "internalType": "address",
@@ -163,12 +329,12 @@
   },
   {
     "inputs": [],
-    "name": "borrowerOperationsAddress",
+    "name": "debtToPay",
     "outputs": [
       {
-        "internalType": "address",
+        "internalType": "uint256",
         "name": "",
-        "type": "address"
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -178,26 +344,59 @@
     "inputs": [
       {
         "internalType": "uint256",
-        "name": "_ETHFee",
+        "name": "_thusdAmount",
         "type": "uint256"
       }
     ],
-    "name": "increaseF_ETH",
+    "name": "depositToBAMM",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [
+    "inputs": [],
+    "name": "finalizeChangingRoles",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "governanceTimeDelay",
+    "outputs": [
       {
         "internalType": "uint256",
-        "name": "_THUSDFee",
+        "name": "",
         "type": "uint256"
       }
     ],
-    "name": "increaseF_THUSD",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "_bammAddress",
+        "type": "address"
+      }
+    ],
+    "name": "initialize",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "isInitialized",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -229,23 +428,102 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_thusdToBurn",
+        "type": "uint256"
+      }
+    ],
+    "name": "payDebt",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingCouncilAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "pendingTreasuryAddress",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "recipientsWhitelist",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      }
+    ],
+    "name": "removeRecipientFromWhitelist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address[]",
+        "name": "_recipients",
+        "type": "address[]"
+      }
+    ],
+    "name": "removeRecipientsFromWhitelist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_thusdTokenAddress",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "_troveManagerAddress",
+        "name": "_borrowerOperations",
         "type": "address"
       },
       {
         "internalType": "address",
-        "name": "_borrowerOperationsAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_activePoolAddress",
+        "name": "_collateralERC20",
         "type": "address"
       }
     ],
@@ -258,19 +536,18 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "_council",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_treasury",
         "type": "address"
       }
     ],
-    "name": "stakes",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "startChangingRoles",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -288,7 +565,7 @@
   },
   {
     "inputs": [],
-    "name": "troveManagerAddress",
+    "name": "treasury",
     "outputs": [
       {
         "internalType": "address",
@@ -297,6 +574,55 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_collateralAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawCollateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_numShares",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawFromBAMM",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recipient",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_thusdAmount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawTHUSD",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 
-interface FolderInfo {
+export interface FolderInfo {
   path: string;
   name: string;
   subfolders?: FolderInfo[];
