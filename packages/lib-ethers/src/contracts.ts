@@ -213,14 +213,6 @@ const getAbi = (priceFeedIsTestnet: boolean): LiquityContractAbis => ({
   erc20: erc20Abi,
 });
 
-const mapLiquityContracts = <T, U>(
-  contracts: Record<_LiquityContractsKey, T>,
-  f: (t: T, key: _LiquityContractsKey) => U
-) =>
-  Object.fromEntries(
-    Object.entries(contracts).map(([key, t]) => [key, f(t, key as _LiquityContractsKey)])
-  ) as Record<_LiquityContractsKey, U>;
-
 /** @internal */
 export interface _LiquityDeploymentJSON {
   readonly chainId: number;
@@ -238,16 +230,46 @@ export type Versions = Record<string, _LiquityDeploymentJSON>
 /** @public */
 export type CollateralsVersionedDeployments = Record<string, Versions>
 
+const mapLiquityContracts = <T, U>(
+  contracts: Record<_LiquityContractsKey, T>,
+  f: (t: T, key: _LiquityContractsKey) => U
+) => {
+  // Check that contracts is not null or undefined
+  if (!contracts) {
+    throw new Error('Contracts object cannot be null or undefined');
+  }
+
+  return Object.fromEntries(
+    Object.entries(contracts).map(([key, t]) => [key, f(t, key as _LiquityContractsKey)])
+  ) as Record<_LiquityContractsKey, U>
+}
+
 /** @internal */
 export const _connectToContracts = (
   signerOrProvider: EthersSigner | EthersProvider,
   { addresses, _priceFeedIsTestnet }: _LiquityDeploymentJSON
 ): _LiquityContracts => {
+  // Check that addresses is not null or undefined
+  if (!addresses) {
+    throw new Error('Addresses object cannot be null or undefined');
+  }
+
   const abi = getAbi(_priceFeedIsTestnet);
 
   return mapLiquityContracts(
     addresses,
-    (address, key) =>
-      new _LiquityContract(address, abi[key], signerOrProvider) as _TypedLiquityContract
+    (address, key) => {
+      // Check that address is not null or undefined
+      if (!address) {
+        throw new Error(`Address for ${key} cannot be null or undefined`);
+      }
+
+      // Check that the ABI for the key is not null or undefined
+      if (!abi[key]) {
+        throw new Error(`ABI for ${key} cannot be null or undefined`);
+      }
+
+      return new _LiquityContract(address, abi[key], signerOrProvider) as _TypedLiquityContract
+    }
   ) as _LiquityContracts;
 };
