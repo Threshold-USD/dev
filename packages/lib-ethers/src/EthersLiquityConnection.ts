@@ -38,6 +38,9 @@ export interface EthersLiquityConnection extends EthersLiquityConnectionOptional
   /** Ethers `Signer` used for sending transactions. */
   readonly signer?: EthersSigner;
 
+  /** deployment collateral of the connected network. */
+  readonly deploymentCollateral: string;
+
   /** deployment collateral version of the connected network. */
   readonly deploymentVersion: string;
 
@@ -74,6 +77,7 @@ export interface _InternalEthersLiquityConnection extends EthersLiquityConnectio
 }
 
 const connectionFrom = (
+  deploymentCollateral: string,
   deploymentVersion: string,
   provider: EthersProvider,
   signer: EthersSigner | undefined,
@@ -94,6 +98,7 @@ const connectionFrom = (
   }
 
   return branded({
+    deploymentCollateral,
     deploymentVersion,
     provider,
     signer,
@@ -179,12 +184,14 @@ export const getProviderAndSigner = (
 
 /** @internal */
 export const _connectToDeployment = (
+  collateral: string,
   version: string,
   deployment: _LiquityDeploymentJSON,
   signerOrProvider: EthersSigner | EthersProvider,
   optionalParams?: EthersLiquityConnectionOptionalParams
 ): EthersLiquityConnection =>
   connectionFrom(
+    collateral,
     version,
     ...getProviderAndSigner(signerOrProvider),
     _connectToContracts(signerOrProvider, deployment),
@@ -245,6 +252,7 @@ export interface EthersLiquityConnectionOptionalParams {
 
 /** @internal */
 export function _connectByChainId<T>(
+  collateral: string,
   version: string,
   deployment: _LiquityDeploymentJSON,
   provider: EthersProvider,
@@ -255,6 +263,7 @@ export function _connectByChainId<T>(
 
 /** @internal */
 export function _connectByChainId(
+  collateral: string,
   version: string,
   deployment: _LiquityDeploymentJSON,
   provider: EthersProvider,
@@ -265,6 +274,7 @@ export function _connectByChainId(
 
 /** @internal */
 export function _connectByChainId(
+  collateral: string,
   version: string,
   deployment: _LiquityDeploymentJSON,
   provider: EthersProvider,
@@ -272,8 +282,8 @@ export function _connectByChainId(
   chainId: number,
   optionalParams?: EthersLiquityConnectionOptionalParams
 ): EthersLiquityConnection {
-
   return connectionFrom(
+    collateral,
     version,
     provider,
     signer,
@@ -290,7 +300,7 @@ export function _connectByChainId(
  * @returns A Promise that resolves with an object containing the versioned deployments for each collateral.
  */
 /** @public */
-export async function getVersionedDeployments(network: string): Promise<CollateralsVersionedDeployments> {
+export async function getCollateralsDeployments(network: string): Promise<CollateralsVersionedDeployments> {
   // Initialize an empty object to hold the versioned deployments.
   const versionedDeployments: CollateralsVersionedDeployments = {};
   
@@ -308,7 +318,7 @@ export async function getVersionedDeployments(network: string): Promise<Collater
           // Load the JSON file for the specified network and version.
           versionedDeployments[collateral.name] = {
             ...versionedDeployments[collateralDeployments[index].name],
-            [versionDeployment.name]: deployment.j,
+            [versionDeployment.name]: deployment,
           }
         })
         // Add the versioned deployment to the corresponding collateral in the versionedDeployments object.
@@ -325,6 +335,7 @@ export async function getVersionedDeployments(network: string): Promise<Collater
 
 /** @internal */
 export const _connect = async (
+  collateral: string,
   version: string,
   deployment: _LiquityDeploymentJSON,
   provider: EthersProvider,
@@ -343,5 +354,5 @@ export const _connect = async (
     };
   }
 
-  return _connectByChainId(version, deployment, provider, signer, (await provider.getNetwork()).chainId, optionalParams);
+  return _connectByChainId(collateral, version, deployment, provider, signer, (await provider.getNetwork()).chainId, optionalParams);
 };

@@ -15,14 +15,14 @@ import {
 
 import { MultiTroveGetter } from "../types";
 
-import { decimalify, panic, DEPLOYMENT_VERSION_FOR_TESTING } from "./_utils";
+import { decimalify, panic, DEPLOYMENT_VERSION_FOR_TESTING, DEPLOYMENT_COLLATERAL_FOR_TESTING } from "./_utils";
 import { EthersCallOverrides, EthersProvider, EthersSigner } from "./types";
 
 import {
   _LiquityDeploymentJSON
 } from "./contracts"
 import {
-  getVersionedDeployments,
+  getCollateralsDeployments,
   EthersLiquityConnection,
   EthersLiquityConnectionOptionalParams,
   EthersLiquityStoreOption,
@@ -133,11 +133,11 @@ export class ReadableEthersLiquity implements ReadableLiquity {
   ): Promise<ReadableEthersLiquity> {
     const [provider, signer] = getProviderAndSigner(signerOrProvider);
     const chainId = (await provider.getNetwork()).chainId
-    const versionedDeployments = await getVersionedDeployments(chainId === 1 ? 'mainnet': 'goerli')
+    const versionedDeployments = await getCollateralsDeployments(chainId === 1 ? 'mainnet': 'goerli')
     const importedDeployment: _LiquityDeploymentJSON =
     versionedDeployments.v1.deployment ?? panic(new UnsupportedNetworkError(chainId));
 
-    return ReadableEthersLiquity._from(await _connect(DEPLOYMENT_VERSION_FOR_TESTING, importedDeployment, provider, signer, optionalParams));
+    return ReadableEthersLiquity._from(await _connect(DEPLOYMENT_COLLATERAL_FOR_TESTING, DEPLOYMENT_VERSION_FOR_TESTING, importedDeployment, provider, signer, optionalParams));
   }
 
   /**

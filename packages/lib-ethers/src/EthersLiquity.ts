@@ -1,6 +1,6 @@
 import { BlockTag } from "@ethersproject/abstract-provider";
 
-import { panic, DEPLOYMENT_VERSION_FOR_TESTING } from "./_utils";
+import { panic, DEPLOYMENT_VERSION_FOR_TESTING, DEPLOYMENT_COLLATERAL_FOR_TESTING } from "./_utils";
 
 import {
   CollateralGainTransferDetails,
@@ -35,7 +35,7 @@ import {
   UnsupportedNetworkError,
   _connect,
   _usingStore,
-  getVersionedDeployments,
+  getCollateralsDeployments,
 } from "./EthersLiquityConnection";
 
 import {
@@ -145,12 +145,12 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   ): Promise<EthersLiquity> {
     const [provider, signer] = getProviderAndSigner(signerOrProvider);
     const chainId = (await provider.getNetwork()).chainId
-    const versionedDeployments = await getVersionedDeployments(chainId === 1 ? 'mainnet': 'goerli')
+    const versionedDeployments = await getCollateralsDeployments(chainId === 1 ? 'mainnet': 'goerli')
 
     const importedDeployment: _LiquityDeploymentJSON =
     versionedDeployments.v1.deployment ?? panic(new UnsupportedNetworkError(chainId));
 
-    return EthersLiquity._from(await _connect(DEPLOYMENT_VERSION_FOR_TESTING, importedDeployment, provider, signer, optionalParams));
+    return EthersLiquity._from(await _connect(DEPLOYMENT_COLLATERAL_FOR_TESTING, DEPLOYMENT_VERSION_FOR_TESTING, importedDeployment, provider, signer, optionalParams));
   }
 
   /**

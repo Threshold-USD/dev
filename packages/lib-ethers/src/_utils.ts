@@ -3,6 +3,7 @@ import { BigNumber } from "@ethersproject/bignumber";
 import { Decimal } from "@liquity/lib-base";
 
 export const DEPLOYMENT_VERSION_FOR_TESTING = "v1"
+export const DEPLOYMENT_COLLATERAL_FOR_TESTING = "tbtc"
 
 export const numberify = (bigNumber: BigNumber): number => bigNumber.toNumber();
 

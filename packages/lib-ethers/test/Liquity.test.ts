@@ -33,7 +33,7 @@ import {
   _redeemMaxIterations
 } from "../src/PopulatableEthersLiquity";
 
-import { DEPLOYMENT_VERSION_FOR_TESTING } from "../src/_utils"
+import { DEPLOYMENT_COLLATERAL_FOR_TESTING, DEPLOYMENT_VERSION_FOR_TESTING } from "../src/_utils"
 import { EthersTransactionReceipt } from "../src/types";
 import { _LiquityDeploymentJSON } from "../src/contracts";
 import { _connectToDeployment } from "../src/EthersLiquityConnection";
@@ -58,7 +58,7 @@ const connectToDeployment = async (
   signer: Signer
 ) =>
   EthersLiquity._from(
-    _connectToDeployment(DEPLOYMENT_VERSION_FOR_TESTING, deployment, signer, {
+    _connectToDeployment(DEPLOYMENT_COLLATERAL_FOR_TESTING, DEPLOYMENT_VERSION_FOR_TESTING, deployment, signer, {
       userAddress: await signer.getAddress()
     })
   );
