@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./Interfaces/IPriceFeed.sol";
 import "./Interfaces/ITellorCaller.sol";
@@ -12,7 +12,7 @@ import "./Dependencies/LiquityMath.sol";
 import "./Dependencies/console.sol";
 
 /*
-* PriceFeed for mainnet deployment, to be connected to Chainlink's live ETH:USD aggregator reference
+* PriceFeed for mainnet deployment, to be connected to Chainlink's live collateral:USD aggregator reference
 * contract, and a wrapper contract TellorCaller, which connects to TellorMaster contract.
 *
 * The PriceFeed uses Chainlink as primary oracle, and Tellor as fallback. It contains logic for
@@ -30,7 +30,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     address borrowerOperationsAddress;
     address troveManagerAddress;
 
-    uint256 constant public ETHUSD_TELLOR_REQ_ID = 1;
+    uint256 constant public COLLATERAL_USD_TELLOR_REQ_ID = 1;
 
     // Use to convert a price answer to an 18-digit precision uint
     uint256 constant public TARGET_DIGITS = 18;
@@ -485,7 +485,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // --- Oracle response wrapper functions ---
 
     function _getCurrentTellorResponse() internal view returns (TellorResponse memory tellorResponse) {
-        try tellorCaller.getTellorCurrentValue(ETHUSD_TELLOR_REQ_ID) returns
+        try tellorCaller.getTellorCurrentValue(COLLATERAL_USD_TELLOR_REQ_ID) returns
         (
             bool ifRetrieve,
             uint256 value,

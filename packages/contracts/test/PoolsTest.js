@@ -28,14 +28,14 @@ contract('StabilityPool', async accounts => {
     await stabilityPool.setAddresses(dumbContractAddress, dumbContractAddress, mockActivePoolAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress)
   })
 
-  it('getCollateralBalance(): gets the recorded ETH balance', async () => {
-    const recordedETHBalance = await stabilityPool.getCollateralBalance()
-    assert.equal(recordedETHBalance, 0)
+  it('getCollateralBalance(): gets the recorded collateral balance', async () => {
+    const recordedCollateralBalance = await stabilityPool.getCollateralBalance()
+    assert.equal(recordedCollateralBalance, 0)
   })
 
   it('getTotalTHUSDDeposits(): gets the recorded THUSD balance', async () => {
-    const recordedETHBalance = await stabilityPool.getTotalTHUSDDeposits()
-    assert.equal(recordedETHBalance, 0)
+    const recordedTHUSDBalance = await stabilityPool.getTotalTHUSDDeposits()
+    assert.equal(recordedTHUSDBalance, 0)
   })
 })
 
@@ -58,14 +58,14 @@ contract('ActivePool', async accounts => {
       await activePool.setAddresses(mockBorrowerOperations.address, dumbContractAddress, dumbContractAddress, dumbContractAddress, dumbContractAddress, erc20Address)
     })
 
-    it('getCollateralBalance(): gets the recorded ETH balance', async () => {
-      const recordedETHBalance = await activePool.getCollateralBalance()
-      assert.equal(recordedETHBalance, 0)
+    it('getCollateralBalance(): gets the recorded collateral balance', async () => {
+      const recordedCollateralBalance = await activePool.getCollateralBalance()
+      assert.equal(recordedCollateralBalance, 0)
     })
 
     it('getTHUSDDebt(): gets the recorded THUSD balance', async () => {
-      const recordedETHBalance = await activePool.getTHUSDDebt()
-      assert.equal(recordedETHBalance, 0)
+      const recordedTHUSDBalance = await activePool.getTHUSDDebt()
+      assert.equal(recordedTHUSDBalance, 0)
     })
 
     it('increaseTHUSD(): increases the recorded THUSD balance by the correct amount', async () => {
@@ -161,13 +161,13 @@ contract('DefaultPool', async accounts => {
     })
 
     it('getCollateralBalance(): gets the recorded THUSD balance', async () => {
-      const recordedETHBalance = await defaultPool.getCollateralBalance()
-      assert.equal(recordedETHBalance, 0)
+      const recordedCollateralBalance = await defaultPool.getCollateralBalance()
+      assert.equal(recordedCollateralBalance, 0)
     })
 
     it('getTHUSDDebt(): gets the recorded THUSD balance', async () => {
-      const recordedETHBalance = await defaultPool.getTHUSDDebt()
-      assert.equal(recordedETHBalance, 0)
+      const recordedTHUSDBalance = await defaultPool.getTHUSDDebt()
+      assert.equal(recordedTHUSDBalance, 0)
     })
 
     it('increaseTHUSD(): increases the recorded THUSD balance by the correct amount', async () => {

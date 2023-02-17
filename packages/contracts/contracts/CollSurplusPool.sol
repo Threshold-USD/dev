@@ -1,15 +1,16 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./Dependencies/IERC20.sol";
 import "./Interfaces/ICollSurplusPool.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
+import "./Dependencies/SendCollateral.sol";
 
 
-contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
+contract CollSurplusPool is Ownable, CheckContract, SendCollateral, ICollSurplusPool {
 
     string constant public NAME = "CollSurplusPool";
 
@@ -56,7 +57,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
     }
 
     /* Returns the collateral state variable at ActivePool address.
-       Not necessarily equal to the raw collateral balance - ether can be forcibly sent to contracts. */
+       Not necessarily equal to the raw collateral balance - collateral can be forcibly sent to contracts. */
     function getCollateralBalance() external view override returns (uint) {
         return collateral;
     }
@@ -87,13 +88,7 @@ contract CollSurplusPool is Ownable, CheckContract, ICollSurplusPool {
         collateral -= claimableColl;
         emit CollateralSent(_account, claimableColl);
 
-        if (collateralAddress == address(0)) {
-            (bool success, ) = _account.call{ value: claimableColl }("");
-            require(success, "CollSurplusPool: sending collateral failed");
-        } else {
-            bool success = IERC20(collateralAddress).transfer(_account, claimableColl);
-            require(success, "CollSurplusPool: sending collateral failed");
-        }
+        sendCollateral(IERC20(collateralAddress), _account, claimableColl);
     }
 
     // --- 'require' functions ---

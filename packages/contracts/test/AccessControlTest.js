@@ -445,7 +445,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   describe('PCV', async accounts => {
     
     before(async () => {
-      await pcv.initialize(dummy.address, { from: owner })
+      await pcv.initialize({ from: owner })
       const debtToPay = await pcv.debtToPay()
       await pcv.payDebt(debtToPay, { from: owner })
     })
@@ -506,7 +506,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
 
     it("initialize(): reverts when caller is not owner, council or treasury", async () => {
       try {
-        await pcv.initialize(alice, { from: alice })
+        await pcv.initialize({ from: alice })
       } catch (err) {
         assert.include(err.message, "revert")
         assert.include(err.message, "PCV: caller must be owner or council or treasury")

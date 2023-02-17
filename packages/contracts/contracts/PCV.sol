@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
@@ -9,8 +9,9 @@ import "./Interfaces/ITHUSDToken.sol";
 import "./Dependencies/IERC20.sol";
 import "./B.Protocol/BAMM.sol";
 import "./BorrowerOperations.sol";
+import "./Dependencies/SendCollateral.sol";
 
-contract PCV is IPCV, Ownable, CheckContract {
+contract PCV is IPCV, Ownable, CheckContract, SendCollateral {
 
     // --- Data ---
     string constant public NAME = "PCV";
@@ -62,9 +63,12 @@ contract PCV is IPCV, Ownable, CheckContract {
     }
 
     // --- Functions ---
-
-    // TODO maybe move to constructor?
-    function setAddresses(address _thusdTokenAddress, address _borrowerOperations, address _collateralERC20)
+    function setAddresses(
+        address _thusdTokenAddress, 
+        address _borrowerOperations,
+        address payable _bammAddress, 
+        address _collateralERC20
+    )
         external
         override
         onlyOwner
@@ -72,6 +76,7 @@ contract PCV is IPCV, Ownable, CheckContract {
         require(address(thusdToken) == address(0), "PCV: contacts already set");
         checkContract(_thusdTokenAddress);
         checkContract(_borrowerOperations);
+        checkContract(_bammAddress);
         if (_collateralERC20 != address(0)) {
             checkContract(_collateralERC20);
         }
@@ -79,29 +84,23 @@ contract PCV is IPCV, Ownable, CheckContract {
         thusdToken = ITHUSDToken(_thusdTokenAddress);
         collateralERC20 = IERC20(_collateralERC20);
         borrowerOperations = BorrowerOperations(_borrowerOperations);
+        bamm = BAMM(_bammAddress);
 
         emit THUSDTokenAddressSet(_thusdTokenAddress);
         emit BorrowerOperationsAddressSet(_borrowerOperations);
         emit CollateralAddressSet(_collateralERC20);
+        emit BAMMAddressSet(_bammAddress);
     }
 
     // --- Initialization ---
-
-    // TODO move bamm initialization to setAddresses or constructor
-    function initialize(address payable _bammAddress) external override onlyOwnerOrCouncilOrTreasury {
+    function initialize() external override onlyOwnerOrCouncilOrTreasury {
         require(!isInitialized, "PCV: already initialized");
-        checkContract(_bammAddress);
-        bamm = BAMM(_bammAddress);
-        emit BAMMAddressSet(_bammAddress);
 
         debtToPay = BOOTSTRAP_LOAN;
         borrowerOperations.mintBootstrapLoanFromPCV(debtToPay);
 
-        thusdToken.approve(address(bamm), debtToPay);
-        bamm.deposit(debtToPay);
-        emit BAMMDeposit(debtToPay);  
-
         isInitialized = true;
+        depositToBAMM(debtToPay);
     }
 
     // --- Backstop protocol ---
@@ -149,17 +148,7 @@ contract PCV is IPCV, Ownable, CheckContract {
         onlyOwnerOrCouncilOrTreasury
         onlyWhitelistedRecipient(_recipient)
     {
-        if (address(collateralERC20) == address(0)) {
-            // ETH
-            require(_collateralAmount <= address(this).balance, "PCV: not enough ETH");
-            (bool success, ) = _recipient.call{ value: _collateralAmount }(""); // re-entry is fine here
-            require(success, "PCV: sending ETH failed");
-        } else {
-            // ERC20
-            require(_collateralAmount <= collateralERC20.balanceOf(address(this)), "PCV: not enough collateral");
-            bool success = collateralERC20.transfer(_recipient, _collateralAmount);
-            require(success, "PCV: sending collateral failed");
-        }
+        sendCollateral(collateralERC20, _recipient, _collateralAmount);
         
         emit CollateralWithdraw(_recipient, _collateralAmount); 
     }

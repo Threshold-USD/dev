@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "../TroveManager.sol";
 import "../BorrowerOperations.sol";
@@ -134,40 +134,40 @@ contract EchidnaTester {
 
     // Borrower Operations
 
-    function getAdjustedETH(uint256 actorBalance, uint256 _ETH, uint256 ratio) internal view returns (uint) {
+    function getAdjustedCollateral(uint256 actorBalance, uint256 _collateral, uint256 ratio) internal view returns (uint) {
         uint256 price = priceFeedTestnet.getPrice();
         require(price > 0);
-        uint256 minETH = ratio * THUSD_GAS_COMPENSATION / price;
-        require(actorBalance > minETH);
-        uint256 ETH = minETH + _ETH % (actorBalance - minETH);
-        return ETH;
+        uint256 minCollateral = ratio * THUSD_GAS_COMPENSATION / price;
+        require(actorBalance > minCollateral);
+        uint256 collateral = minCollateral + _collateral % (actorBalance - minCollateral);
+        return collateral;
     }
 
-    function getAdjustedTHUSD(uint256 ETH, uint256 _THUSDAmount, uint256 ratio) internal view returns (uint) {
+    function getAdjustedTHUSD(uint256 collateral, uint256 _THUSDAmount, uint256 ratio) internal view returns (uint) {
         uint256 price = priceFeedTestnet.getPrice();
         uint256 THUSDAmount = _THUSDAmount;
         uint256 compositeDebt = THUSDAmount + THUSD_GAS_COMPENSATION;
-        uint256 ICR = LiquityMath._computeCR(ETH, compositeDebt, price);
+        uint256 ICR = LiquityMath._computeCR(collateral, compositeDebt, price);
         if (ICR < ratio) {
-            compositeDebt = ETH * price / ratio;
+            compositeDebt = collateral * price / ratio;
             THUSDAmount = compositeDebt - THUSD_GAS_COMPENSATION;
         }
         return THUSDAmount;
     }
 
-    function openTroveExt(uint256 _i, uint256 _ETH, uint256 _THUSDAmount) public payable {
+    function openTroveExt(uint256 _i, uint256 _collateral, uint256 _THUSDAmount) public payable {
         uint256 actor = _i % NUMBER_OF_ACTORS;
         EchidnaProxy echidnaProxy = echidnaProxies[actor];
         uint256 actorBalance = address(echidnaProxy).balance;
 
         // we pass in CCR instead of MCR in case it’s the first one
-        uint256 ETH = getAdjustedETH(actorBalance, _ETH, CCR);
-        uint256 THUSDAmount = getAdjustedTHUSD(ETH, _THUSDAmount, CCR);
+        uint256 collateral = getAdjustedCollateral(actorBalance, _collateral, CCR);
+        uint256 THUSDAmount = getAdjustedTHUSD(collateral, _THUSDAmount, CCR);
 
-        //console.log('ETH', ETH);
+        //console.log('collateral', collateral);
         //console.log('THUSDAmount', THUSDAmount);
 
-        echidnaProxy.openTrovePrx(ETH, THUSDAmount, address(0), address(0), 0);
+        echidnaProxy.openTrovePrx(collateral, THUSDAmount, address(0), address(0), 0);
 
         numberOfTroves = troveManager.getTroveOwnersCount();
         assert(numberOfTroves > 0);
@@ -175,24 +175,24 @@ contract EchidnaTester {
         //assert(numberOfTroves == 0);
     }
 
-    function openTroveRawExt(uint256 _i, uint256 _ETH, uint256 _THUSDAmount, address _upperHint, address _lowerHint, uint256 _maxFee) public payable {
+    function openTroveRawExt(uint256 _i, uint256 _collateral, uint256 _THUSDAmount, address _upperHint, address _lowerHint, uint256 _maxFee) public payable {
         uint256 actor = _i % NUMBER_OF_ACTORS;
-        echidnaProxies[actor].openTrovePrx(_ETH, _THUSDAmount, _upperHint, _lowerHint, _maxFee);
+        echidnaProxies[actor].openTrovePrx(_collateral, _THUSDAmount, _upperHint, _lowerHint, _maxFee);
     }
 
-    function addCollExt(uint256 _i, uint256 _ETH) external payable {
+    function addCollExt(uint256 _i, uint256 _collateral) external payable {
         uint256 actor = _i % NUMBER_OF_ACTORS;
         EchidnaProxy echidnaProxy = echidnaProxies[actor];
         uint256 actorBalance = address(echidnaProxy).balance;
 
-        uint256 ETH = getAdjustedETH(actorBalance, _ETH, MCR);
+        uint256 collateral = getAdjustedCollateral(actorBalance, _collateral, MCR);
 
-        echidnaProxy.addCollPrx(ETH, address(0), address(0));
+        echidnaProxy.addCollPrx(collateral, address(0), address(0));
     }
 
-    function addCollRawExt(uint256 _i, uint256 _ETH, address _upperHint, address _lowerHint) external payable {
+    function addCollRawExt(uint256 _i, uint256 _collateral, address _upperHint, address _lowerHint) external payable {
         uint256 actor = _i % NUMBER_OF_ACTORS;
-        echidnaProxies[actor].addCollPrx(_ETH, _upperHint, _lowerHint);
+        echidnaProxies[actor].addCollPrx(_collateral, _upperHint, _lowerHint);
     }
 
     function withdrawCollExt(uint256 _i, uint256 _amount, address _upperHint, address _lowerHint) external {
@@ -215,24 +215,24 @@ contract EchidnaTester {
         echidnaProxies[actor].closeTrovePrx();
     }
 
-    function adjustTroveExt(uint256 _i, uint256 _ETH, uint256 _collWithdrawal, uint256 _debtChange, bool _isDebtIncrease) external payable {
+    function adjustTroveExt(uint256 _i, uint256 _collateral, uint256 _collWithdrawal, uint256 _debtChange, bool _isDebtIncrease) external payable {
         uint256 actor = _i % NUMBER_OF_ACTORS;
         EchidnaProxy echidnaProxy = echidnaProxies[actor];
         uint256 actorBalance = address(echidnaProxy).balance;
 
-        uint256 ETH = getAdjustedETH(actorBalance, _ETH, MCR);
+        uint256 collateral = getAdjustedCollateral(actorBalance, _collateral, MCR);
         uint256 debtChange = _debtChange;
         if (_isDebtIncrease) {
             // TODO: add current amount already withdrawn:
-            debtChange = getAdjustedTHUSD(ETH, uint(_debtChange), MCR);
+            debtChange = getAdjustedTHUSD(collateral, uint(_debtChange), MCR);
         }
         // TODO: collWithdrawal, debtChange
-        echidnaProxy.adjustTrovePrx(ETH, _collWithdrawal, debtChange, _isDebtIncrease, address(0), address(0), 0);
+        echidnaProxy.adjustTrovePrx(collateral, _collWithdrawal, debtChange, _isDebtIncrease, address(0), address(0), 0);
     }
 
-    function adjustTroveRawExt(uint256 _i, uint256 _ETH, uint256 _collWithdrawal, uint256 _debtChange, bool _isDebtIncrease, address _upperHint, address _lowerHint, uint256 _maxFee) external payable {
+    function adjustTroveRawExt(uint256 _i, uint256 _collateral, uint256 _collWithdrawal, uint256 _debtChange, bool _isDebtIncrease, address _upperHint, address _lowerHint, uint256 _maxFee) external payable {
         uint256 actor = _i % NUMBER_OF_ACTORS;
-        echidnaProxies[actor].adjustTrovePrx(_ETH, _collWithdrawal, _debtChange, _isDebtIncrease, _upperHint, _lowerHint, _maxFee);
+        echidnaProxies[actor].adjustTrovePrx(_collateral, _collWithdrawal, _debtChange, _isDebtIncrease, _upperHint, _lowerHint, _maxFee);
     }
 
     // Pool Manager
@@ -352,7 +352,7 @@ contract EchidnaTester {
         return true;
     }
 
-    function echidna_ETH_balances() public view returns(bool) {
+    function echidna_collateral_balances() public view returns(bool) {
         if (address(troveManager).balance > 0) {
             return false;
         }

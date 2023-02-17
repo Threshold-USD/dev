@@ -328,7 +328,6 @@ contract('BAMM', async accounts => {
 
         await bamm.withdraw(0, { from: D })
 
-        console.log("share:", (await bamm.share.call()).toString())
         console.log("stake D:", (await bamm.stake(D)).toString())
         console.log("stake E:", (await bamm.stake(E)).toString())
 
@@ -343,7 +342,6 @@ contract('BAMM', async accounts => {
 
         await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)      
 
-        console.log("share:", (await bamm.share()).toString())
         console.log("stake D:", (await bamm.stake(D)).toString())
         console.log("stake E:", (await bamm.stake(E)).toString())
         console.log("stake F:", (await bamm.stake(F)).toString())
@@ -356,7 +354,6 @@ contract('BAMM', async accounts => {
         await bamm.withdraw(0, { from: E })
         await bamm.withdraw(0, { from: F })               
         
-        console.log("share:", (await bamm.share()).toString())
         console.log("stake D:", (await bamm.stake(D)).toString())
         console.log("stake E:", (await bamm.stake(E)).toString())
         console.log("stake F:", (await bamm.stake(F)).toString())
@@ -455,25 +452,25 @@ contract('BAMM', async accounts => {
         await bamm.setParams(20, 0, {from: bammOwner})
         const price = await bamm.getSwapCollateralAmount(dec(105, 18))
         assert.equal(price.collateralAmount.toString(), dec(104, 18-2).toString())
-        assert.equal(price.feeTHusdAmount.toString(), "0")
+        assert.equal(price.feeTHUSDAmount.toString(), "0")
 
         // with fee
         await bamm.setParams(20, 100, {from: bammOwner})
         const priceWithFee = await bamm.getSwapCollateralAmount(dec(105, 18))
         assert.equal(priceWithFee.collateralAmount.toString(),price.collateralAmount.toString())
-        assert.equal(priceWithFee.feeTHusdAmount.toString(), dec(105, 16))
+        assert.equal(priceWithFee.feeTHUSDAmount.toString(), dec(105, 16))
 
         // without fee
         await bamm.setParams(20, 0, {from: bammOwner})
         const priceDepleted = await bamm.getSwapCollateralAmount(dec(1050000000000000, 18))
         assert.equal(priceDepleted.collateralAmount.toString(), collateralGains.toString())      
-        assert.equal(priceDepleted.feeTHusdAmount.toString(), "0")
+        assert.equal(priceDepleted.feeTHUSDAmount.toString(), "0")
 
         // with fee
         await bamm.setParams(20, 100, {from: bammOwner})
         const priceDepletedWithFee = await bamm.getSwapCollateralAmount(dec(1050000000000000, 18))
         assert.equal(priceDepletedWithFee.collateralAmount.toString(), priceDepleted.collateralAmount.toString())
-        assert.equal(priceDepletedWithFee.feeTHusdAmount.toString(), dec(1050000000000000, 16))      
+        assert.equal(priceDepletedWithFee.feeTHUSDAmount.toString(), dec(1050000000000000, 16))      
       })
 
       it('test getSwapCollateralAmount', async () => {
@@ -512,13 +509,13 @@ contract('BAMM', async accounts => {
         await bamm.setParams(200, 0, {from: bammOwner})
         const priceWithoutFee = await bamm.getSwapCollateralAmount(thusdQty)
         assert.equal(priceWithoutFee.collateralAmount.toString(), expectedReturn.mul(toBN(100)).div(toBN(100 * 105)).toString())
-        assert.equal(priceWithoutFee.feeTHusdAmount.toString(), "0")
+        assert.equal(priceWithoutFee.feeTHUSDAmount.toString(), "0")
 
         // with fee
         await bamm.setParams(200, 100, {from: bammOwner})
         const priceWithFee = await bamm.getSwapCollateralAmount(thusdQty)
         assert.equal(priceWithoutFee.collateralAmount.toString(), priceWithFee.collateralAmount.toString())      
-        assert.equal(priceWithFee.feeTHusdAmount.toString(), toBN(thusdQty).div(toBN("100")).toString())
+        assert.equal(priceWithFee.feeTHUSDAmount.toString(), toBN(thusdQty).div(toBN("100")).toString())
         
         // with thusd price > 1
         await thusdChainlink.setPrice(dec(102,16)) // 1 thusd = 1.02 usd
@@ -578,7 +575,7 @@ contract('BAMM', async accounts => {
         await bamm.setParams(20, 100, {from: bammOwner})
         const priceWithFee = await bamm.getSwapCollateralAmount(dec(105, 18))
         assert.equal(priceWithFee.collateralAmount.toString(), dec(104, 18-2).toString())
-        assert.equal(priceWithFee.feeTHusdAmount.toString(), dec(105, 16).toString())      
+        assert.equal(priceWithFee.feeTHUSDAmount.toString(), dec(105, 16).toString())      
 
         await thusdToken.approve(bamm.address, dec(105,18), {from: whale})
         const dest = "0xdEADBEEF00AA81bBCF694bC5c05A397F5E5658D5"
@@ -587,15 +584,15 @@ contract('BAMM', async accounts => {
         await bamm.swap(dec(105,18), priceWithFee.collateralAmount, dest, {from: whale}) // TODO - check once with higher value so it will revert
 
         // check thusd balance
-        const expectedPoolBalance = toBN(dec(6105, 18)).sub(priceWithFee.feeTHusdAmount)
+        const expectedPoolBalance = toBN(dec(6105, 18)).sub(priceWithFee.feeTHUSDAmount)
         assert.equal(expectedPoolBalance.toString(), (await stabilityPool.getCompoundedTHUSDDeposit(bamm.address)).toString())
 
-        // check eth balance
+        // check collateral balance
         const balance = await getCollateralBalance(dest)
         assert.isTrue(balance.eq(priceWithFee.collateralAmount))
 
         // check fees
-        assert.equal((await thusdToken.balanceOf(feePool)).toString(), priceWithFee.feeTHusdAmount.toString())
+        assert.equal((await thusdToken.balanceOf(feePool)).toString(), priceWithFee.feeTHUSDAmount.toString())
       })    
 
       it('test set params happy path', async () => {
@@ -637,13 +634,13 @@ contract('BAMM', async accounts => {
         await bamm.setParams(200, 0, {from: bammOwner})
         const priceWithoutFee = await bamm.getSwapCollateralAmount(thusdQty)
         assert.equal(priceWithoutFee.collateralAmount.toString(), expectedReturn200.mul(toBN(100)).div(toBN(100 * 105)).toString())
-        assert.equal(priceWithoutFee.feeTHusdAmount.toString(), "0")
+        assert.equal(priceWithoutFee.feeTHUSDAmount.toString(), "0")
 
         // with fee
         await bamm.setParams(190, 100, {from: bammOwner})
         const priceWithFee = await bamm.getSwapCollateralAmount(thusdQty)
         assert.equal(priceWithFee.collateralAmount.toString(), expectedReturn190.mul(toBN(100)).div(toBN(100 * 105)).toString())
-        assert.equal(priceWithFee.feeTHusdAmount.toString(), toBN(thusdQty).div(toBN("100")).toString())            
+        assert.equal(priceWithFee.feeTHUSDAmount.toString(), toBN(thusdQty).div(toBN("100")).toString())            
       })    
       
       it('test set params sad path', async () => {

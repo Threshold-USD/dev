@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./Dependencies/IERC20.sol";
 import './Interfaces/IBorrowerOperations.sol';
@@ -13,6 +13,7 @@ import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
+import "./Dependencies/SendCollateral.sol";
 
 /*
  * The Stability Pool holds THUSD tokens deposited by Stability Pool depositors.
@@ -127,7 +128,7 @@ import "./Dependencies/console.sol";
  * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
  *
  */
-contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
+contract StabilityPool is LiquityBase, Ownable, CheckContract, SendCollateral, IStabilityPool {
 
     string constant public NAME = "StabilityPool";
 
@@ -580,17 +581,11 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, IStabilityPool {
     function _sendCollateralGainToDepositor(uint256 _amount) internal {
         if (_amount == 0) {return;}
         uint256 newCollateral = collateral - _amount;
-        bool success = false;
         collateral = newCollateral;
         emit StabilityPoolCollateralBalanceUpdated(newCollateral);
         emit CollateralSent(msg.sender, _amount);
 
-        if (collateralAddress == address(0)) {
-          (success, ) = msg.sender.call{ value: _amount }("");
-        } else {
-          success = IERC20(collateralAddress).transfer(msg.sender, _amount);
-        }
-        require(success, "StabilityPool: sending collateral failed");
+        sendCollateral(IERC20(collateralAddress), msg.sender, _amount);
     }
 
     // Send THUSD to user and decrease THUSD in Pool

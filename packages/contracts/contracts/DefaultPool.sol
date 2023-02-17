@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./Dependencies/IERC20.sol";
 import './Interfaces/IDefaultPool.sol';
@@ -8,6 +8,7 @@ import './Interfaces/IActivePool.sol';
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
+import "./Dependencies/SendCollateral.sol";
 
 /*
  * The Default Pool holds the collateral and THUSD debt (but not THUSD tokens) from liquidations that have been redistributed
@@ -16,7 +17,7 @@ import "./Dependencies/console.sol";
  * When a trove makes an operation that applies its pending collateral and THUSD debt, its pending collateral and THUSD debt is moved
  * from the Default Pool to the Active Pool.
  */
-contract DefaultPool is Ownable, CheckContract, IDefaultPool {
+contract DefaultPool is Ownable, CheckContract, SendCollateral, IDefaultPool {
 
     string constant public NAME = "DefaultPool";
 
@@ -58,7 +59,7 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
     /*
     * Returns the collateral state variable.
     *
-    * Not necessarily equal to the the contract's raw collateral balance - ether can be forcibly sent to contracts.
+    * Not necessarily equal to the the contract's raw collateral balance - collateral can be forcibly sent to contracts.
     */
     function getCollateralBalance() external view override returns (uint) {
         return collateral;
@@ -77,14 +78,11 @@ contract DefaultPool is Ownable, CheckContract, IDefaultPool {
         emit DefaultPoolCollateralBalanceUpdated(collateral);
         emit CollateralSent(activePool, _amount);
 
+        sendCollateral(IERC20(collateralAddress), activePool, _amount);
         if (collateralAddress == address(0)) {
-            (bool success, ) = activePool.call{ value: _amount }("");
-            require(success, "DefaultPool: sending ETH failed");
-        } else {
-            bool success = IERC20(collateralAddress).transfer(activePool, _amount);
-            require(success, "DefaultPool: sending collateral failed");
-            IActivePool(activePool).updateCollateralBalance(_amount);
-        }
+            return;
+        } 
+        IActivePool(activePool).updateCollateralBalance(_amount);
     }
 
     function increaseTHUSDDebt(uint256 _amount) external override {

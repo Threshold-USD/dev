@@ -160,7 +160,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
     const { troveManager } = _getContracts(this.connection);
 
     const [collateral, debt] = await Promise.all([
-      troveManager.L_ETH({ ...overrides }).then(decimalify),
+      troveManager.L_Collateral({ ...overrides }).then(decimalify),
       troveManager.L_THUSDDebt({ ...overrides }).then(decimalify)
     ]);
 
@@ -187,7 +187,7 @@ export class ReadableEthersLiquity implements ReadableLiquity {
         decimalify(trove.coll),
         decimalify(trove.debt),
         decimalify(trove.stake),
-        new Trove(decimalify(snapshot.ETH), decimalify(snapshot.THUSDDebt))
+        new Trove(decimalify(snapshot.collateral), decimalify(snapshot.THUSDDebt))
       );
     } else {
       return new TroveWithPendingRedistribution(address, userTroveStatusFrom(trove.status));
@@ -445,7 +445,7 @@ const mapBackendTroves = (troves: BackendTroves): TroveWithPendingRedistribution
         decimalify(trove.coll),
         decimalify(trove.debt),
         decimalify(trove.stake),
-        new Trove(decimalify(trove.snapshotETH), decimalify(trove.snapshotTHUSDDebt))
+        new Trove(decimalify(trove.snapshotCollateral), decimalify(trove.snapshotTHUSDDebt))
       )
   );
 

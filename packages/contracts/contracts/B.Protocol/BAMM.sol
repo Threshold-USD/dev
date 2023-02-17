@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./../StabilityPool.sol";
 import "./CropJoinAdapter.sol";
@@ -10,9 +10,10 @@ import "./../Dependencies/IERC20.sol";
 import "./../Dependencies/Ownable.sol";
 import "./../Dependencies/AggregatorV3Interface.sol";
 import "./../Dependencies/CheckContract.sol";
+import "./../Dependencies/SendCollateral.sol";
 
 
-contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
+contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract, SendCollateral {
 
     AggregatorV3Interface public immutable priceAggregator;
     AggregatorV3Interface public immutable thusd2UsdPriceAggregator;    
@@ -157,28 +158,20 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         uint256 thusdAmount = thusdValue * numShares / total;
         uint256 collateralAmount = collateralValue * numShares / total;
 
-        // this withdraws thusdn and eth
+        // this withdraws thusdn and collateral
         SP.withdrawFromSP(thusdAmount);
 
         // update LP token
         burn(msg.sender, numShares);
 
-        // send thusd and eth
+        // send thusd and collateral
         if(thusdAmount > 0) thusdToken.transfer(msg.sender, thusdAmount);
         emit UserWithdraw(msg.sender, thusdAmount, collateralAmount, numShares);        
         if(collateralAmount == 0) {
             return;
         }
 
-        if (address(collateralERC20) == address(0)) {
-            // ETH
-            (bool success, ) = msg.sender.call{ value: collateralAmount }(""); // re-entry is fine here
-            require(success, "withdraw: sending ETH failed");
-        } else {
-            // ERC20
-            bool success = collateralERC20.transfer(msg.sender, collateralAmount);
-            require(success, "withdraw: sending collateral failed");
-        }
+        sendCollateral(collateralERC20, msg.sender, collateralAmount);
     }
 
     function addBps(uint256 n, int bps) internal pure returns(uint) {
@@ -188,7 +181,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         return n * uint256(10000 + bps) / 10000;
     }
 
-    function compensateForTHusdDeviation(uint256 ethAmount) public view returns(uint256 newEthAmount) {
+    function compensateForTHUSDDeviation(uint256 collateralAmount) public view returns(uint256 newCollateralAmount) {
         uint256 chainlinkDecimals;
         uint256 chainlinkLatestAnswer;
 
@@ -201,12 +194,12 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
 
         // adjust only if 1 thUSD > 1 USDC. If thUSD < USD, then we give a discount, and rebalance will happen anw
         if(chainlinkLatestAnswer > 10 ** chainlinkDecimals ) {
-            newEthAmount = ethAmount * chainlinkLatestAnswer / (10 ** chainlinkDecimals);
+            newCollateralAmount = collateralAmount * chainlinkLatestAnswer / (10 ** chainlinkDecimals);
         }
-        else newEthAmount = ethAmount;
+        else newCollateralAmount = collateralAmount;
     }
 
-    function getSwapCollateralAmount(uint256 thusdQty) public view returns(uint256 collateralAmount, uint256 feeTHusdAmount) {
+    function getSwapCollateralAmount(uint256 thusdQty) public view returns(uint256 collateralAmount, uint256 feeTHUSDAmount) {
         uint256 thusdBalance = SP.getCompoundedTHUSDDeposit(address(this));
         uint256 collateralBalance = getCollateralBalance();
 
@@ -223,16 +216,16 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         uint256 usdReturn = getReturn(xQty, xBalance, yBalance, A);
         uint256 basicCollateralReturn = usdReturn * PRECISION / collateral2usdPrice;
 
-        basicCollateralReturn = compensateForTHusdDeviation(basicCollateralReturn);
+        basicCollateralReturn = compensateForTHUSDDeviation(basicCollateralReturn);
 
         if(collateralBalance < basicCollateralReturn) basicCollateralReturn = collateralBalance; // cannot give more than balance 
         if(maxReturn < basicCollateralReturn) basicCollateralReturn = maxReturn;
 
         collateralAmount = basicCollateralReturn;
-        feeTHusdAmount = addBps(thusdQty, int(fee)) - thusdQty;
+        feeTHUSDAmount = addBps(thusdQty, int(fee)) - thusdQty;
     }
 
-    // get ETH in return to THUSD
+    // get collateral in return to THUSD
     function swap(uint256 thusdAmount, uint256 minCollateralReturn, address payable dest) public returns(uint) {
         (uint256 collateralAmount, uint256 feeAmount) = getSwapCollateralAmount(thusdAmount);
 
@@ -276,8 +269,8 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract {
         uint256 srcQty,
         uint256 /* blockNumber */
     ) external view returns (uint256) {
-        (uint256 ethQty, ) = getSwapCollateralAmount(srcQty);
-        return ethQty * PRECISION / srcQty;
+        (uint256 collateralQty, ) = getSwapCollateralAmount(srcQty);
+        return collateralQty * PRECISION / srcQty;
     }
 
     receive() external payable {}

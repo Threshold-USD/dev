@@ -21,6 +21,8 @@ const TroveManagerTester = artifacts.require("./TroveManagerTester.sol")
 const THUSDTokenTester = artifacts.require("./THUSDTokenTester.sol")
 const ERC20Test = artifacts.require("./ERC20Test.sol")
 
+const Dummy = artifacts.require("./TestContracts/Dummy.sol")
+
 // Proxy scripts
 const BorrowerOperationsScript = artifacts.require('BorrowerOperationsScript')
 const BorrowerWrappersScript = artifacts.require('BorrowerWrappersScript')
@@ -47,15 +49,7 @@ const delay = 90 * 24 * 60 * 60  // 90 days in seconds
 class DeploymentHelper {
 
   static async deployLiquityCore(accounts) {
-    const cmdLineArgs = process.argv
-    const frameworkPath = cmdLineArgs[1]
-    // console.log(`Framework used:  ${frameworkPath}`)
-
-    if (frameworkPath.includes("hardhat")) {
-      return this.deployHardhat(accounts)
-    } else if (frameworkPath.includes("truffle")) {
-      return this.deployTruffle(accounts)
-    }
+    return this.deployHardhat(accounts)
   }
 
   static async deployHardhat(accounts) {
@@ -158,56 +152,6 @@ class DeploymentHelper {
     }
 
     return testerContracts
-  }
-
-  static async deployTruffle() {
-    const priceFeedTestnet = await PriceFeedTestnet.new()
-    const sortedTroves = await SortedTroves.new()
-    const troveManager = await TroveManager.new()
-    const activePool = await ActivePool.new()
-    const stabilityPool = await StabilityPool.new()
-    const erc20 = ERC20Test.new()
-    const gasPool = await GasPool.new()
-    const defaultPool = await DefaultPool.new()
-    const collSurplusPool = await CollSurplusPool.new()
-    const functionCaller = await FunctionCaller.new()
-    const borrowerOperations = await BorrowerOperations.new()
-    const hintHelpers = await HintHelpers.new()
-    const thusdToken = await THUSDToken.new(
-      troveManager.address,
-      stabilityPool.address,
-      borrowerOperations.address
-    )
-    const pcv = await PCV.new()
-
-    PCV.setAsDeployed(pcv)
-
-    let index = 0;
-    for (const account of accounts) {
-      await erc20.mint(account, await contracts.erc20.balanceOf(account))
-      index++;
-
-      if (index >= 50)
-        break;
-    }
-
-    const contracts = {
-      priceFeedTestnet,
-      thusdToken,
-      sortedTroves,
-      troveManager,
-      activePool,
-      stabilityPool,
-      erc20,
-      gasPool,
-      defaultPool,
-      collSurplusPool,
-      functionCaller,
-      borrowerOperations,
-      hintHelpers,
-      pcv
-    }
-    return contracts
   }
 
   static async deployTHUSDToken(contracts) {
@@ -341,9 +285,13 @@ class DeploymentHelper {
       contracts.troveManager.address
     )
 
+    if (!contracts.bamm) {
+      contracts.bamm = await Dummy.new()
+    }
     await contracts.pcv.setAddresses(
       contracts.thusdToken.address,
       contracts.borrowerOperations.address,
+      contracts.bamm.address,
       contracts.erc20.address
     )
 

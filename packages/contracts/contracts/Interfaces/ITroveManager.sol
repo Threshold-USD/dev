@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./ILiquityBase.sol";
 import "./IStabilityPool.sol";
@@ -25,15 +25,15 @@ interface ITroveManager is ILiquityBase {
     event PCVAddressChanged(address _pcvAddress);
 
     event Liquidation(uint256 _liquidatedDebt, uint256 _liquidatedColl, uint256 _collGasCompensation, uint256 _THUSDGasCompensation);
-    event Redemption(uint256 _attemptedTHUSDAmount, uint256 _actualTHUSDAmount, uint256 _ETHSent, uint256 _ETHFee);
+    event Redemption(uint256 _attemptedTHUSDAmount, uint256 _actualTHUSDAmount, uint256 _collateralSent, uint256 _collateralFee);
     event TroveUpdated(address indexed _borrower, uint256 _debt, uint256 _coll, uint256 stake, uint8 operation);
     event TroveLiquidated(address indexed _borrower, uint256 _debt, uint256 _coll, uint8 operation);
     event BaseRateUpdated(uint256 _baseRate);
     event LastFeeOpTimeUpdated(uint256 _lastFeeOpTime);
     event TotalStakesUpdated(uint256 _newTotalStakes);
     event SystemSnapshotsUpdated(uint256 _totalStakesSnapshot, uint256 _totalCollateralSnapshot);
-    event LTermsUpdated(uint256 _L_ETH, uint256 _L_THUSDDebt);
-    event TroveSnapshotsUpdated(uint256 _L_ETH, uint256 _L_THUSDDebt);
+    event LTermsUpdated(uint256 _L_Collateral, uint256 _L_THUSDDebt);
+    event TroveSnapshotsUpdated(uint256 _L_Collateral, uint256 _L_THUSDDebt);
     event TroveIndexUpdated(address _borrower, uint256 _newIndex);
 
     // --- Functions ---
@@ -86,7 +86,7 @@ interface ITroveManager is ILiquityBase {
 
     function applyPendingRewards(address _borrower) external;
 
-    function getPendingETHReward(address _borrower) external view returns (uint);
+    function getPendingCollateralReward(address _borrower) external view returns (uint);
 
     function getPendingTHUSDDebtReward(address _borrower) external view returns (uint);
 
@@ -96,7 +96,7 @@ interface ITroveManager is ILiquityBase {
         uint256 debt,
         uint256 coll,
         uint256 pendingTHUSDDebtReward,
-        uint256 pendingETHReward
+        uint256 pendingCollateralReward
     );
 
     function closeTrove(address _borrower) external;
@@ -106,7 +106,7 @@ interface ITroveManager is ILiquityBase {
     function getRedemptionRate() external view returns (uint);
     function getRedemptionRateWithDecay() external view returns (uint);
 
-    function getRedemptionFeeWithDecay(uint256 _ETHDrawn) external view returns (uint);
+    function getRedemptionFeeWithDecay(uint256 _collateralDrawn) external view returns (uint);
 
     function getBorrowingRate() external view returns (uint);
     function getBorrowingRateWithDecay() external view returns (uint);

@@ -11,10 +11,10 @@ const mv = testHelpers.MoneyValues
 const timeValues = testHelpers.TimeValues
 
 
-/* NOTE: Some tests involving ETH redemption fees do not test for specific fee values.
+/* NOTE: Some tests involving collateral redemption fees do not test for specific fee values.
  * Some only test that the fees are non-zero when they should occur.
  *
- * Specific ETH gain values will depend on the final fee schedule used, and the final choices for
+ * Specific collateral gain values will depend on the final fee schedule used, and the final choices for
  * the parameter BETA in the TroveManager, which is still TBD based on economic modelling.
  *
  */

@@ -437,11 +437,11 @@ export class PopulatedEthersRedemption
       ({ logs }) =>
         troveManager
           .extractEvents(logs, "Redemption")
-          .map(({ args: { _ETHSent, _ETHFee, _actualTHUSDAmount, _attemptedTHUSDAmount } }) => ({
+          .map(({ args: { _collateralSent, _collateralFee, _actualTHUSDAmount, _attemptedTHUSDAmount } }) => ({
             attemptedTHUSDAmount: decimalify(_attemptedTHUSDAmount),
             actualTHUSDAmount: decimalify(_actualTHUSDAmount),
-            collateralTaken: decimalify(_ETHSent),
-            fee: decimalify(_ETHFee)
+            collateralTaken: decimalify(_collateralSent),
+            fee: decimalify(_collateralFee)
           }))[0]
     );
 

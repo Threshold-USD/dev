@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "../TroveManager.sol";
 import "../BorrowerOperations.sol";
@@ -56,19 +56,19 @@ contract EchidnaProxy {
     }
 
     // Borrower Operations
-    function openTrovePrx(uint256 _ETH, uint256 _THUSDAmount, address _upperHint, address _lowerHint, uint256 _maxFee) external payable {
+    function openTrovePrx(uint256 _collateral, uint256 _THUSDAmount, address _upperHint, address _lowerHint, uint256 _maxFee) external payable {
         if (borrowerOperations.collateralAddress() == address(0)) {
-          borrowerOperations.openTrove{value: _ETH}(_maxFee, _THUSDAmount, 0, _upperHint, _lowerHint);
+          borrowerOperations.openTrove{value: _collateral}(_maxFee, _THUSDAmount, 0, _upperHint, _lowerHint);
         } else {
-          borrowerOperations.openTrove{value: 0}(_maxFee, _THUSDAmount, _ETH, _upperHint, _lowerHint);
+          borrowerOperations.openTrove{value: 0}(_maxFee, _THUSDAmount, _collateral, _upperHint, _lowerHint);
         }
     }
 
-    function addCollPrx(uint256 _ETH, address _upperHint, address _lowerHint) external payable {
+    function addCollPrx(uint256 _collateral, address _upperHint, address _lowerHint) external payable {
         if (borrowerOperations.collateralAddress() == address(0)) {
-            borrowerOperations.addColl{value: _ETH}(0, _upperHint, _lowerHint);
+            borrowerOperations.addColl{value: _collateral}(0, _upperHint, _lowerHint);
         } else {
-            borrowerOperations.addColl{value: 0}(_ETH, _upperHint, _lowerHint);
+            borrowerOperations.addColl{value: 0}(_collateral, _upperHint, _lowerHint);
         }
     }
 
@@ -88,11 +88,11 @@ contract EchidnaProxy {
         borrowerOperations.closeTrove();
     }
 
-    function adjustTrovePrx(uint256 _ETH, uint256 _collWithdrawal, uint256 _debtChange, bool _isDebtIncrease, address _upperHint, address _lowerHint, uint256 _maxFee) external payable {
+    function adjustTrovePrx(uint256 _collateral, uint256 _collWithdrawal, uint256 _debtChange, bool _isDebtIncrease, address _upperHint, address _lowerHint, uint256 _maxFee) external payable {
         if (borrowerOperations.collateralAddress() == address(0)) {
-          borrowerOperations.adjustTrove{value: _ETH}(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, 0, _upperHint, _lowerHint);
+          borrowerOperations.adjustTrove{value: _collateral}(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, 0, _upperHint, _lowerHint);
         } else {
-          borrowerOperations.adjustTrove{value: 0}(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, _ETH, _upperHint, _lowerHint);
+          borrowerOperations.adjustTrove{value: 0}(_maxFee, _collWithdrawal, _debtChange, _isDebtIncrease, _collateral, _upperHint, _lowerHint);
         }
     }
 

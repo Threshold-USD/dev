@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./Dependencies/IERC20.sol";
 import './Interfaces/IActivePool.sol';
@@ -10,6 +10,7 @@ import './Interfaces/IStabilityPool.sol';
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 // import "./Dependencies/console.sol";
+import "./Dependencies/SendCollateral.sol";
 
 /*
  * The Active Pool holds the collateral and THUSD debt (but not THUSD tokens) for all active troves.
@@ -18,7 +19,7 @@ import "./Dependencies/CheckContract.sol";
  * Stability Pool, the Default Pool, or both, depending on the liquidation conditions.
  *
  */
-contract ActivePool is Ownable, CheckContract, IActivePool {
+contract ActivePool is Ownable, CheckContract, SendCollateral, IActivePool {
 
     string constant public NAME = "ActivePool";
 
@@ -93,22 +94,18 @@ contract ActivePool is Ownable, CheckContract, IActivePool {
         emit ActivePoolCollateralBalanceUpdated(collateral);
         emit CollateralSent(_account, _amount);
 
+        sendCollateral(IERC20(collateralAddress), _account, _amount);
         if (collateralAddress == address(0)) {
-            (bool success, ) = _account.call{ value: _amount }("");
-            require(success, "ActivePool: sending collateral failed");
-        } else {
-            bool success = IERC20(collateralAddress).transfer(_account, _amount);
-            require(success, "ActivePool: sending collateral failed");
-
-            if (_account == defaultPoolAddress) {
-                IDefaultPool(_account).updateCollateralBalance(_amount);
-            }
-            if (_account == collSurplusPoolAddress) {
-                ICollSurplusPool(_account).updateCollateralBalance(_amount);
-            }
-            if (_account == stabilityPoolAddress) {
-                IStabilityPool(_account).updateCollateralBalance(_amount);
-            }
+            return;
+        }
+        if (_account == defaultPoolAddress) {
+            IDefaultPool(_account).updateCollateralBalance(_amount);
+        }
+        if (_account == collSurplusPoolAddress) {
+            ICollSurplusPool(_account).updateCollateralBalance(_amount);
+        }
+        if (_account == stabilityPoolAddress) {
+            IStabilityPool(_account).updateCollateralBalance(_amount);
         }
     }
 

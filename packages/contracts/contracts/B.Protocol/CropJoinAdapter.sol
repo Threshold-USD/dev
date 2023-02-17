@@ -1,27 +1,19 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
-
-import "./crop.sol";
-import "./../StabilityPool.sol";
+pragma solidity ^0.8.17;
 
 // NOTE! - this is not an ERC20 token. transfer is not supported.
-contract CropJoinAdapter is CropJoin {
-    string constant public name = "B.AMM THUSD-ETH";
-    string constant public symbol = "THUSDETH";
+contract CropJoinAdapter {
+    string constant public name = "B.AMM THUSD-COLLATERAL";
+    string constant public symbol = "THUSDCOLL";
     uint256 constant public decimals = 18;
+    
+    uint256     public total;                  // total gems       [wad]
+    mapping (address => uint256) public stake; // gems per user   [wad]
 
+    event Join(uint256 val);
+    event Exit(uint256 val);
     event Transfer(address indexed _from, address indexed _to, uint256 _value);
-
-    constructor()  
-        CropJoin(address(new Dummy()), "B.AMM", address(new DummyGem()), address(new DummyGem()))
-    {
-    }
-
-    // adapter to cropjoin
-    function nav() public view override returns (uint256) {
-        return total;
-    }
     
     function totalSupply() public view returns (uint256) {
         return total;
@@ -32,34 +24,20 @@ contract CropJoinAdapter is CropJoin {
     }
 
     function mint(address to, uint256 value) virtual internal {
-        join(to, value);
+        if (value > 0) {
+            total += value;
+            stake[to] += value;
+        }
+        emit Join(value);
         emit Transfer(address(0), to, value);
     }
 
     function burn(address owner, uint256 value) virtual internal {
-        exit(owner, value);
+        if (value > 0) {
+            total -= value;
+            stake[owner] -= value;
+        }
+        emit Exit(value);
         emit Transfer(owner, address(0), value);        
-    }
-}
-
-contract Dummy {
-    fallback() external {}
-}
-
-contract DummyGem is Dummy {
-    function transfer(address, uint256) external pure returns(bool) {
-        return true;
-    }
-
-    function transferFrom(address, address, uint256) external pure returns(bool) {
-        return true;
-    }
-
-    function decimals() external pure returns(uint256) {
-        return 18;
-    }  
-
-    function balanceOf(address) public pure returns (uint256 balance) {
-        balance = 0;
     }
 }

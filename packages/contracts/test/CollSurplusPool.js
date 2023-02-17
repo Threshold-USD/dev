@@ -45,11 +45,11 @@ contract('CollSurplusPool', async accounts => {
       const { collateral: B_coll, netDebt: B_netDebt } = await openTrove({ ICR: toBN(dec(200, 16)), extraParams: { from: B } })
       await openTrove({ extraTHUSDAmount: B_netDebt, extraParams: { from: A, value: dec(3000, 'ether') } })
 
-      // At ETH:USD = 100, this redemption should leave 1 ether of coll surplus
+      // At collateral:USD = 100, this redemption should leave 1 ether/token of coll surplus
       await th.redeemCollateralAndGetTxObject(A, contracts, B_netDebt)
 
-      const ETH_2 = await collSurplusPool.getCollateralBalance()
-      th.assertIsApproximatelyEqual(ETH_2, B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price)))
+      const collateral_2 = await collSurplusPool.getCollateralBalance()
+      th.assertIsApproximatelyEqual(collateral_2, B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price)))
     })
 
     it("CollSurplusPool: claimColl(): Reverts if caller is not Borrower Operations", async () => {
@@ -78,8 +78,8 @@ contract('CollSurplusPool', async accounts => {
     //   // At ETH:USD = 100, this redemption should leave 1 ether of coll surplus for B
     //   await th.redeemCollateralAndGetTxObject(A, contracts, B_netDebt)
     //
-    //   const ETH_2 = await collSurplusPool.getCollateralBalance()
-    //   th.assertIsApproximatelyEqual(ETH_2, B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price)))
+    //   const collateral_2 = await collSurplusPool.getCollateralBalance()
+    //   th.assertIsApproximatelyEqual(collateral_2, B_coll.sub(B_netDebt.mul(mv._1e18BN).div(price)))
     //
     //   const claimCollateralData = th.getTransactionData('claimCollateral()', [])
     //   await th.assertRevert(nonPayable.forward(borrowerOperations.address, claimCollateralData), 'CollSurplusPool: sending ETH failed')

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.8.17;
 
 import "./TroveManager.sol";
 import "./SortedTroves.sol";
@@ -15,7 +14,7 @@ contract MultiTroveGetter {
         uint256 coll;
         uint256 stake;
 
-        uint256 snapshotETH;
+        uint256 snapshotCollateral;
         uint256 snapshotTHUSDDebt;
     }
 
@@ -81,7 +80,7 @@ contract MultiTroveGetter {
                 /* arrayIndex */
             ) = troveManager.Troves(currentTroveowner);
             (
-                _troves[idx].snapshotETH,
+                _troves[idx].snapshotCollateral,
                 _troves[idx].snapshotTHUSDDebt
             ) = troveManager.rewardSnapshots(currentTroveowner);
 
@@ -110,7 +109,7 @@ contract MultiTroveGetter {
                 /* arrayIndex */
             ) = troveManager.Troves(currentTroveowner);
             (
-                _troves[idx].snapshotETH,
+                _troves[idx].snapshotCollateral,
                 _troves[idx].snapshotTHUSDDebt
             ) = troveManager.rewardSnapshots(currentTroveowner);
 

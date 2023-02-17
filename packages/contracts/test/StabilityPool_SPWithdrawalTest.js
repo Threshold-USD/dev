@@ -73,8 +73,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // --- withdrawFromSP()
 
       // --- Identical deposits, identical liquidation amounts---
-      it("withdrawFromSP(): Depositors with equal initial deposit withdraw correct compounded deposit and ETH Gain after one liquidation", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): Depositors with equal initial deposit withdraw correct compounded deposit and collateral Gain after one liquidation", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B and C who then deposit it to the SP
@@ -93,12 +93,12 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         // Defaulter liquidated
         await troveManager.liquidate(defaulter_1, { from: owner });
 
-        // Check depositors' compounded deposit is 6666.66 THUSD and ETH Gain is 33.16 ETH
+        // Check depositors' compounded deposit is 6666.66 THUSD and collateral Gain is 33.16 ETH/tokens
         const txA = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice })
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -112,8 +112,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference(carol_collateralWithdrawn, '33166666666666666667'), 10000)
       })
 
-      it("withdrawFromSP(): Depositors with equal initial deposit withdraw correct compounded deposit and ETH Gain after two identical liquidations", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): Depositors with equal initial deposit withdraw correct compounded deposit and collateral Gain after two identical liquidations", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B and C who then deposit it to the SP
@@ -134,11 +134,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await troveManager.liquidate(defaulter_1, { from: owner });
         await troveManager.liquidate(defaulter_2, { from: owner });
 
-        // Check depositors' compounded deposit is 3333.33 THUSD and ETH Gain is 66.33 ETH
+        // Check depositors' compounded deposit is 3333.33 THUSD and collateral Gain is 66.33 ETH/tokens
         const txA = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice })
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -152,8 +152,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference(carol_collateralWithdrawn, '66333333333333333333'), 10000)
       })
 
-      it("withdrawFromSP():  Depositors with equal initial deposit withdraw correct compounded deposit and ETH Gain after three identical liquidations", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP():  Depositors with equal initial deposit withdraw correct compounded deposit and collateral Gain after three identical liquidations", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B and C who then deposit it to the SP
@@ -176,12 +176,12 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await troveManager.liquidate(defaulter_2, { from: owner });
         await troveManager.liquidate(defaulter_3, { from: owner });
 
-        // Check depositors' compounded deposit is 0 THUSD and ETH Gain is 99.5 ETH
+        // Check depositors' compounded deposit is 0 THUSD and collateral Gain is 99.5 ETH/tokens
         const txA = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice })
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -196,8 +196,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       })
 
       // --- Identical deposits, increasing liquidation amounts ---
-      it("withdrawFromSP(): Depositors with equal initial deposit withdraw correct compounded deposit and ETH Gain after two liquidations of increasing THUSD", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): Depositors with equal initial deposit withdraw correct compounded deposit and collateral Gain after two liquidations of increasing THUSD", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B and C who then deposit it to the SP
@@ -223,7 +223,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -238,8 +238,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference(carol_collateralWithdrawn, dec(398, 17)), 10000)
       })
 
-      it("withdrawFromSP(): Depositors with equal initial deposit withdraw correct compounded deposit and ETH Gain after three liquidations of increasing THUSD", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): Depositors with equal initial deposit withdraw correct compounded deposit and collateral Gain after three liquidations of increasing THUSD", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
@@ -268,7 +268,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -284,8 +284,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       })
 
       // --- Increasing deposits, identical liquidation amounts ---
-      it("withdrawFromSP(): Depositors with varying deposits withdraw correct compounded deposit and ETH Gain after two identical liquidations", async () => {
-        // Whale opens Trove with 100k ETH       
+      it("withdrawFromSP(): Depositors with varying deposits withdraw correct compounded deposit and collateral Gain after two identical liquidations", async () => {
+        // Whale opens Trove with 100k ETH/tokens       
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k, 20k, 30k THUSD to A, B and C respectively who then deposit it to the SP
@@ -312,7 +312,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(20000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(30000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -326,8 +326,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference(carol_collateralWithdrawn, dec(995, 17)), 100000)
       })
 
-      it("withdrawFromSP(): Depositors with varying deposits withdraw correct compounded deposit and ETH Gain after three identical liquidations", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): Depositors with varying deposits withdraw correct compounded deposit and collateral Gain after three identical liquidations", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k, 20k, 30k THUSD to A, B and C respectively who then deposit it to the SP
@@ -356,7 +356,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(20000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(30000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -371,8 +371,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       })
 
       // --- Varied deposits and varied liquidation amount ---
-      it("withdrawFromSP(): Depositors with varying deposits withdraw correct compounded deposit and ETH Gain after three varying liquidations", async () => {
-        // Whale opens Trove with 1m ETH
+      it("withdrawFromSP(): Depositors with varying deposits withdraw correct compounded deposit and collateral Gain after three varying liquidations", async () => {
+        // Whale opens Trove with 1m ETH/tokens
         await openTrove(whale, dec(1000000, 18), dec(1000000, 'ether'))
 
         /* Depositors provide:-
@@ -389,9 +389,9 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         /* Defaulters open troves
 
-        Defaulter 1: 207000 THUSD & 2160 ETH
-        Defaulter 2: 5000 THUSD & 50 ETH
-        Defaulter 3: 46700 THUSD & 500 ETH
+        Defaulter 1: 207000 THUSD & 2160 ETH/tokens
+        Defaulter 2: 5000 THUSD & 50 ETH/tokens
+        Defaulter 3: 46700 THUSD & 500 ETH/tokens
         */
         await openTrove(defaulter_1, '207000000000000000000000', dec(2160, 'ether'))
         await openTrove(defaulter_2, dec(5, 21), dec(50, 'ether'))
@@ -410,7 +410,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(500000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(500000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -428,8 +428,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
       // --- Deposit enters at t > 0
 
-      it("withdrawFromSP(): A, B, C Deposit -> 2 liquidations -> D deposits -> 1 liquidation. All deposits and liquidations = 100 THUSD.  A, B, C, D withdraw correct THUSD deposit and ETH Gain", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): A, B, C Deposit -> 2 liquidations -> D deposits -> 1 liquidation. All deposits and liquidations = 100 THUSD.  A, B, C, D withdraw correct THUSD deposit and collateral Gain", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B and C who then deposit it to the SP
@@ -463,7 +463,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
         const txD = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: dennis })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -480,8 +480,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference(dennis_collateralWithdrawn, '49750000000000000000'), 100000)
       })
 
-      it("withdrawFromSP(): A, B, C Deposit -> 2 liquidations -> D deposits -> 2 liquidations. All deposits and liquidations = 100 THUSD.  A, B, C, D withdraw correct THUSD deposit and ETH Gain", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): A, B, C Deposit -> 2 liquidations -> D deposits -> 2 liquidations. All deposits and liquidations = 100 THUSD.  A, B, C, D withdraw correct THUSD deposit and collateral Gain", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B and C who then deposit it to the SP
@@ -517,7 +517,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
         const txD = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: dennis })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -534,8 +534,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference(dennis_collateralWithdrawn, dec(995, 17)), 100000)
       })
 
-      it("withdrawFromSP(): A, B, C Deposit -> 2 liquidations -> D deposits -> 2 liquidations. Various deposit and liquidation vals.  A, B, C, D withdraw correct THUSD deposit and ETH Gain", async () => {
-        // Whale opens Trove with 1m ETH
+      it("withdrawFromSP(): A, B, C Deposit -> 2 liquidations -> D deposits -> 2 liquidations. Various deposit and liquidation vals.  A, B, C, D withdraw correct THUSD deposit and collateral Gain", async () => {
+        // Whale opens Trove with 1m ETH/tokens
         await openTrove(whale, dec(1000000, 18), dec(1000000, 'ether'))
 
         /* Depositors open troves and make SP deposit:
@@ -552,10 +552,10 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await stabilityPool.provideToSP(dec(15000, 18), { from: carol })
 
         /* Defaulters open troves:
-        Defaulter 1:  10000 THUSD, 100 ETH
-        Defaulter 2:  25000 THUSD, 250 ETH
-        Defaulter 3:  5000 THUSD, 50 ETH
-        Defaulter 4:  40000 THUSD, 400 ETH
+        Defaulter 1:  10000 THUSD, 100 ETH/tokens
+        Defaulter 2:  25000 THUSD, 250 ETH/tokens
+        Defaulter 3:  5000 THUSD, 50 ETH/tokens
+        Defaulter 4:  40000 THUSD, 400 ETH/tokens
         */
         await openTrove(defaulter_1, dec(10000, 18), dec(100, 'ether'))
         await openTrove(defaulter_2, dec(25000, 18), dec(250, 'ether'))
@@ -583,7 +583,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txC = await stabilityPool.withdrawFromSP(dec(100000, 18), { from: carol })
         const txD = await stabilityPool.withdrawFromSP(dec(100000, 18), { from: dennis })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -603,8 +603,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
       // --- Depositor leaves ---
 
-      it("withdrawFromSP(): A, B, C, D deposit -> 2 liquidations -> D withdraws -> 2 liquidations. All deposits and liquidations = 100 THUSD.  A, B, C, D withdraw correct THUSD deposit and ETH Gain", async () => {
-        // Whale opens Trove with 100k ETH      
+      it("withdrawFromSP(): A, B, C, D deposit -> 2 liquidations -> D withdraws -> 2 liquidations. All deposits and liquidations = 100 THUSD.  A, B, C, D withdraw correct THUSD deposit and collateral Gain", async () => {
+        // Whale opens Trove with 100k ETH/tokens      
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B and C who then deposit it to the SP
@@ -627,7 +627,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await troveManager.liquidate(defaulter_1, { from: owner });
         await troveManager.liquidate(defaulter_2, { from: owner });
 
-        // Dennis withdraws his deposit and ETH gain
+        // Dennis withdraws his deposit and collateral Gain
         // Increasing the price for a moment to avoid pending liquidations to block withdrawal
         await priceFeed.setPrice(dec(200, 18))
         const txD = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: dennis })
@@ -645,7 +645,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -659,8 +659,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference(carol_collateralWithdrawn, dec(995, 17)), 100000)
       })
 
-      it("withdrawFromSP(): A, B, C, D deposit -> 2 liquidations -> D withdraws -> 2 liquidations. Various deposit and liquidation vals. A, B, C, D withdraw correct THUSD deposit and ETH Gain", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): A, B, C, D deposit -> 2 liquidations -> D withdraws -> 2 liquidations. Various deposit and liquidation vals. A, B, C, D withdraw correct THUSD deposit and collateral Gain", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         /* Initial deposits:
@@ -697,7 +697,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await troveManager.liquidate(defaulter_1, { from: owner });
         await troveManager.liquidate(defaulter_2, { from: owner });
 
-        // Dennis withdraws his deposit and ETH gain
+        // Dennis withdraws his deposit and collateral Gain
         // Increasing the price for a moment to avoid pending liquidations to block withdrawal
         await priceFeed.setPrice(dec(200, 18))
         const txD = await stabilityPool.withdrawFromSP(dec(40000, 18), { from: dennis })
@@ -716,7 +716,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(100000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(100000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -732,8 +732,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       })
 
       // --- One deposit enters at t > 0, and another leaves later ---
-      it("withdrawFromSP(): A, B, D deposit -> 2 liquidations -> C makes deposit -> 1 liquidation -> D withdraws -> 1 liquidation. All deposits: 100 THUSD. Liquidations: 100,100,100,50.  A, B, C, D withdraw correct THUSD deposit and ETH Gain", async () => {
-        // Whale opens Trove with 100k ETH    
+      it("withdrawFromSP(): A, B, D deposit -> 2 liquidations -> C makes deposit -> 1 liquidation -> D withdraws -> 1 liquidation. All deposits: 100 THUSD. Liquidations: 100,100,100,50.  A, B, C, D withdraw correct THUSD deposit and collateral Gain", async () => {
+        // Whale opens Trove with 100k ETH/tokens    
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B and D who then deposit it to the SP
@@ -762,7 +762,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         await troveManager.liquidate(defaulter_3, { from: owner });
 
-        // Dennis withdraws his deposit and ETH gain
+        // Dennis withdraws his deposit and collateral Gain
         // Increasing the price for a moment to avoid pending liquidations to block withdrawal
         await priceFeed.setPrice(dec(200, 18))
         const txD = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: dennis })
@@ -778,7 +778,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const txC = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: carol })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
         const carol_collateralWithdrawn = th.getEventArgByName(txC, 'CollateralGainWithdrawn', '_collateral').toString()
@@ -802,7 +802,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // A, B withdraw 0THUSD & 100e
       // C, D withdraw 5000THUSD  & 500e
       it("withdrawFromSP(): Depositor withdraws correct compounded deposit after liquidation empties the pool", async () => {
-        // Whale opens Trove with 100k ETH
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B who then deposit it to the SP
@@ -849,7 +849,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(alice)).toString(), '0'), 10000)
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(bob)).toString(), '0'), 10000)
 
-        // Expect Alice and Bob's ETH Gain to be 100 ETH
+        // Expect Alice and Bob's collateral Gain to be 100 ETH/tokens
         assert.isAtMost(th.getDifference(alice_collateralWithdrawn, dec(995, 17)), 100000)
         assert.isAtMost(th.getDifference(bob_collateralWithdrawn, dec(995, 17)), 100000)
 
@@ -857,7 +857,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(carol)).toString(), '5000000000000000000000'), 100000)
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(dennis)).toString(), '5000000000000000000000'), 100000)
 
-        // Expect Carol and and Dennis ETH Gain to be 50 ETH
+        // Expect Carol and and Dennis collateral Gain to be 50 ETH/tokens
         assert.isAtMost(th.getDifference(carol_collateralWithdrawn, '49750000000000000000'), 100000)
         assert.isAtMost(th.getDifference(dennis_collateralWithdrawn, '49750000000000000000'), 100000)
       })
@@ -869,7 +869,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // L3 cancels 10000, 1
       // L2 20000, 200 empties Pool
       it("withdrawFromSP(): Pool-emptying liquidation increases epoch by one, resets scaleFactor to 0, and resets P to 1e18", async () => {
-        // Whale opens Trove with 100k ETH  
+        // Whale opens Trove with 100k ETH/tokens  
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B who then deposit it to the SP
@@ -961,7 +961,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // A, B withdraw 0 THUSD & 100e
       // C, D withdraw 5000 THUSD  & 50e
       it("withdrawFromSP(): Depositors withdraw correct compounded deposit after liquidation empties the pool", async () => {
-        // Whale opens Trove with 100k ETH
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Whale transfers 10k THUSD to A, B who then deposit it to the SP
@@ -1014,7 +1014,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(dennis)).toString(), '16666666666666666666666'), 100000)
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(erin)).toString(), '25000000000000000000000'), 100000)
 
-        //Expect Alice and Bob's ETH Gain to be 1 ETH
+        //Expect Alice and Bob's collateral Gain to be 1 ETH/tokens
         assert.isAtMost(th.getDifference(alice_collateralWithdrawn, dec(995, 17)), 100000)
         assert.isAtMost(th.getDifference(bob_collateralWithdrawn, dec(995, 17)), 100000)
 
@@ -1026,9 +1026,9 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // A deposits 10000
       // L1, L2, L3 liquidated with 10000 THUSD each
       // A withdraws all
-      // Expect A to withdraw 0 deposit and ether only from reward L1
-      it("withdrawFromSP(): single deposit fully offset. After subsequent liquidations, depositor withdraws 0 deposit and *only* the ETH Gain from one liquidation", async () => {
-        // Whale opens Trove with 100k ETH
+      // Expect A to withdraw 0 deposit and ether/tokens only from reward L1
+      it("withdrawFromSP(): single deposit fully offset. After subsequent liquidations, depositor withdraws 0 deposit and *only* the collateral Gain from one liquidation", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
@@ -1049,7 +1049,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         const txA = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
 
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(alice)).toString(), 0), 100000)
@@ -1067,10 +1067,10 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // G,H deposits 10000
       // L4 cancels 20000, 200E
 
-      // Expect all depositors withdraw 0 THUSD and 100 ETH
+      // Expect all depositors withdraw 0 THUSD and 100 ETH/tokens
 
       it("withdrawFromSP(): Depositor withdraws correct compounded deposit after liquidation empties the pool", async () => {
-        // Whale opens Trove with 100k ETH
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // 4 Defaulters open trove with 200% ICR
@@ -1150,8 +1150,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(graham)).toString(), '0'), 100000)
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(harriet)).toString(), '0'), 100000)
 
-        /* Expect all ETH gains to be 100 ETH:  Since each liquidation of empties the pool, depositors
-        should only earn ETH from the single liquidation that cancelled with their deposit */
+        /* Expect all collateral Gains to be 100 ETH/tokens:  Since each liquidation of empties the pool, depositors
+        should only earn ETH/tokens from the single liquidation that cancelled with their deposit */
         assert.isAtMost(th.getDifference(alice_collateralWithdrawn, dec(995, 17)), 100000)
         assert.isAtMost(th.getDifference(bob_collateralWithdrawn, dec(995, 17)), 100000)
         assert.isAtMost(th.getDifference(carol_collateralWithdrawn, dec(995, 17)), 100000)
@@ -1174,9 +1174,9 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // L2 of 9900 THUSD, should bring P slightly past boundary i.e. 1e-9 -> 1e-10
 
       // expect d(B) = d0(B)/100
-      // expect correct ETH gain, i.e. all of the reward
-      it("withdrawFromSP(): deposit spans one scale factor change: Single depositor withdraws correct compounded deposit and ETH Gain after one liquidation", async () => {
-        // Whale opens Trove with 100k ETH
+      // expect correct collateral Gain, i.e. all of the reward
+      it("withdrawFromSP(): deposit spans one scale factor change: Single depositor withdraws correct compounded deposit and collateral Gain after one liquidation", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
@@ -1202,7 +1202,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txA = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice })
         await priceFeed.setPrice(dec(100, 18))
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = await th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
 
         await thusdToken.transfer(bob, dec(10000, 18), { from: whale })
@@ -1216,7 +1216,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const bob_collateralWithdrawn = await th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
 
-        // Expect Bob to withdraw 1% of initial deposit (100 THUSD) and all the liquidated ETH (60 ether)
+        // Expect Bob to withdraw 1% of initial deposit (100 THUSD) and all the liquidated ETH/tokens (60 ether/tokens)
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(bob)).toString(), '100000000000000000000'), 100000)
         assert.isAtMost(th.getDifference(bob_collateralWithdrawn, '59700000000000000000'), 100000)
       })
@@ -1228,9 +1228,9 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // L2 of 59400, should bring P slightly past boundary i.e. 1e-9 -> 1e-10
 
       // expect d(B) = d0(B)/100
-      // expect correct ETH gain, i.e. all of the reward
-      it("withdrawFromSP(): Several deposits of varying amounts span one scale factor change. Depositors withdraw correct compounded deposit and ETH Gain after one liquidation", async () => {
-        // Whale opens Trove with 100k ETH
+      // expect correct collateral Gain, i.e. all of the reward
+      it("withdrawFromSP(): Several deposits of varying amounts span one scale factor change. Depositors withdraw correct compounded deposit and collateral Gain after one liquidation", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
@@ -1276,14 +1276,14 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txC = await stabilityPool.withdrawFromSP(dec(20000, 18), { from: carol })
         const txD = await stabilityPool.withdrawFromSP(dec(30000, 18), { from: dennis })
 
-        /* Expect depositors to withdraw 1% of their initial deposit, and an ETH gain
+        /* Expect depositors to withdraw 1% of their initial deposit, and an collateral Gain
         in proportion to their initial deposit:
 
-        Bob:  1000 THUSD, 55 Ether
-        Carol:  2000 THUSD, 110 Ether
-        Dennis:  3000 THUSD, 165 Ether
+        Bob:  1000 THUSD, 55 Ether/tokens
+        Carol:  2000 THUSD, 110 Ether/tokens
+        Dennis:  3000 THUSD, 165 Ether/tokens
 
-        Total: 6000 THUSD, 300 Ether
+        Total: 6000 THUSD, 300 Ether/tokens
         */
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(bob)).toString(), dec(100, 18)), 100000)
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(carol)).toString(), dec(200, 18)), 100000)
@@ -1298,7 +1298,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isAtMost(th.getDifference(dennis_collateralWithdrawn, '164175000000000000000'), 100000)
       })
 
-      // Deposit's ETH reward spans one scale change - deposit reduced by correct amount
+      // Deposit's ETH/tokens reward spans one scale change - deposit reduced by correct amount
 
       // A make deposit 10000 THUSD
       // L1 brings P to 1e-5*P. L1:  9999.9000000000000000 THUSD
@@ -1307,9 +1307,9 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // L2 decreases P again by 1e-5, over the scale boundary: 9999.9000000000000000 (near to the 10000 THUSD total deposits)
       // B withdraws
       // expect d(B) = d0(B) * 1e-5
-      // expect B gets entire ETH gain from L2
-      it("withdrawFromSP(): deposit spans one scale factor change: Single depositor withdraws correct compounded deposit and ETH Gain after one liquidation", async () => {
-        // Whale opens Trove with 100k ETH
+      // expect B gets entire collateral Gain from L2
+      it("withdrawFromSP(): deposit spans one scale factor change: Single depositor withdraws correct compounded deposit and collateral Gain after one liquidation", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
@@ -1347,7 +1347,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
         const bob_collateralWithdrawn = await th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral').toString()
 
-        // Bob should withdraw 1e-5 of initial deposit: 0.1 THUSD and the full ETH gain of 100 ether
+        // Bob should withdraw 1e-5 of initial deposit: 0.1 THUSD and the full collateral Gain of 100 ether/tokens
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(bob)).toString(), dec(1, 17)), 100000)
         assert.isAtMost(th.getDifference(bob_collateralWithdrawn, dec(995, 17)), 100000000000)
       })
@@ -1359,9 +1359,9 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // L2 decreases P again by 1e-5, over boundary. L2: 59999.4000000000000000  (near to the 60000 THUSD total deposits)
       // B withdraws
       // expect d(B) = d0(B) * 1e-5
-      // expect B gets entire ETH gain from L2
-      it("withdrawFromSP(): Several deposits of varying amounts span one scale factor change. Depositors withdraws correct compounded deposit and ETH Gain after one liquidation", async () => {
-        // Whale opens Trove with 100k ETH
+      // expect B gets entire collateral Gain from L2
+      it("withdrawFromSP(): Several deposits of varying amounts span one scale factor change. Depositors withdraws correct compounded deposit and collateral Gain after one liquidation", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
@@ -1424,7 +1424,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // L1 brings P to (~1e-10)*P. L1: 9999.9999999000000000 THUSD
       // Expect A to withdraw 0 deposit
       it("withdrawFromSP(): Deposit that decreases to less than 1e-9 of it's original value is reduced to 0", async () => {
-        // Whale opens Trove with 100k ETH    
+        // Whale opens Trove with 100k ETH/tokens    
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Defaulters 1 withdraws 9999.9999999 THUSD
@@ -1447,17 +1447,17 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // --- Serial scale changes ---
 
       /* A make deposit 10000 THUSD
-      L1 brings P to 0.0001P. L1:  9999.900000000000000000 THUSD, 1 ETH
+      L1 brings P to 0.0001P. L1:  9999.900000000000000000 THUSD, 1 ETH/token
       B makes deposit 9999.9, brings SP to 10k
-      L2 decreases P by(~1e-5)P. L2:  9999.900000000000000000 THUSD, 1 ETH
+      L2 decreases P by(~1e-5)P. L2:  9999.900000000000000000 THUSD, 1 ETH/token
       C makes deposit 9999.9, brings SP to 10k
-      L3 decreases P by(~1e-5)P. L3:  9999.900000000000000000 THUSD, 1 ETH
+      L3 decreases P by(~1e-5)P. L3:  9999.900000000000000000 THUSD, 1 ETH/token
       D makes deposit 9999.9, brings SP to 10k
-      L4 decreases P by(~1e-5)P. L4:  9999.900000000000000000 THUSD, 1 ETH
-      expect A, B, C, D each withdraw ~100 Ether
+      L4 decreases P by(~1e-5)P. L4:  9999.900000000000000000 THUSD, 1 ETH/tokens
+      expect A, B, C, D each withdraw ~100 Ether/tokens
       */
-      it("withdrawFromSP(): Several deposits of 10000 THUSD span one scale factor change. Depositors withdraws correct compounded deposit and ETH Gain after one liquidation", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): Several deposits of 10000 THUSD span one scale factor change. Depositors withdraws correct compounded deposit and collateral Gain after one liquidation", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Defaulters 1-4 each withdraw 9999.9 THUSD
@@ -1525,8 +1525,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         // D should withdraw around 0.9999 THUSD, since his deposit of 9999.9 was reduced by a factor of 1e-5
         assert.isAtMost(th.getDifference((await thusdToken.balanceOf(dennis)).toString(), dec(99999, 12)), 100000)
 
-        // 99.5 ETH is offset at each L, 0.5 goes to gas comp
-        // Each depositor gets ETH rewards of around 99.5 ETH - 1e17 error tolerance
+        // 99.5 ETH/tokens is offset at each L, 0.5 goes to gas comp
+        // Each depositor gets collateral rewards of around 99.5 ETH/tokens - 1e17 error tolerance
         assert.isTrue(toBN(alice_collateralWithdrawn).sub(toBN(dec(995, 17))).abs().lte(toBN(dec(1, 17))))
         assert.isTrue(toBN(bob_collateralWithdrawn).sub(toBN(dec(995, 17))).abs().lte(toBN(dec(1, 17))))
         assert.isTrue(toBN(carol_collateralWithdrawn).sub(toBN(dec(995, 17))).abs().lte(toBN(dec(1, 17))))
@@ -1534,7 +1534,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       })
 
       it("withdrawFromSP(): 2 depositors can withdraw after each receiving half of a pool-emptying liquidation", async () => {
-        // Whale opens Trove with 100k ETH 
+        // Whale opens Trove with 100k ETH/tokens 
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Defaulters 1-3 each withdraw 24100, 24300, 24500 THUSD (inc gas comp)
@@ -1659,8 +1659,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         assert.isTrue(txF.receipt.status)
       })
 
-      it("withdrawFromSP(): Depositor's ETH gain stops increasing after two scale changes", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): Depositor's collateral Gain stops increasing after two scale changes", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         // Defaulters 1-5 each withdraw up to debt of 9999.9999999 THUSD
@@ -1735,10 +1735,10 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
       // --- Extreme values, confirm no overflows ---
 
       it("withdrawFromSP(): Large liquidated coll/debt, deposits and ETH price", async () => {
-        // Whale opens Trove with 100k ETH
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
-        // ETH:USD price is $2 billion per ETH
+        // collateral:USD price is $2 billion per ETH/token
         await priceFeed.setPrice(dec(2, 27));
 
         const depositors = [alice, bob]
@@ -1751,7 +1751,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         // Defaulter opens trove with 200% ICR
         await openTrove(defaulter_1, dec(1, 36), dec(1, 27))
 
-        // ETH:USD price drops to $1 billion per ETH
+        // collateral:USD price drops to $1 billion per ETH/tokens
         await priceFeed.setPrice(dec(1, 27));
 
         // Defaulter liquidated
@@ -1760,7 +1760,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const txA = await stabilityPool.withdrawFromSP(dec(1, 36), { from: alice })
         const txB = await stabilityPool.withdrawFromSP(dec(1, 36), { from: bob })
 
-        // Grab the ETH gain from the emitted event in the tx log
+        // Grab the collateral Gain from the emitted event in the tx log
         const alice_collateralWithdrawn = th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral')
         const bob_collateralWithdrawn = th.getEventArgByName(txB, 'CollateralGainWithdrawn', '_collateral')
 
@@ -1777,23 +1777,23 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         assert.isTrue(bobTHUSDBalDiff.lte(toBN(dec(1, 18))))
 
-        // Check ETH gains
-        const aliceExpectedETHGain = toBN(dec(4975, 23))
-        const aliceETHDiff = aliceExpectedETHGain.sub(toBN(alice_collateralWithdrawn))
+        // Check collateral Gains
+        const aliceExpectedCollateralGain = toBN(dec(4975, 23))
+        const aliceCollateralDiff = aliceExpectedCollateralGain.sub(toBN(alice_collateralWithdrawn))
 
-        assert.isTrue(aliceETHDiff.lte(toBN(dec(1, 18))))
+        assert.isTrue(aliceCollateralDiff.lte(toBN(dec(1, 18))))
 
-        const bobExpectedETHGain = toBN(dec(4975, 23))
-        const bobETHDiff = bobExpectedETHGain.sub(toBN(bob_collateralWithdrawn))
+        const bobExpectedCollateralGain = toBN(dec(4975, 23))
+        const bobCollateralDiff = bobExpectedCollateralGain.sub(toBN(bob_collateralWithdrawn))
 
-        assert.isTrue(bobETHDiff.lte(toBN(dec(1, 18))))
+        assert.isTrue(bobCollateralDiff.lte(toBN(dec(1, 18))))
       })
 
-      it("withdrawFromSP(): Small liquidated coll/debt, large deposits and ETH price", async () => {
-        // Whale opens Trove with 100k ETH
+      it("withdrawFromSP(): Small liquidated coll/debt, large deposits and collateral price", async () => {
+        // Whale opens Trove with 100k ETH/tokens
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
-        // ETH:USD price is $2 billion per ETH
+        // collateral:USD price is $2 billion per ETH/token
         await priceFeed.setPrice(dec(2, 27));
         const price = await priceFeed.getPrice()
 
@@ -1804,10 +1804,10 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
           await stabilityPool.provideToSP(dec(1, 38), { from: account })
         }
 
-        // Defaulter opens trove with 50e-7 ETH and  5000 THUSD. 200% ICR
+        // Defaulter opens trove with 50e-7 ETH/tokens and  5000 THUSD. 200% ICR
         await openTrove(defaulter_1, dec(5000, 18), dec(5, 12))
 
-        // ETH:USD price drops to $1 billion per ETH
+        // collateral:USD price drops to $1 billion per ETH/token
         await priceFeed.setPrice(dec(1, 27));
 
         // Defaulter liquidated
@@ -1831,7 +1831,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         assert.isTrue(bobTHUSDBalDiff.lte(toBN('100000000000000000000')))
 
-        // Expect ETH gain per depositor of ~1e11 wei to be rounded to 0 by the ETHGainedPerUnitStaked calculation (e / D), where D is ~1e36.
+        // Expect collateral Gain per depositor of ~1e11 wei to be rounded to 0 by the CollateralGainedPerUnitStaked calculation (e / D), where D is ~1e36.
         assert.equal(alice_collateralWithdrawn.toString(), '0')
         assert.equal(bob_collateralWithdrawn.toString(), '0')
       })

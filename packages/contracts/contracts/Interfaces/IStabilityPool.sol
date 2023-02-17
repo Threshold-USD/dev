@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 /*
  * The Stability Pool holds THUSD tokens deposited by Stability Pool depositors.
@@ -9,7 +9,7 @@ pragma solidity ^0.8.10;
  * THUSD in the Stability Pool:  that is, the offset debt evaporates, and an equal amount of THUSD tokens in the Stability Pool is burned.
  *
  * Thus, a liquidation causes each depositor to receive a THUSD loss, in proportion to their deposit as a share of total deposits.
- * They also receive an ETH gain, as the ETH collateral of the liquidated trove is distributed among Stability depositors,
+ * They also receive an collateral gain, as the collateral of the liquidated trove is distributed among Stability depositors,
  * in the same proportion.
  *
  * When a liquidation occurs, it depletes every deposit by the same fraction: for example, a liquidation that depletes 40%
@@ -18,7 +18,7 @@ pragma solidity ^0.8.10;
  * A deposit that has experienced a series of liquidations is termed a "compounded deposit": each liquidation depletes the deposit,
  * multiplying it by some factor in range ]0,1[
  *
- * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / ETH gain derivations:
+ * Please see the implementation spec in the proof document, which closely follows on from the compounded deposit / collateral gain derivations:
  * https://github.com/liquity/liquity/blob/master/papers/Scalable_Reward_Distribution_with_Compounding_Stakes.pdf
  *
  */

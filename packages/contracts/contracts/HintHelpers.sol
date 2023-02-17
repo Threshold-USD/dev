@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./Interfaces/ITroveManager.sol";
 import "./Interfaces/ISortedTroves.sol";
@@ -96,10 +96,10 @@ contract HintHelpers is LiquityBase, Ownable, CheckContract {
                 if (netTHUSDDebt > MIN_NET_DEBT) {
                     uint256 maxRedeemableTHUSD = LiquityMath._min(remainingTHUSD, netTHUSDDebt - MIN_NET_DEBT);
 
-                    uint256 ETH = troveManager.getTroveColl(currentTroveuser)
-                        + troveManager.getPendingETHReward(currentTroveuser);
+                    uint256 collateral = troveManager.getTroveColl(currentTroveuser)
+                        + troveManager.getPendingCollateralReward(currentTroveuser);
 
-                    uint256 newColl = ETH - (maxRedeemableTHUSD * DECIMAL_PRECISION / _price);
+                    uint256 newColl = collateral - (maxRedeemableTHUSD * DECIMAL_PRECISION / _price);
                     uint256 newDebt = netTHUSDDebt - maxRedeemableTHUSD;
 
                     uint256 compositeDebt = _getCompositeDebt(newDebt);

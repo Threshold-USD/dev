@@ -42,8 +42,6 @@ contract('PCV', async accounts => {
         contracts.erc20.address = ZERO_ADDRESS
       }
 
-      await deploymentHelper.connectCoreContracts(contracts)
-
       priceFeed = contracts.priceFeedTestnet
       thusdToken = contracts.thusdToken
       hintHelpers = contracts.hintHelpers
@@ -61,10 +59,13 @@ contract('PCV', async accounts => {
         400, 
         feePool, 
         erc20.address)
+      contracts.bamm = bamm
+
+      await deploymentHelper.connectCoreContracts(contracts)
         
       bootstrapLoan = await pcv.BOOTSTRAP_LOAN()
       
-      await pcv.initialize(bamm.address, { from: owner })
+      await pcv.initialize({ from: owner })
       await pcv.startChangingRoles(council, treasury, { from: owner })
       await pcv.finalizeChangingRoles({ from: owner })
       await pcv.addRecipientsToWhitelist([alice, council, treasury], { from: owner })
@@ -73,7 +74,7 @@ contract('PCV', async accounts => {
     })
 
     it('initialize(): reverts when trying to initialize second time', async () => {
-      await assertRevert(pcv.initialize(bamm.address, { from: owner }), "PCV: already initialized")
+      await assertRevert(pcv.initialize({ from: owner }), "PCV: already initialized")
     })
 
     it('initialize(): bootstrap loan deposited to SP and tracked in PCV', async () => {

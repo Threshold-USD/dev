@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 interface IPCV {
 
@@ -26,8 +26,13 @@ interface IPCV {
     function debtToPay() external returns(uint256);
     function payDebt(uint256 _thusdToBurn) external;
 
-    function setAddresses(address _thusdTokenAddress, address _borrowerOperations, address _collateralERC20) external;
-    function initialize(address payable _bammAddress) external;
+    function setAddresses(
+        address _thusdTokenAddress, 
+        address _borrowerOperations, 
+        address payable _bammAddress,
+        address _collateralERC20
+    ) external;
+    function initialize() external;
 
     function depositToBAMM(uint256 _thusdAmount) external;
     function withdrawFromBAMM(uint256 _numShares) external;

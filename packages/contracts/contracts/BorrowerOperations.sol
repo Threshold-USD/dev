@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.10;
+pragma solidity ^0.8.17;
 
 import "./Interfaces/IBorrowerOperations.sol";
 import "./Interfaces/ITroveManager.sol";
@@ -12,8 +12,9 @@ import "./Dependencies/LiquityBase.sol";
 import "./Dependencies/Ownable.sol";
 import "./Dependencies/CheckContract.sol";
 import "./Dependencies/console.sol";
+import "./Dependencies/SendCollateral.sol";
 
-contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOperations {
+contract BorrowerOperations is LiquityBase, Ownable, CheckContract, SendCollateral, IBorrowerOperations {
 
     string constant public NAME = "BorrowerOperations";
 
@@ -468,18 +469,12 @@ contract BorrowerOperations is LiquityBase, Ownable, CheckContract, IBorrowerOpe
 
     // Send collateral to Active Pool and increase its recorded collateral balance
     function _activePoolAddColl(IActivePool _activePool, uint256 _amount) internal {
+        sendCollateralFrom(IERC20(collateralAddress), msg.sender, address(_activePool), _amount);
 
         if (collateralAddress == address(0)) {
-          // ETH
-          (bool success, ) = address(_activePool).call{value: _amount}("");
-          require(success, "BorrowerOps: Sending collateral to ActivePool failed");
-        } else {
-          // ERC20
-          bool success = IERC20(collateralAddress).transferFrom(msg.sender, address(_activePool), _amount);
-          // TODO add call to trigger the update
-          _activePool.updateCollateralBalance(_amount);
-          require(success, "BorrowerOps: Sending collateral to ActivePool failed");
+            return;
         }
+        _activePool.updateCollateralBalance(_amount);
     }
 
     // Issue the specified amount of THUSD to _account and increases the total active debt (_netDebtIncrease potentially includes a THUSDFee)
