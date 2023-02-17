@@ -26,14 +26,10 @@ export const FunctionalPanel = ({ children, loader }: FunctionalPanelProps): JSX
     Difference,
     Wallet
   });
-  
-  const thresholdStores = useMemo(() => {
-    return Object.values(threshold).map((thresholdStore) => thresholdStore.store)
-  }, [threshold])
-  
+
   return (
     <>
-      <ThresholdStoreProvider {...{ loader }} thresholdStores={thresholdStores}>
+      <ThresholdStoreProvider {...{ loader }} threshold={threshold}>
         <VaultViewProvider {...{ loader}}>
           {children}
         </VaultViewProvider>

@@ -1,53 +1,55 @@
 import { useEffect, useReducer } from "react";
-import { LiquityStoreState as ThresholdStoreState, LiquityStore as ThresholdStore } from "@liquity/lib-base";
+import { LiquityStoreState as ThresholdStoreState } from "@liquity/lib-base";
 
 import { equals } from "../utils/equals";
 import { useThresholdStore } from "./useThresholdStore";
+import { ThresholdLoadedStore } from "../components/ThresholdStoreProvider";
 
+// Subscribes to store updates, and calls rerender() if the selected state changes
 const subscribeStores = <S, T>(
-  stores: ThresholdStore<T>[],
-  select: (state: ThresholdStoreState<T>) => S ,
+  stores: ThresholdLoadedStore<T>[],
+  select: (state: ThresholdStoreState<T>) => S,
   rerender: React.DispatchWithoutAction
 ) => {
-  for (const key in stores) {
-    stores[key].subscribe(({ newState, oldState }) => {
+  stores.forEach((store) => {
+    store.store.subscribe(({ newState, oldState }) => {
+      // Only rerender if the selected state has changed
       if (!equals(select(newState), select(oldState))) {
         rerender();
       }
     })
-  }
+  })
 }
 
+// Returns an array of the selected store state for each threshold store
 const getSelectedStoreStates = <S, T>(
-  stores: ThresholdStore<T>[],
+  stores: ThresholdLoadedStore<T>[],
   select: (state: ThresholdStoreState<T>) => S
 ) => {
-  let version = 0
-  let selectedStores: Record<string, S> = {}
+  const selectedStores = stores.map(({ collateral, version, store }) => {
+    return {
+      collateral,
+      version,
+      store: select(store.state)
+    }
+  })
 
-  for (const key in stores) {
-    version ++
-    selectedStores = {...selectedStores, ["v" + version]: select(stores[key].state)};
-  }
   return selectedStores
 }
 
-export const useThresholdSelector = <S, T>(select: (state: ThresholdStoreState<T>) => S): Record<string, S> => {
+// A custom hook to select a specific part of the state from each threshold store
+export const useThresholdSelector = <S, T>(
+  select: (state: ThresholdStoreState<T>) => S
+): { collateral: string, version: string, store: S }[] => {
   const stores = useThresholdStore<T>();
   const [, rerender] = useReducer(() => ({}), {});
 
-  useEffect(
-    () =>
-      subscribeStores(
-        stores, 
-        select, 
-        rerender
-      ),
+  // Subscribe to store updates, and rerender when the selected state changes
+  useEffect(() =>
+    subscribeStores(stores, select, rerender),
     [stores, select]
   );
 
-  return getSelectedStoreStates(
-    stores,
-    select
-  )
+  // Return the selected state for each threshold store
+  return getSelectedStoreStates(stores, select);
 };

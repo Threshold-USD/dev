@@ -6,21 +6,27 @@ import { useWeb3React } from "@web3-react/core";
 
 import { isBatchedProvider, isWebSocketAugmentedProvider } from "@liquity/providers";
 import {
-  BlockPolledLiquityStore as BlockPolledThresholdStore,
   EthersLiquity as EthersThreshold,
-  EthersLiquityWithStore as EthersThresholdWithStore,
   _connectByChainId,
-  getVersionedDeployments
+  getCollateralsDeployments,
+  _LiquityDeploymentJSON
 } from "@liquity/lib-ethers";
 import { CollateralsVersionedDeployments } from "@liquity/lib-ethers/src/contracts";
 
 import { ThresholdConfig, getConfig } from "../config";
+import { Threshold } from "@liquity/lib-react";
+
+type Version = {
+  collateral: keyof CollateralsVersionedDeployments
+  version: string
+  deployment: _LiquityDeploymentJSON
+}
 
 type ThresholdContextValue = {
   config: ThresholdConfig;
   account: string;
   provider: Provider;
-  threshold: Record<string, EthersThresholdWithStore<BlockPolledThresholdStore>>;
+  threshold: Threshold[];
 };
 
 const ThresholdContext = createContext<ThresholdContextValue | undefined>(undefined);
@@ -40,27 +46,55 @@ const wsParams = (network: string, infuraApiKey: string): [string, string] => [
 const supportedNetworks = ["homestead", "goerli"];
 
 const getCollateralVersions = async (chainId: number): Promise<CollateralsVersionedDeployments> => {
-  return await getVersionedDeployments(chainId === 1 ? 'mainnet' : 'goerli');
+  return await getCollateralsDeployments(chainId === 1 ? 'mainnet' : 'goerli');
 }
 
 const getConnections = async (
-    versionedDeployments: CollateralsVersionedDeployments, 
+    versionsArray: Version[], 
     provider: Web3Provider, 
     account: string, 
     chainId: number,
     setConnections: Function
   ) => {
-    const connectionsByChainId = [];
-    for (const [key, value] of Object.entries(versionedDeployments)) {
-      connectionsByChainId.push(_connectByChainId(
-        key, 
-        value.deployment, 
+
+    const connectionsByChainId = versionsArray.map(version => 
+      _connectByChainId(
+        version.collateral,
+        version.version, 
+        version.deployment, 
         provider, 
         provider.getSigner(account), chainId, 
         { userAddress: account, useStore: "blockPolled" }
-      ))
-    }
+      )
+    )
     return setConnections(connectionsByChainId)
+};
+
+function iterateVersions(collaterals: CollateralsVersionedDeployments) {
+  const result = [];
+
+  // Iterate over the top-level keys in the object (e.g. "btc", "eth")
+  for (const collateral in collaterals) {
+    if (collaterals.hasOwnProperty(collateral)) {
+      const versions = collaterals[collateral];
+
+      // Iterate over the version keys for the current cryptocurrency
+      for (const version in versions) {
+        if (versions.hasOwnProperty(version)) {
+          // Add an object with the cryptocurrency identification and version to the result array
+          const versionObj = {
+            collateral: collateral,
+            version: version,
+            deployment: versions[version]
+          };
+          result.push(versionObj);
+        }
+      }
+    }
+  }
+
+  // Return the array of version objects with the cryptocurrency identification
+  return result;
 }
 
 export const ThresholdProvider = ({
@@ -72,17 +106,17 @@ export const ThresholdProvider = ({
   const { library: provider, account, chainId } = useWeb3React<Web3Provider>();
   const [config, setConfig] = useState<ThresholdConfig>();
   const [connections, setConnections] = useState<any[]>();
-  const [threshold, setThreshold] = useState<Record<string, EthersThresholdWithStore<BlockPolledThresholdStore>>>({})
+  const [threshold, setThreshold] = useState<Threshold[]>([])
 
   useEffect(() => {
     if (!chainId || !provider || !account || !config) {
       return;
     }
     getCollateralVersions(chainId)
-    .then((result) => {
-      console.log('result: ',result)
-      getConnections(result, provider, account, chainId, setConnections)
-    })
+      .then((collaterals) => {
+        const versionsArray = iterateVersions(collaterals);
+        getConnections(versionsArray, provider, account, chainId, setConnections)
+      })
   }, [chainId, provider, account, config])
   
   useEffect(() => {
@@ -95,12 +129,19 @@ export const ThresholdProvider = ({
       if (connections.length > 0) {
         const { provider, chainId } = connections[0];
 
+        let thresholdStores: Threshold[] = []
+
         for (const connection of connections) {
-          const version = connection.deploymentVersion;
           const ethersThresholdFromConnection = EthersThreshold._from(connection);
           ethersThresholdFromConnection.store.logging = true;
-          setThreshold(prev => { return {...prev, [version]: ethersThresholdFromConnection}})
+          thresholdStores.push({
+            collateral: connection.deploymentCollateral,
+            version: connection.deploymentVersion,
+            store: ethersThresholdFromConnection,
+          })
         }
+
+        setThreshold(thresholdStores)
         
         if (isBatchedProvider(provider) && provider.chainId !== chainId) {
           provider.chainId = chainId;
@@ -134,7 +175,6 @@ export const ThresholdProvider = ({
   if (!connections || chainId !== 5) {
     return unsupportedNetworkFallback ? <>{unsupportedNetworkFallback(chainId)}</> : <></>;
   }
-  
   if (Object.keys(threshold).length !== connections.length) {
     return <>{loader}</>;
   }
