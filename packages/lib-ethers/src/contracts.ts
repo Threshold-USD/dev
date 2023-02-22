@@ -225,10 +225,10 @@ export interface _LiquityDeploymentJSON {
 }
 
 /** @internal */
-export type Versions = Record<string, _LiquityDeploymentJSON>
+export type _Versions = Record<string, _LiquityDeploymentJSON>
 
 /** @public */
-export type CollateralsVersionedDeployments = Record<string, Versions>
+export type CollateralsVersionedDeployments = Record<string, _Versions>
 
 const mapLiquityContracts = <T, U>(
   contracts: Record<_LiquityContractsKey, T>,

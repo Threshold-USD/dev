@@ -1,4 +1,4 @@
-import { Decimal } from "./Decimal";
+import { Decimal, Decimalish } from "./Decimal";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
 import { StabilityDeposit } from "./StabilityDeposit";
 import { Fees } from "./Fees";
@@ -120,6 +120,14 @@ export interface ReadableLiquity {
    */
   getErc20TokenBalance(address?: string): Promise<Decimal>;
 
+  /**
+   * Get the Stability Pool share.
+   *
+   * @param withdrawAmount - withdraw amount.
+   */
+  getWitdrawsSpShare(withdrawAmount: Decimalish): Promise<string>;
+
+  
   /**
    * Get the Borrowers Operations contract's allowance of a holder's Erc20 tokens.
    *

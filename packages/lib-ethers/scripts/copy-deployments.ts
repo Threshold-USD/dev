@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-// Define the output and input directories for the deployment files.
+// TODO update this script to support multiple collaterals and versions once the front end is updated to support this.
 const outputDir = "deployments";
 const inputDir = (channel: string, collateralName?: string) =>
   collateralName

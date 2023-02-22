@@ -203,6 +203,11 @@ export interface SendableLiquity<R = unknown, S = unknown>
     amount: Decimalish
   ): Promise<SentLiquityTransaction<S, LiquityReceipt<R, StabilityDepositChangeDetails>>>;
 
+  /** {@inheritDoc TransactableLiquity.bammUnlock} */
+  bammUnlock(): Promise<
+    SentLiquityTransaction<S, LiquityReceipt<R, void>>
+  >;
+
   /** {@inheritDoc TransactableLiquity.withdrawGainsFromStabilityPool} */
   withdrawGainsFromStabilityPool(): Promise<
     SentLiquityTransaction<S, LiquityReceipt<R, StabilityPoolGainsWithdrawalDetails>>

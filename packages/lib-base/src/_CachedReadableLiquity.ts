@@ -1,4 +1,4 @@
-import { Decimal } from "./Decimal";
+import { Decimal, Decimalish } from "./Decimal";
 import { Fees } from "./Fees";
 import { StabilityDeposit } from "./StabilityDeposit";
 import { Trove, TroveWithPendingRedistribution, UserTrove } from "./Trove";
@@ -147,6 +147,13 @@ export class _CachedReadableLiquity<T extends unknown[]>
       this._cache.getErc20TokenAllowance(address, ...extraParams) ??
       this._readable.getErc20TokenAllowance(address, ...extraParams)
     );
+  }
+
+  async getWitdrawsSpShare(withdrawAmount: Decimalish, ...extraParams: T): Promise<string> {
+    return (
+      this._cache.getWitdrawsSpShare(withdrawAmount, ...extraParams) ??
+      this._readable.getWitdrawsSpShare(withdrawAmount, ...extraParams)
+    )
   }
 
   async checkMintList(...extraParams: T): Promise<boolean> {

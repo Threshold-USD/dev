@@ -226,6 +226,11 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     return this._readable.getStabilityDeposit(address, overrides);
   }
 
+  /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getWitdrawsSpShare} */
+  getWitdrawsSpShare(withdrawAmount: Decimalish, overrides?: EthersCallOverrides): Promise<string> {
+    return this._readable.getWitdrawsSpShare(withdrawAmount, overrides);
+  }
+
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getTHUSDInStabilityPool} */
   getTHUSDInStabilityPool(overrides?: EthersCallOverrides): Promise<Decimal> {
     return this._readable.getTHUSDInStabilityPool(overrides);
@@ -289,6 +294,10 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.getFees} */
   getFees(overrides?: EthersCallOverrides): Promise<Fees> {
     return this._readable.getFees(overrides);
+  }
+
+  getBammAllowance(overrides?: EthersCallOverrides): Promise<boolean> {
+    return this._readable.getBammAllowance(overrides);
   }
 
   /**
@@ -452,6 +461,19 @@ export class EthersLiquity implements ReadableEthersLiquity, TransactableLiquity
     overrides?: EthersTransactionOverrides
   ): Promise<StabilityDepositChangeDetails> {
     return this.send.withdrawTHUSDFromStabilityPool(amount, overrides).then(waitForSuccess);
+  }
+
+  /**
+ * {@inheritDoc @liquity/lib-base#TransactableLiquity.bammUnlock}
+ *
+ * @throws
+ * Throws {@link EthersTransactionFailedError} in case of transaction failure.
+ * Throws {@link EthersTransactionCancelledError} if the transaction is cancelled or replaced.
+ */
+  bammUnlock(
+    overrides?: EthersTransactionOverrides
+  ): Promise<void> {
+    return this.send.bammUnlock(overrides).then(waitForSuccess);
   }
 
   /**

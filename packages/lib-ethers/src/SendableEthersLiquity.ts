@@ -154,6 +154,13 @@ export class SendableEthersLiquity
     return this._populate.withdrawGainsFromStabilityPool(overrides).then(sendTransaction);
   }
 
+  /** {@inheritDoc @liquity/lib-base#SendableLiquity.bammUnlock} */
+  bammUnlock(
+    overrides?: EthersTransactionOverrides
+  ): Promise<SentEthersLiquityTransaction<void>> {
+    return this._populate.bammUnlock(overrides).then(sendTransaction);
+  }
+
   /** {@inheritDoc @liquity/lib-base#SendableLiquity.transferCollateralGainToTrove} */
   transferCollateralGainToTrove(
     overrides?: EthersTransactionOverrides

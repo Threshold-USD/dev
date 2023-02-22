@@ -8,7 +8,7 @@ export {
 } from "./src/EthersLiquityConnection";
 
 export {
-  Versions,
+  _Versions,
   CollateralsVersionedDeployments,
   _LiquityContractAddresses,
   _LiquityContractsKey,

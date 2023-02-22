@@ -336,6 +336,12 @@ export interface TransactableLiquity {
   withdrawTHUSDFromStabilityPool(amount: Decimalish): Promise<StabilityDepositChangeDetails>;
 
   /**
+   * @throws
+   * Throws {@link TransactionFailedError} in case of transaction failure.
+   */
+    bammUnlock(): Promise<void>;
+
+  /**
    * Withdraw {@link @liquity/lib-base#StabilityDeposit.collateralGain | collateral gain} from Stability Deposit.
    *
    * @throws

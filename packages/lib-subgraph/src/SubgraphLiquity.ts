@@ -345,4 +345,8 @@ export class SubgraphLiquity implements ReadableLiquity, ObservableLiquity {
   getFees(): Promise<Fees> {
     throw new Error("Method not implemented.");
   }
+
+  getWitdrawsSpShare(): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
 }

@@ -62,6 +62,10 @@ export class Decimal {
     return new Decimal(BigNumber.from(bigNumberString));
   }
 
+  static fromBigNumber(bigNumber: BigNumber): Decimal {
+    return new Decimal(bigNumber);
+  }
+
   private static _fromString(representation: string): Decimal {
     if (!representation || !representation.match(stringRepresentationFormat)) {
       throw new Error(`bad decimal format: "${representation}"`);

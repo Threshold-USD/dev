@@ -218,6 +218,11 @@ export interface PopulatableLiquity<R = unknown, S = unknown, P = unknown>
     >
   >;
 
+  /** {@inheritDoc TransactableLiquity.bammUnlock} */
+  bammUnlock(): Promise<
+    PopulatedLiquityTransaction<P, SentLiquityTransaction<S, LiquityReceipt<R, void>>>
+  >;
+
   /** {@inheritDoc TransactableLiquity.withdrawGainsFromStabilityPool} */
   withdrawGainsFromStabilityPool(): Promise<
     PopulatedLiquityTransaction<

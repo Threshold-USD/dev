@@ -37,6 +37,8 @@ export interface BlockPolledLiquityStoreExtraState {
 
   /** @internal */
   _feesFactory: (blockTimestamp: number, recoveryMode: boolean) => Fees;
+
+  bammAllowance: boolean;
 }
 
 /**
@@ -90,6 +92,7 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
     const {
       blockTimestamp,
       _feesFactory,
+      bammAllowance,
       ...baseState
     } = await promiseAllValues({
       blockTimestamp: this._readable._getBlockTimestamp(blockTag),
@@ -104,6 +107,7 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
       symbol: this._readable.getSymbol({ blockTag }),
       collateralAddress: this._readable.getCollateralAddress({ blockTag }),
       mintList: this._readable.checkMintList({ blockTag }),
+      bammAllowance: this._readable.getBammAllowance({ blockTag }),
       ...(userAddress
         ? {
             accountBalance: this._provider.getBalance(userAddress, blockTag).then(decimalify),
@@ -131,8 +135,13 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
             stabilityDeposit: new StabilityDeposit(
               Decimal.ZERO,
               Decimal.ZERO,
-              Decimal.ZERO
-            )
+              Decimal.ZERO,
+              Decimal.ZERO,
+              Decimal.ZERO,
+              Decimal.ZERO,
+              Decimal.ZERO,
+              Decimal.ZERO,
+            ),
           })
     });
 
@@ -144,7 +153,8 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
       {
         blockTag,
         blockTimestamp,
-        _feesFactory
+        _feesFactory,
+        bammAllowance
       }
     ];
   }
@@ -182,7 +192,8 @@ export class BlockPolledLiquityStore extends LiquityStore<BlockPolledLiquityStor
     return {
       blockTag: stateUpdate.blockTag ?? oldState.blockTag,
       blockTimestamp: stateUpdate.blockTimestamp ?? oldState.blockTimestamp,
-      _feesFactory: stateUpdate._feesFactory ?? oldState._feesFactory
+      _feesFactory: stateUpdate._feesFactory ?? oldState._feesFactory,
+      bammAllowance: stateUpdate.bammAllowance ?? oldState.bammAllowance,
     };
   }
 }

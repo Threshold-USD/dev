@@ -15,29 +15,57 @@ export type StabilityDepositChange<T> =
  * @public
  */
 export class StabilityDeposit {
-  /** Amount of thUSD in the Stability Deposit at the time of the last direct modification. */
-  readonly initialTHUSD: Decimal;
+ /** pool share of user in the BAMM wich has a share in the stability pool */
+ readonly bammPoolShare: Decimal;
 
-  /** Amount of thUSD left in the Stability Deposit. */
-  readonly currentTHUSD: Decimal;
+ /** pool share of user in the BAMM wich has a share in the stability pool */
+ readonly poolShare: Decimal;
 
-  /** Amount of native currency (e.g. Ether) received in exchange for the used-up thUSD.  */
-  readonly collateralGain: Decimal;
+ /** Amount of LUSD in the Stability Deposit at the time of the last direct modification. */
+ readonly initialTHUSD: Decimal;
+
+ /** Amount of LUSD left in the Stability Deposit. */
+ readonly currentTHUSD: Decimal;
+
+ /** Amount of USD left in the Stability Deposit. */
+ readonly currentUSD: Decimal;
+
+ /** Amount of native currency (e.g. Ether) received in exchange for the used-up LUSD. */
+ readonly collateralGain: Decimal;
+
+  /**
+   * Address of frontend through which this Stability Deposit was made.
+   *
+   * @remarks
+   * If the Stability Deposit was made through a frontend that doesn't tag deposits, this will be
+   * the zero-address.
+   */
+
+  readonly totalCollateralInBamm: Decimal;
+  
+  readonly totalThusdInBamm: Decimal;
 
   /** @internal */
   constructor(
+    bammPoolShare: Decimal,
+    poolShare: Decimal,
     initialTHUSD: Decimal,
+    currentUSD: Decimal,
     currentTHUSD: Decimal,
-    collateralGain: Decimal
-  ) {
-    this.initialTHUSD = initialTHUSD;
-    this.currentTHUSD = currentTHUSD;
-    this.collateralGain = collateralGain;
-
-    if (this.currentTHUSD.gt(this.initialTHUSD)) {
-      throw new Error("currentTHUSD can't be greater than initialTHUSD");
+    collateralGain: Decimal,
+    totalCollateralInBamm: Decimal,
+    totalThusdInBamm: Decimal
+    ) {
+      this.bammPoolShare = bammPoolShare;
+      this.poolShare = poolShare;
+      this.initialTHUSD = initialTHUSD;
+      this.currentUSD = currentUSD;
+      this.currentTHUSD = currentTHUSD;
+      this.collateralGain = collateralGain;
+      this.totalCollateralInBamm = totalCollateralInBamm;
+      this.totalThusdInBamm = totalThusdInBamm;
     }
-  }
+  
 
   get isEmpty(): boolean {
     return (
@@ -50,9 +78,13 @@ export class StabilityDeposit {
   /** @internal */
   toString(): string {
     return (
-      `{ initialTHUSD: ${this.initialTHUSD}` +
-      `, currentTHUSD: ${this.currentTHUSD}` +
-      `, collateralGain: ${this.collateralGain} }`
+      `{ bammPoolShare: ${this.bammPoolShare}` +
+      `, poolShare: ${this.poolShare}` +
+      `, initialLUSD: ${this.initialTHUSD}` +
+      `, currentLUSD: ${this.currentTHUSD}` +
+      `, collateralGain: ${this.collateralGain}` +
+      `, totalEthInBamm: ${this.totalCollateralInBamm}` +
+      `, totalLusdInBamm: ${this.totalThusdInBamm}`
     );
   }
 
@@ -60,10 +92,16 @@ export class StabilityDeposit {
    * Compare to another instance of `StabilityDeposit`.
    */
   equals(that: StabilityDeposit): boolean {
+
     return (
+      this.bammPoolShare.eq(that.bammPoolShare) &&
+      this.poolShare.eq(that.poolShare) &&
+      this.currentUSD.eq(that.currentUSD) &&
       this.initialTHUSD.eq(that.initialTHUSD) &&
       this.currentTHUSD.eq(that.currentTHUSD) &&
-      this.collateralGain.eq(that.collateralGain)
+      this.collateralGain.eq(that.collateralGain) &&
+      this.totalCollateralInBamm === that.totalCollateralInBamm &&
+      this.totalThusdInBamm === that.totalThusdInBamm
     );
   }
 
@@ -72,15 +110,15 @@ export class StabilityDeposit {
    *
    * @returns An object representing the change, or `undefined` if the deposited amounts are equal.
    */
-  whatChanged(thatTHUSD: Decimalish): StabilityDepositChange<Decimal> | undefined {
-    thatTHUSD = Decimal.from(thatTHUSD);
+  whatChanged(thatUSD: Decimalish): StabilityDepositChange<Decimal> | undefined {
+    thatUSD = Decimal.from(thatUSD);
 
-    if (thatTHUSD.lt(this.currentTHUSD)) {
-      return { withdrawTHUSD: this.currentTHUSD.sub(thatTHUSD), withdrawAllTHUSD: thatTHUSD.isZero };
+    if (thatUSD.lt(this.currentTHUSD)) {
+      return { withdrawTHUSD: this.currentTHUSD.sub(thatUSD), withdrawAllTHUSD: thatUSD.isZero };
     }
 
-    if (thatTHUSD.gt(this.currentTHUSD)) {
-      return { depositTHUSD: thatTHUSD.sub(this.currentTHUSD) };
+    if (thatUSD.gt(this.currentTHUSD)) {
+      return { depositTHUSD: thatUSD.sub(this.currentTHUSD) };
     }
   }
 
@@ -91,11 +129,11 @@ export class StabilityDeposit {
    */
   apply(change: StabilityDepositChange<Decimalish> | undefined): Decimal {
     if (!change) {
-      return this.currentTHUSD;
+      return this.currentUSD;
     }
 
     if (change.withdrawTHUSD !== undefined) {
-      return change.withdrawAllTHUSD || this.currentTHUSD.lte(change.withdrawTHUSD)
+      return change.withdrawAllTHUSD || this.currentUSD.lte(change.withdrawTHUSD)
         ? Decimal.ZERO
         : this.currentTHUSD.sub(change.withdrawTHUSD);
     } else {
