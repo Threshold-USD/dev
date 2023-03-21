@@ -3,12 +3,18 @@ const PriceFeed = artifacts.require("./PriceFeedTester.sol")
 const PriceFeedTestnet = artifacts.require("./PriceFeedTestnet.sol")
 const MockChainlink = artifacts.require("./MockAggregator.sol")
 const MockTellor = artifacts.require("./MockTellor.sol")
+const BrokenMockTellor = artifacts.require("./MockTellor.sol")
 const TellorCaller = artifacts.require("./TellorCaller.sol")
 
 const testHelpers = require("../utils/testHelpers.js")
 const th = testHelpers.TestHelper
 
 const { dec, assertRevert, toBN } = th
+
+const abiCoder = new ethers.utils.AbiCoder();
+const queryDataArgs = abiCoder.encode(["string", "string"], ["erc20", "usd"]);
+const queryData = abiCoder.encode(["string", "bytes"], ["SpotPrice", queryDataArgs]);
+const queryId = ethers.utils.keccak256(queryData);
 
 contract('PriceFeed', async accounts => {
 
@@ -20,6 +26,12 @@ contract('PriceFeed', async accounts => {
 
   const setAddresses = async () => {
     await priceFeed.setAddresses(mockChainlink.address, tellorCaller.address, { from: owner })
+  }
+
+  async function setTellorPrice(price) {
+    let valueBytes = abiCoder.encode(["uint256"], [price]);
+    await mockTellor.submitValue(queryId, valueBytes, 0, queryData)
+    await th.fastForwardTime(15 * 60 + 1, web3.currentProvider) // 15 minutes
   }
 
   beforeEach(async () => {
@@ -35,10 +47,10 @@ contract('PriceFeed', async accounts => {
     mockChainlink = await MockChainlink.new()
     MockChainlink.setAsDeployed(mockChainlink)
 
-    mockTellor = await MockTellor.new()
+    mockTellor = await MockTellor.new(queryData)
     MockTellor.setAsDeployed(mockTellor)
 
-    tellorCaller = await TellorCaller.new(mockTellor.address)
+    tellorCaller = await TellorCaller.new(mockTellor.address, queryId)
     TellorCaller.setAsDeployed(tellorCaller)
 
     // Set Chainlink latest and prev round Id's to non-zero
@@ -48,12 +60,11 @@ contract('PriceFeed', async accounts => {
     //Set current and prev prices in both oracles
     await mockChainlink.setPrice(dec(100, 18))
     await mockChainlink.setPrevPrice(dec(100, 18))
-    await mockTellor.setPrice(dec(100, 18))
+    await setTellorPrice(dec(100, 18))
 
     // Set mock price updateTimes in both oracles to very recent
     const now = await th.getLatestBlockTimestamp(web3)
     await mockChainlink.setUpdateTime(now)
-    await mockTellor.setUpdateTime(now)
   })
 
   describe('PriceFeed internal testing contract', async accounts => {
@@ -164,7 +175,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(1, 8))
     await mockChainlink.setPrice("-5000")
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setUpdateTime(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -175,21 +186,21 @@ contract('PriceFeed', async accounts => {
     assert.equal(price, dec(123, 18))
 
     // Tellor price is 10 at 6-digit precision
-    await mockTellor.setPrice(dec(10, 6))
+    await setTellorPrice(dec(10, 6))
     await priceFeed.fetchPrice()
     price = await priceFeed.lastGoodPrice()
     // Check Liquity PriceFeed gives 10, with 18 digit precision
     assert.equal(price, dec(10, 18))
 
     // Tellor price is 1e9 at 6-digit precision
-    await mockTellor.setPrice(dec(1, 15))
+    await setTellorPrice(dec(1, 15))
     await priceFeed.fetchPrice()
     price = await priceFeed.lastGoodPrice()
     // Check Liquity PriceFeed gives 1e9, with 18 digit precision
     assert.equal(price, dec(1, 27))
 
     // Tellor price is 0.0001 at 6-digit precision
-    await mockTellor.setPrice(100)
+    await setTellorPrice(100)
     await priceFeed.fetchPrice()
     price = await priceFeed.lastGoodPrice()
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
@@ -197,7 +208,7 @@ contract('PriceFeed', async accounts => {
     assert.equal(price, dec(1, 14))
 
     // Tellor price is 1234.56789 at 6-digit precision
-    await mockTellor.setPrice(dec(1234567890))
+    await setTellorPrice(dec(1234567890))
     await priceFeed.fetchPrice()
     price = await priceFeed.lastGoodPrice()
     // Check Liquity PriceFeed gives 0.0001 with 18 digit precision
@@ -213,7 +224,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setLatestRoundId(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -230,7 +241,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setLatestRoundId(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -247,7 +258,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setUpdateTime(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -264,7 +275,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setUpdateTime(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -285,7 +296,7 @@ contract('PriceFeed', async accounts => {
     const now = await th.getLatestBlockTimestamp(web3)
     const future = toBN(now).add(toBN('1000'))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setUpdateTime(future)
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -305,7 +316,7 @@ contract('PriceFeed', async accounts => {
     const now = await th.getLatestBlockTimestamp(web3)
     const future = toBN(now).add(toBN('1000'))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setUpdateTime(future)
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -322,7 +333,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setPrice("-5000")
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -338,7 +349,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setPrice("-5000")
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -357,7 +368,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setDecimalsRevert()
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -374,7 +385,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setDecimalsRevert()
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -392,7 +403,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setLatestRevert()
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -409,7 +420,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setLatestRevert()
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -427,7 +438,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setPrevRevert()
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -444,7 +455,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
     await mockChainlink.setPrevRevert()
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -468,8 +479,7 @@ contract('PriceFeed', async accounts => {
     const now = await th.getLatestBlockTimestamp(web3)
 
     // Tellor price is recent
-    await mockTellor.setUpdateTime(now)
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     const priceFetchTx = await priceFeed.fetchPrice()
     const statusAfter = await priceFeed.status()
@@ -488,8 +498,7 @@ contract('PriceFeed', async accounts => {
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
     // Tellor price is recent
-    await mockTellor.setUpdateTime(now)
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     const priceFetchTx = await priceFeed.fetchPrice()
 
@@ -506,13 +515,13 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -529,13 +538,13 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await priceFeed.setLastGoodPrice(dec(999, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     const priceFetchTx = await priceFeed.fetchPrice()
@@ -556,7 +565,7 @@ contract('PriceFeed', async accounts => {
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
     // Tellor breaks by 0 price
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
     const statusAfter = await priceFeed.status()
@@ -574,7 +583,7 @@ contract('PriceFeed', async accounts => {
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
     let price = await priceFeed.lastGoodPrice()
@@ -622,7 +631,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(99999999)  // price drops to 0.99999999: a drop of > 50% from previous
 
@@ -638,7 +647,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203,4))
+    await setTellorPrice(dec(203,4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(99999999)  // price drops to 0.99999999: a drop of > 50% from previous
 
@@ -655,7 +664,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(dec(1, 8))  // price drops to 1
 
@@ -671,7 +680,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(dec(1, 8))  // price drops to 1
 
@@ -688,7 +697,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(dec(100000001))   // price drops to 1.00000001:  a drop of < 50% from previous
 
@@ -704,7 +713,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(100000001)   // price drops to 1.00000001:  a drop of < 50% from previous
 
@@ -722,7 +731,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(400000001)  // price increases to 4.000000001: an increase of > 100% from previous
 
@@ -738,7 +747,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(400000001)  // price increases to 4.000000001: an increase of > 100% from previous
 
@@ -754,7 +763,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(dec(4, 8))  // price increases to 4: an increase of 100% from previous
 
@@ -770,7 +779,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(dec(4, 8))  // price increases to 4: an increase of 100% from previous
 
@@ -786,7 +795,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(399999999)  // price increases to 3.99999999: an increase of < 100% from previous
 
@@ -802,7 +811,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(203, 4))
+    await setTellorPrice(dec(203, 4))
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(399999999)  // price increases to 3.99999999: an increase of < 100% from previous
 
@@ -820,7 +829,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(99999999)  // price drops to 0.99999999: a drop of > 50% from previous
-    await mockTellor.setPrice(999999) // Tellor price drops to same value (6 ecimals)
+    await setTellorPrice(999999) // Tellor price drops to same value (6 ecimals)
 
     const priceFetchTx = await priceFeed.fetchPrice()
     const statusAfter = await priceFeed.status()
@@ -836,7 +845,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(99999999)  // price drops to 0.99999999: a drop of > 50% from previous
-    await mockTellor.setPrice(999999) // Tellor price drops to same value (at 6 decimals)
+    await setTellorPrice(999999) // Tellor price drops to same value (at 6 decimals)
 
     const priceFetchTx = await priceFeed.fetchPrice()
     let price = await priceFeed.lastGoodPrice()
@@ -852,7 +861,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(1000, 8))  // prev price = 1000
     await mockChainlink.setPrice(dec(100, 8))  // price drops to 100: a drop of > 50% from previous
-    await mockTellor.setPrice(104999999) // Tellor price drops to 104.99: price difference with new Chainlink price is now just under 5%
+    await setTellorPrice(104999999) // Tellor price drops to 104.99: price difference with new Chainlink price is now just under 5%
 
     const priceFetchTx = await priceFeed.fetchPrice()
     const statusAfter = await priceFeed.status()
@@ -868,7 +877,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(1000, 8))  // prev price = 1000
     await mockChainlink.setPrice(dec(100, 8))  // price drops to 100: a drop of > 50% from previous
-    await mockTellor.setPrice(104999999) // Tellor price drops to 104.99: price difference with new Chainlink price is now just under 5%
+    await setTellorPrice(104999999) // Tellor price drops to 104.99: price difference with new Chainlink price is now just under 5%
 
     const priceFetchTx = await priceFeed.fetchPrice()
     let price = await priceFeed.lastGoodPrice()
@@ -884,7 +893,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(1000, 8))  // prev price = 1000
     await mockChainlink.setPrice(dec(100, 8))  // price drops to 100: a drop of > 50% from previous
-    await mockTellor.setPrice(105000001) // Tellor price drops to 105.000001: price difference with new Chainlink price is now > 5%
+    await setTellorPrice(105000001) // Tellor price drops to 105.000001: price difference with new Chainlink price is now > 5%
 
     const priceFetchTx = await priceFeed.fetchPrice()
     const statusAfter = await priceFeed.status()
@@ -900,7 +909,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(1000, 8))  // prev price = 1000
     await mockChainlink.setPrice(dec(100, 8))  // price drops to 100: a drop of > 50% from previous
-    await mockTellor.setPrice(105000001) // Tellor price drops to 105.000001: price difference with new Chainlink price is now > 5%
+    await setTellorPrice(105000001) // Tellor price drops to 105.000001: price difference with new Chainlink price is now > 5%
 
     const priceFetchTx = await priceFeed.fetchPrice()
     let price = await priceFeed.lastGoodPrice()
@@ -915,14 +924,14 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(1000, 8))  // prev price = 1000
     await mockChainlink.setPrice(dec(100, 8))  // price drops to 100: a drop of > 50% from previous
-    await mockTellor.setPrice(dec(100, 8))
+    await setTellorPrice(dec(100, 8))
 
     // 4 hours pass with no Tellor updates
     await th.fastForwardTime(14400, web3.currentProvider)
 
      // check Tellor price timestamp is out of date by > 4 hours
      const now = await th.getLatestBlockTimestamp(web3)
-     const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+     const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
      assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
      await mockChainlink.setUpdateTime(now)
@@ -942,14 +951,14 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(1000, 8))  // prev price = 1000
     await mockChainlink.setPrice(dec(100, 8))  // price drops to 100: a drop of > 50% from previous
-    await mockTellor.setPrice(dec(100, 8))
+    await setTellorPrice(dec(100, 8))
 
     // 4 hours pass with no Tellor updates
     await th.fastForwardTime(14400, web3.currentProvider)
 
      // check Tellor price timestamp is out of date by > 4 hours
      const now = await th.getLatestBlockTimestamp(web3)
-     const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+     const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
      assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
      await mockChainlink.setUpdateTime(now)
@@ -972,7 +981,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(99999999)  // price drops to 0.99999999: a drop of > 50% from previous
 
     // Make mock Tellor return 0 price
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
 
@@ -987,14 +996,14 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(1300, 6))
+    await setTellorPrice(dec(1300, 6))
 
     // Make mock Chainlink price deviate too much
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(99999999)  // price drops to 0.99999999: a drop of > 50% from previous
 
     // Make mock Tellor return 0 price
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
     let price = await priceFeed.lastGoodPrice()
@@ -1027,7 +1036,7 @@ contract('PriceFeed', async accounts => {
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(1300, 6))
+    await setTellorPrice(dec(1300, 6))
 
     // Make mock Chainlink price deviate too much
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
@@ -1043,7 +1052,7 @@ contract('PriceFeed', async accounts => {
     assert.equal(price, dec(1200, 18))
   })
 
-  it("C1 chainlinkWorking: Chainlink price drop of >50% and Tellor is broken by future timestamp: Pricefeed switches to bothOracleSuspect", async () => {
+  it("C1 chainlinkWorking: Chainlink price drop of >50% and Tellor is broken by stale timestamp: Pricefeed switches to bothOracleSuspect", async () => {
     await setAddresses()
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
@@ -1061,23 +1070,21 @@ contract('PriceFeed', async accounts => {
     assert.equal(statusAfter, '2') // status 2: both oracles untrusted
   })
 
-  it("C1 chainlinkWorking: Chainlink price drop of >50% and Tellor is broken by future timestamp: return last good price", async () => {
+  it("C1 chainlinkWorking: Chainlink price drop of >50% and Tellor is broken by stale timestamp: return last good price", async () => {
     await setAddresses()
     priceFeed.setLastGoodPrice(dec(1200, 18)) // establish a "last good price" from the previous price fetch
 
     const statusBefore = await priceFeed.status()
     assert.equal(statusBefore, '0') // status 0: Chainlink working
 
-    await mockTellor.setPrice(dec(1300, 6))
+    await setTellorPrice(dec(1300, 6))
 
     // Make mock Chainlink price deviate too much
     await mockChainlink.setPrevPrice(dec(2, 8))  // price = 2
     await mockChainlink.setPrice(99999999)  // price drops to 0.99999999: a drop of > 50% from previous
 
-    // Make mock Tellor return a future timestamp
-    const now = await th.getLatestBlockTimestamp(web3)
-    const future = toBN(now).add(toBN("10000"))
-    await mockTellor.setUpdateTime(future)
+    // Make mock stale Tellor
+    await th.fastForwardTime(24 * 60 * 60 + 1, web3.currentProvider) // 24 hours
 
     const priceFetchTx = await priceFeed.fetchPrice()
     let price = await priceFeed.lastGoodPrice()
@@ -1097,7 +1104,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(101, 8))
     await mockChainlink.setPrice(dec(102, 8))
 
-    await mockTellor.setPrice(dec(103, 18))
+    await setTellorPrice(dec(103, 18))
 
     const priceFetchTx = await priceFeed.fetchPrice()
 
@@ -1115,7 +1122,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(101, 8))
     await mockChainlink.setPrice(dec(102, 8))
 
-    await mockTellor.setPrice(dec(103, 18))
+    await setTellorPrice(dec(103, 18))
 
     const priceFetchTx = await priceFeed.fetchPrice()
     let price = await priceFeed.lastGoodPrice()
@@ -1134,14 +1141,14 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(101, 8))
     await mockChainlink.setPrice(dec(102, 8))
 
-    await mockTellor.setPrice(dec(103, 18))
+    await setTellorPrice(dec(103, 18))
 
     // 4 hours pass with no Tellor updates
     await th.fastForwardTime(14400, web3.currentProvider)
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await mockChainlink.setUpdateTime(now) // Chainlink's price is current
@@ -1162,14 +1169,14 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(101, 8))
     await mockChainlink.setPrice(dec(102, 8))
 
-    await mockTellor.setPrice(dec(103, 18))
+    await setTellorPrice(dec(103, 18))
 
     // 4 hours pass with no Tellor updates
     await th.fastForwardTime(14400, web3.currentProvider)
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await mockChainlink.setUpdateTime(now) // Chainlink's price is current
@@ -1191,7 +1198,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(101, 8))
     await mockChainlink.setPrice(dec(102, 8))
 
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
 
@@ -1209,7 +1216,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(101, 8))
     await mockChainlink.setPrice(dec(102, 8))
 
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     const priceFetchTx = await priceFeed.fetchPrice()
     let price = await priceFeed.lastGoodPrice()
@@ -1232,7 +1239,7 @@ contract('PriceFeed', async accounts => {
 
     const now = await th.getLatestBlockTimestamp(web3)
     await mockTellor.setUpdateTime(now)
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     await priceFeed.fetchPrice()
 
@@ -1251,7 +1258,7 @@ contract('PriceFeed', async accounts => {
 
     const now = await th.getLatestBlockTimestamp(web3)
     await mockTellor.setUpdateTime(now)
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     await priceFeed.fetchPrice()
     const price = await priceFeed.lastGoodPrice()
@@ -1261,16 +1268,18 @@ contract('PriceFeed', async accounts => {
 
   // Using Tellor, Tellor breaks
   it("C2 usingTellorChainlinkUntrusted: Tellor breaks by call reverted: switch to bothOraclesSuspect", async () => {
+    // deploy broken mock
+    mockTellor = await BrokenMockTellor.new(queryData)
+    BrokenMockTellor.setAsDeployed(mockTellor)
+    tellorCaller = await TellorCaller.new(mockTellor.address, queryId)
     await setAddresses()
+
     priceFeed.setStatus(1) // status 1: using Tellor, Chainlink untrusted
 
     await priceFeed.setLastGoodPrice(dec(123, 18))
 
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
-    await mockTellor.setPrice(dec(999, 6))
-
-    await mockTellor.setRevertRequest()
 
     await priceFeed.fetchPrice()
 
@@ -1279,16 +1288,18 @@ contract('PriceFeed', async accounts => {
   })
 
   it("C2 usingTellorChainlinkUntrusted: Tellor breaks by call reverted: return last good price", async () => {
+    // deploy broken mock
+    mockTellor = await BrokenMockTellor.new(queryData)
+    BrokenMockTellor.setAsDeployed(mockTellor)
+    tellorCaller = await TellorCaller.new(mockTellor.address, queryId)
     await setAddresses()
+
     priceFeed.setStatus(1) // status 1: using Tellor, Chainlink untrusted
 
     await priceFeed.setLastGoodPrice(dec(123, 18))
 
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
-    await mockTellor.setPrice(dec(999, 6))
-
-    await mockTellor.setRevertRequest()
 
     await priceFeed.fetchPrice()
     const price = await priceFeed.lastGoodPrice()
@@ -1305,7 +1316,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
-    await mockTellor.setPrice(dec(999, 6))
+    await setTellorPrice(dec(999, 6))
 
     await mockTellor.setUpdateTime(0)
 
@@ -1323,7 +1334,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
-    await mockTellor.setPrice(dec(999, 6))
+    await setTellorPrice(dec(999, 6))
 
     await mockTellor.setUpdateTime(0)
 
@@ -1343,13 +1354,13 @@ contract('PriceFeed', async accounts => {
 
     await priceFeed.setLastGoodPrice(dec(246, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await mockChainlink.setUpdateTime(now)
@@ -1369,13 +1380,13 @@ contract('PriceFeed', async accounts => {
 
     await priceFeed.setLastGoodPrice(dec(246, 18))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await mockChainlink.setUpdateTime(now)
@@ -1392,7 +1403,7 @@ contract('PriceFeed', async accounts => {
     await setAddresses()
     priceFeed.setStatus(1) // status 1: using Tellor, Chainlink untrusted
 
-    await mockTellor.setPrice(dec(100, 6)) // price = 100
+    await setTellorPrice(dec(100, 6)) // price = 100
     await mockChainlink.setPrice(dec(105, 8)) // price = 105: 5% difference from Chainlink
 
     await priceFeed.fetchPrice()
@@ -1405,7 +1416,7 @@ contract('PriceFeed', async accounts => {
     await setAddresses()
     priceFeed.setStatus(1) // status 1: using Tellor, Chainlink untrusted
 
-    await mockTellor.setPrice(dec(100, 6)) // price = 100
+    await setTellorPrice(dec(100, 6)) // price = 100
     await mockChainlink.setPrice(dec(105, 8)) // price = 105: 5% difference from Chainlink
 
     await priceFeed.fetchPrice()
@@ -1418,7 +1429,7 @@ contract('PriceFeed', async accounts => {
     await setAddresses()
     priceFeed.setStatus(1) // status 1: using Tellor, Chainlink untrusted
 
-    await mockTellor.setPrice(dec(100, 6)) // price = 100
+    await setTellorPrice(dec(100, 6)) // price = 100
     await mockChainlink.setPrice('10500000001') // price = 105.00000001: > 5% difference from Tellor
 
     await priceFeed.fetchPrice()
@@ -1431,7 +1442,7 @@ contract('PriceFeed', async accounts => {
     await setAddresses()
     priceFeed.setStatus(1) // status 1: using Tellor, Chainlink untrusted
 
-    await mockTellor.setPrice(dec(100, 6)) // price = 100
+    await setTellorPrice(dec(100, 6)) // price = 100
     await mockChainlink.setPrice('10500000001') // price = 105.00000001: > 5% difference from Tellor
 
     await priceFeed.fetchPrice()
@@ -1449,7 +1460,7 @@ contract('PriceFeed', async accounts => {
 
     await priceFeed.setLastGoodPrice(dec(50, 18))
 
-    await mockTellor.setPrice(dec(100, 6)) // price = 100
+    await setTellorPrice(dec(100, 6)) // price = 100
     await mockChainlink.setPrice('10500000001') // price = 105.00000001: > 5% difference from Tellor
 
     const status = await priceFeed.status()
@@ -1462,7 +1473,7 @@ contract('PriceFeed', async accounts => {
 
     await priceFeed.setLastGoodPrice(dec(50, 18))
 
-    await mockTellor.setPrice(dec(100, 6)) // price = 100
+    await setTellorPrice(dec(100, 6)) // price = 100
     await mockChainlink.setPrice('10500000001') // price = 105.00000001: > 5% difference from Tellor
 
     await priceFeed.fetchPrice()
@@ -1475,7 +1486,7 @@ contract('PriceFeed', async accounts => {
     await setAddresses()
     priceFeed.setStatus(2) // status 2: both oracles untrusted
 
-    await mockTellor.setPrice(dec(100, 6)) // price = 100
+    await setTellorPrice(dec(100, 6)) // price = 100
     await mockChainlink.setPrice(dec(105, 8)) // price = 105: 5% difference from Tellor
 
     await priceFeed.fetchPrice()
@@ -1488,7 +1499,7 @@ contract('PriceFeed', async accounts => {
     await setAddresses()
     priceFeed.setStatus(2) // status 2: both oracles untrusted
 
-    await mockTellor.setPrice(dec(100, 6)) // price = 100
+    await setTellorPrice(dec(100, 6)) // price = 100
     await mockChainlink.setPrice(dec(105, 8)) // price = 105: 5% difference from Tellor
 
     await priceFeed.fetchPrice()
@@ -1506,7 +1517,7 @@ contract('PriceFeed', async accounts => {
 
     // Both Chainlink and Tellor break with 0 price
     await mockChainlink.setPrice(0)
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     await priceFeed.fetchPrice()
 
@@ -1524,7 +1535,7 @@ contract('PriceFeed', async accounts => {
 
     // Both Chainlink and Tellor break with 0 price
     await mockChainlink.setPrice(dec(0))
-    await mockTellor.setPrice(dec(0))
+    await setTellorPrice(dec(0))
 
     await priceFeed.fetchPrice()
 
@@ -1543,13 +1554,13 @@ contract('PriceFeed', async accounts => {
     // Chainlink breaks
     await mockChainlink.setPrice(dec(0))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await priceFeed.fetchPrice()
@@ -1569,13 +1580,13 @@ contract('PriceFeed', async accounts => {
     // Chainlink breaks
     await mockChainlink.setPrice(dec(0))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await priceFeed.fetchPrice()
@@ -1595,7 +1606,7 @@ contract('PriceFeed', async accounts => {
     // Chainlink breaks
     await mockChainlink.setPrice(dec(0))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
@@ -1616,7 +1627,7 @@ contract('PriceFeed', async accounts => {
     // Chainlink breaks
     await mockChainlink.setPrice(dec(0))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await priceFeed.fetchPrice()
 
@@ -1633,7 +1644,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(998, 6))
+    await setTellorPrice(dec(998, 6))
 
     await priceFeed.fetchPrice()
 
@@ -1650,7 +1661,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(998, 6))
+    await setTellorPrice(dec(998, 6))
 
     await priceFeed.fetchPrice()
 
@@ -1667,7 +1678,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await priceFeed.fetchPrice()
 
@@ -1684,7 +1695,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await priceFeed.fetchPrice()
 
@@ -1701,7 +1712,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(998, 6))
+    await setTellorPrice(dec(998, 6))
 
     await priceFeed.fetchPrice()
 
@@ -1718,7 +1729,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(998, 6))
+    await setTellorPrice(dec(998, 6))
 
     await priceFeed.fetchPrice()
 
@@ -1735,7 +1746,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     await priceFeed.fetchPrice()
 
@@ -1752,7 +1763,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     await priceFeed.fetchPrice()
 
@@ -1777,7 +1788,7 @@ contract('PriceFeed', async accounts => {
     assert.isTrue(chainlinkUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     // set tellor broken
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
     await mockTellor.set
 
     await priceFeed.fetchPrice()
@@ -1803,7 +1814,7 @@ contract('PriceFeed', async accounts => {
     assert.isTrue(chainlinkUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     // set tellor broken
-    await mockTellor.setPrice(0)
+    await setTellorPrice(0)
 
     await priceFeed.fetchPrice()
 
@@ -1820,7 +1831,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
@@ -1847,8 +1858,6 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
-
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
     // check Chainlink price timestamp is out of date by > 4 hours
@@ -1856,8 +1865,8 @@ contract('PriceFeed', async accounts => {
     const chainlinkUpdateTime = (await mockChainlink.latestRoundData())[3]
     assert.isTrue(chainlinkUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
-    // set Tellor to current time
-    await mockTellor.setUpdateTime(now)
+    // set Tellor price
+    await setTellorPrice(dec(123, 6))
 
     await priceFeed.fetchPrice()
 
@@ -1874,7 +1883,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
@@ -1884,7 +1893,7 @@ contract('PriceFeed', async accounts => {
     assert.isTrue(chainlinkUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
      // check Tellor price timestamp is out of date by > 4 hours
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await priceFeed.fetchPrice()
@@ -1902,7 +1911,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
@@ -1912,7 +1921,7 @@ contract('PriceFeed', async accounts => {
     assert.isTrue(chainlinkUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
      // check Tellor price timestamp is out of date by > 4 hours
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await priceFeed.fetchPrice()
@@ -1933,7 +1942,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))  // Greater than 5% difference with chainlink
+    await setTellorPrice(dec(123, 6))  // Greater than 5% difference with chainlink
 
     await priceFeed.fetchPrice()
 
@@ -1950,7 +1959,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))  // Greater than 5% difference with chainlink
+    await setTellorPrice(dec(123, 6))  // Greater than 5% difference with chainlink
 
     await priceFeed.fetchPrice()
 
@@ -1967,7 +1976,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(998, 6))  // within 5% of Chainlink
+    await setTellorPrice(dec(998, 6))  // within 5% of Chainlink
 
     await priceFeed.fetchPrice()
 
@@ -1984,7 +1993,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(998, 6))  // within 5% of Chainlink
+    await setTellorPrice(dec(998, 6))  // within 5% of Chainlink
 
     await priceFeed.fetchPrice()
 
@@ -2002,7 +2011,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(998, 8))
-    await mockTellor.setPrice(dec(123, 6))  // Tellor not close to current Chainlink
+    await setTellorPrice(dec(123, 6))  // Tellor not close to current Chainlink
 
     await priceFeed.fetchPrice()
 
@@ -2018,7 +2027,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(998, 8))
-    await mockTellor.setPrice(dec(123, 6))  // Tellor not close to current Chainlink
+    await setTellorPrice(dec(123, 6))  // Tellor not close to current Chainlink
 
     await priceFeed.fetchPrice()
 
@@ -2034,7 +2043,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(200, 8))
     await mockChainlink.setPrice(dec(99, 8))  // >50% price drop from previous Chainlink price
-    await mockTellor.setPrice(dec(123, 6)) // Tellor not close to current Chainlink
+    await setTellorPrice(dec(123, 6)) // Tellor not close to current Chainlink
 
     await priceFeed.fetchPrice()
 
@@ -2050,7 +2059,7 @@ contract('PriceFeed', async accounts => {
 
     await mockChainlink.setPrevPrice(dec(200, 8))
     await mockChainlink.setPrice(dec(99, 8))  // >50% price drop from previous Chainlink price
-    await mockTellor.setPrice(dec(123, 6))  // Tellor not close to current Chainlink
+    await setTellorPrice(dec(123, 6))  // Tellor not close to current Chainlink
 
     await priceFeed.fetchPrice()
 
@@ -2069,13 +2078,13 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await mockChainlink.setPrice(dec(998, 8))
@@ -2096,13 +2105,13 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await mockChainlink.setPrice(dec(998, 8))
@@ -2123,13 +2132,13 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(200, 8))
     await mockChainlink.setPrice(dec(200, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await mockChainlink.setPrice(dec(99, 8)) // >50% price drop from previous Chainlink price
@@ -2150,13 +2159,13 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(200, 8))
     await mockChainlink.setPrice(dec(200, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // fast forward 4 hours
 
     // check Tellor price timestamp is out of date by > 4 hours
     const now = await th.getLatestBlockTimestamp(web3)
-    const tellorUpdateTime = await mockTellor.getTimestampbyRequestIDandIndex(0, 0)
+    const tellorUpdateTime = (await tellorCaller.getTellorCurrentValue())[2]
     assert.isTrue(tellorUpdateTime.lt(toBN(now).sub(toBN(14400))))
 
     await mockChainlink.setPrice(dec(99, 8))  // > 50% price drop from previous Chainlink price
@@ -2177,7 +2186,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
@@ -2201,7 +2210,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrevPrice(dec(999, 8))
     await mockChainlink.setPrice(dec(999, 8))
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await th.fastForwardTime(14400, web3.currentProvider) // Fast forward 4 hours
 
@@ -2226,7 +2235,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await mockChainlink.setUpdateTime(0)  // Chainlink breaks by 0 timestamp
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await priceFeed.fetchPrice()
 
@@ -2244,7 +2253,7 @@ contract('PriceFeed', async accounts => {
     await mockChainlink.setPrice(dec(999, 8))
     await mockChainlink.setUpdateTime(0)  // Chainlink breaks by 0 timestamp
 
-    await mockTellor.setPrice(dec(123, 6))
+    await setTellorPrice(dec(123, 6))
 
     await priceFeed.fetchPrice()
 

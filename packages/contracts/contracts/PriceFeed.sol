@@ -30,8 +30,6 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     address borrowerOperationsAddress;
     address troveManagerAddress;
 
-    uint256 constant public COLLATERAL_USD_TELLOR_REQ_ID = 1;
-
     // Use to convert a price answer to an 18-digit precision uint
     uint256 constant public TARGET_DIGITS = 18;
     uint256 constant public TELLOR_DIGITS = 6;
@@ -485,7 +483,7 @@ contract PriceFeed is Ownable, CheckContract, BaseMath, IPriceFeed {
     // --- Oracle response wrapper functions ---
 
     function _getCurrentTellorResponse() internal view returns (TellorResponse memory tellorResponse) {
-        try tellorCaller.getTellorCurrentValue(COLLATERAL_USD_TELLOR_REQ_ID) returns
+        try tellorCaller.getTellorCurrentValue() returns
         (
             bool ifRetrieve,
             uint256 value,

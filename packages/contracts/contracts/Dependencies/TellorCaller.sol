@@ -3,11 +3,11 @@
 pragma solidity ^0.8.17;
 
 import "../Interfaces/ITellorCaller.sol";
-import "./ITellor.sol";
+import "usingtellor/contracts/interface/ITellor.sol";
 /*
 * This contract has a single external function that calls Tellor: getTellorCurrentValue().
 *
-* The function is called by the Liquity contract PriceFeed.sol. If any of its inner calls to Tellor revert,
+* The function is called by the thUSD contract PriceFeed.sol. If any of its inner calls to Tellor revert,
 * this function will revert, and PriceFeed will catch the failure and handle it accordingly.
 *
 * The function comes from Tellor's own wrapper contract, 'UsingTellor.sol':
@@ -16,22 +16,25 @@ import "./ITellor.sol";
 */
 contract TellorCaller is ITellorCaller {
 
-    ITellor public tellor;
+    ITellor public immutable tellor;
+    bytes32 public immutable queryId;
 
-    constructor (address _tellorMasterAddress) {
+    /**
+     * @param _tellorMasterAddress Address of Tellor contract
+     * @param _queryId Pre-calculated hash of query. See https://queryidbuilder.herokuapp.com/spotprice
+     */
+    constructor (address _tellorMasterAddress, bytes32 _queryId) {
         tellor = ITellor(_tellorMasterAddress);
+        queryId = _queryId;
     }
 
     /*
-    * getTellorCurrentValue(): identical to getCurrentValue() in UsingTellor.sol
-    *
     * @dev Allows the user to get the latest value for the requestId specified
-    * @param _requestId is the requestId to look up the value for
     * @return ifRetrieve bool true if it is able to retrieve a value, the value, and the value's timestamp
     * @return value the value retrieved
     * @return _timestampRetrieved the value's timestamp
     */
-    function getTellorCurrentValue(uint256 _requestId)
+    function getTellorCurrentValue()
         external
         view
         override
@@ -41,11 +44,32 @@ contract TellorCaller is ITellorCaller {
             uint256 _timestampRetrieved
         )
     {
-        uint256 _count = tellor.getNewValueCountbyRequestId(_requestId);
-        uint256 _time =
-            tellor.getTimestampbyRequestIDandIndex(_requestId, _count - 1);
-        uint256 _value = tellor.retrieveData(_requestId, _time);
-        if (_value > 0) return (true, _value, _time);
+        (, bytes memory _value, uint256 _time) =
+            tellor.getDataBefore(queryId, block.timestamp - 15 minutes);
+        // If timestampRetrieved is 0, no data was found
+        if(_time > 0) {
+            // Check that the data is not too old
+            if(block.timestamp - _time < 24 hours) {
+                // Use the helper function _sliceUint to parse the bytes to uint256
+                return(true, _sliceUint(_value), _time);
+            }
+        }
         return (false, 0, _time);
+    }
+
+    // Internal functions
+    /**
+     * @dev Convert bytes to uint256. Copy from `UsingTellor.sol`
+     * @param _b bytes value to convert to uint256
+     * @return _number uint256 converted from bytes
+     */
+    function _sliceUint(bytes memory _b)
+        internal
+        pure
+        returns (uint256 _number)
+    {
+        for (uint256 _i = 0; _i < _b.length; _i++) {
+            _number = _number * 256 + uint8(_b[_i]);
+        }
     }
 }
