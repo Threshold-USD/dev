@@ -95,6 +95,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
             // }
             // Provide withdrawn THUSD to Stability Pool
             if (THUSDAmount > 0) {
+                thusdToken.increaseAllowance(address(stabilityPool), THUSDAmount);
                 stabilityPool.provideToSP(THUSDAmount);
             }
         }
@@ -121,6 +122,7 @@ contract BorrowerWrappersScript is BorrowerOperationsScript, ETHTransferScript, 
 
         uint256 totalTHUSD = gainedTHUSD + netTHUSDAmount;
         if (totalTHUSD > 0) {
+            thusdToken.approve(address(stabilityPool), totalTHUSD);
             stabilityPool.provideToSP(totalTHUSD);
         }
 

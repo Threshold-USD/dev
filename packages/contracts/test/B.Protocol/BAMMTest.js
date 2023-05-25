@@ -45,6 +45,7 @@ contract('BAMM', async accounts => {
       const openTrove = async (params) => th.openTrove(contracts, params)
       const sendCollateral = async (recipient, valueToSend) => th.sendCollateral(erc20, whale, recipient, valueToSend)
       const getCollateralBalance = async (address) => th.getCollateralBalance(erc20, address)
+      const provideToSP = async (amount, params) => th.provideToSP(contracts, amount, params)
 
       beforeEach(async () => {
         contracts = await deploymentHelper.deployLiquityCore(accounts)
@@ -279,7 +280,7 @@ contract('BAMM', async accounts => {
         await thusdToken.approve(bamm.address, dec(2000, 18), { from: E })
         await bamm.deposit(dec(1000, 18), { from: D })
         await bamm.deposit(dec(2000, 18), { from: E })
-        await stabilityPool.provideToSP(dec(3000, 18), { from: F })
+        await provideToSP(dec(3000, 18), { from: F })
 
         await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
@@ -320,7 +321,7 @@ contract('BAMM', async accounts => {
           totalDeposits += Number(qty.toString())
           userBalance[i] += Number(qty.toString())
           await bamm.deposit(qty, { from: ammUsers[i] })
-          await stabilityPool.provideToSP(qty, { from: nonAmmUsers[i] })
+          await provideToSP(qty, { from: nonAmmUsers[i] })
         }
 
         for(n = 0 ; n < 10 ; n++) {
@@ -341,7 +342,7 @@ contract('BAMM', async accounts => {
             else {
               console.log("deposit", i)
               await bamm.deposit(qty, { from: ammUsers[i]} )
-              await stabilityPool.provideToSP(qty, { from: nonAmmUsers[i] })
+              await provideToSP(qty, { from: nonAmmUsers[i] })
 
               totalDeposits += qty
               userBalance[i] += qty            
@@ -390,12 +391,12 @@ contract('BAMM', async accounts => {
         console.log("stake D:", (await bamm.stake(D)).toString())
         console.log("stake E:", (await bamm.stake(E)).toString())
 
-        await stabilityPool.provideToSP(dec(1000, 18), { from: A })
+        await provideToSP(dec(1000, 18), { from: A })
 
         await th.fastForwardTime(timeValues.SECONDS_IN_ONE_HOUR, web3.currentProvider)
 
         await bamm.deposit(dec(3000, 18), { from: F })
-        await stabilityPool.provideToSP(dec(3000, 18), { from: B })
+        await provideToSP(dec(3000, 18), { from: B })
 
         await stabilityPool.withdrawFromSP(0, { from: A })   
 

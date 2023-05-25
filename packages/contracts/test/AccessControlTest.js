@@ -29,6 +29,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
   let activePool
   let stabilityPool
   let defaultPool
+  let gasPool
   let functionCaller
   let borrowerOperations
   let dummy
@@ -48,6 +49,7 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     activePool = contracts.activePool
     stabilityPool = contracts.stabilityPool
     defaultPool = contracts.defaultPool
+    gasPool = contracts.gasPool
     functionCaller = contracts.functionCaller
     borrowerOperations = contracts.borrowerOperations
     pcv = contracts.pcv
@@ -275,6 +277,20 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
     })
   })
 
+  describe('GasPool', async accounts => {
+    // sendTHUSD
+    it("sendTHUSD(): reverts when called by an account that is not TroveManager", async () => {
+      // Attempt call from alice
+      try {
+        const txAlice = await gasPool.sendTHUSD(alice, 100, { from: alice })
+
+      } catch (err) {
+        assert.include(err.message, "revert")
+        assert.include(err.message, "GasPool: Caller is not the TroveManager")
+      }
+    })
+  })
+
   describe('DefaultPool', async accounts => {
     // sendCollateralToActivePool
     it("sendCollateralToActivePool(): reverts when called by an account that is not TroveManager", async () => {
@@ -376,29 +392,6 @@ contract('Access Control: Liquity functions with the caller restricted to Liquit
       }
     })
 
-    // sendToPool
-    it("sendToPool(): reverts when called by an account that is not StabilityPool", async () => {
-      // Attempt call from alice
-      try {
-        const txAlice = await thusdToken.sendToPool(bob, activePool.address, 100, { from: alice })
-
-      } catch (err) {
-        assert.include(err.message, "revert")
-        assert.include(err.message, "Caller is not the StabilityPool")
-      }
-    })
-
-    // returnFromPool
-    it("returnFromPool(): reverts when called by an account that is not TroveManager nor StabilityPool", async () => {
-      // Attempt call from alice
-      try {
-        const txAlice = await thusdToken.returnFromPool(activePool.address, bob, 100, { from: alice })
-
-      } catch (err) {
-        assert.include(err.message, "revert")
-        // assert.include(err.message, "Caller is neither TroveManager nor StabilityPool")
-      }
-    })
   })
 
   describe('SortedTroves', async accounts => {

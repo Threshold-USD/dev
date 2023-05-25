@@ -5,6 +5,7 @@ pragma solidity ^0.8.17;
 import "./Interfaces/ITroveManager.sol";
 import "./Interfaces/IStabilityPool.sol";
 import "./Interfaces/ICollSurplusPool.sol";
+import "./Interfaces/IGasPool.sol";
 import "./Interfaces/ITHUSDToken.sol";
 import "./Interfaces/ISortedTroves.sol";
 import "./Interfaces/IPCV.sol";
@@ -754,7 +755,7 @@ contract TroveManager is LiquityBase, Ownable, CheckContract, ITroveManager {
 
     function _sendGasCompensation(IActivePool _activePool, address _liquidator, uint256 _THUSD, uint256 _collateral) internal {
         if (_THUSD > 0) {
-            thusdToken.returnFromPool(gasPoolAddress, _liquidator, _THUSD);
+            IGasPool(gasPoolAddress).sendTHUSD(_liquidator, _THUSD);
         }
 
         if (_collateral > 0) {

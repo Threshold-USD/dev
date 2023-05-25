@@ -42,6 +42,7 @@ contract('Pool Manager: Sum-Product rounding errors', async accounts => {
 
     for (let account of depositors) {
       await openTrove({ extraTHUSDAmount: toBN(dec(10000, 18)), ICR: toBN(dec(2, 18)), extraParams: { from: account } })
+      await thusdToken.approve(stabilityPool.address, dec(100, 18), {from: account})
       await stabilityPool.provideToSP(dec(100, 18), { from: account })
     }
 

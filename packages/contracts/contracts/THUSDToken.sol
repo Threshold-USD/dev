@@ -22,7 +22,6 @@ import "./Dependencies/console.sol";
 * transfer() and transferFrom() calls. The purpose is to protect users from losing tokens by mistakenly sending THUSD directly to a Liquity
 * core contract, when they should rather call the right function.
 *
-* 2) sendToPool() and returnFromPool(): functions callable only Liquity core contracts, which move THUSD tokens between Liquity <-> user.
 */
 
 contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
@@ -210,19 +209,6 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
             "THUSD: Caller is neither BorrowerOperations nor TroveManager nor StabilityPool"
         );
         _burn(_account, _amount);
-    }
-
-    function sendToPool(address _sender,  address _poolAddress, uint256 _amount) external override {
-        require(isStabilityPools[msg.sender], "THUSD: Caller is not the StabilityPool");
-        _transfer(_sender, _poolAddress, _amount);
-    }
-
-    function returnFromPool(address _poolAddress, address _receiver, uint256 _amount) external override {
-        require(
-            isTroveManager[msg.sender] || isStabilityPools[msg.sender],
-            "THUSD: Caller is neither TroveManager nor StabilityPool"
-        );
-        _transfer(_poolAddress, _receiver, _amount);
     }
 
     // --- External functions ---

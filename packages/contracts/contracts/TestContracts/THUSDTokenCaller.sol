@@ -19,11 +19,4 @@ contract THUSDTokenCaller {
         THUSD.burn(_account, _amount);
     }
 
-    function thusdSendToPool(address _sender,  address _poolAddress, uint256 _amount) external {
-        THUSD.sendToPool(_sender, _poolAddress, _amount);
-    }
-
-    function thusdReturnFromPool(address _poolAddress, address _receiver, uint256 _amount ) external {
-        THUSD.returnFromPool(_poolAddress, _receiver, _amount);
-    }
 }

@@ -278,39 +278,6 @@ contract('THUSDToken', async accounts => {
         const alice_BalanceAfter = await thusdTokenTester.balanceOf(alice)
         assert.equal(alice_BalanceAfter, 80)
       })
-
-      // TODO: Rewrite this test - it should check the actual thusdTokenTester's balance.
-      it('sendToPool(): changes balances of Stability pool and user by the correct amounts', async () => {
-        const stabilityPool_BalanceBefore = await thusdTokenTester.balanceOf(stabilityPool.address)
-        const bob_BalanceBefore = await thusdTokenTester.balanceOf(bob)
-        assert.equal(stabilityPool_BalanceBefore, 0)
-        assert.equal(bob_BalanceBefore, 100)
-
-        await thusdTokenTester.unprotectedSendToPool(bob, stabilityPool.address, 75)
-
-        const stabilityPool_BalanceAfter = await thusdTokenTester.balanceOf(stabilityPool.address)
-        const bob_BalanceAfter = await thusdTokenTester.balanceOf(bob)
-        assert.equal(stabilityPool_BalanceAfter, 75)
-        assert.equal(bob_BalanceAfter, 25)
-      })
-
-      it('returnFromPool(): changes balances of Stability pool and user by the correct amounts', async () => {
-        /// --- SETUP --- give pool 100 THUSD
-        await thusdTokenTester.unprotectedMint(stabilityPool.address, 100)
-
-        /// --- TEST ---
-        const stabilityPool_BalanceBefore = await thusdTokenTester.balanceOf(stabilityPool.address)
-        const  bob_BalanceBefore = await thusdTokenTester.balanceOf(bob)
-        assert.equal(stabilityPool_BalanceBefore, 100)
-        assert.equal(bob_BalanceBefore, 100)
-
-        await thusdTokenTester.unprotectedReturnFromPool(stabilityPool.address, bob, 75)
-
-        const stabilityPool_BalanceAfter = await thusdTokenTester.balanceOf(stabilityPool.address)
-        const bob_BalanceAfter = await thusdTokenTester.balanceOf(bob)
-        assert.equal(stabilityPool_BalanceAfter, 25)
-        assert.equal(bob_BalanceAfter, 175)
-      })
     }
 
     it('transfer(): transferring to a blacklisted address reverts', async () => {

@@ -43,6 +43,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
     const ZERO_ADDRESS = th.ZERO_ADDRESS
 
     const getOpenTroveTHUSDAmount = async (totalDebt) => th.getOpenTroveTHUSDAmount(contracts, totalDebt)
+    const provideToSP = async (amount, params) => th.provideToSP(contracts, amount, params)
 
     describe("Stability Pool Withdrawal", async () => {
 
@@ -81,7 +82,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, carol]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulter opens trove with 200% ICR and 10k THUSD net debt
@@ -120,7 +121,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, carol]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulters open trove with 200% ICR
@@ -160,7 +161,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, carol]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulters open trove with 200% ICR
@@ -204,7 +205,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, carol]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulters open trove with 200% ICR
@@ -247,7 +248,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, carol]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulters open trove with 200% ICR
@@ -290,11 +291,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // Whale transfers 10k, 20k, 30k THUSD to A, B and C respectively who then deposit it to the SP
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
         await thusdToken.transfer(bob, dec(20000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(20000, 18), { from: bob })
+        await provideToSP(dec(20000, 18), { from: bob })
         await thusdToken.transfer(carol, dec(30000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(30000, 18), { from: carol })
+        await provideToSP(dec(30000, 18), { from: carol })
 
         // 2 Defaulters open trove with 200% ICR
         await openTrove(defaulter_1, dec(10000, 18), dec(100, 'ether'))
@@ -332,11 +333,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // Whale transfers 10k, 20k, 30k THUSD to A, B and C respectively who then deposit it to the SP
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
         await thusdToken.transfer(bob, dec(20000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(20000, 18), { from: bob })
+        await provideToSP(dec(20000, 18), { from: bob })
         await thusdToken.transfer(carol, dec(30000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(30000, 18), { from: carol })
+        await provideToSP(dec(30000, 18), { from: carol })
 
         // Defaulters open trove with 200% ICR
         await openTrove(defaulter_1, dec(10000, 18), dec(100, 'ether'))
@@ -381,11 +382,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         Carol: 13100 THUSD */
         // Whale transfers THUSD to  A, B and C respectively who then deposit it to the SP
         await thusdToken.transfer(alice, dec(2000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(2000, 18), { from: alice })
+        await provideToSP(dec(2000, 18), { from: alice })
         await thusdToken.transfer(bob, dec(456000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(456000, 18), { from: bob })
+        await provideToSP(dec(456000, 18), { from: bob })
         await thusdToken.transfer(carol, dec(13100, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(13100, 18), { from: carol })
+        await provideToSP(dec(13100, 18), { from: carol })
 
         /* Defaulters open troves
 
@@ -436,7 +437,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, carol]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulters open trove with 200% ICR
@@ -453,7 +454,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // Whale transfers 10k to Dennis who then provides to SP
         await thusdToken.transfer(dennis, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: dennis })
+        await provideToSP(dec(10000, 18), { from: dennis })
 
         // Third defaulter liquidated
         await troveManager.liquidate(defaulter_3, { from: owner });
@@ -488,7 +489,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, carol]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulters open trove with 200% ICR
@@ -506,7 +507,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // Dennis opens a trove and provides to SP
         await thusdToken.transfer(dennis, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: dennis })
+        await provideToSP(dec(10000, 18), { from: dennis })
 
         // Third and fourth defaulters liquidated
         await troveManager.liquidate(defaulter_3, { from: owner });
@@ -545,11 +546,11 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         */
         // Whale transfers THUSD to  A, B and C respectively who then deposit it to the SP
         await thusdToken.transfer(alice, dec(60000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(60000, 18), { from: alice })
+        await provideToSP(dec(60000, 18), { from: alice })
         await thusdToken.transfer(bob, dec(20000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(20000, 18), { from: bob })
+        await provideToSP(dec(20000, 18), { from: bob })
         await thusdToken.transfer(carol, dec(15000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(15000, 18), { from: carol })
+        await provideToSP(dec(15000, 18), { from: carol })
 
         /* Defaulters open troves:
         Defaulter 1:  10000 THUSD, 100 ETH/tokens
@@ -571,7 +572,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // Dennis provides 25000 THUSD
         await thusdToken.transfer(dennis, dec(25000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(25000, 18), { from: dennis })
+        await provideToSP(dec(25000, 18), { from: dennis })
 
         // Last two defaulters liquidated
         await troveManager.liquidate(defaulter_3, { from: owner });
@@ -611,7 +612,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, carol, dennis]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulters open trove with 200% ICR
@@ -671,13 +672,13 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         */
         // Whale transfers THUSD to  A, B,C and D respectively who then deposit it to the SP
         await thusdToken.transfer(alice, dec(20000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(20000, 18), { from: alice })
+        await provideToSP(dec(20000, 18), { from: alice })
         await thusdToken.transfer(bob, dec(25000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(25000, 18), { from: bob })
+        await provideToSP(dec(25000, 18), { from: bob })
         await thusdToken.transfer(carol, dec(12500, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(12500, 18), { from: carol })
+        await provideToSP(dec(12500, 18), { from: carol })
         await thusdToken.transfer(dennis, dec(40000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(40000, 18), { from: dennis })
+        await provideToSP(dec(40000, 18), { from: dennis })
 
         /* Defaulters open troves:
         Defaulter 1: 10000 THUSD
@@ -740,7 +741,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob, dennis]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulters open troves
@@ -758,7 +759,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // Carol makes deposit
         await thusdToken.transfer(carol, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: carol })
+        await provideToSP(dec(10000, 18), { from: carol })
 
         await troveManager.liquidate(defaulter_3, { from: owner });
 
@@ -809,7 +810,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // 2 Defaulters open trove with 200% ICR
@@ -826,14 +827,14 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors_2 = [carol, dennis]
         for (account of depositors_2) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulter 2 liquidated. 10000 THUSD offset
         await troveManager.liquidate(defaulter_2, { from: owner });
 
         // await borrowerOperations.openTrove(th._100pct, dec(1, 18), dec(2, 'ether'), account, account, { from: erin })
-        // await stabilityPool.provideToSP(dec(1, 18), { from: erin })
+        // await provideToSP(dec(1, 18), { from: erin })
 
         const txA = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: alice })
         const txB = await stabilityPool.withdrawFromSP(dec(10000, 18), { from: bob })
@@ -876,7 +877,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // 4 Defaulters open trove with 200% ICR
@@ -924,7 +925,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors_2 = [carol, dennis]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulter 3 liquidated. 10000 THUSD fully offset, Pool remains non-zero
@@ -968,7 +969,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors = [alice, bob]
         for (account of depositors) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // 2 Defaulters open trove with 200% ICR
@@ -983,13 +984,13 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // Carol, Dennis, Erin each deposit 10000, 20000, 30000 THUSD respectively
         await thusdToken.transfer(carol, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: carol })
+        await provideToSP(dec(10000, 18), { from: carol })
 
         await thusdToken.transfer(dennis, dec(20000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(20000, 18), { from: dennis })
+        await provideToSP(dec(20000, 18), { from: dennis })
 
         await thusdToken.transfer(erin, dec(30000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(30000, 18), { from: erin })
+        await provideToSP(dec(30000, 18), { from: erin })
 
         // Defaulter 2 liquidated. 10000 THUSD offset
         await troveManager.liquidate(defaulter_2, { from: owner });
@@ -1032,7 +1033,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
 
         // Defaulter 1,2,3 withdraw 10000 THUSD
         await openTrove(defaulter_1, dec(10000, 18), dec(100, 'ether'))
@@ -1086,7 +1087,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors_1 = [alice, bob]
         for (account of depositors_1) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulter 1 liquidated. 20k THUSD fully offset with pool.
@@ -1096,7 +1097,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors_2 = [carol, dennis]
         for (account of depositors_2) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulter 2 liquidated. 10000 THUSD offset
@@ -1106,7 +1107,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors_3 = [erin, flyn]
         for (account of depositors_3) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulter 3 liquidated. 10000 THUSD offset
@@ -1116,7 +1117,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const depositors_4 = [graham, harriet]
         for (account of depositors_4) {
           await thusdToken.transfer(account, dec(10000, 18), { from: whale })
-          await stabilityPool.provideToSP(dec(10000, 18), { from: account })
+          await provideToSP(dec(10000, 18), { from: account })
         }
 
         // Defaulter 4 liquidated. 10k THUSD offset
@@ -1180,7 +1181,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
 
         // Defaulter 1 withdraws 'almost' 10000 THUSD:  9999.99991 THUSD
         await openTrove(defaulter_1, '9999999910000000000000', dec(100, 'ether'))
@@ -1206,7 +1207,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const alice_collateralWithdrawn = await th.getEventArgByName(txA, 'CollateralGainWithdrawn', '_collateral').toString()
 
         await thusdToken.transfer(bob, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: bob })
+        await provideToSP(dec(10000, 18), { from: bob })
 
         // Defaulter 2 liquidated.  9900 THUSD liquidated. P altered by a factor of 1-(9900/10000) = 0.01.  Scale changed.
         await troveManager.liquidate(defaulter_2, { from: owner });
@@ -1234,7 +1235,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
 
         // Defaulter 1 withdraws 'almost' 10k THUSD.
         await openTrove(defaulter_1, '9999999910000000000000', dec(100, 'ether'))
@@ -1258,13 +1259,13 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         //B, C, D deposit to Stability Pool
         await thusdToken.transfer(bob, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: bob })
+        await provideToSP(dec(10000, 18), { from: bob })
 
         await thusdToken.transfer(carol, dec(20000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(20000, 18), { from: carol })
+        await provideToSP(dec(20000, 18), { from: carol })
 
         await thusdToken.transfer(dennis, dec(30000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(30000, 18), { from: dennis })
+        await provideToSP(dec(30000, 18), { from: dennis })
 
         // 54000 THUSD liquidated.  P altered by a factor of 1-(59400/60000) = 0.01. Scale changed.
         const txL2 = await troveManager.liquidate(defaulter_2, { from: owner });
@@ -1313,7 +1314,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
 
         // Defaulter 1 and default 2 each withdraw 9999.999999999 THUSD
         await openTrove(defaulter_1, dec(99999, 17), dec(100, 'ether'))
@@ -1336,7 +1337,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // Bob deposits 10k THUSD
         await thusdToken.transfer(bob, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: bob })
+        await provideToSP(dec(10000, 18), { from: bob })
 
         // Defaulter 2 liquidated
         const txL2 = await troveManager.liquidate(defaulter_2, { from: owner });
@@ -1365,7 +1366,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await openTrove(whale, dec(100000, 18), dec(100000, 'ether'))
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
 
         // Defaulter 1 and default 2 withdraw up to debt of 9999.9 THUSD and 59999.4 THUSD
         await openTrove(defaulter_1, '9999900000000000000000', dec(100, 'ether'))
@@ -1387,13 +1388,13 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // B, C, D deposit 10000, 20000, 30000 THUSD
         await thusdToken.transfer(bob, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: bob })
+        await provideToSP(dec(10000, 18), { from: bob })
 
         await thusdToken.transfer(carol, dec(20000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(20000, 18), { from: carol })
+        await provideToSP(dec(20000, 18), { from: carol })
 
         await thusdToken.transfer(dennis, dec(30000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(30000, 18), { from: dennis })
+        await provideToSP(dec(30000, 18), { from: dennis })
 
         // Defaulter 2 liquidated
         const txL2 = await troveManager.liquidate(defaulter_2, { from: owner });
@@ -1434,7 +1435,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await priceFeed.setPrice(dec(100, 18));
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
 
         // Defaulter 1 liquidated. P -> (~1e-10)*P
         const txL1 = await troveManager.liquidate(defaulter_1, { from: owner });
@@ -1470,7 +1471,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await priceFeed.setPrice(dec(100, 18));
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
 
         // Defaulter 1 liquidated.
         const txL1 = await troveManager.liquidate(defaulter_1, { from: owner });
@@ -1480,7 +1481,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // B deposits 9999.9 THUSD
         await thusdToken.transfer(bob, dec(99999, 17), { from: whale })
-        await stabilityPool.provideToSP(dec(99999, 17), { from: bob })
+        await provideToSP(dec(99999, 17), { from: bob })
 
         // Defaulter 2 liquidated
         const txL2 = await troveManager.liquidate(defaulter_2, { from: owner });
@@ -1490,7 +1491,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // C deposits 9999.9 THUSD
         await thusdToken.transfer(carol, dec(99999, 17), { from: whale })
-        await stabilityPool.provideToSP(dec(99999, 17), { from: carol })
+        await provideToSP(dec(99999, 17), { from: carol })
 
         // Defaulter 3 liquidated
         const txL3 = await troveManager.liquidate(defaulter_3, { from: owner });
@@ -1500,7 +1501,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // D deposits 9999.9 THUSD
         await thusdToken.transfer(dennis, dec(99999, 17), { from: whale })
-        await stabilityPool.provideToSP(dec(99999, 17), { from: dennis })
+        await provideToSP(dec(99999, 17), { from: dennis })
 
         // Defaulter 4 liquidated
         const txL4 = await troveManager.liquidate(defaulter_4, { from: owner });
@@ -1548,8 +1549,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         // A, B provide 10k THUSD
         await thusdToken.transfer(A, dec(10000, 18), { from: whale })
         await thusdToken.transfer(B, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: A })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: B })
+        await provideToSP(dec(10000, 18), { from: A })
+        await provideToSP(dec(10000, 18), { from: B })
 
         // Defaulter 1 liquidated. SP emptied
         const txL1 = await troveManager.liquidate(defaulter_1, { from: owner });
@@ -1588,8 +1589,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         // C, D provide 10k THUSD
         await thusdToken.transfer(C, dec(10000, 18), { from: whale })
         await thusdToken.transfer(D, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: C })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: D })
+        await provideToSP(dec(10000, 18), { from: C })
+        await provideToSP(dec(10000, 18), { from: D })
 
         // Defaulter 2 liquidated.  SP emptied
         const txL2 = await troveManager.liquidate(defaulter_2, { from: owner });
@@ -1628,8 +1629,8 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         // E, F provide 10k THUSD
         await thusdToken.transfer(E, dec(10000, 18), { from: whale })
         await thusdToken.transfer(F, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: E })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: F })
+        await provideToSP(dec(10000, 18), { from: E })
+        await provideToSP(dec(10000, 18), { from: F })
 
         // Defaulter 3 liquidated. SP emptied
         const txL3 = await troveManager.liquidate(defaulter_3, { from: owner });
@@ -1674,7 +1675,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         await priceFeed.setPrice(dec(100, 18));
 
         await thusdToken.transfer(alice, dec(10000, 18), { from: whale })
-        await stabilityPool.provideToSP(dec(10000, 18), { from: alice })
+        await provideToSP(dec(10000, 18), { from: alice })
 
         // Defaulter 1 liquidated.
         const txL1 = await troveManager.liquidate(defaulter_1, { from: owner });
@@ -1684,7 +1685,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // B deposits 9999.9 THUSD
         await thusdToken.transfer(bob, dec(99999, 17), { from: whale })
-        await stabilityPool.provideToSP(dec(99999, 17), { from: bob })
+        await provideToSP(dec(99999, 17), { from: bob })
 
         // Defaulter 2 liquidated
         const txL2 = await troveManager.liquidate(defaulter_2, { from: owner });
@@ -1694,7 +1695,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // C deposits 9999.9 THUSD
         await thusdToken.transfer(carol, dec(99999, 17), { from: whale })
-        await stabilityPool.provideToSP(dec(99999, 17), { from: carol })
+        await provideToSP(dec(99999, 17), { from: carol })
 
         // Defaulter 3 liquidated
         const txL3 = await troveManager.liquidate(defaulter_3, { from: owner });
@@ -1704,7 +1705,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // D deposits 9999.9 THUSD
         await thusdToken.transfer(dennis, dec(99999, 17), { from: whale })
-        await stabilityPool.provideToSP(dec(99999, 17), { from: dennis })
+        await provideToSP(dec(99999, 17), { from: dennis })
 
         // Defaulter 4 liquidated
         const txL4 = await troveManager.liquidate(defaulter_4, { from: owner });
@@ -1716,7 +1717,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
 
         // E deposits 9999.9 THUSD
         await thusdToken.transfer(erin, dec(99999, 17), { from: whale })
-        await stabilityPool.provideToSP(dec(99999, 17), { from: erin })
+        await provideToSP(dec(99999, 17), { from: erin })
 
         // Defaulter 5 liquidated
         const txL5 = await troveManager.liquidate(defaulter_5, { from: owner });
@@ -1745,7 +1746,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const ethValue = isCollateralERC20 ? 0 : dec(2, 27)
         for (account of depositors) {
           await borrowerOperations.openTrove(th._100pct, dec(1, 36), dec(2, 27), account, account, { from: account, value: ethValue })
-          await stabilityPool.provideToSP(dec(1, 36), { from: account })
+          await provideToSP(dec(1, 36), { from: account })
         }
 
         // Defaulter opens trove with 200% ICR
@@ -1801,7 +1802,7 @@ contract('StabilityPool - Withdrawal of stability deposit - Reward calculations'
         const ethValue = isCollateralERC20 ? 0 : dec(2, 29)
         for (account of depositors) {
           await borrowerOperations.openTrove(th._100pct, dec(1, 38), dec(2, 29), account, account, { from: account, value: ethValue })
-          await stabilityPool.provideToSP(dec(1, 38), { from: account })
+          await provideToSP(dec(1, 38), { from: account })
         }
 
         // Defaulter opens trove with 50e-7 ETH/tokens and  5000 THUSD. 200% ICR

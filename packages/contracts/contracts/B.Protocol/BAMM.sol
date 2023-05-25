@@ -166,6 +166,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract, SendColl
 
         // deposit
         require(thusdToken.transferFrom(msg.sender, address(this), thusdAmount), "deposit: transferFrom failed");
+        thusdToken.increaseAllowance(address(SP), thusdAmount);
         SP.provideToSP(thusdAmount);
 
         // update LP token
@@ -261,6 +262,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract, SendColl
         require(collateralAmount >= minCollateralReturn, "swap: low return");
 
         thusdToken.transferFrom(msg.sender, address(this), thusdAmount);
+        thusdToken.increaseAllowance(address(SP), thusdAmount - feeAmount);
         SP.provideToSP(thusdAmount - feeAmount);
 
         if(feeAmount > 0) thusdToken.transfer(feePool, feeAmount);

@@ -1012,6 +1012,11 @@ class TestHelper {
 
   // --- StabilityPool gas functions ---
 
+  static async provideToSP(contracts, amount, params) {
+    await contracts.thusdToken.approve(contracts.stabilityPool.address, amount, params)
+    await contracts.stabilityPool.provideToSP(amount, params)
+  }
+
   static async provideToSP_allAccounts(accounts, stabilityPool, amount) {
     const gasCostList = []
     for (const account of accounts) {

@@ -15,6 +15,7 @@ contract('All functions with onlyOwner modifier', async accounts => {
   let activePool
   let stabilityPool
   let defaultPool
+  let gasPool
   let borrowerOperations
 
   let pcv
@@ -30,6 +31,7 @@ contract('All functions with onlyOwner modifier', async accounts => {
     activePool = contracts.activePool
     stabilityPool = contracts.stabilityPool
     defaultPool = contracts.defaultPool
+    gasPool = contracts.gasPool
     borrowerOperations = contracts.borrowerOperations
     pcv = contracts.pcv
   })
@@ -78,6 +80,12 @@ contract('All functions with onlyOwner modifier', async accounts => {
   describe('BorrowerOperations', async accounts => {
     it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
       await testSetAddresses(borrowerOperations, 11, 11)
+    })
+  })
+
+  describe('GasPool', async accounts => {
+    it("setAddresses(): reverts when called by non-owner, with wrong addresses, or twice", async () => {
+      await testSetAddresses(gasPool, 2)
     })
   })
 

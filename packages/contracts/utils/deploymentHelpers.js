@@ -272,6 +272,11 @@ class DeploymentHelper {
       contracts.erc20.address
     )
 
+    await contracts.gasPool.setAddresses(
+      contracts.troveManager.address,
+      contracts.thusdToken.address
+    )
+
     await contracts.collSurplusPool.setAddresses(
       contracts.borrowerOperations.address,
       contracts.troveManager.address,

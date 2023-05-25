@@ -580,7 +580,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, SendCollateral, I
 
     // Transfer the THUSD tokens from the user to the Stability Pool's address, and update its recorded THUSD
     function _sendTHUSDtoStabilityPool(address _address, uint256 _amount) internal {
-        thusdToken.sendToPool(_address, address(this), _amount);
+        thusdToken.transferFrom(_address, address(this), _amount);
         uint256 newTotalTHUSDDeposits = totalTHUSDDeposits + _amount;
         totalTHUSDDeposits = newTotalTHUSDDeposits;
         emit StabilityPoolTHUSDBalanceUpdated(newTotalTHUSDDeposits);
@@ -600,7 +600,7 @@ contract StabilityPool is LiquityBase, Ownable, CheckContract, SendCollateral, I
     function _sendTHUSDToDepositor(address _depositor, uint256 THUSDWithdrawal) internal {
         if (THUSDWithdrawal == 0) {return;}
 
-        thusdToken.returnFromPool(address(this), _depositor, THUSDWithdrawal);
+        thusdToken.transfer(_depositor, THUSDWithdrawal);
         _decreaseTHUSD(THUSDWithdrawal);
     }
 
