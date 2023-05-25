@@ -54,9 +54,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     mapping (address => mapping (address => uint256)) private _allowances;
 
     // --- Addresses ---
-    mapping(address => bool) public isTroveManager;
-    mapping(address => bool) public isStabilityPools;
-    mapping(address => bool) public isBorrowerOperations;
+    mapping(address => bool) public burnList;
     mapping(address => bool) public mintList;
 
     uint256 public immutable governanceTimeDelay;
@@ -202,12 +200,7 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     }
 
     function burn(address _account, uint256 _amount) external override {
-        require(
-            isBorrowerOperations[msg.sender] ||
-            isTroveManager[msg.sender] ||
-            isStabilityPools[msg.sender],
-            "THUSD: Caller is neither BorrowerOperations nor TroveManager nor StabilityPool"
-        );
+        require(burnList[msg.sender], "THUSDToken: Caller not allowed to burn");
         _burn(_account, _amount);
     }
 
@@ -313,13 +306,13 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         checkContract(_stabilityPoolAddress);
         checkContract(_borrowerOperationsAddress);
 
-        isTroveManager[_troveManagerAddress] = true;
+        burnList[_troveManagerAddress] = true;
         emit TroveManagerAddressAdded(_troveManagerAddress);
 
-        isStabilityPools[_stabilityPoolAddress] = true;
+        burnList[_stabilityPoolAddress] = true;
         emit StabilityPoolAddressAdded(_stabilityPoolAddress);
 
-        isBorrowerOperations[_borrowerOperationsAddress] = true;
+        burnList[_borrowerOperationsAddress] = true;
         emit BorrowerOperationsAddressAdded(_borrowerOperationsAddress);
 
         mintList[_borrowerOperationsAddress] = true;
