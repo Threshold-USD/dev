@@ -715,6 +715,28 @@ contract('THUSDToken', async accounts => {
         
         assert.isTrue(await thusdTokenTester.mintList(alice))
       })
+
+      it('revokeMintAndBurnList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.revokeMintAndBurnList(
+            borrowerOperations.address, 
+            { from: alice }),
+            "Ownable: caller is not the owner")
+      })
+
+      it('revokeMintAndBurnList(): reverts when account has no burning role', async () => {
+        await assertRevert(
+          thusdTokenTester.revokeMintAndBurnList(
+            alice, 
+            { from: owner }),
+            "Incorrect address to revoke")
+      })
+
+      it('revokeMintAndBurnList(): removes account from burning list', async () => {
+        await thusdTokenTester.revokeMintAndBurnList(borrowerOperations.address, { from: owner })
+        assert.isFalse(await thusdTokenTester.burnList(borrowerOperations.address))
+        assert.isFalse(await thusdTokenTester.mintList(borrowerOperations.address))
+      })
     }
   }
   describe('Basic token functions, without Proxy', async () => {

@@ -192,6 +192,16 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         pendingBorrowerOperations = address(0);
     }
 
+    function revokeMintAndBurnList(address _account)
+        external
+        onlyOwner
+    {
+        require(burnList[_account], "Incorrect address to revoke");
+
+        burnList[_account] = false;
+        mintList[_account] = false;
+    }
+
     // --- Functions for intra-Liquity calls ---
 
     function mint(address _account, uint256 _amount) external override {
