@@ -715,6 +715,100 @@ contract('THUSDToken', async accounts => {
         
         assert.isTrue(await thusdTokenTester.mintList(alice))
       })
+
+      it('startRevokeBurnList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.startRevokeBurnList(
+            borrowerOperations.address, 
+            { from: alice }),
+            "Ownable: caller is not the owner")
+      })
+
+      it('startRevokeBurnList(): reverts when account has no burning role', async () => {
+        await assertRevert(
+          thusdTokenTester.startRevokeBurnList(
+            alice, 
+            { from: owner }),
+            "Incorrect address to revoke")
+      })
+
+      it('startRevokeBurnList(): puts account to pending list', async () => {
+        await thusdTokenTester.startRevokeBurnList(borrowerOperations.address, { from: owner })
+        
+        const timeNow = await getLatestBlockTimestamp(web3)
+        assert.equal(await thusdTokenTester.pendingRevokedBurnAddress(), borrowerOperations.address)
+        assert.equal(await thusdTokenTester.revokeBurnListInitiated(), timeNow)
+        
+        assert.isTrue(await thusdTokenTester.burnList(borrowerOperations.address))
+      })
+        
+      it('cancelRevokeBurnList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.cancelRevokeBurnList({ from: alice }), 
+          "Ownable: caller is not the owner"
+        )
+      })
+
+      it('cancelRevokeBurnList(): reverts when change is not initiated', async () => {
+        await assertRevert(
+          thusdTokenTester.cancelRevokeBurnList({ from: owner }),
+          "Revoking from burn list is not started"
+        )
+      })
+
+      it('cancelRevokeBurnList(): cancels revoking from burn list', async () => {
+        await thusdTokenTester.startRevokeBurnList(
+            borrowerOperations.address, 
+            { from: owner }
+        )
+        
+        await thusdTokenTester.cancelRevokeBurnList({ from: owner })
+
+        assert.equal(await thusdTokenTester.pendingRevokedBurnAddress(), ZERO_ADDRESS)
+        assert.equal(await thusdTokenTester.revokeBurnListInitiated(), 0)
+        
+        assert.isTrue(await thusdTokenTester.burnList(borrowerOperations.address))
+      })
+
+      it('finalizeRevokeBurnList(): reverts when caller is not owner', async () => {
+        await assertRevert(
+          thusdTokenTester.finalizeRevokeBurnList(
+            { from: alice }),
+            "Ownable: caller is not the owner")
+      })
+
+      it('finalizeRevokeBurnList(): reverts when change is not initiated', async () => {
+        await assertRevert(
+          thusdTokenTester.finalizeRevokeBurnList(
+            { from: owner }),
+            "Change not initiated")
+      })
+
+      it('finalizeRevokeBurnList(): reverts when passed not enough time', async () => {
+        await thusdTokenTester.startRevokeBurnList(
+            borrowerOperations.address, 
+            { from: owner }
+          )
+        await assertRevert(
+          thusdTokenTester.finalizeRevokeBurnList(
+            { from: owner }),
+            "Governance delay has not elapsed")
+      })
+
+      it('finalizeRevokeBurnList(): removes account from minting list', async () => {
+        await thusdTokenTester.startRevokeBurnList(
+            borrowerOperations.address, 
+            { from: owner }
+          )
+        await fastForwardTime(delay, web3.currentProvider)
+        
+        await thusdTokenTester.finalizeRevokeBurnList({ from: owner })
+
+        assert.equal(await thusdTokenTester.pendingRevokedBurnAddress(), ZERO_ADDRESS)
+        assert.equal(await thusdTokenTester.revokeBurnListInitiated(), 0)
+        
+        assert.isFalse(await thusdTokenTester.burnList(borrowerOperations.address))
+      })
     }
   }
   describe('Basic token functions, without Proxy', async () => {

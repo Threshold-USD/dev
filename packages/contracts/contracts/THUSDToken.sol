@@ -62,9 +62,13 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
     address public pendingTroveManager;
     address public pendingStabilityPool;
     address public pendingBorrowerOperations;
+    
     address public pendingRevokedMintAddress;
+    address public pendingRevokedBurnAddress;
     address public pendingAddedMintAddress;
+
     uint256 public revokeMintListInitiated;
+    uint256 public revokeBurnListInitiated;
     uint256 public addContractsInitiated;
     uint256 public addMintListInitiated;
 
@@ -190,6 +194,33 @@ contract THUSDToken is Ownable, CheckContract, ITHUSDToken {
         pendingTroveManager = address(0);
         pendingStabilityPool = address(0);
         pendingBorrowerOperations = address(0);
+    }
+
+    function startRevokeBurnList(address _account)
+        external
+        onlyOwner
+    {
+        require(burnList[_account], "Incorrect address to revoke");
+
+        revokeBurnListInitiated = block.timestamp;
+        pendingRevokedBurnAddress = _account;
+    }
+
+    function cancelRevokeBurnList() external onlyOwner {
+        require(revokeBurnListInitiated != 0, "Revoking from burn list is not started");
+
+        revokeBurnListInitiated = 0;
+        pendingRevokedBurnAddress = address(0);
+    }
+
+    function finalizeRevokeBurnList()
+        external
+        onlyOwner
+        onlyAfterGovernanceDelay(revokeBurnListInitiated)
+    {
+        burnList[pendingRevokedBurnAddress] = false;
+        revokeBurnListInitiated = 0;
+        pendingRevokedBurnAddress = address(0);
     }
 
     // --- Functions for intra-Liquity calls ---

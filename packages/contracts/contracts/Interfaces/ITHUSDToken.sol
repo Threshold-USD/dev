@@ -17,6 +17,7 @@ interface ITHUSDToken is IERC20, IERC2612 {
 
     // --- Functions ---
     function mintList(address contractAddress) external view returns (bool);
+    function burnList(address contractAddress) external view returns (bool);
 
     function mint(address _account, uint256 _amount) external;
 
