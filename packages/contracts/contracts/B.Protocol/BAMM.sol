@@ -257,6 +257,8 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract, SendColl
 
     // get collateral in return to THUSD
     function swap(uint256 thusdAmount, uint256 minCollateralReturn, address payable dest) public returns(uint) {
+        require(minCollateralReturn > 0, "swap: min return must not be zero");
+        
         (uint256 collateralAmount, uint256 feeAmount) = getSwapCollateralAmount(thusdAmount);
 
         require(collateralAmount >= minCollateralReturn, "swap: low return");
@@ -283,7 +285,7 @@ contract BAMM is CropJoinAdapter, PriceFormula, Ownable, CheckContract, SendColl
         uint256 /* conversionRate */,
         bool /* validate */
     ) external payable returns (bool) {
-        return swap(srcAmount, 0, destAddress) > 0;
+        return swap(srcAmount, 1, destAddress) > 0;
     }
 
     function getConversionRate(
