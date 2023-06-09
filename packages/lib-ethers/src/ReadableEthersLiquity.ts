@@ -453,21 +453,21 @@ export class ReadableEthersLiquity implements ReadableLiquity {
   isStabilityPools(overrides?: EthersCallOverrides): Promise<boolean> {
     const { stabilityPool, thusdToken } = _getContracts(this.connection);
 
-    return thusdToken.isStabilityPools(stabilityPool.address, { ...overrides });
+    return thusdToken.burnList(stabilityPool.address, { ...overrides });
   }
   
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.isBorrowerOperations} */
   isBorrowerOperations(overrides?: EthersCallOverrides): Promise<boolean> {
     const { borrowerOperations, thusdToken } = _getContracts(this.connection);
 
-    return thusdToken.isBorrowerOperations(borrowerOperations.address, { ...overrides });
+    return thusdToken.burnList(borrowerOperations.address, { ...overrides });
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.isTroveManager} */
   isTroveManager(overrides?: EthersCallOverrides): Promise<boolean> {
     const { troveManager, thusdToken } = _getContracts(this.connection);
 
-    return thusdToken.isTroveManager(troveManager.address, { ...overrides });
+    return thusdToken.burnList(troveManager.address, { ...overrides });
   }
 
   /** {@inheritDoc @liquity/lib-base#ReadableLiquity.checkMintList} */
