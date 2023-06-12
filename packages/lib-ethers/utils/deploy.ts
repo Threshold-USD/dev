@@ -198,7 +198,7 @@ const connectContracts = async (
         nonce
       }),
 
-    nonce =>
+    nonce => 
       troveManager.setAddresses(
         borrowerOperations.address,
         activePool.address,
@@ -241,7 +241,7 @@ const connectContracts = async (
         { ...overrides, nonce }
       ),
 
-    nonce =>
+    nonce => 
       activePool.setAddresses(
         borrowerOperations.address,
         troveManager.address,
@@ -252,13 +252,13 @@ const connectContracts = async (
         { ...overrides, nonce }
       ),
 
-    nonce =>
+    nonce => 
       defaultPool.setAddresses(troveManager.address, activePool.address, erc20.address, {
         ...overrides,
         nonce
       }),
 
-    nonce =>
+    nonce =>  
       collSurplusPool.setAddresses(
         borrowerOperations.address,
         troveManager.address,
@@ -273,7 +273,7 @@ const connectContracts = async (
         nonce
       }),
 
-    nonce =>
+    nonce => 
       pcv.setAddresses(
         thusdToken.address,
         borrowerOperations.address,
@@ -283,10 +283,18 @@ const connectContracts = async (
       )
   ];
 
-  const txs = await Promise.all(connections.map((connect, i) => connect(txCount + i)));
+  const txs: ContractTransaction[] = []
+
+  for (const [index, connect] of connections.entries()) {
+    await connect(txCount + index)    
+      .then((result) =>  txs.push(result))
+  }
 
   let i = 0;
-  await Promise.all(txs.map(tx => tx.wait().then(() => log(`Connected ${++i}`))));
+  for (const tx of txs) {
+    await tx.wait()    
+      .then(() => log(`Connected ${++i}`))
+  }
 };
 
 export const deployAndSetupContracts = async (
