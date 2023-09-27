@@ -11,14 +11,12 @@ import {
 interface IOwners {
   feePool: string
   bammOwner: string
-  legalEntity: string
   governorBravo: string
 }
 
 const contractOwners: IOwners = {
   feePool: "0x7095F0B91A1010c11820B4E263927835A4CF52c9",
   bammOwner: "0x0000000000000000000000000000000000000001",
-  legalEntity: "0xf642Bd6A9F76294d86E99c2071cFE2Aa3B61fBDa",
   governorBravo: "0x87F005317692D05BAA4193AB0c961c69e175f45f"
 }
 
@@ -326,7 +324,7 @@ export const transferContractsOwnership = async (
   const contracts: ((nonce: number) => Promise<ContractTransaction>)[] = [
     nonce =>
       thusdToken.transferOwnership(
-        process.env.LEGAL_ENTITY || contractOwners["legalEntity"], 
+        process.env.GOVERNOR_BRAVO || contractOwners["governorBravo"], 
         {
           ...overrides,
           nonce
@@ -342,7 +340,7 @@ export const transferContractsOwnership = async (
 
     nonce =>
       priceFeed.transferOwnership(
-        process.env.LEGAL_ENTITY || contractOwners["legalEntity"], 
+        process.env.GOVERNOR_BRAVO || contractOwners["governorBravo"], 
         { 
           ...overrides, 
           nonce 
