@@ -9,7 +9,7 @@ owner of thUSD can redeem their stablecoins for the underlying collateral at any
 mechanism along with algorithmically adjusted fees guarantee a minimum stablecoin value of USD 1.
 
 A liquidation mechanism based on incentivized stability deposits and a redistribution
-cycle from riskier to safer troves provides stability at a much lower collateral ratio than current
+cycle from riskier to safer vaults provides stability at a much lower collateral ratio than current
 systems. Stability is maintained via economically-driven user interactions and arbitrage, rather
 than by active governance or monetary interventions.
 
@@ -43,7 +43,7 @@ Visit [thresholdusd.org](https://www.thresholdusd.org) to find out more and join
   - [PriceFeed Logic](#pricefeed-logic)
   - [Testnet PriceFeed and PriceFeed tests](#testnet-pricefeed-and-pricefeed-tests)
   - [PriceFeed limitations and known issues](#pricefeed-limitations-and-known-issues)
-  - [Keeping a sorted list of Troves ordered by ICR](#keeping-a-sorted-list-of-troves-ordered-by-icr)
+  - [Keeping a sorted list of vaults ordered by ICR](#keeping-a-sorted-list-of-vaults-ordered-by-icr)
   - [Flow of Collateral in Threshold USD](#flow-of-ether-in-thresholdusd)
   - [Flow of thUSD tokens in Threshold USD](#flow-of-thusd-tokens-in-thresholdusd)
 - [Expected User Behaviors](#expected-user-behaviors)
@@ -104,7 +104,7 @@ Visit [thresholdusd.org](https://www.thresholdusd.org) to find out more and join
 
 ## Threshold USD Overview
 
-Threshold USD is a collateralized debt platform. Users can lock up collateral, and issue stablecoin tokens (thUSD) to their own Ethereum address, and subsequently transfer those tokens to any other Ethereum address. The individual collateralized debt positions are called Troves.
+Threshold USD is a collateralized debt platform. Users can lock up collateral, and issue stablecoin tokens (thUSD) to their own Ethereum address, and subsequently transfer those tokens to any other Ethereum address. The individual collateralized debt positions are called vaults.
 
 The stablecoin tokens are economically geared towards maintaining value of 1 thUSD = \$1 USD, due to the following properties:
 
@@ -124,9 +124,9 @@ The Threshold USD system regularly updates the collateral:USD price via a decent
 
 Threshold USD utilizes a two-step liquidation mechanism in the following order of priority:
 
-1. Offset under-collateralized Troves against the Stability Pool containing thUSD tokens
+1. Offset under-collateralized vaults against the Stability Pool containing thUSD tokens
 
-2. Redistribute under-collateralized Troves to other borrowers if the Stability Pool is emptied
+2. Redistribute under-collateralized vaults to other borrowers if the Stability Pool is emptied
 
 Threshold USD primarily uses the thUSD tokens in its Stability Pool to absorb the under-collateralized debt, i.e. to repay the liquidated borrower's liability.
 
@@ -134,13 +134,13 @@ Any user may deposit thUSD tokens to the Stability Pool. This allows them to ear
 
 Stability Pool depositors can expect to earn net gains from liquidations, as in most cases, the value of the liquidated collateral will be greater than the value of the cancelled debt (since a liquidated Vault will likely have an ICR just slightly below 110%).
 
-If the liquidated debt is higher than the amount of thUSD in the Stability Pool, the system tries to cancel as much debt as possible with the tokens in the Stability Pool, and then redistributes the remaining liquidated collateral and debt across all active Troves.
+If the liquidated debt is higher than the amount of thUSD in the Stability Pool, the system tries to cancel as much debt as possible with the tokens in the Stability Pool, and then redistributes the remaining liquidated collateral and debt across all active vaults.
 
-Anyone may call the public `liquidateTroves()` function, which will check for under-collateralized Troves, and liquidate them. Alternatively they can call `batchLiquidateTroves()` with a custom list of vault addresses to attempt to liquidate.
+Anyone may call the public `liquidateTroves()` function, which will check for under-collateralized vaults, and liquidate them. Alternatively they can call `batchLiquidateTroves()` with a custom list of vault addresses to attempt to liquidate.
 
 ### Liquidation gas costs
 
-Currently, mass liquidations performed via the above functions cost 60-65k gas per vault. Thus the system can liquidate up to a maximum of 95-105 troves in a single transaction.
+Currently, mass liquidations performed via the above functions cost 60-65k gas per vault. Thus the system can liquidate up to a maximum of 95-105 vaults in a single transaction.
 
 ### Liquidation Logic
 
@@ -153,17 +153,17 @@ Here is the liquidation logic for a single Vault in Normal Mode and Recovery Mod
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Condition                      | Liquidation behavior                                                                                                                                                                                                                                                                                                |
 |----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | ICR < MCR & SP.THUSD >= vault.debt | thUSD in the StabilityPool equal to the Vault's debt is offset with the Vault's debt. The Vault's collateral is shared between depositors.                                                                                                                                                                       |
-| ICR < MCR & SP.THUSD < vault.debt | The total StabilityPool thUSD is offset with an equal amount of debt from the Vault.  A fraction of the Vault's collateral (equal to the ratio of its offset debt to its entire debt) is shared between depositors. The remaining debt and collateral (minus ETH gas compensation) is redistributed to active Troves |
-| ICR < MCR & SP.THUSD = 0          | Redistribute all debt and collateral (minus ETH gas compensation) to active Troves.                                                                                                                                                                                                                                 |
+| ICR < MCR & SP.THUSD < vault.debt | The total StabilityPool thUSD is offset with an equal amount of debt from the Vault.  A fraction of the Vault's collateral (equal to the ratio of its offset debt to its entire debt) is shared between depositors. The remaining debt and collateral (minus ETH gas compensation) is redistributed to active vaults |
+| ICR < MCR & SP.THUSD = 0          | Redistribute all debt and collateral (minus ETH gas compensation) to active vaults.                                                                                                                                                                                                                                 |
 | ICR  >= MCR                      | Do nothing.                                                                                                                                                                                                                                                                                                         |
 #### Liquidations in Recovery Mode: TCR < 150%
 
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Condition                                | Liquidation behavior                                                                                                                                                                                                                                                                                                                                                                                         |
 |------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| ICR <=100%                               | Redistribute all debt and collateral (minus ETH gas compensation) to active Troves.                                                                                                                                                                                                                                                                                                                          |
+| ICR <=100%                               | Redistribute all debt and collateral (minus ETH gas compensation) to active vaults.                                                                                                                                                                                                                                                                                                                          |
 | 100% < ICR < MCR & SP.THUSD > vault.debt  | thUSD in the StabilityPool equal to the Vault's debt is offset with the Vault's debt. The Vault's collateral (minus ETH gas compensation) is shared between depsitors.                                                                                                                                                                                                                                    |
-| 100% < ICR < MCR & SP.THUSD < vault.debt  | The total StabilityPool thUSD is offset with an equal amount of debt from the Vault.  A fraction of the Vault's collateral (equal to the ratio of its offset debt to its entire debt) is shared between depositors. The remaining debt and collateral (minus ETH gas compensation) is redistributed to active troves                                                                                          |
-| MCR <= ICR < TCR & SP.THUSD >= vault.debt  |  The Pool thUSD is offset with an equal amount of debt from the Vault. A fraction of collateral with dollar value equal to `1.1 * debt` is shared between depositors. Nothing is redistributed to other active Troves. Since it's ICR was > 1.1, the Vault has a collateral remainder, which is sent to the `CollSurplusPool` and is claimable by the borrower. The Vault is closed. |
+| 100% < ICR < MCR & SP.THUSD < vault.debt  | The total StabilityPool thUSD is offset with an equal amount of debt from the Vault.  A fraction of the Vault's collateral (equal to the ratio of its offset debt to its entire debt) is shared between depositors. The remaining debt and collateral (minus ETH gas compensation) is redistributed to active vaults                                                                                          |
+| MCR <= ICR < TCR & SP.THUSD >= vault.debt  |  The Pool thUSD is offset with an equal amount of debt from the Vault. A fraction of collateral with dollar value equal to `1.1 * debt` is shared between depositors. Nothing is redistributed to other active vaults. Since it's ICR was > 1.1, the Vault has a collateral remainder, which is sent to the `CollSurplusPool` and is claimable by the borrower. The Vault is closed. |
 | MCR <= ICR < TCR & SP.THUSD  < vault.debt | Do nothing.                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ICR >= TCR                               | Do nothing.                                                                                                                                                                                                                                                                                                                                                                                                  |
 
@@ -177,11 +177,11 @@ Similarly, a Vault's accumulated gains from liquidations are automatically appli
 
 Any thUSD holder (whether or not they have an active Vault) may redeem their thUSD directly with the system. Their thUSD is exchanged for collateral, at face value: redeeming x thUSD tokens returns \$x worth of collateral (minus a [redemption fee](#redemption-fee)).
 
-When thUSD is redeemed for collateral, the system cancels the thUSD with debt from Troves, and the collateral is drawn from their collateral.
+When thUSD is redeemed for collateral, the system cancels the thUSD with debt from vaults, and the collateral is drawn from their collateral.
 
-In order to fulfill the redemption request, Troves are redeemed from in ascending order of their collateralization ratio.
+In order to fulfill the redemption request, vaults are redeemed from in ascending order of their collateralization ratio.
 
-A redemption sequence of `n` steps will **fully** redeem from up to `n-1` Troves, and, and **partially** redeems from up to 1 Vault, which is always the last Vault in the redemption sequence.
+A redemption sequence of `n` steps will **fully** redeem from up to `n-1` vaults, and, and **partially** redeems from up to 1 Vault, which is always the last Vault in the redemption sequence.
 
 Redemptions are blocked when TCR < 110% (there is no need to restrict ICR < TCR). At that TCR redemptions would likely be unprofitable, as thUSD is probably trading above $1 if the system has crashed that badly, but it could be a way for an attacker with a lot of thUSD to lower the TCR even further.
 
@@ -189,9 +189,9 @@ Note that redemptions are disabled during the first 14 days of operation since d
 
 ### Partial redemption
 
-Most redemption transactions will include a partial redemption, since the amount redeemed is unlikely to perfectly match the total debt of a series of Troves.
+Most redemption transactions will include a partial redemption, since the amount redeemed is unlikely to perfectly match the total debt of a series of vaults.
 
-The partially redeemed Vault is re-inserted into the sorted list of Troves, and remains active, with reduced collateral and debt.
+The partially redeemed Vault is re-inserted into the sorted list of vaults, and remains active, with reduced collateral and debt.
 
 ### Full redemption
 
@@ -209,7 +209,7 @@ Economically, the redemption mechanism creates a hard price floor for thUSD, ens
 
 Recovery Mode kicks in when the total collateralization ratio (TCR) of the system falls below 150%.
 
-During Recovery Mode, liquidation conditions are relaxed, and the system blocks borrower transactions that would further decrease the TCR. New thUSD may only be issued by adjusting existing Troves in a way that improves their ICR, or by opening a new Vault with an ICR of >=150%. In general, if an existing Vault's adjustment reduces its ICR, the transaction is only executed if the resulting TCR is above 150%
+During Recovery Mode, liquidation conditions are relaxed, and the system blocks borrower transactions that would further decrease the TCR. New thUSD may only be issued by adjusting existing vaults in a way that improves their ICR, or by opening a new Vault with an ICR of >=150%. In general, if an existing Vault's adjustment reduces its ICR, the transaction is only executed if the resulting TCR is above 150%
 
 Recovery Mode is structured to incentivize borrowers to behave in ways that promptly raise the TCR back above 150%, and to incentivize thUSD holders to replenish the Stability Pool.
 
@@ -264,7 +264,7 @@ The three main contracts - `BorrowerOperations.sol`, `TroveManager.sol` and `Sta
 
 `THUSDToken.sol` - the stablecoin token contract, which implements the ERC20 fungible token standard in conjunction with EIP-2612 and a mechanism that blocks (accidental) transfers to addresses like the StabilityPool and address(0) that are not supposed to receive funds through direct transfers. The contract mints, burns and transfers thUSD tokens.
 
-`SortedTroves.sol` - a doubly linked list that stores addresses of Vault owners, sorted by their individual collateralization ratio (ICR). It inserts and re-inserts Troves at the correct position, based on their ICR.
+`SortedTroves.sol` - a doubly linked list that stores addresses of Vault owners, sorted by their individual collateralization ratio (ICR). It inserts and re-inserts vaults at the correct position, based on their ICR.
 
 `PriceFeed.sol` - Contains functionality for obtaining the current collateral:USD price, which the system uses for calculating collateralization ratios.
 
@@ -274,11 +274,11 @@ The three main contracts - `BorrowerOperations.sol`, `TroveManager.sol` and `Sta
 
 Along with `StabilityPool.sol`, these contracts hold collateral and/or tokens for their respective parts of the system, and contain minimal logic:
 
-`ActivePool.sol` - holds the total collateral balance and records the total stablecoin debt of the active Troves.
+`ActivePool.sol` - holds the total collateral balance and records the total stablecoin debt of the active vaults.
 
-`DefaultPool.sol` - holds the total collateral balance and records the total stablecoin debt of the liquidated Troves that are pending redistribution to active Troves. If a Vault has pending ether/debt “rewards” in the DefaultPool, then they will be applied to the Vault when it next undergoes a borrower operation, a redemption, or a liquidation.
+`DefaultPool.sol` - holds the total collateral balance and records the total stablecoin debt of the liquidated vaults that are pending redistribution to active vaults. If a Vault has pending ether/debt “rewards” in the DefaultPool, then they will be applied to the Vault when it next undergoes a borrower operation, a redemption, or a liquidation.
 
-`CollSurplusPool.sol` - holds the collateral surplus from Troves that have been fully redeemed from as well as from Troves with an ICR > MCR that were liquidated in Recovery Mode. Sends the surplus back to the owning borrower, when told to do so by `BorrowerOperations.sol`.
+`CollSurplusPool.sol` - holds the collateral surplus from vaults that have been fully redeemed from as well as from vaults with an ICR > MCR that were liquidated in Recovery Mode. Sends the surplus back to the owning borrower, when told to do so by `BorrowerOperations.sol`.
 
 `GasPool.sol` - holds the total thUSD liquidation reserves. thUSD is moved into the `GasPool` when a Vault is opened, and moved out when a Vault is liquidated or closed.
 
@@ -341,22 +341,22 @@ To summarize the Chainlink decimals issue:
 **Tellor Decimals**: Tellor uses 6 decimal precision for their ETHUSD price as determined by a social consensus of Tellor miners/data providers, and shown on Tellor's price feed page. Their decimals value is not offered in their on-chain contracts.  We rely on the continued social consensus around 6 decimals for their ETHUSD price feed. Tellor have informed us that if there was demand for an ETHUSD price at different precision, they would simply create a new `requestId`, and make no attempt to alter the social consensus around the precision of the current ETHUSD `requestId` (1) used by Threshold USD.
 
 
-### Keeping a sorted list of Troves ordered by ICR
+### Keeping a sorted list of vaults ordered by ICR
 
-Threshold USD relies on a particular data structure: a sorted doubly-linked list of Troves that remains ordered by individual collateralization ratio (ICR), i.e. the amount of collateral (in USD) divided by the amount of debt (in thUSD).
+Threshold USD relies on a particular data structure: a sorted doubly-linked list of vaults that remains ordered by individual collateralization ratio (ICR), i.e. the amount of collateral (in USD) divided by the amount of debt (in thUSD).
 
-This ordered list is critical for gas-efficient redemption sequences and for the `liquidateTroves` sequence, both of which target Troves in ascending order of ICR.
+This ordered list is critical for gas-efficient redemption sequences and for the `liquidateTroves` sequence, both of which target vaults in ascending order of ICR.
 
 The sorted doubly-linked list is found in `SortedTroves.sol`.
 
-Nodes map to active Troves in the system - the ID property is the address of a vault owner. The list accepts positional hints for efficient O(1) insertion - please see the [hints](#supplying-hints-to-cdp-operations) section for more details.
+Nodes map to active vaults in the system - the ID property is the address of a vault owner. The list accepts positional hints for efficient O(1) insertion - please see the [hints](#supplying-hints-to-cdp-operations) section for more details.
 
-ICRs are computed dynamically at runtime, and not stored on the node. This is because ICRs of active Troves change dynamically, when:
+ICRs are computed dynamically at runtime, and not stored on the node. This is because ICRs of active vaults change dynamically, when:
 
 - The collateral:USD price varies, altering the USD of the collateral of every Vault
-- A liquidation that redistributes collateral and debt to active Troves occurs
+- A liquidation that redistributes collateral and debt to active vaults occurs
 
-The list relies on the fact that a collateral and debt redistribution due to a liquidation preserves the ordering of all active Troves (though it does decrease the ICR of each active Vault above the MCR).
+The list relies on the fact that a collateral and debt redistribution due to a liquidation preserves the ordering of all active vaults (though it does decrease the ICR of each active Vault above the MCR).
 
 The fact that ordering is maintained as redistributions occur, is not immediately obvious: please see the [mathematical proof](https://github.com/threshold-usd/dev/blob/main/papers) which shows that this holds in Threshold USD.
 
@@ -458,7 +458,7 @@ The only time thUSD is transferred to/from a Threshold USD contract, is when a u
 
 Generally, borrowers call functions that trigger Vault operations on their own Vault. Stability Pool users (who may or may not also be borrowers) call functions that trigger Stability Pool operations, such as depositing or withdrawing tokens to/from the Stability Pool.
 
-Anyone may call the public liquidation functions, and attempt to liquidate one or several Troves.
+Anyone may call the public liquidation functions, and attempt to liquidate one or several vaults.
 
 thUSD token holders may also redeem their tokens, and swap an amount of tokens 1-for-1 in value (minus fees) with collateral.
 
@@ -592,15 +592,15 @@ All data structures with the ‘public’ visibility specifier are ‘gettable�
 
 `liquidate(address _borrower)`: callable by anyone, attempts to liquidate the Vault of `_user`. Executes successfully if `_user`’s Vault meets the conditions for liquidation (e.g. in Normal Mode, it liquidates if the Vault's ICR < the system MCR).  
 
-`liquidateTroves(uint n)`: callable by anyone, checks for under-collateralized Troves below MCR and liquidates up to `n`, starting from the Vault with the lowest collateralization ratio; subject to gas constraints and the actual number of under-collateralized Troves. The gas costs of `liquidateTroves(uint n)` mainly depend on the number of Troves that are liquidated, and whether the Troves are offset against the Stability Pool or redistributed. For n=1, the gas costs per liquidated Vault are roughly between 215K-400K, for n=5 between 80K-115K, for n=10 between 70K-82K, and for n=50 between 60K-65K.
+`liquidateTroves(uint n)`: callable by anyone, checks for under-collateralized vaults below MCR and liquidates up to `n`, starting from the Vault with the lowest collateralization ratio; subject to gas constraints and the actual number of under-collateralized vaults. The gas costs of `liquidateTroves(uint n)` mainly depend on the number of vaults that are liquidated, and whether the vaults are offset against the Stability Pool or redistributed. For n=1, the gas costs per liquidated Vault are roughly between 215K-400K, for n=5 between 80K-115K, for n=10 between 70K-82K, and for n=50 between 60K-65K.
 
-`batchLiquidateTroves(address[] calldata _troveArray)`: callable by anyone, accepts a custom list of Troves addresses as an argument. Steps through the provided list and attempts to liquidate every Vault, until it reaches the end or it runs out of gas. A Vault is liquidated only if it meets the conditions for liquidation. For a batch of 10 Troves, the gas costs per liquidated Vault are roughly between 75K-83K, for a batch of 50 Troves between 54K-69K.
+`batchLiquidateTroves(address[] calldata _troveArray)`: callable by anyone, accepts a custom list of vaults addresses as an argument. Steps through the provided list and attempts to liquidate every Vault, until it reaches the end or it runs out of gas. A Vault is liquidated only if it meets the conditions for liquidation. For a batch of 10 vaults, the gas costs per liquidated Vault are roughly between 75K-83K, for a batch of 50 vaults between 54K-69K.
 
-`redeemCollateral(uint _THUSDAmount, address _firstRedemptionHint, address _upperPartialRedemptionHint, address _lowerPartialRedemptionHint, uint _partialRedemptionHintNICR, uint _maxIterations, uint _maxFeePercentage)`: redeems `_THUSDamount` of stablecoins for ether from the system. Decreases the caller’s thUSD balance, and sends them the corresponding amount of collateral. Executes successfully if the caller has sufficient thUSD to redeem. The number of Troves redeemed from is capped by `_maxIterations`. The borrower has to provide a `_maxFeePercentage` that he/she is willing to accept in case of a fee slippage, i.e. when another redemption transaction is processed first, driving up the redemption fee.
+`redeemCollateral(uint _THUSDAmount, address _firstRedemptionHint, address _upperPartialRedemptionHint, address _lowerPartialRedemptionHint, uint _partialRedemptionHintNICR, uint _maxIterations, uint _maxFeePercentage)`: redeems `_THUSDamount` of stablecoins for ether from the system. Decreases the caller’s thUSD balance, and sends them the corresponding amount of collateral. Executes successfully if the caller has sufficient thUSD to redeem. The number of vaults redeemed from is capped by `_maxIterations`. The borrower has to provide a `_maxFeePercentage` that he/she is willing to accept in case of a fee slippage, i.e. when another redemption transaction is processed first, driving up the redemption fee.
 
 `getCurrentICR(address _user, uint _price)`: computes the user’s individual collateralization ratio (ICR) based on their total collateral and total thUSD debt. Returns 2^256 -1 if they have 0 debt.
 
-`getTroveOwnersCount()`: get the number of active Troves in the system.
+`getTroveOwnersCount()`: get the number of active vaults in the system.
 
 `getPendingETHReward(address _borrower)`: get the pending collateral reward from liquidation redistribution events, for the given Vault.
 
@@ -608,9 +608,9 @@ All data structures with the ‘public’ visibility specifier are ‘gettable�
 
 `getEntireDebtAndColl(address _borrower)`: returns a Trove’s entire debt and collateral, which respectively include any pending debt rewards and collateral rewards from prior redistributions.
 
-`getEntireSystemColl()`:  Returns the systemic entire collateral allocated to Troves, i.e. the sum of the collateral in the Active Pool and the Default Pool.
+`getEntireSystemColl()`:  Returns the systemic entire collateral allocated to vaults, i.e. the sum of the collateral in the Active Pool and the Default Pool.
 
-`getEntireSystemDebt()` Returns the systemic entire debt assigned to Troves, i.e. the sum of the THUSDDebt in the Active Pool and the Default Pool.
+`getEntireSystemDebt()` Returns the systemic entire debt assigned to vaults, i.e. the sum of the THUSDDebt in the Active Pool and the Default Pool.
 
 `getTCR()`: returns the total collateralization ratio (TCR) of the system.  The TCR is based on the the entire system debt and collateral (including pending rewards).
 
@@ -626,13 +626,13 @@ All data structures with the ‘public’ visibility specifier are ‘gettable�
 - `partialRedemptionHintNICR` is the final nominal ICR of the last Vault after being hit by partial redemption, or zero in case of no partial redemption (see [Hints for `redeemCollateral`](#hints-for-redeemcollateral)).
 - `truncatedTHUSDamount` is the maximum amount that can be redeemed out of the the provided `_THUSDamount`. This can be lower than `_THUSDamount` when redeeming the full amount would leave the last Vault of the redemption sequence with less debt than the minimum allowed value.
 
-The number of Troves to consider for redemption can be capped by passing a non-zero value as `_maxIterations`, while passing zero will leave it uncapped.
+The number of vaults to consider for redemption can be capped by passing a non-zero value as `_maxIterations`, while passing zero will leave it uncapped.
 
 ### Stability Pool Functions - `StabilityPool.sol`
 
 `provideToSP(uint _amount)`: allows stablecoin holders to deposit `_amount` of thUSD to the Stability Pool. It sends `_amount` of thUSD from their address to the Pool, and tops up their thUSD deposit by `_amount`. If the depositor already has a non-zero deposit, it sends their accumulated collateral to their address.
 
-`withdrawFromSP(uint _amount)`: allows a stablecoin holder to withdraw `_amount` of thUSD from the Stability Pool, up to the value of their remaining Stability deposit. It decreases their thUSD balance by `_amount`. It sends the depositor’s accumulated collateral gains to their address. If the user makes a partial withdrawal, their deposit remainder will earn further gains. To prevent potential loss evasion by depositors, withdrawals from the Stability Pool are suspended when there are liquidable Troves with ICR < 110% in the system.
+`withdrawFromSP(uint _amount)`: allows a stablecoin holder to withdraw `_amount` of thUSD from the Stability Pool, up to the value of their remaining Stability deposit. It decreases their thUSD balance by `_amount`. It sends the depositor’s accumulated collateral gains to their address. If the user makes a partial withdrawal, their deposit remainder will earn further gains. To prevent potential loss evasion by depositors, withdrawals from the Stability Pool are suspended when there are liquidable vaults with ICR < 110% in the system.
 
 `withdrawETHGainToTrove(address _hint)`: sends the user's entire accumulated collateral gain to the user's active Vault, and updates their Stability deposit with its accumulated loss from debt absorptions.
 
@@ -656,19 +656,19 @@ https://eips.ethereum.org/EIPS/eip-2612
 
 ## Supplying Hints to Vault operations
 
-Troves in Threshold USD are recorded in a sorted doubly linked list, sorted by their NICR, from high to low. NICR stands for the nominal collateral ratio that is simply the amount of collateral (in collateral) multiplied by 100e18 and divided by the amount of debt (in thUSD), without taking the collateral:USD price into account. Given that all Troves are equally affected by collateral price changes, they do not need to be sorted by their real ICR.
+vaults in Threshold USD are recorded in a sorted doubly linked list, sorted by their NICR, from high to low. NICR stands for the nominal collateral ratio that is simply the amount of collateral (in collateral) multiplied by 100e18 and divided by the amount of debt (in thUSD), without taking the collateral:USD price into account. Given that all vaults are equally affected by collateral price changes, they do not need to be sorted by their real ICR.
 
 All Vault operations that change the collateralization ratio need to either insert or reinsert the Vault to the `SortedTroves` list. To reduce the computational complexity (and gas cost) of the insertion to the linked list, two ‘hints’ may be provided.
 
 A hint is the address of a Vault with a position in the sorted list close to the correct insert position.
 
-All Vault operations take two ‘hint’ arguments: a `_lowerHint` referring to the `nextId` and an `_upperHint` referring to the `prevId` of the two adjacent nodes in the linked list that are (or would become) the neighbors of the given Vault. Taking both direct neighbors as hints has the advantage of being much more resilient to situations where a neighbor gets moved or removed before the caller's transaction is processed: the transaction would only fail if both neighboring Troves are affected during the pendency of the transaction.
+All Vault operations take two ‘hint’ arguments: a `_lowerHint` referring to the `nextId` and an `_upperHint` referring to the `prevId` of the two adjacent nodes in the linked list that are (or would become) the neighbors of the given Vault. Taking both direct neighbors as hints has the advantage of being much more resilient to situations where a neighbor gets moved or removed before the caller's transaction is processed: the transaction would only fail if both neighboring vaults are affected during the pendency of the transaction.
 
 The better the ‘hint’ is, the shorter the list traversal, and the cheaper the gas cost of the function call. `SortedList::findInsertPosition(uint256 _NICR, address _prevId, address _nextId)` that is called by the Vault operation firsts check if `prevId` is still existant and valid (larger NICR than the provided `_NICR`) and then descends the list starting from `prevId`. If the check fails, the function further checks if `nextId` is still existant and valid (smaller NICR than the provided `_NICR`) and then ascends list starting from `nextId`.
 
 The `HintHelpers::getApproxHint(...)` function can be used to generate a useful hint pointing to a Vault relatively close to the target position, which can then be passed as an argument to the desired Vault operation or to `SortedTroves::findInsertPosition(...)` to get its two direct neighbors as ‘exact‘ hints (based on the current state of the system).
 
-`getApproxHint(uint _CR, uint _numTrials, uint _inputRandomSeed)` randomly selects `numTrials` amount of Troves, and returns the one with the closest position in the list to where a Vault with a nominal collateralization ratio of `_CR` should be inserted. It can be shown mathematically that for `numTrials = k * sqrt(n)`, the function's gas cost is with very high probability worst case `O(sqrt(n)) if k >= 10`. For scalability reasons (Infura is able to serve up to ~4900 trials), the function also takes a random seed `_inputRandomSeed` to make sure that calls with different seeds may lead to a different results, allowing for better approximations through multiple consecutive runs.
+`getApproxHint(uint _CR, uint _numTrials, uint _inputRandomSeed)` randomly selects `numTrials` amount of vaults, and returns the one with the closest position in the list to where a Vault with a nominal collateralization ratio of `_CR` should be inserted. It can be shown mathematically that for `numTrials = k * sqrt(n)`, the function's gas cost is with very high probability worst case `O(sqrt(n)) if k >= 10`. For scalability reasons (Infura is able to serve up to ~4900 trials), the function also takes a random seed `_inputRandomSeed` to make sure that calls with different seeds may lead to a different results, allowing for better approximations through multiple consecutive runs.
 
 **Vault operation without a hint**
 
@@ -710,7 +710,7 @@ Hints allow cheaper Vault operations for the user, at the expense of a slightly 
   const _1e20 = toBN(toWei('100'))
   let NICR = ETHColl.mul(_1e20).div(expectedDebt)
 
-  // Get an approximate address hint from the deployed HintHelper contract. Use (15 * number of troves) trials
+  // Get an approximate address hint from the deployed HintHelper contract. Use (15 * number of vaults) trials
   // to get an approx. hint that is close to the right position.
   let numTroves = await sortedTroves.getSize()
   let numTrials = numTroves.mul(toBN('15'))
@@ -737,7 +737,7 @@ Hints allow cheaper Vault operations for the user, at the expense of a slightly 
 
   NICR = newColl.mul(_1e20).div(newDebt)
 
-  // Get an approximate address hint from the deployed HintHelper contract. Use (15 * number of troves) trials
+  // Get an approximate address hint from the deployed HintHelper contract. Use (15 * number of vaults) trials
   // to get an approx. hint that is close to the right position.
   numTroves = await sortedTroves.getSize()
   numTrials = numTroves.mul(toBN('15'))
@@ -758,17 +758,17 @@ Hints allow cheaper Vault operations for the user, at the expense of a slightly 
 - `_upperPartialRedemptionHint` hints at the `prevId` neighbor of the last redeemed Vault upon reinsertion, if it's partially redeemed,
 - `_partialRedemptionHintNICR` ensures that the transaction won't run out of gas if neither `_lowerPartialRedemptionHint` nor `_upperPartialRedemptionHint` are  valid anymore.
 
-`redeemCollateral` will only redeem from Troves that have an ICR >= MCR. In other words, if there are Troves at the bottom of the SortedTroves list that are below the minimum collateralization ratio (which can happen after an collateral:USD price drop), they will be skipped. To make this more gas-efficient, the position of the first redeemable Vault should be passed as `_firstRedemptionHint`.
+`redeemCollateral` will only redeem from vaults that have an ICR >= MCR. In other words, if there are vaults at the bottom of the SortedTroves list that are below the minimum collateralization ratio (which can happen after an collateral:USD price drop), they will be skipped. To make this more gas-efficient, the position of the first redeemable Vault should be passed as `_firstRedemptionHint`.
 
 #### First redemption hint
 
 The first redemption hint is the address of the vault from which to start the redemption sequence - i.e the address of the first vault in the system with ICR >= 110%.
 
-If when the transaction is confirmed the address is in fact not valid - the system will start from the lowest ICR vault in the system, and step upwards until it finds the first vault with ICR >= 110% to redeem from. In this case, since the number of troves below 110% will be limited due to ongoing liquidations, there's a good chance that the redemption transaction still succeed.
+If when the transaction is confirmed the address is in fact not valid - the system will start from the lowest ICR vault in the system, and step upwards until it finds the first vault with ICR >= 110% to redeem from. In this case, since the number of vaults below 110% will be limited due to ongoing liquidations, there's a good chance that the redemption transaction still succeed.
 
 #### Partial redemption hints
 
-All Troves that are fully redeemed from in a redemption sequence are left with zero debt, and are closed. The remaining collateral (the difference between the orginal collateral and the amount used for the redemption) will be claimable by the owner.
+All vaults that are fully redeemed from in a redemption sequence are left with zero debt, and are closed. The remaining collateral (the difference between the orginal collateral and the amount used for the redemption) will be claimable by the owner.
 
 It’s likely that the last Vault in the redemption sequence would be partially redeemed from - i.e. only some of its debt cancelled with thUSD. In this case, it should be reinserted somewhere between top and bottom of the list. The `_lowerPartialRedemptionHint` and `_upperPartialRedemptionHint` hints passed to `redeemCollateral` describe the future neighbors the expected reinsert position.
 
@@ -810,23 +810,23 @@ If not, the redemption sequence doesn’t perform the final partial redemption, 
 
 ## Gas compensation
 
-In Threshold USD, we want to maximize liquidation throughput, and ensure that undercollateralized Troves are liquidated promptly by “liquidators” - agents who may also hold Stability Pool deposits, and who expect to profit from liquidations.
+In Threshold USD, we want to maximize liquidation throughput, and ensure that undercollateralized vaults are liquidated promptly by “liquidators” - agents who may also hold Stability Pool deposits, and who expect to profit from liquidations.
 
-However, gas costs in Ethereum are substantial. If the gas costs of our public liquidation functions are too high, this may discourage liquidators from calling them, and leave the system holding too many undercollateralized Troves for too long.
+However, gas costs in Ethereum are substantial. If the gas costs of our public liquidation functions are too high, this may discourage liquidators from calling them, and leave the system holding too many undercollateralized vaults for too long.
 
 The protocol thus directly compensates liquidators for their gas costs, to incentivize prompt liquidations in both normal and extreme periods of high gas prices. Liquidators should be confident that they will at least break even by making liquidation transactions.
 
 Gas compensation is paid in a mix of thUSD and collateral. While the collateral is taken from the liquidated Vault, the thUSD is provided by the borrower. When a borrower first issues debt, some thUSD is reserved as a Liquidation Reserve. A liquidation transaction thus draws collateral from the vault(s) it liquidates, and sends the both the reserved thUSD and the compensation in collateral to the caller, and liquidates the remainder.
 
-When a liquidation transaction liquidates multiple Troves, each Vault contributes thUSD and collateral towards the total compensation for the transaction.
+When a liquidation transaction liquidates multiple vaults, each Vault contributes thUSD and collateral towards the total compensation for the transaction.
 
 Gas compensation per liquidated Vault is given by the formula:
 
 Gas compensation = `200 thUSD + 0.5% of trove’s collateral (collateral)`
 
 The intentions behind this formula are:
-- To ensure that smaller Troves are liquidated promptly in normal times, at least
-- To ensure that larger Troves are liquidated promptly even in extreme high gas price periods. The larger the Vault, the stronger the incentive to liquidate it.
+- To ensure that smaller vaults are liquidated promptly in normal times, at least
+- To ensure that larger vaults are liquidated promptly even in extreme high gas price periods. The larger the Vault, the stronger the incentive to liquidate it.
 
 ### Gas compensation schedule
 
@@ -862,7 +862,7 @@ Since liquidations are expected to occur at an ICR of just below 110%, and even 
 
 We define the **collateral surplus** in a liquidation as `$(collateral) - debt`, where `$(...)` represents the dollar value.
 
-At an thUSD price of $1, Troves with `ICR > 100%` have a positive collateral surplus.
+At an thUSD price of $1, vaults with `ICR > 100%` have a positive collateral surplus.
 
 After one or more liquidations, a deposit will have absorbed thUSD losses, and received collateral gains. The remaining reduced deposit is the **compounded deposit**.
 
@@ -874,7 +874,7 @@ Stability Providers expect a positive ROI on their initial deposit. That is:
 
 When a liquidation hits the Stability Pool, it is known as an **offset**: the debt of the Vault is offset against the thUSD in the Pool. When **x** thUSD debt is offset, the debt is cancelled, and **x** thUSD in the Pool is burned. When the thUSD Stability Pool is greater than the debt of the Vault, all the Vault's debt is cancelled, and all its collateral is shared between depositors. This is a **pure offset**.
 
-It can happen that the thUSD in the Stability Pool is less than the debt of a Vault. In this case, the the whole Stability Pool will be used to offset a fraction of the Trove’s debt, and an equal fraction of the Trove’s collateral will be assigned to Stability Providers. The remainder of the Trove’s debt and collateral gets redistributed to active Troves. This is a **mixed offset and redistribution**.
+It can happen that the thUSD in the Stability Pool is less than the debt of a Vault. In this case, the the whole Stability Pool will be used to offset a fraction of the Trove’s debt, and an equal fraction of the Trove’s collateral will be assigned to Stability Providers. The remainder of the Trove’s debt and collateral gets redistributed to active vaults. This is a **mixed offset and redistribution**.
 
 Because the collateral fraction matches the offset debt fraction, the effective ICR of the collateral and debt that is offset, is equal to the ICR of the Vault. So, for depositors, the ROI per liquidation depends only on the ICR of the liquidated Vault.
 
@@ -894,7 +894,7 @@ For example: a liquidation that empties 30% of the Stability Pool will reduce ea
 
 Here’s an example of the Stability Pool absorbing liquidations. The Stability Pool contains 3 depositors, A, B and C, and the collateral:USD price is 100.
 
-There are two Troves to be liquidated, T1 and T2:
+There are two vaults to be liquidated, T1 and T2:
 
 |   | Vault | Collateral (collateral) | Debt (THUSD) | ICR         | $(collateral) ($) | Collateral surplus ($) |
 |---|-------|------------------|-------------|-------------|------------|------------------------|
@@ -1015,13 +1015,13 @@ The decay parameter is tuned such that the fee changes by a factor of 0.99 per h
 
 ## Redistributions and Corrected Stakes
 
-When a liquidation occurs and the Stability Pool is empty or smaller than the liquidated debt, the redistribution mechanism should distribute the remaining collateral and debt of the liquidated Vault, to all active Troves in the system, in proportion to their collateral.
+When a liquidation occurs and the Stability Pool is empty or smaller than the liquidated debt, the redistribution mechanism should distribute the remaining collateral and debt of the liquidated Vault, to all active vaults in the system, in proportion to their collateral.
 
-For two Troves A and B with collateral `A.coll > B.coll`, Vault A should earn a bigger share of the liquidated collateral and debt.
+For two vaults A and B with collateral `A.coll > B.coll`, Vault A should earn a bigger share of the liquidated collateral and debt.
 
-In Threshold USD it is important that all active Troves remain ordered by their ICR. We have proven that redistribution of the liquidated debt and collateral proportional to active Troves’ collateral, preserves the ordering of active Troves by ICR, as liquidations occur over time.  Please see the [proofs section](https://github.com/threshold-usd/dev/tree/main/papers).
+In Threshold USD it is important that all active vaults remain ordered by their ICR. We have proven that redistribution of the liquidated debt and collateral proportional to active Troves’ collateral, preserves the ordering of active vaults by ICR, as liquidations occur over time.  Please see the [proofs section](https://github.com/threshold-usd/dev/tree/main/papers).
 
-However, when it comes to implementation, Ethereum gas costs make it too expensive to loop over all Troves and write new data to storage for each one. When a Vault receives redistribution rewards, the system does not update the Vault's collateral and debt properties - instead, the Trove’s rewards remain "pending" until the borrower's next operation.
+However, when it comes to implementation, Ethereum gas costs make it too expensive to loop over all vaults and write new data to storage for each one. When a Vault receives redistribution rewards, the system does not update the Vault's collateral and debt properties - instead, the Trove’s rewards remain "pending" until the borrower's next operation.
 
 These “pending rewards” can not be accounted for in future reward calculations in a scalable way.
 
@@ -1029,15 +1029,15 @@ However: the ICR of a Vault is always calculated as the ratio of its total colla
 
 **This causes a problem: redistributions proportional to initial collateral can break vault ordering.**
 
-Consider the case where new Vault is created after all active Troves have received a redistribution from a liquidation. This “fresh” Vault has then experienced fewer rewards than the older Troves, and thus, it receives a disproportionate share of subsequent rewards, relative to its total collateral.
+Consider the case where new Vault is created after all active vaults have received a redistribution from a liquidation. This “fresh” Vault has then experienced fewer rewards than the older vaults, and thus, it receives a disproportionate share of subsequent rewards, relative to its total collateral.
 
-The fresh vault would earns rewards based on its **entire** collateral, whereas old Troves would earn rewards based only on **some portion** of their collateral - since a part of their collateral is pending, and not included in the Trove’s `coll` property.
+The fresh vault would earns rewards based on its **entire** collateral, whereas old vaults would earn rewards based only on **some portion** of their collateral - since a part of their collateral is pending, and not included in the Trove’s `coll` property.
 
-This can break the ordering of Troves by ICR - see the [proofs section](https://github.com/threshold-usd/dev/tree/main/papers).
+This can break the ordering of vaults by ICR - see the [proofs section](https://github.com/threshold-usd/dev/tree/main/papers).
 
 ### Corrected Stake Solution
 
-We use a corrected stake to account for this discrepancy, and ensure that newer Troves earn the same liquidation rewards per unit of total collateral, as do older Troves with pending rewards. Thus the corrected stake ensures the sorted list remains ordered by ICR, as liquidation events occur over time.
+We use a corrected stake to account for this discrepancy, and ensure that newer vaults earn the same liquidation rewards per unit of total collateral, as do older vaults with pending rewards. Thus the corrected stake ensures the sorted list remains ordered by ICR, as liquidation events occur over time.
 
 When a Vault is opened, its stake is calculated based on its collateral, and snapshots of the entire system collateral and debt which were taken immediately after the last liquidation.
 
@@ -1047,11 +1047,11 @@ A Trove’s stake is given by:
 stake = _coll.mul(totalStakesSnapshot).div(totalCollateralSnapshot)
 ```
 
-It then earns redistribution rewards based on this corrected stake. A newly opened Trove’s stake will be less than its raw collateral, if the system contains active Troves with pending redistribution rewards when it was made.
+It then earns redistribution rewards based on this corrected stake. A newly opened Trove’s stake will be less than its raw collateral, if the system contains active vaults with pending redistribution rewards when it was made.
 
 Whenever a borrower adjusts their Trove’s collateral, their pending rewards are applied, and a fresh corrected stake is computed.
 
-To convince yourself this corrected stake preserves ordering of active Troves by ICR, please see the [proofs section](https://github.com/threshold-usd/dev/blob/main/papers).
+To convince yourself this corrected stake preserves ordering of active vaults by ICR, please see the [proofs section](https://github.com/threshold-usd/dev/blob/main/papers).
 
 ## Math Proofs
 
@@ -1086,9 +1086,9 @@ _**Individual collateralization ratio (ICR):**_ a Vault's ICR is the ratio of th
 
 _**Nominal collateralization ratio (nominal ICR, NICR):**_ a Vault's nominal ICR is its entire collateral (in collateral) multiplied by 100e18 and divided by its entire debt.
 
-_**Total active collateral:**_ the sum of active collateral over all Troves. Equal to the collateral in the ActivePool.
+_**Total active collateral:**_ the sum of active collateral over all vaults. Equal to the collateral in the ActivePool.
 
-_**Total active debt:**_ the sum of active debt over all Troves. Equal to the thUSD in the ActivePool.
+_**Total active debt:**_ the sum of active debt over all vaults. Equal to the thUSD in the ActivePool.
 
 _**Total defaulted collateral:**_ the total collateral in the DefaultPool
 
@@ -1108,25 +1108,25 @@ _**Depositor:**_ an externally owned account or contract that has assigned thUSD
 
 _**Redemption:**_ the act of swapping thUSD tokens with the system, in return for an equivalent value of collateral. Any account with a thUSD token balance may redeem them, whether or not they are a borrower.
 
-When thUSD is redeemed for collateral, the collateral is always withdrawn from the lowest collateral Troves, in ascending order of their collateralization ratio. A redeemer can not selectively target Troves with which to swap thUSD for collateral.
+When thUSD is redeemed for collateral, the collateral is always withdrawn from the lowest collateral vaults, in ascending order of their collateralization ratio. A redeemer can not selectively target vaults with which to swap thUSD for collateral.
 
 _**Repayment:**_ when a borrower sends thUSD tokens to their own Vault, reducing their debt, and increasing their collateralization ratio.
 
 _**Retrieval:**_ when a borrower with an active Vault withdraws some or all of their collateral from their own vault, either reducing their collateralization ratio, or closing their Vault (if they have zero debt and withdraw all their collateral)
 
-_**Liquidation:**_ the act of force-closing an undercollateralized Vault and redistributing its collateral and debt. When the Stability Pool is sufficiently large, the liquidated debt is offset with the Stability Pool, and the collateral distributed to depositors. If the liquidated debt can not be offset with the Pool, the system redistributes the liquidated collateral and debt directly to the active Troves with >110% collateralization ratio.
+_**Liquidation:**_ the act of force-closing an undercollateralized Vault and redistributing its collateral and debt. When the Stability Pool is sufficiently large, the liquidated debt is offset with the Stability Pool, and the collateral distributed to depositors. If the liquidated debt can not be offset with the Pool, the system redistributes the liquidated collateral and debt directly to the active vaults with >110% collateralization ratio.
 
-Liquidation functionality is permissionless and publically available - anyone may liquidate an undercollateralized Vault, or batch liquidate Troves in ascending order of collateralization ratio.
+Liquidation functionality is permissionless and publically available - anyone may liquidate an undercollateralized Vault, or batch liquidate vaults in ascending order of collateralization ratio.
 
 _**Collateral Surplus**_: The difference between the dollar value of a Vault's collateral, and the dollar value of its thUSD debt. In a full liquidation, this is the net gain earned by the recipients of the liquidation.
 
 _**Offset:**_ cancellation of liquidated debt with thUSD in the Stability Pool, and assignment of liquidated collateral to Stability Pool depositors, in proportion to their deposit.
 
-_**Redistribution:**_ assignment of liquidated debt and collateral directly to active Troves, in proportion to their collateral.
+_**Redistribution:**_ assignment of liquidated debt and collateral directly to active vaults, in proportion to their collateral.
 
 _**Pure offset:**_  when a Vault's debt is entirely cancelled with thUSD in the Stability Pool, and all of it's liquidated collateral is assigned to Stability Providers.
 
-_**Mixed offset and redistribution:**_  When the Stability Pool thUSD only covers a fraction of the liquidated Vault's debt.  This fraction of debt is cancelled with thUSD in the Stability Pool, and an equal fraction of the Vault's collateral is assigned to depositors. The remaining collateral & debt is redistributed directly to active Troves.
+_**Mixed offset and redistribution:**_  When the Stability Pool thUSD only covers a fraction of the liquidated Vault's debt.  This fraction of debt is cancelled with thUSD in the Stability Pool, and an equal fraction of the Vault's collateral is assigned to depositors. The remaining collateral & debt is redistributed directly to active vaults.
 
 _**Gas compensation:**_ A refund, in thUSD and collateral, automatically paid to the caller of a liquidation function, intended to at least cover the gas cost of the transaction. Designed to ensure that liquidators are not dissuaded by potentially high gas costs.
 
@@ -1294,13 +1294,13 @@ When the vault is at one end of the `SortedTroves` list and adjusted such that i
 - Depositor sees incoming price drop tx (or just anticipates one, by reading exchange price data), that would shortly be followed by unprofitable liquidation txs
 - Depositor front-runs with `withdrawFromSP()` to evade the loss
 
-Stability Pool depositors expect to make profits from liquidations which are likely to happen at a collateral ratio slightly below 110%, but well above 100%. In rare cases (flash crashes, oracle failures), troves may be liquidated below 100% though, resulting in a net loss for stability depositors. Depositors thus have an incentive to withdraw their deposits if they anticipate liquidations below 100% (note that the exact threshold of such “unprofitable” liquidations will depend on the current Dollar price of thUSD).
+Stability Pool depositors expect to make profits from liquidations which are likely to happen at a collateral ratio slightly below 110%, but well above 100%. In rare cases (flash crashes, oracle failures), vaults may be liquidated below 100% though, resulting in a net loss for stability depositors. Depositors thus have an incentive to withdraw their deposits if they anticipate liquidations below 100% (note that the exact threshold of such “unprofitable” liquidations will depend on the current Dollar price of thUSD).
 
 As long the difference between two price feed updates is <10% and price stability is maintained, loss evasion situations should be rare. The percentage changes between two consecutive prices reported by Chainlink’s collateral:USD oracle has only ever come close to 10% a handful of times in the past few years.
 
-In the current implementation, deposit withdrawals are prohibited if and while there are troves with a collateral ratio (ICR) < 110% in the system. This prevents loss evasion by front-running the liquidate transaction as long as there are troves that are liquidatable in normal mode.
+In the current implementation, deposit withdrawals are prohibited if and while there are vaults with a collateral ratio (ICR) < 110% in the system. This prevents loss evasion by front-running the liquidate transaction as long as there are vaults that are liquidatable in normal mode.
 
-This solution is only partially effective since it does not prevent stability depositors from monitoring the collateral price feed and front-running oracle price update transactions that would make troves liquidatable. Given that we expect loss-evasion opportunities to be very rare, we do not expect that a significant fraction of stability depositors would actually apply front-running strategies, which require sophistication and automation. In the unlikely event that large fraction of the depositors withdraw shortly before the liquidation of troves at <100% CR, the redistribution mechanism will still be able to absorb defaults.
+This solution is only partially effective since it does not prevent stability depositors from monitoring the collateral price feed and front-running oracle price update transactions that would make vaults liquidatable. Given that we expect loss-evasion opportunities to be very rare, we do not expect that a significant fraction of stability depositors would actually apply front-running strategies, which require sophistication and automation. In the unlikely event that large fraction of the depositors withdraw shortly before the liquidation of vaults at <100% CR, the redistribution mechanism will still be able to absorb defaults.
 
 
 #### Reaping liquidation gains on the fly
@@ -1312,17 +1312,17 @@ This solution is only partially effective since it does not prevent stability de
 
 Front-runners could deposit funds to the Stability Pool on the fly (instead of keeping their funds in the pool) and make liquidation gains when they see a pending price update or liquidate transaction. They could even borrow the thUSD using a vault as a flash loan.
 
-Such flash deposit-liquidations would actually be beneficial (in terms of TCR) to system health and prevent redistributions, since the pool can be filled on the spot to liquidate troves anytime, if only for the length of 1 transaction.
+Such flash deposit-liquidations would actually be beneficial (in terms of TCR) to system health and prevent redistributions, since the pool can be filled on the spot to liquidate vaults anytime, if only for the length of 1 transaction.
 
 
-#### Front-running and changing the order of troves as a DoS attack
+#### Front-running and changing the order of vaults as a DoS attack
 
 *Example sequence:**
 -Attacker sees incoming operation(`openLoan()`, `redeemCollateral()`, etc) that would insert a vault to the sorted list
 -Attacker front-runs with mass openLoan txs
 -Incoming operation becomes more costly - more traversals needed for insertion
 
-It’s theoretically possible to increase the number of the troves that need to be traversed on-chain. That is, an attacker that sees a pending borrower transaction (or redemption or liquidation transaction) could try to increase the number of traversed troves by introducing additional troves on the way. However, the number of troves that an attacker can inject before the pending transaction gets mined is limited by the amount of spendable gas. Also, the total costs of making the path longer by 1 are significantly higher (gas costs of opening a vault, plus the 0.5% borrowing fee) than the costs of one extra traversal step (simply reading from storage). The attacker also needs significant capital on-hand, since the minimum debt for a vault is 2000 thUSD.
+It’s theoretically possible to increase the number of the vaults that need to be traversed on-chain. That is, an attacker that sees a pending borrower transaction (or redemption or liquidation transaction) could try to increase the number of traversed vaults by introducing additional vaults on the way. However, the number of vaults that an attacker can inject before the pending transaction gets mined is limited by the amount of spendable gas. Also, the total costs of making the path longer by 1 are significantly higher (gas costs of opening a vault, plus the 0.5% borrowing fee) than the costs of one extra traversal step (simply reading from storage). The attacker also needs significant capital on-hand, since the minimum debt for a vault is 2000 thUSD.
 
 In case of a redemption, the “last” vault affected by the transaction may end up being only partially redeemed from, which means that its ICR will change so that it needs to be reinserted at a different place in the sorted vault list (note that this is not the case for partial liquidations in recovery mode, which preserve the ICR). A special ICR hint therefore needs to be provided by the transaction sender for that matter, which may become incorrect if another transaction changes the order before the redemption is processed. The protocol gracefully handles this by terminating the redemption sequence at the last fully redeemed vault (see [here](https://github.com/threshold-usd/dev#hints-for-redeemcollateral)).
 
