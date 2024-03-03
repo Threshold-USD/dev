@@ -414,8 +414,6 @@ Likewise, the StabilityPool holds the total accumulated collateral gains from li
 
 ### Flow of thUSD tokens in Threshold USD
 
-![Flow of thUSD](images/THUSD_flows.svg)
-
 When a user issues debt from their Vault, thUSD tokens are minted to their own address, and a debt is recorded on the Vault. Conversely, when they repay their Trove’s thUSD debt, thUSD is burned from their address, and the debt on their Vault is reduced.
 
 Redemptions burn thUSD from the redeemer’s balance, and reduce the debt of the Vault redeemed against.
@@ -653,6 +651,66 @@ could be front-run and revert - which may hamper the execution flow of a contrac
 
 For more details please see the original proposal EIP-2612:
 https://eips.ethereum.org/EIPS/eip-2612
+
+## Governance OnlyOwner Functions
+
+### PCV - `PCV.sol`
+
+`initialize()`: This function can be called only once, it initializes the PCV contract by setting the `debtToPay` with the `BOOTSTRAP_LOAN` constant amount and mints the debt amount from thUSD via `Borroweroperations` contract. It sets the `isInitialized` to `true`, and deposits the bootstrap loan minted from thUSD to `BAMM` contract.
+
+`depositToBAMM(uint256 _thusdAmount)`: This function handles the deposit of `_thusdAmount` tokens into the `BAMM` contract from the Protocol Controlled Value `PCV`. Before proceeding, it ensures that the `_numShares` is less than or equal to the available balance of thUSD tokens held by the `PCV`. Upon verification, it grants approval for the `BAMM` contract to spend the specified _thusdAmount from the `PCV`. Subsequently, the function invokes the deposit method within the `BAMM` contract, effectively transferring the _thusdAmount from the `PCV` to `BAMM`.
+
+`withdrawFromBAMM(uint256 _numShares)`: It handles the withdraw of thUSD tokens from `BAMM`. Before proceeding, it ensures that the `_numShares` is less than or equal to the available balance of thUSD tokens held by the `BAMM`. Upon verification, it calls `withdraw` function of `BAMM` contract.
+
+`withdrawTHUSD(address _recipient, uint256 _thusdAmount)`: It handles the withdraw of thUSD tokens from `PCV`. This function is only callable by the Owner, Treasury or Council, and only after paying the entire debt. Before proceeding, it ensures that the `_thusdAmount` is less than or equal to the available balance of thUSD tokens held by the `PCV`. Upon verification, it transfers the thusd amount requested to the recipient passed in `_recipient` as parameter to the `withdrawTHUSD` function.
+
+`withdrawCollateral(address _recipient, uint256 _thusdAmount)`: It handles the withdraw of Collateral tokens from `PCV`. This function is only callable by the Owner, Treasury or Council, and only after paying the entire debt. It transfers the thusd amount requested to the recipient passed in `_recipient` as parameter to the `withdrawTHUSD` function.
+
+`payDebt(uint256 _thusdToBurn)`: It pays the `PCV` remaining bootstrap loan debt. This function is only callable by the Owner, Treasury or Council. Before proceeding, it ensures that the `debtToPay` is greater than 0 and that the `_thusdToBurn` is lesser than or equal to the available balance of thUSD tokens held by the `PCV`. Upon verification, It pays the reamining debt and burn the amount of thUSD tokens used to pay the debt.
+
+`startChangingRoles(address _council, address _treasury)`: This function changes the council and treasury roles addresses. Before proceeding, it ensures that the owner or treasury addresses sent in the function parameters are different than the ones that have been already set. Upon verification, it sets the `changingRolesInitiated` with the `block.timestamp` value in which the function has been executed and it sets the `pendingCouncilAddress` with the `_council` address and `pendingTreasuryAddress` with the `_treasury` address
+
+`cancelChangingRoles()`: This function can cancels the existing changing roles process. Before proceeding, it ensures that the changing roles process has been initiated. Upon verification, it sets both `pendingCouncilAddress` and `pendingTreasuryAddress` with the `_address(0)`, thus cancelling the existing change roles process.
+
+`finalizeChangingRoles()`: This function finalizes the ongoing process of changing roles by setting the `council` and `treasury` addresses. Prior to execution, it verifies that the changing roles process has been initiated and that the `governanceTimeDelay` has elapsed since the initial call. Upon successful verification, it assigns the `council` address to the `pendingCouncilAddress` and the `treasury` address to the `pendingTreasuryAddress`. Subsequently, it resets both `pendingCouncilAddress` and `pendingTreasuryAddress` to `_address(0)`, thereby completing the current change roles
+
+`addRecipientToWhitelist(address _recipient)`: This function adds a recipient to the recipients' whitelist. Before proceeding, it verifies that the recipient is not already included in the whitelist. Upon verification, it adds the `_recipient` address to the `recipientsWhitelist` whitelist.
+
+`addRecipientsToWhitelist(address[] calldata _recipients)`: This function adds an array of recipients to the recipients' whitelist. Before proceeding, it verifies that the length of the `_recipients` array is greater than zero. Once verified, it adds each recipient address in the array to the `recipientsWhitelist`.
+
+`removeRecipientFromWhitelist(address _recipient)`: This function removes a recipient to the recipients' whitelist. Before proceeding, it verifies that the recipient is included in the whitelist. Upon verification, it removes the `_recipient` address to the `recipientsWhitelist` whitelist.
+
+`removeRecipientsFromWhitelist(address _recipient)`: This function removes an array of recipients to the recipients' whitelist. Before proceeding, it verifies that the length of the `_recipients` array is greater than zero. Once verified, it removes each recipient address of the array to the `recipientsWhitelist`.
+
+### PriceFeed - `PriceFeed.sol`
+
+`forceExitBothUntrustedStatus(bool tryTellorFirst)`: This function reverts if both oracles are still broken. In case when both oracles are online but have different prices then caller can control which will be checked first: ChainLink if `tryTellorFirst` is false, Tellor otherwise
+
+### THUSDToken - `THUSDToken.sol`
+
+`startRevokeMintList(address _account)`: This function initiates the process of revoking a borrower operations contract's capability to mint new tokens. It first validates that the address provided in `_account` parameter is included in the `mintList`. Once verified, the function initializes the revocation process by updating `revokeMintListInitiated` with the current block timestamp and `pendingRevokedMintAddress` with the address passed in `_account` parameter.
+
+`cancelRevokeMintList()`: It cancels the existing revoking mint process. The function first validates whether the `pendingRevokedMintAddress` is non-zero to confirm the presence of an ongoing pending revoking process. Once verified, it resets both `revokeMintListInitiated` and `pendingRevokedMintAddress` to zero and `address(0)` respectively. Effectively finalizing the existing revoking process.
+
+`finalizeRevokeMintList()`: This function revokes the minting capability to the borrower operations contract, previously designated in the `pendingRevokedMintAddress`. It executes only after the governance delay has elapsed following the `revokeMintListInitiated` timestamp. By finalizing the revoke mint process it resets the `pendingRevokedMintAddress` and `revokeMintListInitiated`.
+
+`startAddMintList(address _account)`: This function initiates the process of adding a borrower operations contract's capability to mint new tokens. It first validates that the address provided in `_account` parameter isn't included in the `mintList`. Once verified, the function initializes the adding process by updating `addMintListInitiated` with the current block timestamp and `pendingAddedMintAddress` with the address passed in `_account` parameter.
+
+`cancelAddMintList()`: It cancels the existing adding mint process. The function first validates whether the `addMintListInitiated` is non-zero to confirm the presence of an ongoing pending adding mint capability process. Once verified, it resets both `addMintListInitiated` and `pendingAddedMintAddress` to zero and `address(0)` respectively. Effectively finalizing the existing revoking process.
+
+`finalizeAddMintList()`: This function adds the minting capability to the borrower operations contract, previously designated in the `pendingAddedMintAddress`. It executes only after the governance delay has elapsed following the `addMintListInitiated` timestamp. By finalizing the revoke mint process it resets the `pendingAddedMintAddress` and `addMintListInitiated`.
+
+`startAddContracts(address _troveManagerAddress, address _stabilityPoolAddress, address _borrowerOperationsAddress)`: This function initiates the process of integrating borrower operations, trove manager, and stability pool contracts, enabling them to mint and burn thUSD tokens. It begins by verifying that the contract addresses provided as parameters are indeed contracts. Once confirmed, it assigns the addresses to p`endingTroveManager`, `pendingStabilityPool`, and `pendingBorrowerOperations` using `_troveManagerAddress`, `_stabilityPoolAddress`, and `_borrowerOperationsAddress`, respectively. Additionally, it records the initiation of adding these contracts by setting `addContractsInitiated` to the current block timestamp when the transaction is executed.
+
+`cancelAddContracts()`: This function terminates the current process of adding contracts. Initially, it checks that `addContractsInitiated` is not zero, which indicates an active process of adding contracts is underway. Upon confirmation, it resets `addContractsInitiated`, `pendingTroveManager`, `pendingStabilityPool`, and `pendingRevokedMintAddress` to 0, `address(0)`, `address(0)`, and `address(0)` respectively. This action effectively concludes the process of adding contracts.
+
+`finalizeAddContracts()`: This function adds the minting and burning capabilities to the borrower operations, trove manager, and stability pool contracts previously designated in the `pendingBorrowerOperations`, `pendingStabilityPool` and `pendingTroveManager`. It executes only after the governance delay has elapsed following the `addContractsInitiated` timestamp. By finalizing the process of adding new contracts, it resets the `pendingBorrowerOperations`, `pendingStabilityPool`,`pendingTroveManager` and `addContractsInitiated`.
+
+`startRevokeBurnList(address _account)`: This function initiates the process of revoking a borrower operations contract's capability to burn thUSD tokens. It first validates that the address provided in `_account` parameter is included in the `burnList`. Once verified, the function initializes the revocation process by updating `revokeBurnListInitiated` with the current block timestamp and `pendingRevokedBurnAddress` with the address passed in `_account` parameter.
+
+`cancelRevokeBurnList()`: It cancels the existing revoking mint process. The function first validates whether the `pendingRevokedBurnAddress` is non-zero to confirm the presence of an ongoing pending revoking process. Once verified, it resets both `revokeBurnListInitiated` and `pendingRevokedBurnAddress` to zero and `address(0)` respectively. Effectively finalizing the existing revoking process.
+
+`finalizeRevokeBurnList()`: This function revokes the minting capability to the borrower operations contract, previously designated in the `pendingRevokedBurnAddress`. It executes only after the governance delay has elapsed following the `revokeBurnListInitiated` timestamp. By finalizing the revoke mint process it resets the `pendingRevokedBurnAddress` and `revokeBurnListInitiated`.
 
 ## Supplying Hints to Vault operations
 
