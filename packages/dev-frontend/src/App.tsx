@@ -3,7 +3,7 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import walletConnectModule from '@web3-onboard/walletconnect'
 import coinbaseModule from '@web3-onboard/coinbase'
 import tahoModule from '@web3-onboard/taho'
-import gnosisModule  from '@web3-onboard/gnosis'
+import safeModule  from '@web3-onboard/gnosis'
 import { Flex, Spinner, Heading, ThemeProvider} from "theme-ui";
 
 import { getConfig } from "./config";
@@ -33,14 +33,14 @@ const injected = injectedModule();
 const coinbase = coinbaseModule();
 const walletConnect = walletConnectModule(wcV2InitOptions)
 const taho = tahoModule();
-const gnosis = gnosisModule()
+const safe = safeModule()
 
 const wallets = [
   injected,
   taho,
   coinbase,
   walletConnect,
-  gnosis,
+  safe,
 ]
 
 const publicRpcUrls = {
