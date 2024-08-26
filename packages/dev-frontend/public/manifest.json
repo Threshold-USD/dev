@@ -2,17 +2,31 @@
   "short_name": "Threshold USD",
   "name": "Threshold USD",
   "description": "Threshold USD (thUSD) is a stablecoin soft-pegged against USD and backed by ETH and tBTC",
-  "iconPath": "thusd-logo.png",
   "icons": [
     {
-      "src": "favicon.png",
-      "sizes": "32x32",
-      "type": "image/png"
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
     },
     {
-      "src": "thusd-logo.png",
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "logo192.png",
       "type": "image/png",
-      "sizes": "128x128"
+      "sizes": "192x192"
+    },
+    {
+      "src": "logo512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ],
   "start_url": ".",
