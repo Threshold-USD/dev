@@ -17,7 +17,7 @@ export const ExternalLinks = (): JSX.Element => {
         alignSelf: "center",
         bottom: 0
       }}>
-        <Link variant="socialIcons" href="https://discord.com/invite/WXK9PC6SRF" target="_blank">
+        <Link variant="socialIcons" href="https://discord.threshold.network" target="_blank">
           <Image src="./icons/discord.svg" sx={colorMode === "darkGrey" ? {filter: GREY_FILTER} : {}} />
         </Link>
         <Link variant="socialIcons" href="https://github.com/Threshold-USD/dev" target="_blank">
